@@ -6,6 +6,7 @@ contracts/mcore_*/
 
 # Coverage report
 contracts/coverage/
+contracts/coverage.json
 
 # Generic contracts exclusions
 contracts/.openzeppelin/unknwon-*.json
