@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "description": "Entry point of the sybel.io blockchain repository",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sybel-app/sybel-io-blockchain"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "clean": "turbo run clean",
     "build": "turbo run build",
