@@ -1,3 +1,6 @@
+# Turbo exclusion
+.turbo/
+
 # Manticore
 contracts/mcore_*/
 

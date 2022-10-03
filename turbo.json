@@ -5,8 +5,12 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "lint": {
-      "outputs": []
+    "clean": {
+      "cache": false
+    },
+    "test": {},
+    "size": {
+      "cache": false
     }
   }
 }
