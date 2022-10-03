@@ -1,0 +1,21 @@
+# Manticore
+contracts/mcore_*/
+
+# Coverage report
+contracts/coverage/
+
+# Generic contracts exclusions
+contracts/.openzeppelin/unknwon-*.json
+contracts/.deps/*
+
+# Blockchain parts
+contracts/artifacts/
+contracts/cache/
+contracts/contracts/artifacts/
+contracts/typechain-types/
+
+# Node.js dependency directory
+node_modules/
+
+# .env files
+.env

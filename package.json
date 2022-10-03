@@ -1,0 +1,26 @@
+{
+  "name": "sybel-io-blockchain",
+  "version": "1.0.0",
+  "description": "Entry point of the sybel.io blockchain repository",
+  "license": "MIT",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "offline": "turbo run @sybel-io-back-api/*#offline --parallel",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "test": "turbo run test",
+    "package": "turbo run package"
+  },
+  "engines": {
+    "npm": ">=8.0.0",
+    "pnpm": ">=7.0.0",
+    "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.23",
+    "turbo": "^1.5.4",
+    "typescript": "^4.8.4"
+  }
+}
