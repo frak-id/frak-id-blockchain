@@ -12,7 +12,7 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "size": "turbo run size",
-    "publish": "turbo run publish"
+    "publish-packages": "turbo run build && changeset version && changeset publish"
   },
   "engines": {
     "npm": ">=8.0.0",
@@ -23,5 +23,8 @@
     "@types/node": "^18.7.23",
     "turbo": "^1.5.4",
     "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "@changesets/cli": "^2.25.0"
   }
 }
