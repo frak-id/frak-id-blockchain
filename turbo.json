@@ -11,6 +11,9 @@
     "test": {},
     "size": {
       "cache": false
+    },
+    "publish": {
+      "dependsOn": ["^build"]
     }
   }
 }

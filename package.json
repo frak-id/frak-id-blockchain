@@ -7,14 +7,12 @@
     "type": "git",
     "url": "https://github.com/sybel-app/sybel-io-blockchain"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "scripts": {
     "clean": "turbo run clean",
     "build": "turbo run build",
     "test": "turbo run test",
-    "size": "turbo run size"
+    "size": "turbo run size",
+    "publish": "turbo run publish"
   },
   "engines": {
     "npm": ">=8.0.0",
