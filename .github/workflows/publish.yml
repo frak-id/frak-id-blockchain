@@ -4,6 +4,11 @@ on:
   push:
     branches: ["main"]
 
+env:
+  MUMBAI_PROVIDER: ${{ secrets.MUMBAI_PROVIDER }}
+  SYBEL_DEPLOY_PRIV_KEY: ${{ secrets.SYBEL_DEPLOY_PRIVATE_KEY }}
+  POLYGON_SCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
+
 jobs:
   publish:
     runs-on: ubuntu-latest
