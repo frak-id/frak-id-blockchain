@@ -10,6 +10,7 @@ import "@openzeppelin/hardhat-upgrades";
 import "hardhat-contract-sizer";
 import "hardhat-abi-exporter";
 import "solidity-coverage";
+import "hardhat-prettier";
 
 dotenv.config();
 

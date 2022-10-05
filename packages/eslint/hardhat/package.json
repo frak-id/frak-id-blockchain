@@ -1,0 +1,22 @@
+{
+  "name": "@sybel-io-blockchain/eslint-hardhat",
+  "version": "1.0.0",
+  "main": "./index.js",
+  "license": "MIT",
+  "dependencies": {
+    "eslint-config-turbo": "latest"
+  },
+  "peerDependencies": {
+    "eslint": "^8.24.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.24.0",
+    "typescript": "^4.5.3",
+    "eslint-config-airbnb-typescript": "^12.0.0",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-react": "^7.22.0"
+  }
+}

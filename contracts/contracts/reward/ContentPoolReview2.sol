@@ -112,9 +112,9 @@ contract ContentPoolReview {
             shares != currentParticipant.shares,
             "SYB: Can't update share for the same share amount"
         );
-        uint256 claimableReward = claimableReward(user);
+        uint256 reward = claimableReward(user);
         require(
-            claimableReward == 0,
+            reward == 0,
             "SYB: User need to claim his reward before updating his position"
         );
         // Lock the current state
@@ -159,7 +159,7 @@ contract ContentPoolReview {
         Participant storage participant = participants[user];
         uint256 toBePayed = claimableReward(user);
         // Ensure the user got a claimable reward
-        require(claimableReward > 0, "SYB: No reward to be claimed");
+        require(toBePayed > 0, "SYB: No reward to be claimed");
         // TODO : Have a state count cap to be able to handle edge case like long time not checked ones (cap to 200 hundred max ??)
         for (
             uint256 stateIndex = participant.lastStateIndex;
@@ -186,7 +186,7 @@ contract ContentPoolReview {
      * @dev Compute the user claimable reward
      * TODO : Max reward state to iterate over
      */
-    function claimableReward(address user) public view returns (uint256) {
+    function claimableReward(address user) public returns (uint256) {
         require(
             user != address(0),
             "SYBL: Can't check the reward for the 0 address"

@@ -1,0 +1,17 @@
+{
+  "folders": [
+	{
+		"name": "✨ sybel-io-blockchain",
+		"path": "."
+	},
+	{
+		"name": "🔥 @sybel-io-blockchain/contracts",
+		"path": "contracts"
+	},
+	{
+		"name": "📦 @sybel-io-blockchain/shared",
+		"path": "shared"
+	}
+],
+  "settings": {}
+}
