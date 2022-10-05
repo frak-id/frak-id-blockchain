@@ -14,16 +14,11 @@ import * as deployedAddresses from "../addresses.json";
 
 (async () => {
   try {
-    console.log(
-      "Deploying all the contract for a simple blockchain intergration"
-    );
+    console.log("Deploying all the contract for a simple blockchain intergration");
 
     // Update our rewarder contract
     const listenerFactory = await ethers.getContractFactory("ListenerBadges");
-    const listener = (await upgrades.upgradeProxy(
-      deployedAddresses.listenBadgesAddr,
-      listenerFactory
-    )) as Rewarder;
+    const listener = (await upgrades.upgradeProxy(deployedAddresses.listenBadgesAddr, listenerFactory)) as Rewarder;
     await listener.deployed();
 
     console.log("Listener badges  updated on " + listener.address);
@@ -32,10 +27,7 @@ import * as deployedAddresses from "../addresses.json";
   }
 })();
 
-async function deployContract<Type extends Contract>(
-  name: string,
-  args?: unknown[]
-): Promise<Type> {
+async function deployContract<Type extends Contract>(name: string, args?: unknown[]): Promise<Type> {
   const contractFactory = await ethers.getContractFactory(name);
   const contract = (await upgrades.deployProxy(contractFactory, args, {
     kind: "uups",
@@ -44,15 +36,9 @@ async function deployContract<Type extends Contract>(
   return contract;
 }
 
-async function updateContract<Type extends Contract>(
-  name: string,
-  proxyAddress: string
-): Promise<Type> {
+async function updateContract<Type extends Contract>(name: string, proxyAddress: string): Promise<Type> {
   const contractFactory = await ethers.getContractFactory(name);
-  const contract = (await upgrades.upgradeProxy(
-    proxyAddress,
-    contractFactory
-  )) as Type;
+  const contract = (await upgrades.upgradeProxy(proxyAddress, contractFactory)) as Type;
   await contract.deployed();
   return contract;
 }

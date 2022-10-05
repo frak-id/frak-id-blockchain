@@ -8,7 +8,7 @@ export const testRoles = (
   contractAccessor: () => SybelAccessControlUpgradeable,
   addr1Accessor: () => SignerWithAddress,
   role: string,
-  roleRequiredFunctions: (() => Promise<void>)[]
+  roleRequiredFunctions: (() => Promise<void>)[],
 ) => {
   let contract: SybelAccessControlUpgradeable;
   let addr1: SignerWithAddress;

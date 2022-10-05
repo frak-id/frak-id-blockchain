@@ -17,9 +17,7 @@ import { FoundationWallet } from "../typechain-types/contracts/wallets/Foundatio
 
 (async () => {
   try {
-    console.log(
-      "Deploying all the contract for a simple blockchain intergration"
-    );
+    console.log("Deploying all the contract for a simple blockchain intergration");
     // Deploy our sybl token contract
     const sybelToken = await deployContract<SybelToken>("SybelToken");
     console.log("Sybel token deployed to " + sybelToken.address);
@@ -28,10 +26,7 @@ import { FoundationWallet } from "../typechain-types/contracts/wallets/Foundatio
   }
 })();
 
-async function deployContract<Type extends Contract>(
-  name: string,
-  args?: unknown[]
-): Promise<Type> {
+async function deployContract<Type extends Contract>(name: string, args?: unknown[]): Promise<Type> {
   const contractFactory = await ethers.getContractFactory(name);
   const contract = (await upgrades.deployProxy(contractFactory, args, {
     kind: "uups",
@@ -49,7 +44,7 @@ class DeployedAddress {
     readonly podcastBadgesAddr: String,
     readonly fractionCostBadgesAddr: String,
     readonly rewarderAddr: String,
-    readonly minterAddr: String
+    readonly minterAddr: String,
   ) {}
 
   toJson(): string {

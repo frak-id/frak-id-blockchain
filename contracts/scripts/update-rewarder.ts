@@ -19,15 +19,9 @@ import { rewarderAddr } from "../addresses.json";
   }
 })();
 
-async function updateContract<Type extends Contract>(
-  name: string,
-  proxyAddress: string
-): Promise<Type> {
+async function updateContract<Type extends Contract>(name: string, proxyAddress: string): Promise<Type> {
   const contractFactory = await ethers.getContractFactory(name);
-  const contract = (await upgrades.upgradeProxy(
-    proxyAddress,
-    contractFactory
-  )) as Type;
+  const contract = (await upgrades.upgradeProxy(proxyAddress, contractFactory)) as Type;
   await contract.deployed();
   return contract;
 }

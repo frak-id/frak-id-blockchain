@@ -38,9 +38,7 @@ describe("VestingWallets", () => {
 
     // Deploy our sybel token and vesting wallets
     sybelToken = await deployContract("SybelToken");
-    vestingWallets = await deployContract("VestingWallets", [
-      sybelToken.address,
-    ]);
+    vestingWallets = await deployContract("VestingWallets", [sybelToken.address]);
 
     // Grant the minter role to the vesting wallets
     const minterRole = utils.keccak256(utils.toUtf8Bytes("MINTER_ROLE"));
@@ -56,11 +54,7 @@ describe("VestingWallets", () => {
       // Get the original balance of an investor
       const oldAddr1Balance = await sybelToken.balanceOf(addr1.address);
 
-      const tx = await vestingWallets.addVestingWallet(
-        addr1.address,
-        50,
-        GROUP_INVESTOR_ID
-      );
+      const tx = await vestingWallets.addVestingWallet(addr1.address, 50, GROUP_INVESTOR_ID);
 
       // Get the current timestamp
       await updateTimestampToEndOfInvestorDuration(tx);
@@ -72,20 +66,14 @@ describe("VestingWallets", () => {
 
       // Ensure the addre 1 can release 50 sybl
       expect(newdAddr1Balance).to.equal(oldAddr1Balance.add(50));
-      expect(
-        await vestingWallets["releasedAmount(address)"](addr1.address)
-      ).to.equal(50);
+      expect(await vestingWallets["releasedAmount(address)"](addr1.address)).to.equal(50);
     });
 
     it("Can add a new investor, and release founds itself", async () => {
       // Get the original balance of an investor
       const oldAddr1Balance = await sybelToken.balanceOf(addr1.address);
 
-      const tx = await vestingWallets.addVestingWallet(
-        addr1.address,
-        50,
-        GROUP_INVESTOR_ID
-      );
+      const tx = await vestingWallets.addVestingWallet(addr1.address, 50, GROUP_INVESTOR_ID);
 
       // Get the current timestamp
       await updateTimestampToEndOfInvestorDuration(tx);
@@ -97,41 +85,19 @@ describe("VestingWallets", () => {
 
       // Ensure the addre 1 can release 50 sybl
       expect(newdAddr1Balance).to.equal(oldAddr1Balance.add(50));
-      expect(
-        await vestingWallets.connect(addr1)["releasedAmount()"]()
-      ).to.equal(50);
+      expect(await vestingWallets.connect(addr1)["releasedAmount()"]()).to.equal(50);
     });
 
     it("Can add a new investor on multiple vesting group", async () => {
       // Get the original balance of an investor
       const oldAddr1Balance = await sybelToken.balanceOf(addr1.address);
 
-      await vestingWallets.addVestingWallet(
-        addr1.address,
-        50,
-        GROUP_INVESTOR_ID
-      );
+      await vestingWallets.addVestingWallet(addr1.address, 50, GROUP_INVESTOR_ID);
       await vestingWallets.addVestingWallet(addr1.address, 50, GROUP_TEAM_ID);
-      await vestingWallets.addVestingWallet(
-        addr1.address,
-        50,
-        GROUP_PRE_SALES_1_ID
-      );
-      await vestingWallets.addVestingWallet(
-        addr1.address,
-        50,
-        GROUP_PRE_SALES_2_ID
-      );
-      await vestingWallets.addVestingWallet(
-        addr1.address,
-        50,
-        GROUP_PRE_SALES_3_ID
-      );
-      const tx = await vestingWallets.addVestingWallet(
-        addr1.address,
-        50,
-        GROUP_PRE_SALES_4_ID
-      );
+      await vestingWallets.addVestingWallet(addr1.address, 50, GROUP_PRE_SALES_1_ID);
+      await vestingWallets.addVestingWallet(addr1.address, 50, GROUP_PRE_SALES_2_ID);
+      await vestingWallets.addVestingWallet(addr1.address, 50, GROUP_PRE_SALES_3_ID);
+      const tx = await vestingWallets.addVestingWallet(addr1.address, 50, GROUP_PRE_SALES_4_ID);
 
       // Check the number of vesting wallets for the user
       const wallets = await vestingWallets.getVestingWallet(addr1.address);
@@ -146,20 +112,12 @@ describe("VestingWallets", () => {
 
       // Ensure the addre 1 can release 300 sybl
       expect(newdAddr1Balance).to.equal(oldAddr1Balance.add(300));
-      expect(
-        await vestingWallets.connect(addr1)["releasedAmount()"]()
-      ).to.equal(300);
+      expect(await vestingWallets.connect(addr1)["releasedAmount()"]()).to.equal(300);
     });
 
     it("Can't exceed group cap", async () => {
       const exceedAmount = BigNumber.from(await investorGroup.rewardCap).add(1);
-      await expect(
-        vestingWallets.addVestingWallet(
-          addr1.address,
-          exceedAmount,
-          GROUP_INVESTOR_ID
-        )
-      ).to.be.reverted;
+      await expect(vestingWallets.addVestingWallet(addr1.address, exceedAmount, GROUP_INVESTOR_ID)).to.be.reverted;
     });
 
     it("Don't create two vesting wallet for a given invester", async () => {
@@ -167,21 +125,13 @@ describe("VestingWallets", () => {
       const oldAddr1Balance = await sybelToken.balanceOf(addr1.address);
 
       // Create a first vesting wallet
-      const tx = await vestingWallets.addVestingWallet(
-        addr1.address,
-        50,
-        GROUP_INVESTOR_ID
-      );
+      const tx = await vestingWallets.addVestingWallet(addr1.address, 50, GROUP_INVESTOR_ID);
 
       // Got at the end of the delay
       await updateTimestampToEndOfInvestorDuration(tx);
 
       // Add 50 more token
-      await vestingWallets.addVestingWallet(
-        addr1.address,
-        50,
-        GROUP_INVESTOR_ID
-      );
+      await vestingWallets.addVestingWallet(addr1.address, 50, GROUP_INVESTOR_ID);
 
       // Try to release the amount
       await vestingWallets["release(address)"](addr1.address);
@@ -189,9 +139,7 @@ describe("VestingWallets", () => {
 
       // Ensure the addre 1 can release 100 sybl
       expect(newdAddr1Balance).to.equal(oldAddr1Balance.add(100));
-      expect(
-        await vestingWallets["releasedAmount(address)"](addr1.address)
-      ).to.equal(100);
+      expect(await vestingWallets["releasedAmount(address)"](addr1.address)).to.equal(100);
     });
   });
 
@@ -200,19 +148,12 @@ describe("VestingWallets", () => {
       // Add a new vesting group
       await vestingWallets.addVestingGroup(13, 10, 10, 10);
       // Add another one with the same id
-      await expect(vestingWallets.addVestingGroup(13, 10, 10, 10)).to.be
-        .reverted;
+      await expect(vestingWallets.addVestingGroup(13, 10, 10, 10)).to.be.reverted;
     });
     it("Can't exceed contract vesting cap", async () => {
       // Add another one with the same id
-      await expect(
-        vestingWallets.addVestingGroup(
-          13,
-          BigNumber.from(10).pow(18).mul(2_000_000_000),
-          10,
-          10
-        )
-      ).to.be.reverted;
+      await expect(vestingWallets.addVestingGroup(13, BigNumber.from(10).pow(18).mul(2_000_000_000), 10, 10)).to.be
+        .reverted;
     });
   });
 
@@ -226,7 +167,7 @@ describe("VestingWallets", () => {
         async () => {
           await vestingWallets.connect(addr1).addVestingGroup(13, 10, 10, 10);
         },
-      ]
+      ],
     );
   });
   describe("Pauser roles", () => {
@@ -239,7 +180,7 @@ describe("VestingWallets", () => {
           await vestingWallets.connect(addr1).pause();
           await vestingWallets.connect(addr1).unpause();
         },
-      ]
+      ],
     );
   });
 
@@ -253,24 +194,17 @@ describe("VestingWallets", () => {
           await vestingWallets.addVestingGroup(13, 10, 10, 10);
         },
         async () => {
-          await vestingWallets.addVestingWallet(
-            addr1.address,
-            50,
-            GROUP_INVESTOR_ID
-          );
+          await vestingWallets.addVestingWallet(addr1.address, 50, GROUP_INVESTOR_ID);
         },
-      ]
+      ],
     );
   });
 
-  async function updateTimestampToEndOfInvestorDuration(
-    tx: ContractTransaction
-  ) {
+  async function updateTimestampToEndOfInvestorDuration(tx: ContractTransaction) {
     // Wait for the tx to be mined
     await tx.wait();
     const txMined = await ethers.provider.getTransaction(tx.hash);
-    const blockTimestamp = (await ethers.provider.getBlock(txMined.blockHash!))
-      .timestamp;
+    const blockTimestamp = (await ethers.provider.getBlock(txMined.blockHash!)).timestamp;
     // Get the investor group duration
     const newTimestamp = BigNumber.from(blockTimestamp)
       .add(await investorGroup.duration)

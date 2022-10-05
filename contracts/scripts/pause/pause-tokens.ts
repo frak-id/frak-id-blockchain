@@ -4,11 +4,7 @@ import { ethers } from "hardhat";
 import { Contract } from "ethers";
 
 import { SybelToken } from "../../typechain-types/contracts/tokens/SybelToken";
-import {
-  tseTokenAddr,
-  smtTokenAddr,
-  internalTokenAddr,
-} from "../../addresses.json";
+import { tseTokenAddr, smtTokenAddr, internalTokenAddr } from "../../addresses.json";
 import { SybelInternalTokens } from "../../typechain-types/contracts/tokens/SybelInternalTokens";
 
 (async () => {
@@ -17,10 +13,7 @@ import { SybelInternalTokens } from "../../typechain-types/contracts/tokens/Sybe
 
     // Find the contract we want to pause
     const tseToken = await findContract<SybelToken>("SybelToken", tseTokenAddr);
-    const internalToken = await findContract<SybelInternalTokens>(
-      "SybelInternalTokens",
-      internalTokenAddr
-    );
+    const internalToken = await findContract<SybelInternalTokens>("SybelInternalTokens", internalTokenAddr);
 
     // Pause each one of them
     await tseToken.pause();
@@ -30,10 +23,7 @@ import { SybelInternalTokens } from "../../typechain-types/contracts/tokens/Sybe
   }
 })();
 
-async function findContract<Type extends Contract>(
-  name: string,
-  address: string
-): Promise<Type> {
+async function findContract<Type extends Contract>(name: string, address: string): Promise<Type> {
   const contractFactory = await ethers.getContractFactory(name);
   return contractFactory.attach(address) as Type;
 }

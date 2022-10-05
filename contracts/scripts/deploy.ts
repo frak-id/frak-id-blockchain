@@ -17,14 +17,10 @@ import { FoundationWallet } from "../typechain-types/contracts/wallets/Foundatio
 
 (async () => {
   try {
-    console.log(
-      "Deploying all the contract for a simple blockchain intergration"
-    );
+    console.log("Deploying all the contract for a simple blockchain intergration");
 
     // Deploy our internal token contract
-    const internalToken = await deployContract<SybelInternalTokens>(
-      "SybelInternalTokens"
-    );
+    const internalToken = await deployContract<SybelInternalTokens>("SybelInternalTokens");
     console.log("Internal tokens deployed to " + internalToken.address);
 
     // Deploy our sybl token contract
@@ -33,24 +29,15 @@ import { FoundationWallet } from "../typechain-types/contracts/wallets/Foundatio
 
     // Deploy our sybel foundation wallet contract
     const sybelCorpWallet = (await hre.ethers.getSigners())[0].address;
-    const fondationWallet = await deployContract<FoundationWallet>(
-      "FoundationWallet",
-      [sybelCorpWallet]
-    );
-    console.log(
-      `FoundationWallet deployed to ${fondationWallet.address} with corp wallet ${sybelCorpWallet}`
-    );
+    const fondationWallet = await deployContract<FoundationWallet>("FoundationWallet", [sybelCorpWallet]);
+    console.log(`FoundationWallet deployed to ${fondationWallet.address} with corp wallet ${sybelCorpWallet}`);
 
     // Deploy our listener and podcast badges contract
-    const listenerBadges = await deployContract<ListenerBadges>(
-      "ListenerBadges"
-    );
+    const listenerBadges = await deployContract<ListenerBadges>("ListenerBadges");
     console.log("Listener badges deployed to " + listenerBadges.address);
     const podcastBadges = await deployContract<PodcastBadges>("PodcastBadges");
     console.log("Podcast badges deployed to " + podcastBadges.address);
-    const factionCostBadges = await deployContract<FractionCostBadges>(
-      "FractionCostBadges"
-    );
+    const factionCostBadges = await deployContract<FractionCostBadges>("FractionCostBadges");
     console.log("Fraction badges deployed to " + factionCostBadges.address);
 
     // Deploy our rewarder contract
@@ -96,19 +83,13 @@ import { FoundationWallet } from "../typechain-types/contracts/wallets/Foundatio
     const jsonAddresses = JSON.stringify(addresses);
     fs.writeFileSync("addresses.json", jsonAddresses);
     // Write another addresses with the name of the current network as backup
-    fs.writeFileSync(
-      `addresses-${hre.hardhatArguments.network}.json`,
-      jsonAddresses
-    );
+    fs.writeFileSync(`addresses-${hre.hardhatArguments.network}.json`, jsonAddresses);
   } catch (e: any) {
     console.log(e.message);
   }
 })();
 
-async function deployContract<Type extends Contract>(
-  name: string,
-  args?: unknown[]
-): Promise<Type> {
+async function deployContract<Type extends Contract>(name: string, args?: unknown[]): Promise<Type> {
   const contractFactory = await ethers.getContractFactory(name);
   const contract = (await upgrades.deployProxy(contractFactory, args, {
     kind: "uups",
@@ -126,7 +107,7 @@ class DeployedAddress {
     readonly podcastBadgesAddr: String,
     readonly fractionCostBadgesAddr: String,
     readonly rewarderAddr: String,
-    readonly minterAddr: String
+    readonly minterAddr: String,
   ) {}
 
   toJson(): string {

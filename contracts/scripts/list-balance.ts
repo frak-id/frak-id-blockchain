@@ -14,10 +14,7 @@ import { sybelTokenAddr, minterAddr } from "../addresses.json";
     console.log(`current network name ${hre.hardhatArguments.network}`);
 
     // Find our required contracts
-    const sybelToken = await findContract<SybelToken>(
-      "SybelToken",
-      sybelTokenAddr
-    );
+    const sybelToken = await findContract<SybelToken>("SybelToken", sybelTokenAddr);
 
     // Find our required contracts
     const minter = await findContract<Minter>("Minter", minterAddr);
@@ -29,23 +26,14 @@ import { sybelTokenAddr, minterAddr } from "../addresses.json";
 
     for (const account of accounts) {
       const balance = await sybelToken.balanceOf(account.address);
-      console.log(
-        "The user " +
-          account.address +
-          " have " +
-          balance.toNumber() / 1e6 +
-          "TSE"
-      );
+      console.log("The user " + account.address + " have " + balance.toNumber() / 1e6 + "TSE");
     }
   } catch (e: any) {
     console.log(e.message);
   }
 })();
 
-async function findContract<Type extends Contract>(
-  name: string,
-  address: string
-): Promise<Type> {
+async function findContract<Type extends Contract>(name: string, address: string): Promise<Type> {
   const contractFactory = await ethers.getContractFactory(name);
   return contractFactory.attach(address) as Type;
 }

@@ -6,7 +6,7 @@ import { SybelAccessControlUpgradeable } from "../../typechain-types/contracts/u
 export const testPauses = (
   contractAccessor: () => SybelAccessControlUpgradeable,
   addr1Accessor: () => SignerWithAddress,
-  unpausedRequiredFunctions: (() => Promise<void>)[]
+  unpausedRequiredFunctions: (() => Promise<void>)[],
 ) => {
   let contract: SybelAccessControlUpgradeable;
   let addr1: SignerWithAddress;

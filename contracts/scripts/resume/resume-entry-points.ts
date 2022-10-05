@@ -23,10 +23,7 @@ import { Minter } from "../../typechain-types/contracts/minter/Minter";
   }
 })();
 
-async function findContract<Type extends Contract>(
-  name: string,
-  address: string
-): Promise<Type> {
+async function findContract<Type extends Contract>(name: string, address: string): Promise<Type> {
   const contractFactory = await ethers.getContractFactory(name);
   return contractFactory.attach(address) as Type;
 }
