@@ -145,10 +145,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ContentPool__factory>;
     getContractFactory(
-      name: "ContentPool",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ContentPool__factory>;
-    getContractFactory(
       name: "ContentPoolReview",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ContentPoolReview__factory>;
@@ -353,11 +349,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Minter>;
-    getContractAt(
-      name: "ContentPool",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ContentPool>;
     getContractAt(
       name: "ContentPool",
       address: string,

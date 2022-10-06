@@ -1,26 +1,26 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
 import { ethers } from "hardhat";
 
-import { BigNumber, utils } from "ethers";
+import { BigNumber } from "ethers";
 
-import { SybelToken } from "../../typechain-types/contracts/tokens/SybelToken";
+import { SybelToken } from "../../types/contracts/tokens/SybelToken";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { deployContract } from "../utils/deploy";
+import { deployContract } from "../../scripts/utils/deploy";
 import { testRoles } from "../utils/test-roles";
 import { testPauses } from "../utils/test-pauses";
-import { minterRole, pauserRole } from "../utils/roles";
+import { minterRole, pauserRole } from "../../scripts/utils/roles";
 
 describe("SybelToken", () => {
   let sybelToken: SybelToken;
   let owner: SignerWithAddress;
   let addr1: SignerWithAddress;
   let addr2: SignerWithAddress;
-  let addrs: SignerWithAddress[];
+  let _addrs: SignerWithAddress[];
 
   // Deploy our sybel contract
   beforeEach(async function () {
-    [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
+    [owner, addr1, addr2, ..._addrs] = await ethers.getSigners();
 
     // Deploy our sybel token
     sybelToken = await deployContract("SybelToken");

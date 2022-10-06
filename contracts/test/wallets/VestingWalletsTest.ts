@@ -1,18 +1,16 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
-import { ethers, upgrades } from "hardhat";
-
-const hre = require("hardhat");
+import { ethers } from "hardhat";
 
 import { BigNumber, ContractTransaction, utils } from "ethers";
 
-import { SybelToken } from "../../typechain-types/contracts/tokens/SybelToken";
-import { VestingWallets } from "../../typechain-types/contracts/wallets/VestingWallets";
+import { SybelToken } from "../../types/contracts/tokens/SybelToken";
+import { VestingWallets } from "../../types/contracts/wallets/VestingWallets";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { deployContract } from "../utils/deploy";
+import { deployContract } from "../../scripts/utils/deploy";
 import { testPauses } from "../utils/test-pauses";
 import { testRoles } from "../utils/test-roles";
-import { adminRole, pauserRole, upgraderRole } from "../utils/roles";
+import { adminRole, pauserRole } from "../../scripts/utils/roles";
 
 const GROUP_INVESTOR_ID = 1;
 const GROUP_TEAM_ID = 2;
@@ -24,17 +22,17 @@ const GROUP_PRE_SALES_4_ID = 13;
 describe("VestingWallets", () => {
   let vestingWallets: VestingWallets;
   let sybelToken: SybelToken;
-  let owner: SignerWithAddress;
+  let _owner: SignerWithAddress;
   let addr1: SignerWithAddress;
-  let addr2: SignerWithAddress;
-  let addrs: SignerWithAddress[];
+  let _addr2: SignerWithAddress;
+  let _addrs: SignerWithAddress[];
 
   // Our investor group
   let investorGroup: VestingWallets.VestingGroupStruct;
 
   // Deploy our sybel contract
   beforeEach(async function () {
-    [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
+    [_owner, addr1, _addr2, ..._addrs] = await ethers.getSigners();
 
     // Deploy our sybel token and vesting wallets
     sybelToken = await deployContract("SybelToken");

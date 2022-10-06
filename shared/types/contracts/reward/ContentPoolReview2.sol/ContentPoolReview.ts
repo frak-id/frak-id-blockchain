@@ -27,11 +27,16 @@ export interface ContentPoolReviewInterface extends utils.Interface {
   functions: {
     "addReward(uint256)": FunctionFragment;
     "claimReward(address)": FunctionFragment;
+    "claimableReward(address)": FunctionFragment;
     "updateParticipant(address,uint256)": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: "addReward" | "claimReward" | "updateParticipant"
+    nameOrSignatureOrTopic:
+      | "addReward"
+      | "claimReward"
+      | "claimableReward"
+      | "updateParticipant"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -43,6 +48,10 @@ export interface ContentPoolReviewInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "claimableReward",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "updateParticipant",
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
@@ -50,6 +59,10 @@ export interface ContentPoolReviewInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "addReward", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "claimReward",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "claimableReward",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -97,6 +110,11 @@ export interface ContentPoolReview extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    claimableReward(
+      user: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     updateParticipant(
       user: PromiseOrValue<string>,
       shares: PromiseOrValue<BigNumberish>,
@@ -110,6 +128,11 @@ export interface ContentPoolReview extends BaseContract {
   ): Promise<ContractTransaction>;
 
   claimReward(
+    user: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  claimableReward(
     user: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -131,6 +154,11 @@ export interface ContentPoolReview extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    claimableReward(
+      user: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     updateParticipant(
       user: PromiseOrValue<string>,
       shares: PromiseOrValue<BigNumberish>,
@@ -151,6 +179,11 @@ export interface ContentPoolReview extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    claimableReward(
+      user: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     updateParticipant(
       user: PromiseOrValue<string>,
       shares: PromiseOrValue<BigNumberish>,
@@ -165,6 +198,11 @@ export interface ContentPoolReview extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     claimReward(
+      user: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    claimableReward(
       user: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;

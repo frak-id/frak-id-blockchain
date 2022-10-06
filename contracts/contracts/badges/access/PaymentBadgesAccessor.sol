@@ -20,10 +20,10 @@ abstract contract PaymentBadgesAccessor is Initializable {
      */
     IPodcastBadges public podcastBadges;
 
-    function __PaymentBadgesAccessor_init(
-        address listenerBadgesAddr,
-        address podcastBadgesAddr
-    ) internal onlyInitializing {
+    function __PaymentBadgesAccessor_init(address listenerBadgesAddr, address podcastBadgesAddr)
+        internal
+        onlyInitializing
+    {
         listenerBadges = IListenerBadges(listenerBadgesAddr);
         podcastBadges = IPodcastBadges(podcastBadgesAddr);
     }

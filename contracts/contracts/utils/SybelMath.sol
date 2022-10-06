@@ -17,22 +17,14 @@ library SybelMath {
     /**
      * @dev Build the id for a S FNT
      */
-    function buildSnftId(uint256 podcastId, uint8 tokenType)
-        internal
-        pure
-        returns (uint256)
-    {
+    function buildSnftId(uint256 podcastId, uint8 tokenType) internal pure returns (uint256) {
         return (podcastId << ID_OFFSET) | tokenType;
     }
 
     /**
      * @dev Build the id for a S FNT
      */
-    function buildSnftIds(uint256 podcastId, uint8[] memory types)
-        internal
-        pure
-        returns (uint256[] memory)
-    {
+    function buildSnftIds(uint256 podcastId, uint8[] memory types) internal pure returns (uint256[] memory) {
         uint256[] memory tokenIds = new uint256[](types.length);
         for (uint8 i = 0; i < types.length; ++i) {
             tokenIds[i] = buildSnftId(podcastId, types[i]);
@@ -50,22 +42,14 @@ library SybelMath {
     /**
      * @dev Build the id for a classic NFT id
      */
-    function buildStandardNftId(uint256 podcastId)
-        internal
-        pure
-        returns (uint256)
-    {
+    function buildStandardNftId(uint256 podcastId) internal pure returns (uint256) {
         return (podcastId << ID_OFFSET) | TOKEN_TYPE_STANDARD_MASK;
     }
 
     /**
      * @dev Build the id for a classic NFT id
      */
-    function buildClassicNftId(uint256 podcastId)
-        internal
-        pure
-        returns (uint256)
-    {
+    function buildClassicNftId(uint256 podcastId) internal pure returns (uint256) {
         return (podcastId << ID_OFFSET) | TOKEN_TYPE_CLASSIC_MASK;
     }
 
@@ -86,11 +70,7 @@ library SybelMath {
     /**
      * @dev Build the id for a epic NFT id
      */
-    function buildLegendaryNftId(uint256 podcastId)
-        internal
-        pure
-        returns (uint256)
-    {
+    function buildLegendaryNftId(uint256 podcastId) internal pure returns (uint256) {
         return (podcastId << ID_OFFSET) | TOKEN_TYPE_LEGENDARY_MASK;
     }
 
@@ -132,9 +112,7 @@ library SybelMath {
      */
     function isPodcastRelatedToken(uint256 id) internal pure returns (bool) {
         uint8 tokenType = extractTokenType(id);
-        return
-            tokenType > TOKEN_TYPE_NFT_MASK &&
-            tokenType <= TOKEN_TYPE_LEGENDARY_MASK;
+        return tokenType > TOKEN_TYPE_NFT_MASK && tokenType <= TOKEN_TYPE_LEGENDARY_MASK;
     }
 
     /**
@@ -149,11 +127,7 @@ library SybelMath {
     /**
      * @dev Create a singleton array of the given element
      */
-    function asSingletonArray(uint256 element)
-        internal
-        pure
-        returns (uint256[] memory)
-    {
+    function asSingletonArray(uint256 element) internal pure returns (uint256[] memory) {
         uint256[] memory array = new uint256[](1);
         array[0] = element;
 
@@ -163,11 +137,7 @@ library SybelMath {
     /**
      * @dev Create a singleton array of the given element
      */
-    function asSingletonArray(address element)
-        internal
-        pure
-        returns (address[] memory)
-    {
+    function asSingletonArray(address element) internal pure returns (address[] memory) {
         address[] memory array = new address[](1);
         array[0] = element;
 

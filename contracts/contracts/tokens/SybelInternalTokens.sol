@@ -11,11 +11,7 @@ import "../utils/MintingAccessControlUpgradeable.sol";
 
 /// @custom:security-contact crypto-support@sybel.co
 /// @custom:oz-upgrades-unsafe-allow external-library-linking
-contract SybelInternalTokens is
-    MintingAccessControlUpgradeable,
-    ERC1155Upgradeable,
-    IERC2981Upgradeable
-{
+contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable, IERC2981Upgradeable {
     // The current podcast token id
     uint256 private _currentPodcastTokenID;
 
@@ -44,9 +40,7 @@ contract SybelInternalTokens is
     }
 
     function initialize() external initializer {
-        __ERC1155_init(
-            "https://storage.googleapis.com/sybel-io.appspot.com/json/{id}.json"
-        );
+        __ERC1155_init("https://storage.googleapis.com/sybel-io.appspot.com/json/{id}.json");
         __MintingAccessControlUpgradeable_init();
         // Set the initial podcast id
         _currentPodcastTokenID = 1;
@@ -83,10 +77,7 @@ contract SybelInternalTokens is
         onlyRole(SybelRoles.MINTER)
         whenNotPaused
     {
-        require(
-            ids.length == supplies.length,
-            "SYB: Can't set the supply for id and supplies of different length"
-        );
+        require(ids.length == supplies.length, "SYB: Id and supplies of different length");
         // Iterate over each ids and increment their supplies
         for (uint256 i = 0; i < ids.length; ++i) {
             uint256 id = ids[i];
@@ -222,11 +213,7 @@ contract SybelInternalTokens is
         public
         view
         virtual
-        override(
-            ERC1155Upgradeable,
-            IERC165Upgradeable,
-            AccessControlUpgradeable
-        )
+        override(ERC1155Upgradeable, IERC165Upgradeable, AccessControlUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

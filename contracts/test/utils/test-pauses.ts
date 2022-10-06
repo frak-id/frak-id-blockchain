@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { SybelAccessControlUpgradeable } from "../../typechain-types/contracts/utils/SybelAccessControlUpgradeable";
+import { SybelAccessControlUpgradeable } from "../../types/contracts/utils/SybelAccessControlUpgradeable";
 
 // Check the Roles managment
 export const testPauses = (

@@ -10,12 +10,9 @@ import "../../utils/SybelAccessControlUpgradeable.sol";
  * @dev Handle the computation of our listener badges
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract FractionCostBadges is
-    IFractionCostBadges,
-    SybelAccessControlUpgradeable
-{
+contract FractionCostBadges is IFractionCostBadges, SybelAccessControlUpgradeable {
     // Map f nft id to cost badge
-    mapping(uint256 => uint256) fractionBadges;
+    mapping(uint256 => uint256) private fractionBadges;
 
     event FractionCostBadgeUpdated(uint256 id, uint256 badge);
 
@@ -47,13 +44,7 @@ contract FractionCostBadges is
     /**
      * @dev Get the payment badges for the given informations
      */
-    function getBadge(uint256 fractionId)
-        external
-        view
-        override
-        whenNotPaused
-        returns (uint256)
-    {
+    function getBadge(uint256 fractionId) external view override whenNotPaused returns (uint256) {
         uint256 fractionBadge = fractionBadges[fractionId];
         if (fractionBadge == 0) {
             // If the badge of this fraction isn't set yet, set it to default
@@ -67,11 +58,7 @@ contract FractionCostBadges is
      * @dev The initial cost of a fraction type
      * We use a pure function instead of a mapping to economise on storage read, and since this reawrd shouldn't evolve really fast
      */
-    function initialFractionCost(uint8 tokenType)
-        public
-        pure
-        returns (uint256)
-    {
+    function initialFractionCost(uint8 tokenType) public pure returns (uint256) {
         uint256 initialCost = 0;
         if (tokenType == SybelMath.TOKEN_TYPE_CLASSIC_MASK) {
             initialCost = 20 ether; // 20 SYBL

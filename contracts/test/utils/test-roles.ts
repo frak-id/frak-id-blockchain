@@ -1,7 +1,6 @@
-import { utils } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { SybelAccessControlUpgradeable } from "../../typechain-types/contracts/utils/SybelAccessControlUpgradeable";
+import { SybelAccessControlUpgradeable } from "../../types/contracts/utils/SybelAccessControlUpgradeable";
 
 // Check the Roles managment
 export const testRoles = (
@@ -42,7 +41,7 @@ export const testRoles = (
     expect(isAddr2Admin).to.equal(true);
 
     // Revoke the role and check the user havn't it anymore
-    contract.revokeRole(role, addr1.address);
+    await contract.revokeRole(role, addr1.address);
     isAddr2Admin = await contract.hasRole(role, addr1.address);
 
     // Then try to perform the role required functions
@@ -57,7 +56,7 @@ export const testRoles = (
     expect(isAddr2Admin).to.equal(true);
 
     // Renounce the role and check the user havn't it anymore
-    contract.connect(addr1).renounceRole(role, addr1.address);
+    await contract.connect(addr1).renounceRole(role, addr1.address);
     isAddr2Admin = await contract.hasRole(role, addr1.address);
 
     // Then try to perform the role required functions

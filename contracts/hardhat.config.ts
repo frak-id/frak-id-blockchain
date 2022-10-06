@@ -1,16 +1,10 @@
-import { task } from "hardhat/config";
-// import { ethers } from "hardhat";
-
 import dotenv from "dotenv";
 import "@typechain/hardhat";
-import "@nomiclabs/hardhat-ethers";
-import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
 import "@openzeppelin/hardhat-upgrades";
 import "hardhat-contract-sizer";
 import "hardhat-abi-exporter";
-import "solidity-coverage";
-import "hardhat-prettier";
+import "@nomicfoundation/hardhat-toolbox";
 
 dotenv.config();
 
@@ -50,10 +44,19 @@ export default {
   include: ["./scripts", "./test", "./typechain-types"],
   files: ["./hardhat.config.ts"],
   typechain: {
-    outDir: "../shared/types",
+    outDir: "./types",
+  },
+  gasReporter: {
+    currency: "EUR",
+    token: "MATIC",
+    gasPriceApi: "https://api.polygonscan.com/api?module=proxy&action=eth_gasPrice",
+    enabled: true,
+    excludeContracts: [],
+    src: "./contracts",
+    coinmarketcap: process.env.COIN_MARKET_CAP_API_KEY,
   },
   abiExporter: {
-    path: "../shared/abi",
+    path: "./abi",
     runOnCompile: true,
     clear: true,
     flat: true,

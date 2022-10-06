@@ -57,17 +57,17 @@ contract ContentPoolReview {
     /**
      * @dev Mapping between address and participant
      */
-    mapping(address => Participant) participants;
+    mapping(address => Participant) private participants;
 
     /**
      * @dev All the reward claim by reward state index, to user addresses, to claimed reward
      */
-    mapping(uint256 => mapping(address => uint256)) claimedRewards;
+    mapping(uint256 => mapping(address => uint256)) private claimedRewards;
 
     /**
      * The pending referal reward for the given address
      */
-    mapping(address => uint256) userPendingReward;
+    mapping(address => uint256) private userPendingReward;
 
     /**
      * @dev Modifier to make a function callable only when the reward state isn't locked
@@ -95,28 +95,16 @@ contract ContentPoolReview {
     /**
      * @dev Update a participant share on this pool
      */
-    function updateParticipant(address user, uint256 shares)
-        external
-        whenNotLocked
-    {
-        require(
-            user != address(0),
-            "SYBL: Can't update share on the 0 address"
-        );
+    function updateParticipant(address user, uint256 shares) external whenNotLocked {
+        require(user != address(0), "SYBL: Can't update share on the 0 address");
         // Close the last RewardState (is it enough as lock ??)
         RewardState storage currentState = rewardStates[currentStateIndex];
         currentState.open = false;
         // Get the participant and check the share differences
         Participant storage currentParticipant = participants[user];
-        require(
-            shares != currentParticipant.shares,
-            "SYB: Can't update share for the same share amount"
-        );
+        require(shares != currentParticipant.shares, "SYB: Can't update share for the same share amount");
         uint256 reward = claimableReward(user);
-        require(
-            reward == 0,
-            "SYB: User need to claim his reward before updating his position"
-        );
+        require(reward == 0, "SYB: User need to claim his reward before updating his position");
         // Lock the current state
         isStateLocked = true;
         // Compute the share difference
@@ -151,28 +139,20 @@ contract ContentPoolReview {
      * @dev Claim the user reward
      */
     function claimReward(address user) external whenNotLocked {
-        require(
-            user != address(0),
-            "SYBL: Can't claim reward on the 0 address"
-        );
+        require(user != address(0), "SYBL: Can't claim reward on the 0 address");
         // Get the participant and it's claimable reward
         Participant storage participant = participants[user];
         uint256 toBePayed = claimableReward(user);
         // Ensure the user got a claimable reward
         require(toBePayed > 0, "SYB: No reward to be claimed");
         // TODO : Have a state count cap to be able to handle edge case like long time not checked ones (cap to 200 hundred max ??)
-        for (
-            uint256 stateIndex = participant.lastStateIndex;
-            stateIndex < currentStateIndex;
-            stateIndex++
-        ) {
+        for (uint256 stateIndex = participant.lastStateIndex; stateIndex < currentStateIndex; stateIndex++) {
             // Get the reward the user claimed on this state
             uint256 alreadyClaimedRewards = claimedRewards[stateIndex][user];
             // Get the state
             RewardState storage state = rewardStates[stateIndex];
             // Compute the total reward tor this user in this state
-            uint256 totalPoolReward = (state.currentPoolReward *
-                participant.shares) / state.totalShares;
+            uint256 totalPoolReward = (state.currentPoolReward * participant.shares) / state.totalShares;
             toBePayed += totalPoolReward - alreadyClaimedRewards;
         }
         // Update the last handled index for the user
@@ -187,33 +167,24 @@ contract ContentPoolReview {
      * TODO : Max reward state to iterate over
      */
     function claimableReward(address user) public returns (uint256) {
-        require(
-            user != address(0),
-            "SYBL: Can't check the reward for the 0 address"
-        );
+        require(user != address(0), "SYBL: Can't check the reward for the 0 address");
         // Get the participant
         Participant storage participant = participants[user];
         uint256 claimable = 0;
         uint256 lastStateIndexChecked = 0;
         require(
-            currentStateIndex - participant.lastStateIndex <
-                MAX_CLAIMABLE_REWARD_STATE_ROUNDS,
+            currentStateIndex - participant.lastStateIndex < MAX_CLAIMABLE_REWARD_STATE_ROUNDS,
             "SYB: Trying to claim too much reward state at the same time"
         );
         // If the difference between the user claim and the last cap is too big,
-        for (
-            uint256 stateIndex = participant.lastStateIndex;
-            stateIndex < currentStateIndex;
-            stateIndex++
-        ) {
+        for (uint256 stateIndex = participant.lastStateIndex; stateIndex < currentStateIndex; stateIndex++) {
             // Get the reward the user claimed on this state
             uint256 alreadyClaimedRewards = claimedRewards[stateIndex][user];
             uint256 stateShare = participant.shares;
             // Get the state
             RewardState storage state = rewardStates[stateIndex];
             // Compute the total reward tor this user in this state
-            uint256 totalPoolReward = (state.currentPoolReward * stateShare) /
-                state.totalShares;
+            uint256 totalPoolReward = (state.currentPoolReward * stateShare) / state.totalShares;
             claimable += totalPoolReward - alreadyClaimedRewards;
             // Update our last index iterated
             lastStateIndexChecked = stateIndex;
@@ -228,9 +199,5 @@ contract ContentPoolReview {
     /**
      * Compute the number of states this participant can claim
      */
-    function statesToClaim(Participant storage participant)
-        private
-        view
-        returns (uint256)
-    {}
+    function statesToClaim(Participant storage participant) private view returns (uint256) {}
 }

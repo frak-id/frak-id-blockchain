@@ -8,12 +8,7 @@ import "./IPausable.sol";
 import "../utils/SybelRoles.sol";
 
 /// @custom:security-contact crypto-support@sybel.co
-abstract contract SybelAccessControlUpgradeable is
-    Initializable,
-    IPausable,
-    AccessControlUpgradeable,
-    UUPSUpgradeable
-{
+abstract contract SybelAccessControlUpgradeable is Initializable, IPausable, AccessControlUpgradeable, UUPSUpgradeable {
     // Is this contract paused ?
     bool private _paused;
 
@@ -63,33 +58,19 @@ abstract contract SybelAccessControlUpgradeable is
     /**
      * @dev Pause this smart contract
      */
-    function pause()
-        external
-        override
-        whenNotPaused
-        onlyRole(SybelRoles.PAUSER)
-    {
+    function pause() external override whenNotPaused onlyRole(SybelRoles.PAUSER) {
         _paused = true;
     }
 
     /**
      * @dev Un pause this smart contract
      */
-    function unpause()
-        external
-        override
-        whenPaused
-        onlyRole(SybelRoles.PAUSER)
-    {
+    function unpause() external override whenPaused onlyRole(SybelRoles.PAUSER) {
         _paused = false;
     }
 
     /**
      * @dev Authorize the upgrade of this contract
      */
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        override
-        onlyRole(SybelRoles.UPGRADER)
-    {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(SybelRoles.UPGRADER) {}
 }

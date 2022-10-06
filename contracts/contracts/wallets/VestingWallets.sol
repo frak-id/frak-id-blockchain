@@ -28,8 +28,7 @@ contract VestingWallets is SybelAccessControlUpgradeable {
     /**
      * @dev Map address to all the vesting groups
      */
-    mapping(address => mapping(uint8 => VestingWallet))
-        private investorVestingWallets;
+    mapping(address => mapping(uint8 => VestingWallet)) private investorVestingWallets;
 
     /**
      * @dev Map address to all participating group ids
@@ -46,25 +45,11 @@ contract VestingWallets is SybelAccessControlUpgradeable {
         _disableInitializers();
     }
 
-    event VestingWalletCreated(
-        address vesterAddress,
-        address vestingWalletAddress,
-        uint64 startTime,
-        uint64 duration
-    );
+    event VestingWalletCreated(address vesterAddress, address vestingWalletAddress, uint64 startTime, uint64 duration);
 
-    event VestingWalletSupplyIncreased(
-        address vesterAddress,
-        address vestingWalletAddress,
-        uint256 additionalReward
-    );
+    event VestingWalletSupplyIncreased(address vesterAddress, address vestingWalletAddress, uint256 additionalReward);
 
-    event VestingGroupAdded(
-        uint8 id,
-        uint256 rewardCap,
-        uint64 duration,
-        uint64 delay
-    );
+    event VestingGroupAdded(uint8 id, uint256 rewardCap, uint64 duration, uint64 delay);
 
     function initialize(address sybelTokenAddr) external initializer {
         __SybelAccessControlUpgradeable_init();
@@ -131,10 +116,7 @@ contract VestingWallets is SybelAccessControlUpgradeable {
         uint64 duration,
         uint64 delay
     ) public onlyRole(SybelRoles.ADMIN) whenNotPaused {
-        require(
-            vestingGroup[id].delay == 0,
-            "SYB: This vesting group already exist"
-        );
+        require(vestingGroup[id].delay == 0, "SYB: This vesting group already exist");
         require(rewardCap > 0, "SYB: The reward cap should be superior to 0");
         require(duration > 0, "SYB: The duration should be superior to 0");
         require(
@@ -152,11 +134,7 @@ contract VestingWallets is SybelAccessControlUpgradeable {
     /**
      * @dev Get the group for the given id
      */
-    function getVestingGroup(uint8 id)
-        external
-        view
-        returns (VestingGroup memory)
-    {
+    function getVestingGroup(uint8 id) external view returns (VestingGroup memory) {
         return vestingGroup[id];
     }
 
@@ -174,40 +152,24 @@ contract VestingWallets is SybelAccessControlUpgradeable {
         // Find the group and check basic properties
         VestingGroup storage group = vestingGroup[groupId];
         require(group.duration > 0, "SYB: This vesting group doesn't exist");
-        require(
-            group.supply + reward <= group.rewardCap,
-            "SYB: Can't mint more than the group supply cap"
-        );
+        require(group.supply + reward <= group.rewardCap, "SYB: Can't mint more than the group supply cap");
         // Check if the vesting wallet is already created
         VestingWallet vestingWallet = investorVestingWallets[investor][groupId];
         if (address(vestingWallet) == address(0)) {
             // In the case the vesting wallet didn't exist before, create it and store it
             uint64 currentTimestamp = uint64(block.timestamp);
-            vestingWallet = new VestingWallet(
-                investor,
-                currentTimestamp + group.delay,
-                group.duration
-            );
+            vestingWallet = new VestingWallet(investor, currentTimestamp + group.delay, group.duration);
             investorVestingWallets[investor][groupId] = vestingWallet;
             // Add this group id for this investor
             investorToGroupIds[investor].push(groupId);
             // Emit the creation event
-            emit VestingWalletCreated(
-                investor,
-                address(vestingWallet),
-                currentTimestamp + group.delay,
-                group.duration
-            );
+            emit VestingWalletCreated(investor, address(vestingWallet), currentTimestamp + group.delay, group.duration);
         }
         // Decrease the cap for this group
         group.supply += reward;
         vestingGroup[groupId] = group;
         // Emit the increase event
-        emit VestingWalletSupplyIncreased(
-            investor,
-            address(vestingWallet),
-            reward
-        );
+        emit VestingWalletSupplyIncreased(investor, address(vestingWallet), reward);
         // Mint the sybl token for this user
         sybelToken.mint(address(vestingWallet), reward);
     }
@@ -215,20 +177,11 @@ contract VestingWallets is SybelAccessControlUpgradeable {
     /**
      * @dev Retrieve the vesting wallet for the given investor
      */
-    function getVestingWallet(address investor)
-        public
-        view
-        returns (VestingWallet[] memory)
-    {
+    function getVestingWallet(address investor) public view returns (VestingWallet[] memory) {
         uint8[] storage investorGroupIds = investorToGroupIds[investor];
-        require(
-            investorGroupIds.length > 0,
-            "SYB: Not an investor in any groups"
-        );
+        require(investorGroupIds.length > 0, "SYB: Not an investor in any groups");
         // Build our initial vesting wallets map
-        VestingWallet[] memory wallets = new VestingWallet[](
-            investorGroupIds.length
-        );
+        VestingWallet[] memory wallets = new VestingWallet[](investorGroupIds.length);
         // Find all the wallet for the user
         for (uint8 i = 0; i < investorGroupIds.length; ++i) {
             uint8 groupId = investorGroupIds[i];
@@ -252,11 +205,7 @@ contract VestingWallets is SybelAccessControlUpgradeable {
     /**
      * @dev Retlease all the token for the given investor
      */
-    function release(address investor)
-        external
-        onlyRole(SybelRoles.ADMIN)
-        whenNotPaused
-    {
+    function release(address investor) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
         VestingWallet[] memory wallets = getVestingWallet(investor);
         for (uint8 i = 0; i < wallets.length; ++i) {
             wallets[i].release(address(sybelToken));

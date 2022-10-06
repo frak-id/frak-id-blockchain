@@ -37,12 +37,12 @@ contract Referral is SybelAccessControlUpgradeable {
     /**
      * Mapping of podcast id to referee to referer
      */
-    mapping(uint256 => mapping(address => address)) podcastIdToRefereeToReferer;
+    mapping(uint256 => mapping(address => address)) private podcastIdToRefereeToReferer;
 
     /**
      * The pending referal reward for the given address
      */
-    mapping(address => uint256) userPendingReward;
+    mapping(address => uint256) private userPendingReward;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -66,15 +66,9 @@ contract Referral is SybelAccessControlUpgradeable {
     ) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
         // Ensure the user doesn't have a referer yet
         address actualReferer = podcastIdToRefereeToReferer[podcastId][user];
-        require(
-            actualReferer == address(0),
-            "SYB: The user already got a referer for this podcast"
-        );
+        require(actualReferer == address(0), "SYB: The user already got a referer for this podcast");
         bool isInRefererChain = isUserInRefererChain(podcastId, user, referer);
-        require(
-            !isInRefererChain,
-            "SYB: The user is already in the referrer referee chain"
-        );
+        require(!isInRefererChain, "SYB: The user is already in the referrer referee chain");
         // Check if the user isn't in the referrer chain
         // If that's got, set it and emit the event
         podcastIdToRefereeToReferer[podcastId][user] = referer;
@@ -87,9 +81,7 @@ contract Referral is SybelAccessControlUpgradeable {
         address referer
     ) internal returns (bool) {
         // Get the referer of our referer
-        address referrerReferrer = podcastIdToRefereeToReferer[podcastId][
-            referer
-        ];
+        address referrerReferrer = podcastIdToRefereeToReferer[podcastId][referer];
         if (referrerReferrer == address(0)) {
             // If he don't have any referer, exit
             return false;
@@ -110,10 +102,7 @@ contract Referral is SybelAccessControlUpgradeable {
         address user,
         uint256 amount
     ) public onlyRole(SybelRoles.ADMIN) whenNotPaused returns (uint256) {
-        require(
-            user != address(0),
-            "SYB: Can't pay referrer for the 0 address"
-        );
+        require(user != address(0), "SYB: Can't pay referrer for the 0 address");
         require(amount > 0, "SYB: Can't pay referrer with 0 as amount");
         // Store the pending reward for this user, and emit the associated event's
         userPendingReward[user] += amount;
@@ -135,15 +124,8 @@ contract Referral is SybelAccessControlUpgradeable {
     /**
      * Withdraw the user pending founds
      */
-    function withdrawFounds(address user)
-        external
-        onlyRole(SybelRoles.ADMIN)
-        whenNotPaused
-    {
-        require(
-            user != address(0),
-            "SYB: Can't withdraw referral founds for the 0 address"
-        );
+    function withdrawFounds(address user) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
+        require(user != address(0), "SYB: Can't withdraw referral founds for the 0 address");
         // Ensure the user have a pending reward
         uint256 pendingReward = userPendingReward[user];
         require(pendingReward > 0, "SYB: The user havn't any pending reward");

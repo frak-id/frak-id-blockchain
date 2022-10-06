@@ -25,10 +25,7 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable {
     /**
      * @dev Mint some SYBL
      */
-    function mint(address to, uint256 amount)
-        external
-        onlyRole(SybelRoles.MINTER)
-    {
+    function mint(address to, uint256 amount) external onlyRole(SybelRoles.MINTER) {
         require(totalSupply() + amount <= cap(), "ERC20Capped: cap exceeded");
         _mint(to, amount);
     }

@@ -13,10 +13,7 @@ import "../utils/SybelAccessControlUpgradeable.sol";
  * @dev Represent our foundation wallet contract
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract FoundationWallet is
-    PaymentSplitterUpgradeable,
-    SybelAccessControlUpgradeable
-{
+contract FoundationWallet is PaymentSplitterUpgradeable, SybelAccessControlUpgradeable {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();

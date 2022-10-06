@@ -1,23 +1,18 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
-import { ethers, upgrades } from "hardhat";
-import * as fs from "fs";
+import { ethers } from "hardhat";
 
-const hre = require("hardhat");
+import { BaseContract, BytesLike, Contract, ContractTransaction, Overrides, utils } from "ethers";
 
-import { BaseContract, BytesLike, CallOverrides, Contract, ContractTransaction, Overrides, utils } from "ethers";
-
-import { Minter } from "../typechain-types/contracts/minter/Minter";
-import * as addr from "../addresses.json";
-import { FractionCostBadges } from "../typechain-types/contracts/badges/cost/FractionCostBadges";
-import { Rewarder } from "../typechain-types/contracts/reward/Rewarder";
-import { ListenerBadges } from "../typechain-types/contracts/badges/payment/ListenerBadges";
-import { PodcastBadges } from "../typechain-types/contracts/badges/payment/PodcastBadges";
-import { SybelToken } from "../typechain-types/contracts/tokens/SybelToken";
-import { SybelInternalTokens } from "../typechain-types/contracts/tokens/SybelInternalTokens";
-import { FoundationWallet } from "../typechain-types/contracts/wallets/FoundationWallet";
-import { PromiseOrValue } from "../typechain-types/common";
-import { isBytes } from "ethers/lib/utils";
-import { util } from "chai";
+import { Minter } from "../types/contracts/minter/Minter";
+import * as addr from "../../shared/addresses.json";
+import { FractionCostBadges } from "../types/contracts/badges/cost/FractionCostBadges";
+import { Rewarder } from "../types/contracts/reward/Rewarder";
+import { ListenerBadges } from "../types/contracts/badges/payment/ListenerBadges";
+import { PodcastBadges } from "../types/contracts/badges/payment/PodcastBadges";
+import { SybelToken } from "../types/contracts/tokens/SybelToken";
+import { SybelInternalTokens } from "../types/contracts/tokens/SybelInternalTokens";
+import { FoundationWallet } from "../types/contracts/wallets/FoundationWallet";
+import { PromiseOrValue } from "../types/common";
 
 let adminRole = "0x00";
 const minterRole = utils.keccak256(utils.toUtf8Bytes("MINTER_ROLE"));
