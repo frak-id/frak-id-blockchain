@@ -41,8 +41,8 @@ contract ListenerBadges is IListenerBadges, SybelAccessControlUpgradeable {
     /**
      * @dev Find the badge for the given listener (on a 1e18 scale)
      */
-    function getBadge(address listener) external view override returns (uint64) {
-        uint64 listenerBadge = listenerBadges[listener];
+    function getBadge(address listener) external view override returns (uint64 listenerBadge) {
+        listenerBadge = listenerBadges[listener];
         if (listenerBadge == 0) {
             // If the badge of this listener isn't set yet, set it to default
             listenerBadge = 1 ether;

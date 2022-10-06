@@ -102,7 +102,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
         uint256 rareSupply,
         uint256 epicSupply,
         uint256 legendarySupply
-    ) external override onlyRole(SybelRoles.MINTER) whenNotPaused returns (uint256) {
+    ) external override onlyRole(SybelRoles.MINTER) whenNotPaused returns (uint256 podcastId) {
         require(podcastOwnerAddress != address(0), "SYB: Cannot add podcast for the 0 address !");
         require(commonSupply > 0, "SYB: Common supply required for initial mint");
         require(commonSupply < 500, "SYB: Initial common supply cant' be greater than 500");
@@ -110,7 +110,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
         require(epicSupply < 50, "SYB: Initial epic supply cant' be greater than 50");
         require(legendarySupply < 5, "SYB: Initial legendary supply cant' be greater than 5");
         // Try to mint the new podcast
-        uint256 podcastId = sybelInternalTokens.mintNewPodcast(podcastOwnerAddress);
+        podcastId = sybelInternalTokens.mintNewPodcast(podcastOwnerAddress);
         // Then set the supply for each token types
         uint256[] memory ids = new uint256[](4);
         ids[0] = SybelMath.buildClassicNftId(podcastId);

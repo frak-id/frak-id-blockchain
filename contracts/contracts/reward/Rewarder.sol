@@ -174,11 +174,9 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
         uint256 podcastId,
         uint16 listenCount,
         ListenerBalanceOnPodcast[] memory balances
-    ) private returns (uint256) {
+    ) private returns (uint256 totalAmountToMint) {
         // The user have a balance we can continue
         uint256 podcastBadge = podcastBadges.getBadge(podcastId);
-        // Amout we will mint for user and for owner
-        uint256 totalAmountToMint = 0;
         // Mint each token for each fraction
         for (uint256 i = 0; i < balances.length; ++i) {
             if (balances[i].balance <= 0) {
@@ -235,8 +233,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
      * We use a pure function instead of a mapping to economise on storage read,
      * and since this reawrd shouldn't evolve really fast
      */
-    function baseRewardForTokenType(uint8 tokenType) private pure returns (uint96) {
-        uint96 reward = 0;
+    function baseRewardForTokenType(uint8 tokenType) private pure returns (uint96 reward) {
         if (tokenType == SybelMath.TOKEN_TYPE_STANDARD_MASK) {
             reward = 0.01 ether; // 0.01 SYBL
         } else if (tokenType == SybelMath.TOKEN_TYPE_CLASSIC_MASK) {

@@ -53,11 +53,10 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
         external
         onlyRole(SybelRoles.MINTER)
         whenNotPaused
-        returns (uint256)
+        returns (uint256 id)
     {
         // Get the next podcast id and increment the current podcast token id
-        uint256 id = _currentPodcastTokenID + 1;
-        _currentPodcastTokenID++;
+        id = ++_currentPodcastTokenID;
 
         // Mint the podcast nft into the podcast owner wallet directly
         uint256 nftId = SybelMath.buildNftId(id);
@@ -179,7 +178,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
         external
         view
         override
-        returns (address receiver, uint256 royaltyAmount)
+        returns (address, uint256)
     {
         if (salePrice > 0 && SybelMath.isPodcastRelatedToken(tokenId)) {
             // Find the address of the owner of this podcast
@@ -195,14 +194,14 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     /**
      * @dev Find the owner of the given podcast is
      */
-    function ownerOf(uint256 podcastId) external view returns (address owner) {
+    function ownerOf(uint256 podcastId) external view returns (address) {
         return owners[podcastId];
     }
 
     /**
      * @dev Fidn the current supply of the given token
      */
-    function supplyOf(uint256 tokenId) external view returns (uint256 supply) {
+    function supplyOf(uint256 tokenId) external view returns (uint256) {
         return _availableSupplies[tokenId];
     }
 

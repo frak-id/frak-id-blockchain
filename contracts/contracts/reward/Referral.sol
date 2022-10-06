@@ -101,14 +101,14 @@ contract Referral is SybelAccessControlUpgradeable {
         uint256 podcastId,
         address user,
         uint256 amount
-    ) public onlyRole(SybelRoles.ADMIN) whenNotPaused returns (uint256) {
+    ) public onlyRole(SybelRoles.ADMIN) whenNotPaused returns (uint256 totalAmount) {
         require(user != address(0), "SYB: Can't pay referrer for the 0 address");
         require(amount > 0, "SYB: Can't pay referrer with 0 as amount");
         // Store the pending reward for this user, and emit the associated event's
         userPendingReward[user] += amount;
         emit ReferralReward(podcastId, user, amount);
         // The total amount to be paid
-        uint256 totalAmount = amount;
+        totalAmount = amount;
         // Check if the user got a referer
         address userReferer = podcastIdToRefereeToReferer[podcastId][user];
         if (userReferer != address(0) && amount > 0) {
