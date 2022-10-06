@@ -22,4 +22,5 @@ library SybelRoles {
 
     // Role required to manage the vesting wallets
     bytes32 internal constant VESTING_MANAGER = keccak256("VESTING_MANAGER");
+    bytes32 internal constant VESTING_CREATOR = keccak256("VESTING_CREATOR");
 }

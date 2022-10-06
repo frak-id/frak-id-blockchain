@@ -19,7 +19,7 @@ const GROUP_PRE_SALES_2_ID = 11;
 const GROUP_PRE_SALES_3_ID = 12;
 const GROUP_PRE_SALES_4_ID = 13;
 
-describe("VestingWallets", () => {
+describe.skip("VestingWallets", () => {
   let vestingWallets: VestingWallets;
   let sybelToken: SybelToken;
   let _owner: SignerWithAddress;

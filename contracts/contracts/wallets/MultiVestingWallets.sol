@@ -2,12 +2,34 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/finance/VestingWallet.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "../tokens/SybelToken.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "../utils/SybelRoles.sol";
+import "hardhat/console.sol";
 
 contract MultiVestingWallets is SybelAccessControlUpgradeable {
+    // Add the library methods
+    using EnumerableSet for EnumerableSet.UintSet;
+
+    /// Emitted when  the vesting begin
+    event VestingBegin(uint64 startDate);
+
+    /// Emitted when a vesting is created
+    event VestingCreated(
+        uint256 indexed vestingId,
+        address indexed beneficiary,
+        uint256 amount,
+        uint64 delay,
+        uint64 duration
+    );
+
+    /// Emitted when a vesting is transfered between 2 address
+    event VestingTransfered(
+        uint256 indexed vestingId,
+        address indexed from,
+        address indexed to
+    );
 
     /**
      * @dev Represent a vesting wallet
@@ -25,7 +47,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     mapping(uint256 => Vesting) public vestings;
 
     /// User to list of vesting id owned
-    mapping(address => uint256[]) public owned;
+    mapping(address => EnumerableSet.UintSet) private owned;
 
     /// Currently locked tokens that are being used by all of the vestings
     uint256 public totalSupply;
@@ -48,13 +70,18 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     function initialize(address sybelTokenAddr) external initializer {
         __SybelAccessControlUpgradeable_init();
 
+        // Grand the vesting manager role to the owner
+        _grantRole(SybelRoles.VESTING_MANAGER, msg.sender);
+
         // Init our sybel token
         sybelToken = SybelToken(sybelTokenAddr);
     }
+
     /**
      * @notice Fake an ERC20-like contract allowing it to be displayed from wallets.
      * @return the contract 'fake' token name.
      */
+
     function name() external pure returns (string memory) {
         return "Vested SYBL Token (multi)";
     }
@@ -66,6 +93,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     function symbol() external pure returns (string memory) {
         return "mvSYBL";
     }
+
     /**
      * @notice Fake an ERC20-like contract allowing it to be displayed from wallets.
      * @return the sybl's decimals value.
@@ -112,7 +140,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      */
     function _begin(uint64 timestamp) internal whenNotPaused onlyWhenNotStarted onlyRole(SybelRoles.VESTING_MANAGER) {
         startDate = timestamp;
-        // TODO : Emit event ?
+        emit VestingBegin(timestamp);
     }
 
     /**
@@ -154,7 +182,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     }
 
     /**
-     * @notice Create a vesting.
+     * @notice Create a new vesting.
      */
     function _createVesting(
         address beneficiary,
@@ -178,15 +206,17 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         });
 
         // Add the user the ownership, and increase the total supply
-        _addOwnership(beneficiary, vestingId);
+        bool isAdded = _addOwnership(beneficiary, vestingId);
+        require(isAdded, "SYB: Unable to add the vesting");
         totalSupply += amount;
+
+        // Emit the creation and transfer event
+        emit VestingCreated(vestingId, beneficiary, amount, delay, duration);
+        emit VestingTransfered(vestingId, address(0), beneficiary);
     }
 
     /**
      * @notice Transfer a vesting to another person.
-     * @dev A `VestingTransfered` event will be emitted.
-     * @param to Receiving address.
-     * @param vestingId Vesting ID to transfer.
      */
     function transfer(address to, uint256 vestingId) external {
         require(to != address(0), "SYB: target is the zero address");
@@ -198,20 +228,20 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         require(from != to, "SYB: cannot transfer to itself");
 
         // Change the ownership of it
-        bool isRemoveSuccess = _removeOwnership(from, vesting.id);
-        require(isRemoveSuccess, "SYB: Unable to remove the ownership of the vesting");
-        _addOwnership(to, vesting.id);
+        bool isRemoved = _removeOwnership(from, vesting.id);
+        require(isRemoved, "SYB: Unable to remove the ownership of the vesting");
+        bool isAdded = _addOwnership(to, vesting.id);
+        require(isAdded, "SYB: Unable to add the ownership of the vesting");
 
         // And update the beneficiary
         vesting.beneficiary = to;
 
-        // TODO : Some events ? 
+        // Then emit the event
+        emit VestingTransfered(vestingId, from, to);
     }
 
     /**
-     * @notice Release the tokens of a specified vesting.
-     * @dev A `TokensReleased` event will be emitted.
-     * @param vestingId Vesting ID to release.
+     * @notice Release the tokens for the specified vesting.
      */
     function release(uint256 vestingId) external returns (uint256) {
         return _release(_getVestingForBeneficiary(vestingId, _msgSender()));
@@ -226,45 +256,56 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
 
     /**
      * @notice Release the tokens of a all of beneficiary's vesting.
-     *
-     * Requirements:
-     * - caller must be the owner
-     * - at least one token must be released
-     *
-     * @dev `TokensReleased` events will be emitted.
      */
     function releaseAllFor(address beneficiary) external onlyRole(SybelRoles.VESTING_MANAGER) returns (uint256) {
         return _releaseAll(beneficiary);
     }
 
     /**
-     * @dev Internal implementation of the release() method.
-     * @dev The methods will fail if there is no tokens due.
-     * @dev A `TokensReleased` event will be emitted.
-     * @param vesting Vesting to release.
+     * @dev Release the given vesting
      */
-    function _release(Vesting storage vesting) internal returns (uint256 released) {
+    function _release(Vesting storage vesting) internal whenNotPaused onlyWhenStarted returns (uint256 released) {
         released = _doRelease(vesting);
         _checkAmount(released);
     }
 
     /**
-     * @dev Internal implementation of the releaseAll() method.
-     * @dev The methods will fail if there is no tokens due.
-     * @dev `TokensReleased` events will be emitted.
-     * @param beneficiary Address to release all vesting from.
+     * @dev Release all the vestings from the given beneficiary
      */
-    function _releaseAll(address beneficiary) internal whenNotPaused onlyWhenNotStarted returns (uint256 released) {
-        uint256[] storage indexes = owned[beneficiary];
+    function _releaseAll(address beneficiary) internal whenNotPaused onlyWhenStarted returns (uint256 released) {
+        EnumerableSet.UintSet storage indexes = owned[beneficiary];
 
-        for (uint256 index = 0; index < indexes.length; ++index) {
-            uint256 vestingId = indexes[index];
+        for (uint256 index = 0; index < indexes.length(); ++index) {
+            uint256 vestingId = indexes.at(index);
             Vesting storage vesting = vestings[vestingId];
 
             released += _doRelease(vesting);
         }
 
         _checkAmount(released);
+    }
+
+    /**
+     * @dev Releasing the given vesting, and returning the amount released
+     */
+    function _doRelease(Vesting storage vesting) internal returns (uint256 releasable) {
+        releasable = _releasableAmount(vesting);
+
+        if (releasable != 0) {
+            // Update our state
+            vesting.released += releasable;
+            totalSupply -= releasable;
+
+            // Then perform the transfer
+            sybelToken.transfer(vesting.beneficiary, releasable);
+        }
+    }
+
+    /**
+     * @dev Revert the transaction if the value is zero.
+     */
+    function _checkAmount(uint256 released) internal pure {
+        require(released > 0, "SYB: no tokens are due");
     }
 
     /**
@@ -291,20 +332,19 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @return The amount of vesting for the address.
      */
     function ownedCount(address beneficiary) public view returns (uint256) {
-        return owned[beneficiary].length;
+        return owned[beneficiary].length();
     }
 
     /**
      * @notice Get the remaining amount of token of a beneficiary.
-     * @dev This function is to make wallets able to display the amount in their UI.
      * @param beneficiary Address to check.
      * @return balance The remaining amount of tokens.
      */
     function balanceOf(address beneficiary) external view returns (uint256 balance) {
-        uint256[] storage indexes = owned[beneficiary];
+        EnumerableSet.UintSet storage indexes = owned[beneficiary];
 
-        for (uint256 index = 0; index < indexes.length; ++index) {
-            uint256 vestingId = indexes[index];
+        for (uint256 index = 0; index < indexes.length(); ++index) {
+            uint256 vestingId = indexes.at(index);
 
             balance += balanceOfVesting(vestingId);
         }
@@ -326,28 +366,6 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      */
     function _balanceOfVesting(Vesting storage vesting) internal view returns (uint256) {
         return vesting.amount - vesting.released;
-    }
-
-    /**
-     * @dev Actually releasing the vesting.
-     * @dev This method will not fail. (aside from a lack of reserve, which should never happen!)
-     */
-    function _doRelease(Vesting storage vesting) internal returns (uint256 releasable) {
-        releasable = _releasableAmount(vesting);
-
-        if (releasable != 0) {
-            sybelToken.transfer(vesting.beneficiary, releasable);
-
-            vesting.released += releasable;
-            totalSupply -= releasable;
-        }
-    }
-
-    /**
-     * @dev Revert the transaction if the value is zero.
-     */
-    function _checkAmount(uint256 released) internal pure {
-        require(released > 0, "SYB: no tokens are due");
     }
 
     /**
@@ -394,7 +412,11 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @param beneficiary Address to get it from.
      * @return vesting struct stored in the storage.
      */
-    function _getVestingForBeneficiary(uint256 vestingId, address beneficiary) internal view returns (Vesting storage vesting) {
+    function _getVestingForBeneficiary(uint256 vestingId, address beneficiary)
+        internal
+        view
+        returns (Vesting storage vesting)
+    {
         vesting = _getVesting(vestingId);
         require(vesting.beneficiary == beneficiary, "SYB: Not the vesting beneficiary");
     }
@@ -402,46 +424,15 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     /**
      * @dev Remove the vesting from the ownership mapping.
      */
-    function _removeOwnership(address account, uint256 vestingId) internal returns (bool) {
-        uint256[] storage indexes = owned[account];
-
-        // TODO : Use enumerable map for that !!
-        (bool found, uint256 index) = _indexOf(indexes, vestingId);
-        if (!found) {
-            return false;
-        }
-
-        if (indexes.length <= 1) {
-            delete owned[account];
-        } else {
-            indexes[index] = indexes[indexes.length - 1];
-            indexes.pop();
-        }
-
-        return true;
+    function _removeOwnership(address account, uint256 vestingId) internal returns (bool isRemoved) {
+        isRemoved = owned[account].remove(vestingId);
     }
 
     /**
      * @dev Add the vesting ID to the ownership mapping.
      */
-    function _addOwnership(address account, uint256 vestingId) internal {
-        owned[account].push(vestingId);
-    }
-
-    /**
-     * @dev Find the index of a value in an array.
-     * @param array Haystack.
-     * @param value Needle.
-     * @return If the first value is `true`, that mean that the needle has been found and the index is stored in the second value. Else if `false`, the value isn't in the array and the second value should be discarded.
-     */
-    function _indexOf(uint256[] storage array, uint256 value) internal view returns (bool, uint256) {
-        for (uint256 index = 0; index < array.length; ++index) {
-            if (array[index] == value) {
-                return (true, index);
-            }
-        }
-
-        return (false, 0);
+    function _addOwnership(address account, uint256 vestingId) internal returns (bool isAdded) {
+        isAdded = owned[account].add(vestingId);
     }
 
     /**
@@ -449,6 +440,14 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      */
     modifier onlyWhenNotStarted() {
         require(startDate == 0, "SYB: already started");
+        _;
+    }
+
+    /**
+     * @dev Revert if the start date is zero.
+     */
+    modifier onlyWhenStarted() {
+        require(startDate != 0, "SYB: not started");
         _;
     }
 }
