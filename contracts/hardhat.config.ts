@@ -4,6 +4,7 @@ import "@nomiclabs/hardhat-etherscan";
 import "@openzeppelin/hardhat-upgrades";
 import "hardhat-contract-sizer";
 import "hardhat-abi-exporter";
+// import "hardhat-docgen"; // TODO : Error with vue for now
 import "@nomicfoundation/hardhat-toolbox";
 
 dotenv.config();
@@ -23,6 +24,11 @@ export default {
     tests: "./test",
     cache: "./cache",
     artifacts: "./artifacts",
+  },
+  docgen: {
+    path: "./docs",
+    clear: true,
+    runOnCompile: true,
   },
   compilerOptions: {
     target: "es2018",

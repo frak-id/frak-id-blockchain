@@ -119,10 +119,7 @@ contract VestingWallets is SybelAccessControlUpgradeable {
         require(vestingGroup[id].delay == 0, "SYB: This vesting group already exist");
         require(rewardCap > 0, "SYB: The reward cap should be superior to 0");
         require(duration > 0, "SYB: The duration should be superior to 0");
-        require(
-            rewardCap + totalGroupCap <= SYBL_VESTING_CAP,
-            "SYB: The reward cap for this group exceed the total cap for vesting"
-        );
+        require(rewardCap + totalGroupCap <= SYBL_VESTING_CAP, "SYB: Reward cap exceeding total cap for vesting");
         // Increase the total group supply
         totalGroupCap += rewardCap;
         // Build and save this group

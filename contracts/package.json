@@ -12,8 +12,8 @@
     "lint": "pnpm lint:sol && pnpm lint:ts && pnpm prettier:check",
     "lint:sol": "solhint --config ./.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:ts": "eslint --config ./.eslintrc.yml --ignore-path ./.eslintignore --ext .js,.ts .",
-    "prettier": "prettier --config ./.prettierrc.yml --write \"**/*.{js,json,md,sol,ts,yml}\"",
-    "prettier:check": "prettier --check --config ./.prettierrc.yml \"**/*.{js,json,md,sol,ts,yml}\"",
+    "prettier": "prettier --config ./.prettierrc --write \"**/*.{js,json,md,sol,ts,yml}\"",
+    "prettier:check": "prettier --check --config ./.prettierrc \"**/*.{js,json,md,sol,ts,yml}\"",
     "export": "rm -r ../shared/abi/ && cpy 'abi/*.json' ../shared/abi/ && rm -r ../shared/types/ && cpy 'types/**/*.ts' ../shared/types/"
   },
   "devDependencies": {
@@ -46,6 +46,7 @@
     "hardhat": "^2.11.2",
     "hardhat-abi-exporter": "^2.10.0",
     "hardhat-contract-sizer": "^2.6.1",
+    "hardhat-docgen": "^1.2.1",
     "hardhat-gas-reporter": "^1.0.8",
     "lint-staged": "^13.0.3",
     "lodash": "^4.17.21",

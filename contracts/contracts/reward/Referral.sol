@@ -112,11 +112,11 @@ contract Referral is SybelAccessControlUpgradeable {
         // Check if the user got a referer
         address userReferer = podcastIdToRefereeToReferer[podcastId][user];
         if (userReferer != address(0) && amount > 0) {
-            // If yes, recursively get all the amount to be paid for all of his referer, dividing by 2 each time we go up a level
+            // If yes, recursively get all the amount to be paid for all of his referer,
+            // dividing by 2 each time we go up a level
             uint256 refererAmount = amount / 2;
             totalAmount += payAllReferer(podcastId, user, refererAmount);
         }
-        // TODO : We should mint the SYBL token associated with the total amount, so when the user withdraw this contract proceeds to the payment
         // Then return the amount to be paid
         return totalAmount;
     }
@@ -131,10 +131,7 @@ contract Referral is SybelAccessControlUpgradeable {
         require(pendingReward > 0, "SYB: The user havn't any pending reward");
         // Ensure we have enough founds on this contract to pay the user
         uint256 contractBalance = sybelToken.balanceOf(address(this));
-        require(
-            contractBalance > pendingReward,
-            "SYB: The referral contract hasn't the required founds to pay the user"
-        );
+        require(contractBalance > pendingReward, "SYB: Contract haven't enought found");
         // Reset the user pending balance
         userPendingReward[user] = 0;
         // Perform the transfer of the founds

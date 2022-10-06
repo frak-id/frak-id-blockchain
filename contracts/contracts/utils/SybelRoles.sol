@@ -19,4 +19,7 @@ library SybelRoles {
 
     // Role required to reward user for their listen
     bytes32 internal constant REWARDER = keccak256("REWARDER_ROLE");
+
+    // Role required to manage the vesting wallets
+    bytes32 internal constant VESTING_MANAGER = keccak256("VESTING_MANAGER");
 }

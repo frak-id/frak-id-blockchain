@@ -134,10 +134,7 @@ contract ContentPool {
         require(pendingReward > 0, "SYB: The user havn't any pending reward");
         // Ensure we have enough founds on this contract to pay the user
         uint256 contractBalance = sybelToken.balanceOf(address(this));
-        require(
-            contractBalance > pendingReward,
-            "SYB: The referral contract hasn't the required founds to pay the user"
-        );
+        require(contractBalance > pendingReward, "SYB: Contract havn't enought founds to pay the user");
         // Reset the user pending balance
         userPendingReward[user] = 0;
         // Perform the transfer of the founds

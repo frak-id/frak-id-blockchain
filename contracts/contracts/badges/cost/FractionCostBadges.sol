@@ -56,7 +56,8 @@ contract FractionCostBadges is IFractionCostBadges, SybelAccessControlUpgradeabl
 
     /**
      * @dev The initial cost of a fraction type
-     * We use a pure function instead of a mapping to economise on storage read, and since this reawrd shouldn't evolve really fast
+     * We use a pure function instead of a mapping to economise on storage read,
+     * and since this reawrd shouldn't evolve really fast
      */
     function initialFractionCost(uint8 tokenType) public pure returns (uint256) {
         uint256 initialCost = 0;

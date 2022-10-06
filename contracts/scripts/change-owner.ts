@@ -73,8 +73,8 @@ const badgeUpdaterRole = utils.keccak256(utils.toUtf8Bytes("BADGE_UPDATER_ROLE")
     await updateRolesContract(fondation, newOwner, previousOwner, [pauserRole, upgraderRole, rewarderRole, adminRole]);
 
     console.log(`Finished the update from ${previousOwner} to ${newOwner}`);
-  } catch (e: any) {
-    console.log(e.message);
+  } catch (e) {
+    console.log(e);
   }
 })();
 

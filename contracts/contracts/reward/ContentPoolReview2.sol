@@ -12,7 +12,8 @@ import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
 /**
  * @dev Represent our content pool contract
- * @dev TODO : Optimize uint sizes (since max supply of sybl is 3 billion e18, what's the max uint we can use for the price ?, What the max array size ? So what max uint for indexes ?)
+ * @dev TODO : Optimize uint sizes (since max supply of sybl is 3 billion e18,
+ * what's the max uint we can use for the price ?, What the max array size ? So what max uint for indexes ?)
  */
 /// @custom:security-contact crypto-support@sybel.co
 contract ContentPoolReview {
@@ -32,7 +33,7 @@ contract ContentPoolReview {
     /**
      * @dev The cap to prevent excessive gaz fees when computing user reward
      */
-    uint256 private immutable MAX_CLAIMABLE_REWARD_STATE_ROUNDS = 500;
+    uint256 private constant MAX_CLAIMABLE_REWARD_STATE_ROUNDS = 500;
 
     /**
      * @dev Access our sybel token
@@ -145,7 +146,6 @@ contract ContentPoolReview {
         uint256 toBePayed = claimableReward(user);
         // Ensure the user got a claimable reward
         require(toBePayed > 0, "SYB: No reward to be claimed");
-        // TODO : Have a state count cap to be able to handle edge case like long time not checked ones (cap to 200 hundred max ??)
         for (uint256 stateIndex = participant.lastStateIndex; stateIndex < currentStateIndex; stateIndex++) {
             // Get the reward the user claimed on this state
             uint256 alreadyClaimedRewards = claimedRewards[stateIndex][user];
