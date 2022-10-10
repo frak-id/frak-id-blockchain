@@ -11,7 +11,7 @@ import { testRoles } from "../utils/test-roles";
 import { testPauses } from "../utils/test-pauses";
 import { minterRole, pauserRole } from "../../scripts/utils/roles";
 
-describe.skip("SybelToken", () => {
+describe("SybelToken", () => {
   let sybelToken: SybelToken;
   let owner: SignerWithAddress;
   let addr1: SignerWithAddress;

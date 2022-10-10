@@ -83,7 +83,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      */
 
     function name() external pure returns (string memory) {
-        return "Vested SYBL Token (multi)";
+        return "Vested SYBL Token";
     }
 
     /**
@@ -91,7 +91,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @return the contract 'fake' token symbol.
      */
     function symbol() external pure returns (string memory) {
-        return "mvSYBL";
+        return "vSYBL";
     }
 
     /**

@@ -59,9 +59,8 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         // Grand the vesting creator role to the owner
         _grantRole(SybelRoles.VESTING_CREATOR, msg.sender);
 
-        // Init our sybel token
+        // Init our sybel token and multi vesting wallet
         sybelToken = SybelToken(sybelTokenAddr);
-        // Init our multi vesting wallets
         multiVestingWallets = MultiVestingWallets(multiVestingWalletAddr);
 
         // Add all the initial group

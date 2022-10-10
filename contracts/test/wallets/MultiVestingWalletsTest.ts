@@ -1,24 +1,15 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
 import { ethers } from "hardhat";
 
-import { BigNumber, BigNumberish, ContractTransaction, utils } from "ethers";
-
 import { SybelToken } from "../../types/contracts/tokens/SybelToken";
-import { VestingWallets } from "../../types/contracts/wallets/VestingWallets";
 import { MultiVestingWallets } from "../../types/contracts/wallets/MultiVestingWallets";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { deployContract } from "../../scripts/utils/deploy";
 import { testPauses } from "../utils/test-pauses";
 import { testRoles } from "../utils/test-roles";
-import { adminRole, pauserRole } from "../../scripts/utils/roles";
-
-const GROUP_INVESTOR_ID = 1;
-const GROUP_TEAM_ID = 2;
-const GROUP_PRE_SALES_1_ID = 10;
-const GROUP_PRE_SALES_2_ID = 11;
-const GROUP_PRE_SALES_3_ID = 12;
-const GROUP_PRE_SALES_4_ID = 13;
+import { pauserRole, minterRole } from "../../scripts/utils/roles";
+import { updateTimestampToEndOfDuration } from "../utils/test-utils";
 
 describe("MultipleVestingWallets", () => {
   let multiVestingWallets: MultiVestingWallets;
@@ -38,7 +29,6 @@ describe("MultipleVestingWallets", () => {
     multiVestingWallets = await deployContract("MultiVestingWallets", [sybelToken.address]);
 
     // Grant the minter role to the vesting wallets
-    const minterRole = utils.keccak256(utils.toUtf8Bytes("MINTER_ROLE"));
     await sybelToken.grantRole(minterRole, multiVestingWallets.address);
 
     // Add some initial supply to our vesting group
@@ -53,7 +43,7 @@ describe("MultipleVestingWallets", () => {
       const decimals = await multiVestingWallets.decimals();
 
       expect(name).not.to.be.null;
-      expect(symbol).to.equal("mvSYBL");
+      expect(symbol).to.equal("vSYBL");
       expect(decimals).to.equal(await sybelToken.decimals());
     });
   });
@@ -192,15 +182,4 @@ describe("MultipleVestingWallets", () => {
       ],
     );
   });
-
-  async function updateTimestampToEndOfDuration(tx: ContractTransaction, duration: BigNumberish) {
-    // Wait for the tx to be mined
-    await tx.wait();
-    const txMined = await ethers.provider.getTransaction(tx.hash);
-    const blockTimestamp = (await ethers.provider.getBlock(txMined.blockHash!)).timestamp;
-    // Get the investor group duration
-    const newTimestamp = BigNumber.from(blockTimestamp).add(duration).toNumber();
-    // Increase the blockchain timestamp
-    await ethers.provider.send("evm_mine", [newTimestamp]);
-  }
 });

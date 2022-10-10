@@ -1,2 +1,4 @@
 abi/
 types/
+
+tools/**/*.log

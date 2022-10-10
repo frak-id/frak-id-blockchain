@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "hardhat clean",
     "build": "hardhat compile",
-    "test": "hardhat tests",
+    "test": "hardhat test",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"test/**/*.ts\" && yarn typechain",
     "size": "hardhat size-contracts",
     "lint": "pnpm lint:sol && pnpm lint:ts && pnpm prettier:check",

@@ -23,7 +23,7 @@ echo "=============================="
 #echo "!!==========================!!"
 #echo "!!= Slither Analysis       =!!"
 #echo "\\/==========================\\/"
-#./tools/slither/slither.sh
+./tools/slither/slither.sh > tools/slither-output.log
 #echo "/\\==========================/\\"
 #echo "!!= Slither Analysis       =!!"
 #echo "!!==========================!!"
@@ -32,7 +32,7 @@ echo "=============================="
 echo "!!==========================!!"
 echo "!!= Mythril                =!!"
 echo "\\/==========================\\/"
-./tools/mythril/mythril.sh
+./tools/mythril/mythril.sh > tools/mythril-output.log
 echo "/\\==========================/\\"
 echo "!!= Mythril                =!!"
 echo "!!==========================!!"
@@ -41,7 +41,7 @@ echo "!!==========================!!"
 #echo "!!==========================!!"
 #echo "!!= Manticore              =!!"
 #echo "\\/==========================\\/"
-#./tools/manticore/manticore.sh
+#./tools/manticore/manticore.sh > tools/manticore-output.log
 #echo "/\\==========================/\\"
 #echo "!!= Manticore              =!!"
 #echo "!!==========================!!"
