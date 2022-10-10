@@ -154,6 +154,8 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         VestingGroup storage group = vestingGroup[groupId];
         require(group.duration > 0, "SYB: This vesting group doesn't exist");
         require(group.supply + reward <= group.rewardCap, "SYB: Can't mint more than the group supply cap");
+        // Update the group
+        group.supply += reward;
         // Mint the sybl token for this user
         sybelToken.mint(address(multiVestingWallets), reward);
         // Create the vesting group

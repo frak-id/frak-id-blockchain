@@ -10,6 +10,7 @@ import { deployContract } from "../../scripts/utils/deploy";
 import { testPauses } from "../utils/test-pauses";
 import { testRoles } from "../utils/test-roles";
 import { minterRole, vestingCreatorRole, vestingManagerRole } from "../../scripts/utils/roles";
+import { updateTimestampToEndOfDuration } from "../utils/test-utils";
 
 const GROUP_INVESTOR_ID = 1;
 const GROUP_TEAM_ID = 2;
@@ -17,6 +18,14 @@ const GROUP_PRE_SALES_1_ID = 10;
 const GROUP_PRE_SALES_2_ID = 11;
 const GROUP_PRE_SALES_3_ID = 12;
 const GROUP_PRE_SALES_4_ID = 13;
+const vestingGroupIds = [
+  GROUP_INVESTOR_ID,
+  GROUP_TEAM_ID,
+  GROUP_PRE_SALES_1_ID,
+  GROUP_PRE_SALES_2_ID,
+  GROUP_PRE_SALES_3_ID,
+  GROUP_PRE_SALES_4_ID,
+];
 
 describe.only("VestingWalletFactory", () => {
   let vestingWalletFactory: VestingWalletFactory;
@@ -53,15 +62,7 @@ describe.only("VestingWalletFactory", () => {
   describe("Vesting group", () => {
     it("Have all the initial vesting group", async () => {
       // Ensure all the programmed group are present
-      const groupIds = [
-        GROUP_INVESTOR_ID,
-        GROUP_TEAM_ID,
-        GROUP_PRE_SALES_1_ID,
-        GROUP_PRE_SALES_2_ID,
-        GROUP_PRE_SALES_3_ID,
-        GROUP_PRE_SALES_4_ID,
-      ];
-      for await (const groupId of groupIds) {
+      for await (const groupId of vestingGroupIds) {
         const fetchedGroup = await vestingWalletFactory.getVestingGroup(groupId);
         expect(fetchedGroup.rewardCap).not.to.equal(0);
         expect(fetchedGroup.supply).to.equal(0);
@@ -72,6 +73,21 @@ describe.only("VestingWalletFactory", () => {
       const inexistantGroup = await vestingWalletFactory.getVestingGroup(6);
       expect(inexistantGroup.rewardCap).to.equal(0);
       expect(inexistantGroup.duration).to.equal(0);
+    });
+
+    it("Ensure group supply increase", async () => {
+      // Ensure a group supply increase when new vesting created
+      const groupId = vestingGroupIds[0];
+      const initialVestingGroup = await vestingWalletFactory.getVestingGroup(groupId);
+
+      // Add a new vesting
+      const addTx = await vestingWalletFactory.addVestingWallet(addr1.address, 10, groupId);
+      expect(addTx.hash).to.not.be.null;
+      await updateTimestampToEndOfDuration(addTx);
+
+      // Ensure the supply increased
+      const newVestingGroup = await vestingWalletFactory.getVestingGroup(groupId);
+      expect(newVestingGroup.supply).to.equal(initialVestingGroup.supply.add(10));
     });
   });
 
@@ -89,3 +105,9 @@ describe.only("VestingWalletFactory", () => {
     );
   });
 });
+
+/**
+ * Idée transparance boite coté produit :
+ *  - Wallet fondation ++ team + vesting -> addresse publique
+ *  - Affichage montant locker / deloquable / deloquer dessus (si deloquable > deloquer notion de confiance)
+ */

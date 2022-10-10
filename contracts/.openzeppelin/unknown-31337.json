@@ -252,11 +252,6 @@
       "kind": "uups"
     },
     {
-      "address": "0x9E545E3C0baAB3E08CdfD552C960A1050f373042",
-      "txHash": "0x8af964bada34db561d3dd68de5a69d1810c0cbe22c593656a944da4af6c3cd48",
-      "kind": "uups"
-    },
-    {
       "address": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
       "txHash": "0x27103ab99e31cbb5929b4d16395590b30bff9bb6a2c43f79917bb39850a86cf8",
       "kind": "uups"
@@ -437,73 +432,13 @@
       "kind": "uups"
     },
     {
-      "address": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
-      "txHash": "0x194946fe544fbc99f9c9b143a21dc3aef212f37cc7cd96cb9489974fe24016f2",
-      "kind": "uups"
-    },
-    {
       "address": "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44",
       "txHash": "0x0f947447d4af124446b935922a31e4feba8f3fa6abe6e1ac2025f941744cc41c",
       "kind": "uups"
     },
     {
-      "address": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
-      "txHash": "0x462f29c3d55c1a1ccf8054299309d72ff1b7d4a86f85a82b189fb4853bd9d9aa",
-      "kind": "uups"
-    },
-    {
-      "address": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
-      "txHash": "0xc5611a322d94512d3634faf45fc49e980556d6e71bd28dafd50930e55d469826",
-      "kind": "uups"
-    },
-    {
-      "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-      "txHash": "0x4c9e80d60af21bc9d14e108972ef8b0481effaa159c2d8249c8c6bf96e31301d",
-      "kind": "uups"
-    },
-    {
-      "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-      "txHash": "0x91a846872802b6b6aa8bbc7a56f20d645fae7568e03c035b9058d638e0cde1dc",
-      "kind": "uups"
-    },
-    {
-      "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
-      "txHash": "0xedeb1835199291b02bf30c70c0db7e330584d9ba4a211040652bcc8327c7d3b3",
-      "kind": "uups"
-    },
-    {
-      "address": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
-      "txHash": "0x373760ea2d0a7b33d288590cdb1cc679f8801a45a1d771cc8c0b25a620b1ddf1",
-      "kind": "uups"
-    },
-    {
-      "address": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
-      "txHash": "0x1394066bf312aa75f8d3858e1b138bb02245bb6c6df76b2e1a9d9b1cc0137052",
-      "kind": "uups"
-    },
-    {
-      "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
-      "txHash": "0xb0f634cc8304d884fd8acd0144a33544d4efe88a6ccc7b7788429d235d48109f",
-      "kind": "uups"
-    },
-    {
-      "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
-      "txHash": "0x69b626d752ae2b0e8585fa2e5a8fa0fd11a0c512ddcdc866ea5ad7ea600fc100",
-      "kind": "uups"
-    },
-    {
-      "address": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
-      "txHash": "0xa3b4b77b69832857e9969d3c096264e4ecf68e39f293c8442eb9da038caadab7",
-      "kind": "uups"
-    },
-    {
       "address": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
       "txHash": "0xefaa05597f20959a1f264a2f74cad063d5782312e8744f9f7fa2b10e837adaf2",
-      "kind": "uups"
-    },
-    {
-      "address": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
-      "txHash": "0xf2ba01fe2b66cd901a352b714cfbdb01fb1de442f6c1ac116108edaac5dae56f",
       "kind": "uups"
     },
     {
@@ -514,16 +449,6 @@
     {
       "address": "0xc5a5C42992dECbae36851359345FE25997F5C42d",
       "txHash": "0xc8c0680e5811499fdbf06feb9992c0ccc8b3db1c8f62e768f8fcdc64a3bca24e",
-      "kind": "uups"
-    },
-    {
-      "address": "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9",
-      "txHash": "0xf6908c29ba1e9652a2dc8577d768eecdf3cce85b16b244cce43aa6614070d3fd",
-      "kind": "uups"
-    },
-    {
-      "address": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
-      "txHash": "0x8936314f4ef324356342595f99ada3242b5fffe264f8233e852c1aaffc8a7f8f",
       "kind": "uups"
     },
     {
@@ -559,6 +484,81 @@
     {
       "address": "0xCD8a1C3ba11CF5ECfa6267617243239504a98d90",
       "txHash": "0xbed8b6d52fcfddabe09a068dd70ca77744b9c418f8a2c05c42e62580500229db",
+      "kind": "uups"
+    },
+    {
+      "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      "txHash": "0x4c9e80d60af21bc9d14e108972ef8b0481effaa159c2d8249c8c6bf96e31301d",
+      "kind": "uups"
+    },
+    {
+      "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+      "txHash": "0x91a846872802b6b6aa8bbc7a56f20d645fae7568e03c035b9058d638e0cde1dc",
+      "kind": "uups"
+    },
+    {
+      "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+      "txHash": "0xdcead5691b6e5b8b8f339822ad85d19b79c3ad5f2d66aa4396e69261285288a5",
+      "kind": "uups"
+    },
+    {
+      "address": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
+      "txHash": "0xc5a1f3a15c5ced85b1ed3c5648e5f3a19a38488ca724b6d9d8daf64158e0dd3b",
+      "kind": "uups"
+    },
+    {
+      "address": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+      "txHash": "0x2f1c06dc566e3369d13df5645608e9aa8759e5cdb853861850404f0761d7647c",
+      "kind": "uups"
+    },
+    {
+      "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+      "txHash": "0x2cf379b11e266c0a31d1811fa99e7d1bbe8f8c6d148641c967310892019cc8c2",
+      "kind": "uups"
+    },
+    {
+      "address": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+      "txHash": "0x10e96e812af75ef0c798f4bcfbfd7598c245ee93e7996d73c67bc5b2655ec4db",
+      "kind": "uups"
+    },
+    {
+      "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
+      "txHash": "0x42d3db58811bd477733b5e5dc6a2bb48a4bdab76b73d3498e37d10f3f5309d5c",
+      "kind": "uups"
+    },
+    {
+      "address": "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
+      "txHash": "0xdbc32ecd7c66606f90efd8f086cdcc170955d9808ebe30965798479ba265dcdf",
+      "kind": "uups"
+    },
+    {
+      "address": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+      "txHash": "0xeee2fa37f44f4d82329e4527c1e5f09c0685e129c2dd6b8941cfa34b77b6271b",
+      "kind": "uups"
+    },
+    {
+      "address": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
+      "txHash": "0xb13b97b772cf33bcbb820179bc07151c1d00c41c34c0d6a2018c0e9d680f7364",
+      "kind": "uups"
+    },
+    {
+      "address": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
+      "txHash": "0x7ab9718d50d3149c217a54e017c498017e5d827382427f6088119823c1d6b38f",
+      "kind": "uups"
+    },
+    {
+      "address": "0x9E545E3C0baAB3E08CdfD552C960A1050f373042",
+      "txHash": "0xaeb67951214b41a13e007149ab8dace8f295b4962f115e8387d7e0c56e9db91f",
+      "kind": "uups"
+    },
+    {
+      "address": "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9",
+      "txHash": "0x2755cfa51425e962b698f703ea7ea758d5c9f4ebf30e0bfbcd9813f8e57d18a9",
+      "kind": "uups"
+    },
+    {
+      "address": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
+      "txHash": "0xd8a2702bc54e6348ed3dbe33feccf74361685e80dc55444d8822924858b4d429",
       "kind": "uups"
     }
   ],
@@ -856,7 +856,7 @@
             "label": "vestings",
             "offset": 0,
             "slot": "252",
-            "type": "t_mapping(t_uint256,t_struct(Vesting)12858_storage)",
+            "type": "t_mapping(t_uint256,t_struct(Vesting)6154_storage)",
             "contract": "MultiVestingWallets",
             "src": "contracts/wallets/MultiVestingWallets.sol:47"
           },
@@ -864,7 +864,7 @@
             "label": "owned",
             "offset": 0,
             "slot": "253",
-            "type": "t_mapping(t_address,t_struct(UintSet)8657_storage)",
+            "type": "t_mapping(t_address,t_struct(UintSet)5276_storage)",
             "contract": "MultiVestingWallets",
             "src": "contracts/wallets/MultiVestingWallets.sol:50"
           },
@@ -880,7 +880,7 @@
             "label": "sybelToken",
             "offset": 0,
             "slot": "255",
-            "type": "t_contract(SybelToken)12163",
+            "type": "t_contract(SybelToken)5518",
             "contract": "MultiVestingWallets",
             "src": "contracts/wallets/MultiVestingWallets.sol:56"
           },
@@ -926,7 +926,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(SybelToken)12163": {
+          "t_contract(SybelToken)5518": {
             "label": "contract SybelToken",
             "numberOfBytes": "20"
           },
@@ -934,7 +934,7 @@
             "label": "mapping(address => bool)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(UintSet)8657_storage)": {
+          "t_mapping(t_address,t_struct(UintSet)5276_storage)": {
             "label": "mapping(address => struct EnumerableSet.UintSet)",
             "numberOfBytes": "32"
           },
@@ -946,7 +946,7 @@
             "label": "mapping(bytes32 => uint256)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(Vesting)12858_storage)": {
+          "t_mapping(t_uint256,t_struct(Vesting)6154_storage)": {
             "label": "mapping(uint256 => struct MultiVestingWallets.Vesting)",
             "numberOfBytes": "32"
           },
@@ -968,7 +968,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Set)8199_storage": {
+          "t_struct(Set)4818_storage": {
             "label": "struct EnumerableSet.Set",
             "members": [
               {
@@ -986,19 +986,19 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(UintSet)8657_storage": {
+          "t_struct(UintSet)5276_storage": {
             "label": "struct EnumerableSet.UintSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)8199_storage",
+                "type": "t_struct(Set)4818_storage",
                 "offset": 0,
                 "slot": "0"
               }
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Vesting)12858_storage": {
+          "t_struct(Vesting)6154_storage": {
             "label": "struct MultiVestingWallets.Vesting",
             "members": [
               {
@@ -1055,9 +1055,9 @@
         }
       }
     },
-    "7165caba1de48c7157ddcd34eb706d1b1db7fab5e9e6137d4b8cafdedec57a78": {
+    "434341fc5c2db9504cb9fe34db8a335f3d6dfe582a9ffdf1daaf201256b9ce56": {
       "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-      "txHash": "0xa68df775e4848ee0977f4d7fe896962d67020317676e3ddca8a47e02b4192322",
+      "txHash": "0x81b3654c314d730044c76ba0838fe7f061d67e371a34bc4b3fe6a0075bee4ee7",
       "layout": {
         "solcVersion": "0.8.17",
         "storage": [
@@ -1146,7 +1146,7 @@
             "label": "sybelToken",
             "offset": 0,
             "slot": "253",
-            "type": "t_contract(SybelToken)12163",
+            "type": "t_contract(SybelToken)5518",
             "contract": "VestingWalletFactory",
             "src": "contracts/wallets/VestingWalletFactory.sol:36"
           },
@@ -1154,7 +1154,7 @@
             "label": "multiVestingWallets",
             "offset": 0,
             "slot": "254",
-            "type": "t_contract(MultiVestingWallets)13819",
+            "type": "t_contract(MultiVestingWallets)7115",
             "contract": "VestingWalletFactory",
             "src": "contracts/wallets/VestingWalletFactory.sol:41"
           },
@@ -1162,7 +1162,7 @@
             "label": "vestingGroup",
             "offset": 0,
             "slot": "255",
-            "type": "t_mapping(t_uint8,t_struct(VestingGroup)13857_storage)",
+            "type": "t_mapping(t_uint8,t_struct(VestingGroup)7153_storage)",
             "contract": "VestingWalletFactory",
             "src": "contracts/wallets/VestingWalletFactory.sol:46"
           }
@@ -1188,11 +1188,11 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(MultiVestingWallets)13819": {
+          "t_contract(MultiVestingWallets)7115": {
             "label": "contract MultiVestingWallets",
             "numberOfBytes": "20"
           },
-          "t_contract(SybelToken)12163": {
+          "t_contract(SybelToken)5518": {
             "label": "contract SybelToken",
             "numberOfBytes": "20"
           },
@@ -1204,7 +1204,7 @@
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint8,t_struct(VestingGroup)13857_storage)": {
+          "t_mapping(t_uint8,t_struct(VestingGroup)7153_storage)": {
             "label": "mapping(uint8 => struct VestingWalletFactory.VestingGroup)",
             "numberOfBytes": "32"
           },
@@ -1226,7 +1226,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(VestingGroup)13857_storage": {
+          "t_struct(VestingGroup)7153_storage": {
             "label": "struct VestingWalletFactory.VestingGroup",
             "members": [
               {

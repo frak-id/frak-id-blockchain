@@ -53,13 +53,11 @@ export const testRoles = (
     // Grant the role and check he got it
     await contract.grantRole(role, addr1.address);
     let isAddr1WithRole = await contract.hasRole(role, addr1.address);
-    console.log(`Checking for role ${role}, have it ? ${isAddr1WithRole}`);
     expect(isAddr1WithRole).to.equal(true);
 
     // Renounce the role and check the user havn't it anymore
     await contract.connect(addr1).renounceRole(role, addr1.address);
     isAddr1WithRole = await contract.hasRole(role, addr1.address);
-    console.log(`Checking for role ${role}, have it ? ${isAddr1WithRole}`);
 
     // Then try to perform the role required functions
     for await (const roleRequiredFunction of roleRequiredFunctions) {
