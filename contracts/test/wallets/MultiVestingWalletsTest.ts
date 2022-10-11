@@ -8,10 +8,10 @@ import { expect } from "chai";
 import { deployContract } from "../../scripts/utils/deploy";
 import { testPauses } from "../utils/test-pauses";
 import { testRoles } from "../utils/test-roles";
-import { pauserRole, minterRole } from "../../scripts/utils/roles";
+import { pauserRole, minterRole, adminRole, vestingCreatorRole, vestingManagerRole } from "../../scripts/utils/roles";
 import { updateTimestampToEndOfDuration } from "../utils/test-utils";
 
-describe("MultipleVestingWallets", () => {
+describe.only("MultipleVestingWallets", () => {
   let multiVestingWallets: MultiVestingWallets;
   let sybelToken: SybelToken;
 
@@ -135,18 +135,33 @@ describe("MultipleVestingWallets", () => {
   });
 
   // Check the roles
-  /*describe("Admin roles", () => {
+  describe("Vesting manager roles", () => {
+    testRoles(
+      () => multiVestingWallets,
+      () => addr1,
+      vestingManagerRole,
+      [
+        async () => {
+          await multiVestingWallets.connect(addr1).createVest(addr1.address, 10, 10, 10);
+        },
+        async () => {
+          await multiVestingWallets.connect(addr1).createVestBatch([addr1.address], [10], 10, 10);
+        },
+      ],
+    );
+  });
+  describe("Admin roles", () => {
     testRoles(
       () => multiVestingWallets,
       () => addr1,
       adminRole,
       [
         async () => {
-          await vestingWallets.connect(addr1).addVestingGroup(13, 10, 10, 10);
+          await multiVestingWallets.connect(addr1).beginNow();
         },
       ],
     );
-  });*/
+  });
   describe("Pauser roles", () => {
     testRoles(
       () => multiVestingWallets,

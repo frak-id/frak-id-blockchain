@@ -1,6 +1,8 @@
 import { ethers } from "hardhat";
 import { BigNumber, BigNumberish, ContractTransaction } from "ethers";
 
+export const address0 = "0x0000000000000000000000000000000000000000";
+
 export async function updateTimestampToEndOfDuration(tx: ContractTransaction, duration?: BigNumberish) {
   // Wait for the tx to be mined
   await tx.wait();

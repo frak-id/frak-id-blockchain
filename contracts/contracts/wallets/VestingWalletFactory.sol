@@ -12,6 +12,16 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
     // The id of the different groups
     uint8 internal constant GROUP_INVESTOR_ID = 1;
     uint8 internal constant GROUP_TEAM_ID = 2;
+
+    uint8 internal constant GROUP_COMPANY_ID = 1;
+    // uint8 internal constant GROUP_INVESTOR_ID = 2;
+    // uint8 internal constant GROUP_TEAM_ID = 3;
+    uint8 internal constant GROUP_PUBLIC_SALES_ID = 4;
+    uint8 internal constant GROUP_TREASURY_ID = 5;
+    uint8 internal constant GROUP_ADVISORS_ID = 6;
+    uint8 internal constant GROUP_EDUCATIONAL_ID = 7;
+    uint8 internal constant GROUP_CREATOR_GRANTS_ID = 8;
+
     uint8 internal constant GROUP_PRE_SALES_1_ID = 10;
     uint8 internal constant GROUP_PRE_SALES_2_ID = 11;
     uint8 internal constant GROUP_PRE_SALES_3_ID = 12;
@@ -64,13 +74,13 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         multiVestingWallets = MultiVestingWallets(multiVestingWalletAddr);
 
         // Add all the initial group
-        addInitialGroup();
+        _addInitialGroup();
     }
 
     /**
      * @dev Add all the initial vesting group
      */
-    function addInitialGroup() internal {
+    function _addInitialGroup() private {
         // Investor and team vesting groups
         _addVestingGroup(
             GROUP_INVESTOR_ID,
@@ -111,6 +121,15 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         );
     }
 
+    function addVestingGroup(
+        uint8 id,
+        uint256 rewardCap,
+        uint64 duration,
+        uint64 delay
+    ) external onlyRole(SybelRoles.ADMIN) {
+        _addVestingGroup(id, rewardCap, duration, delay);
+    }
+
     /**
      * @dev Add a new vesting group
      */
@@ -119,8 +138,8 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         uint256 rewardCap,
         uint64 duration,
         uint64 delay
-    ) internal onlyRole(SybelRoles.ADMIN) whenNotPaused {
-        require(vestingGroup[id].delay == 0, "SYB: This vesting group already exist");
+    ) private whenNotPaused {
+        require(vestingGroup[id].rewardCap == 0, "SYB: This vesting group already exist");
         require(rewardCap > 0, "SYB: The reward cap should be superior to 0");
         require(duration > 0, "SYB: The duration should be superior to 0");
         require(rewardCap + totalGroupCap <= SYBL_VESTING_CAP, "SYB: Reward cap exceeding total cap for vesting");
@@ -159,6 +178,6 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         // Mint the sybl token for this user
         sybelToken.mint(address(multiVestingWallets), reward);
         // Create the vesting group
-        multiVestingWallets.createVest(beneficiary, reward, group.delay, group.duration);
+        // multiVestingWallets.createVest(beneficiary, reward, group.delay, group.duration);
     }
 }
