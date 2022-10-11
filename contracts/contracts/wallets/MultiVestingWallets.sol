@@ -64,20 +64,20 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         address beneficiary; // beneficiary wallet of this vesting
     }
 
-    /// Hard reward cap, of 200 million sybl
-    uint256 private constant REWARD_CAP = 200_000_000 ether;
-
     /// Vesting id to vesting
     mapping(uint256 => Vesting) public vestings;
 
     /// User to list of vesting id owned
     mapping(address => EnumerableSet.UintSet) private owned;
 
-    /// Currently locked tokens that are being used by all of the vestings
-    uint256 public totalSupply;
-
     /// Access to the sybel token
     SybelToken private sybelToken;
+
+    /// Hard reward cap, of 200 million sybl
+    uint96 private constant REWARD_CAP = 200_000_000 ether;
+
+    /// Currently locked tokens that are being used by all of the vestings
+    uint96 public totalSupply;
 
     /// Current id of vesting
     uint24 private _idCounter;
@@ -175,7 +175,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         uint48 startDate,
         bool revocable
     ) external whenNotPaused onlyRole(SybelRoles.VESTING_MANAGER) {
-        require(beneficiaries.length > 0, "SYB: No beneficiaries given");
+        require(beneficiaries.length > 0, "SYB: Empty array");
         require(beneficiaries.length == amounts.length, "SYB: Invalid array lengths");
         require(beneficiaries.length == initialDrops.length, "SYB: Invalid array lengths");
         _requireVestInputs(delay, duration, startDate);
@@ -189,8 +189,8 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @notice Check the input when create a new vesting
      */
     function _requireVestInputs(uint32 delay, uint32 duration, uint48 startDate) internal view {
-        require((duration + delay) > 0, "SYB: Duration + delay should be greater than 0");
-        require(startDate > block.timestamp, "SYB: Start date should be in the future");
+        require((duration + delay) > 0, "SYB: Duration or delay invalid");
+        require(startDate > block.timestamp, "SYB: Start date invalid");
     }
 
     /**
@@ -205,10 +205,11 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         uint48 startDate,
         bool revocable
     ) private {
-        require(beneficiary != address(0), "SYB: Can't vest on the 0 address");
-        require(amount > 0, "SYB: amount need to be > 0");
-        require(amount < REWARD_CAP, "SYB: amount exceed max cap");
-        require(initialDrop < REWARD_CAP, "SYB: initial drop exceed max cap");
+        require(beneficiary != address(0), "SYB: Address invalid");
+        require(amount > 0, "SYB: amount invalid");
+        require(amount > initialDrop, "SYB: initial drop invalid");
+        require(amount < REWARD_CAP, "SYB: amount invalid");
+        require(initialDrop < REWARD_CAP, "SYB: initial drop invalid");
 
         require(availableReserve() >= amount, "SYB: Doesn't have enough founds");
 
@@ -230,7 +231,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         // Add the user the ownership, and increase the total supply
         bool isAdded = _addOwnership(beneficiary, vestingId);
         require(isAdded, "SYB: Unable to add the vesting");
-        totalSupply += amount;
+        totalSupply += uint96(amount);
 
         // Emit the creation and transfer event
         emit VestingCreated(vestingId, beneficiary, uint96(amount), uint96(initialDrop), delay, duration, startDate);
@@ -251,9 +252,9 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
 
         // Change the ownership of it
         bool isRemoved = _removeOwnership(from, vesting.id);
-        require(isRemoved, "SYB: Unable to remove the ownership of the vesting");
+        require(isRemoved, "SYB: Removing ownership error");
         bool isAdded = _addOwnership(to, vesting.id);
-        require(isAdded, "SYB: Unable to add the ownership of the vesting");
+        require(isAdded, "SYB: Adding ownership error");
 
         // And update the beneficiary
         vesting.beneficiary = to;
