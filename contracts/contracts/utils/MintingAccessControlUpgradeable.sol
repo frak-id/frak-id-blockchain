@@ -9,6 +9,6 @@ abstract contract MintingAccessControlUpgradeable is SybelAccessControlUpgradeab
     function __MintingAccessControlUpgradeable_init() internal onlyInitializing {
         __SybelAccessControlUpgradeable_init();
 
-        _grantRole(SybelRoles.MINTER, msg.sender);
+        _grantRole(SybelRoles.MINTER, _msgSender());
     }
 }

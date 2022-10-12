@@ -3,7 +3,6 @@ pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../utils/SybelMath.sol";
@@ -212,7 +211,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
         public
         view
         virtual
-        override(ERC1155Upgradeable, IERC165Upgradeable, AccessControlUpgradeable)
+        override(ERC1155Upgradeable, IERC165Upgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

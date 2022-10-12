@@ -25,7 +25,7 @@ contract FractionCostBadges is IFractionCostBadges, SybelAccessControlUpgradeabl
         __SybelAccessControlUpgradeable_init();
 
         // Grant the badge updater role to the contract deployer
-        _grantRole(SybelRoles.BADGE_UPDATER, msg.sender);
+        _grantRole(SybelRoles.BADGE_UPDATER, _msgSender());
     }
 
     /**
