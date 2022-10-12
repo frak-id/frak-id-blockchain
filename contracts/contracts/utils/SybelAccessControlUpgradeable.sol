@@ -9,6 +9,15 @@ import "../utils/SybelRoles.sol";
 
 /// @custom:security-contact crypto-support@sybel.co
 abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgradeable, IPausable, UUPSUpgradeable {
+
+    /// Event emitted when contract is paused or unpaused
+    event Paused();
+    event Unpaused();
+
+    /// Event emitted when roles changes
+    event RoleGranted(address indexed account, bytes32 indexed role);
+    event RoleRevoked(address indexed account, bytes32 indexed role);
+
     // Is this contract paused ?
     bool private _paused;
 
@@ -63,6 +72,7 @@ abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgrade
      */
     function pause() external override whenNotPaused onlyRole(SybelRoles.PAUSER) {
         _paused = true;
+        emit Paused();
     }
 
     /**
@@ -70,6 +80,7 @@ abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgrade
      */
     function unpause() external override whenPaused onlyRole(SybelRoles.PAUSER) {
         _paused = false;
+        emit Unpaused();
     }
 
     /**
@@ -118,6 +129,7 @@ abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgrade
     function _grantRole(bytes32 role, address account) internal virtual {
         if (!hasRole(role, account)) {
             _roles[role][account] = true;
+            emit RoleGranted(account, role);
         }
     }
 
@@ -143,6 +155,7 @@ abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgrade
     function _revokeRole(bytes32 role, address account) internal virtual {
         if (hasRole(role, account)) {
             _roles[role][account] = false;
+            emit RoleRevoked(account, role);
         }
     }
 
