@@ -1,40 +1,34 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "./MultiVestingWallets.sol";
 import "../tokens/SybelToken.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "../utils/SybelRoles.sol";
 
 contract VestingWalletFactory is SybelAccessControlUpgradeable {
+
+    // Perform safe transfer
+    using SafeERC20Upgradeable for SybelToken;
+
     // The cap of sybl token propose to vester
-    uint256 internal constant SYBL_VESTING_CAP = 1_500_000_000 ether;
-    // The id of the different groups
-    uint8 internal constant GROUP_INVESTOR_ID = 1;
-    uint8 internal constant GROUP_TEAM_ID = 2;
-
-    uint8 internal constant GROUP_COMPANY_ID = 1;
-    // uint8 internal constant GROUP_INVESTOR_ID = 2;
-    // uint8 internal constant GROUP_TEAM_ID = 3;
-    uint8 internal constant GROUP_PUBLIC_SALES_ID = 4;
-    uint8 internal constant GROUP_TREASURY_ID = 5;
-    uint8 internal constant GROUP_ADVISORS_ID = 6;
-    uint8 internal constant GROUP_EDUCATIONAL_ID = 7;
-    uint8 internal constant GROUP_CREATOR_GRANTS_ID = 8;
-
-    uint8 internal constant GROUP_PRE_SALES_1_ID = 10;
-    uint8 internal constant GROUP_PRE_SALES_2_ID = 11;
-    uint8 internal constant GROUP_PRE_SALES_3_ID = 12;
-    uint8 internal constant GROUP_PRE_SALES_4_ID = 13;
+    uint96 internal constant SYBL_VESTING_CAP = 1_500_000_000 ether;
 
     /**
      * @dev Represent the different vesting group
      */
     struct VestingGroup {
-        uint256 rewardCap;
-        uint256 supply;
-        uint64 duration;
-        uint64 delay;
+        // First storage slot (full)
+        uint96 rewardCap;
+        uint96 supply;
+        uint32 duration;
+        uint32 delay;
+
+        // Second storage slot (only useing 17 bytes on 256 available)
+        uint16 initialDropPerthousand; // Initial drop on 1 / 1000
+        bool isRevocable;
     }
 
     // The total amount of sybel minted for the investor's
@@ -61,7 +55,9 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
     }
 
     /// Event emitted when a new vesting group is created
-    event VestingGroupAdded(uint8 id, uint256 rewardCap, uint64 duration, uint64 delay);
+    event GroupAdded(uint8 indexed id, uint96 rewardCap, uint16 initialDropPerthousand, uint32 duration, uint32 delay);
+    event GroupSupplyTransfer(uint8 indexed initialId, uint8 indexed targetId, uint96 amount);
+    event GroupUserAdded(uint8 indexed id, address benefiary, uint96 reward);
 
     function initialize(address sybelTokenAddr, address multiVestingWalletAddr) external initializer {
         __SybelAccessControlUpgradeable_init();
@@ -72,62 +68,20 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         // Init our sybel token and multi vesting wallet
         sybelToken = SybelToken(sybelTokenAddr);
         multiVestingWallets = MultiVestingWallets(multiVestingWalletAddr);
-
-        // Add all the initial group
-        _addInitialGroup();
     }
 
     /**
-     * @dev Add all the initial vesting group
+     * @notice Create a new vesting group
      */
-    function _addInitialGroup() private {
-        // Investor and team vesting groups
-        _addVestingGroup(
-            GROUP_INVESTOR_ID,
-            300_000_000 ether, // Reward cap
-            52 weeks, // Duration
-            0 // Delay before start of the linear curve
-        );
-        _addVestingGroup(
-            GROUP_TEAM_ID,
-            300_000_000 ether, // Reward cap
-            52 weeks, // Duration
-            0 // Delay before start of the linear curve
-        );
-        // Pre sales groupes
-        _addVestingGroup(
-            GROUP_PRE_SALES_1_ID,
-            100_000_000 ether, // Reward cap
-            52 weeks, // Duration
-            0 // Delay before start of the linear curve
-        );
-        _addVestingGroup(
-            GROUP_PRE_SALES_2_ID,
-            200_000_000 ether, // Reward cap
-            52 weeks, // Duration
-            0 // Delay before start of the linear curve
-        );
-        _addVestingGroup(
-            GROUP_PRE_SALES_3_ID,
-            200_000_000 ether, // Reward cap
-            52 weeks, // Duration
-            0 // Delay before start of the linear curve
-        );
-        _addVestingGroup(
-            GROUP_PRE_SALES_4_ID,
-            200_000_000 ether, // Reward cap
-            52 weeks, // Duration
-            0 // Delay before start of the linear curve
-        );
-    }
-
     function addVestingGroup(
         uint8 id,
-        uint256 rewardCap,
-        uint64 duration,
-        uint64 delay
+        uint96 rewardCap,
+        uint16 initialDropPerthousand,
+        uint32 duration,
+        uint32 delay,
+        bool revocable
     ) external onlyRole(SybelRoles.ADMIN) {
-        _addVestingGroup(id, rewardCap, duration, delay);
+        _addVestingGroup(id, rewardCap, initialDropPerthousand, duration, delay, revocable);
     }
 
     /**
@@ -135,9 +89,11 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
      */
     function _addVestingGroup(
         uint8 id,
-        uint256 rewardCap,
-        uint64 duration,
-        uint64 delay
+        uint96 rewardCap,
+        uint16 initialDropPerthousand,
+        uint32 duration,
+        uint32 delay,
+        bool revocable
     ) private whenNotPaused {
         require(vestingGroup[id].rewardCap == 0, "SYB: This vesting group already exist");
         require(rewardCap > 0, "SYB: The reward cap should be superior to 0");
@@ -146,16 +102,47 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         // Increase the total group supply
         totalGroupCap += rewardCap;
         // Build and save this group
-        vestingGroup[id] = VestingGroup(rewardCap, 0, duration, delay);
+        vestingGroup[id] = VestingGroup({
+            rewardCap : rewardCap, 
+            supply : 0, 
+            duration: duration, 
+            delay: delay,
+            initialDropPerthousand: initialDropPerthousand,
+            isRevocable: revocable
+        });
         // Emit the event
-        emit VestingGroupAdded(id, rewardCap, duration, delay);
+        emit GroupAdded(id, rewardCap, initialDropPerthousand, duration, delay);
+    }
+
+    /**
+     * @notice Transfer a group reserve to another one
+     */
+    function transferGroupReserve(uint8 initialId, uint8 targetId, uint96 amount) external whenNotPaused onlyRole(SybelRoles.ADMIN) {
+        // Ensure the group as enough supply
+        VestingGroup storage initialGroup = _getVestingGroup(initialId);
+        require(initialGroup.rewardCap - amount >= initialGroup.supply, "SYB: Not enought group supply");
+        VestingGroup storage targetGroup = _getVestingGroup(targetId);
+
+        // Transfer the founds
+        initialGroup.rewardCap -= amount;
+        targetGroup.rewardCap += amount;
+        // Emit the event
+        emit GroupSupplyTransfer(initialId, targetId, amount);
     }
 
     /**
      * @dev Get the group for the given id
      */
     function getVestingGroup(uint8 id) external view returns (VestingGroup memory) {
-        return vestingGroup[id];
+        return _getVestingGroup(id);
+    }
+
+    /**
+     * @dev Get the group for the given id
+     */
+    function _getVestingGroup(uint8 id) private view returns (VestingGroup storage group) {
+        group = vestingGroup[id];
+        require(group.rewardCap > 0, "SYB: Group doesn't exist");
     }
 
     /**
@@ -164,20 +151,53 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
     function addVestingWallet(
         address beneficiary,
         uint256 reward,
-        uint8 groupId
+        uint8 groupId,
+        uint48 startDate
     ) external onlyRole(SybelRoles.VESTING_CREATOR) whenNotPaused {
         // Ensure all the param are correct
-        require(reward > 0, "SYBL : Investor reward should be greater than 0");
-        require(beneficiary != address(0), "SYB: Investor address shouldn't be 0");
+        require(reward!= 0, "SYBL : Reward shouldn't 0");
+        require(reward< SYBL_VESTING_CAP, "SYBL : Reward too large"); // Ensure the reward pass in a uint96 also
+        require(beneficiary != address(0), "SYB: Wrong investor address");
         // Find the group and check basic properties
-        VestingGroup storage group = vestingGroup[groupId];
-        require(group.duration > 0, "SYB: This vesting group doesn't exist");
-        require(group.supply + reward <= group.rewardCap, "SYB: Can't mint more than the group supply cap");
-        // Update the group
-        group.supply += reward;
+        VestingGroup storage group = _getVestingGroup(groupId);
+        require(group.supply + reward <= group.rewardCap, "SYB: Reward too big");
+        // Compute the initial drop if needed
+        uint256 initialDrop = 0;
+        if(group.initialDropPerthousand > 0) {
+            initialDrop = (reward * group.initialDropPerthousand) / 1000;
+        }
+        // Update the group supply
+        group.supply += uint96(reward);
+
+        // Check the balance of this contract
+        uint256 currentBalance = sybelToken.balanceOf(address(this));
+
         // Mint the sybl token for this user
-        sybelToken.mint(address(multiVestingWallets), reward);
+        sybelToken.mint(address(multiVestingWallets), reward - currentBalance);
+
+        // Transfer the token already owned by this contract (if any, in case of revoked vest)
+        if(currentBalance > 0) {
+            sybelToken.safeTransfer(address(multiVestingWallets), currentBalance);
+        }
+
         // Create the vesting group
-        // multiVestingWallets.createVest(beneficiary, reward, group.delay, group.duration);
+        multiVestingWallets.createVest(beneficiary, reward, initialDrop, group.delay, group.duration, startDate, group.isRevocable);
+
+        // Emit the event
+        emit GroupUserAdded(groupId, beneficiary, uint96(reward));
+    }
+
+    /**
+     * @notice Revoke a user vest wallet, and so reduce the group supply by the amount unlocked
+     */
+    function revokeUserVest(uint8 groupId, uint24 vestId) external onlyRole(SybelRoles.VESTING_CREATOR) whenNotPaused  {
+        // Get our group and the previous sybl balance of the contract
+        VestingGroup storage group = _getVestingGroup(groupId);
+
+        // Perform the vest release
+        uint96 remainingAmount = multiVestingWallets.revoke(vestId);
+
+        // Decrement the supply of the released amount
+        group.supply -= remainingAmount;
     }
 }

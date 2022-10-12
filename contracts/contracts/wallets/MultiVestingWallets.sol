@@ -60,7 +60,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         bool isRevoked; // Is this vesting revoked ?
         bool isRevocable; // Is this vesting revocable ?
 
-        // Third slot (ful)
+        // Third slot (full)
         address beneficiary; // beneficiary wallet of this vesting
     }
 
@@ -464,14 +464,10 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     /**
      * @notice Revoke a vesting wallet
      */
-    function revoke(uint24 vestingId) external whenNotPaused onlyRole(SybelRoles.ADMIN) onlyIfNotRevoked(vestingId) {
+    function revoke(uint24 vestingId) external whenNotPaused onlyRole(SybelRoles.ADMIN) onlyIfNotRevoked(vestingId) returns (uint96 vestAmountRemaining) {
         // Get the vesting
         Vesting storage vesting = _getVesting(vestingId);
         require(vesting.isRevocable, "SYB: Vesting not revocable");
-
-        // Release the found associated to this vesting
-        // TODO : Perform the release after the state changes, since we call sybel token
-        uint96 released = _doRelease(vesting);
 
         // Update the vesting state
         uint96 releasable = _releasableAmount(vesting);
@@ -482,11 +478,16 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         }
         vesting.isRevoked = true;
 
-        // Then perform the refund transfer
-        sybelToken.transfer(vesting.beneficiary, releasable);
+        // Compute the vest amount remaining
+        vestAmountRemaining = vesting.amount - vesting.released;
+
+        // Then perform the refund transfer if needed
+        if(releasable != 0) {
+            sybelToken.transfer(vesting.beneficiary, releasable);
+        }
 
         // Emit the event's
-        emit VestingRevoked(vestingId, vesting.beneficiary, released);
+        emit VestingRevoked(vestingId, vesting.beneficiary, releasable);
         emit VestingTransfered(vestingId, vesting.beneficiary, address(0));
     }
 
