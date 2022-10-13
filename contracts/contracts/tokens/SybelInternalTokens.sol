@@ -3,7 +3,6 @@ pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../utils/SybelMath.sol";
@@ -11,11 +10,7 @@ import "../utils/MintingAccessControlUpgradeable.sol";
 
 /// @custom:security-contact crypto-support@sybel.co
 /// @custom:oz-upgrades-unsafe-allow external-library-linking
-contract SybelInternalTokens is
-    MintingAccessControlUpgradeable,
-    ERC1155Upgradeable,
-    IERC2981Upgradeable
-{
+contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable, IERC2981Upgradeable {
     // The current podcast token id
     uint256 private _currentPodcastTokenID;
 
@@ -44,9 +39,7 @@ contract SybelInternalTokens is
     }
 
     function initialize() external initializer {
-        __ERC1155_init(
-            "https://storage.googleapis.com/sybel-io.appspot.com/json/{id}.json"
-        );
+        __ERC1155_init("https://storage.googleapis.com/sybel-io.appspot.com/json/{id}.json");
         __MintingAccessControlUpgradeable_init();
         // Set the initial podcast id
         _currentPodcastTokenID = 1;
@@ -59,11 +52,10 @@ contract SybelInternalTokens is
         external
         onlyRole(SybelRoles.MINTER)
         whenNotPaused
-        returns (uint256)
+        returns (uint256 id)
     {
         // Get the next podcast id and increment the current podcast token id
-        uint256 id = _currentPodcastTokenID + 1;
-        _currentPodcastTokenID++;
+        id = ++_currentPodcastTokenID;
 
         // Mint the podcast nft into the podcast owner wallet directly
         uint256 nftId = SybelMath.buildNftId(id);
@@ -83,10 +75,7 @@ contract SybelInternalTokens is
         onlyRole(SybelRoles.MINTER)
         whenNotPaused
     {
-        require(
-            ids.length == supplies.length,
-            "SYB: Can't set the supply for id and supplies of different length"
-        );
+        require(ids.length == supplies.length, "SYB: Id and supplies of different length");
         // Iterate over each ids and increment their supplies
         for (uint256 i = 0; i < ids.length; ++i) {
             uint256 id = ids[i];
@@ -188,7 +177,7 @@ contract SybelInternalTokens is
         external
         view
         override
-        returns (address receiver, uint256 royaltyAmount)
+        returns (address, uint256)
     {
         if (salePrice > 0 && SybelMath.isPodcastRelatedToken(tokenId)) {
             // Find the address of the owner of this podcast
@@ -204,14 +193,14 @@ contract SybelInternalTokens is
     /**
      * @dev Find the owner of the given podcast is
      */
-    function ownerOf(uint256 podcastId) external view returns (address owner) {
+    function ownerOf(uint256 podcastId) external view returns (address) {
         return owners[podcastId];
     }
 
     /**
      * @dev Fidn the current supply of the given token
      */
-    function supplyOf(uint256 tokenId) external view returns (uint256 supply) {
+    function supplyOf(uint256 tokenId) external view returns (uint256) {
         return _availableSupplies[tokenId];
     }
 
@@ -222,11 +211,7 @@ contract SybelInternalTokens is
         public
         view
         virtual
-        override(
-            ERC1155Upgradeable,
-            IERC165Upgradeable,
-            AccessControlUpgradeable
-        )
+        override(ERC1155Upgradeable, IERC165Upgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

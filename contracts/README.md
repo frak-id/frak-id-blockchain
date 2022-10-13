@@ -14,6 +14,6 @@ cd sybel-io/
 git status
 git checkout security/setting-up-security-tools
 git pull
-cd blockchain/ 
+cd blockchain/
 npm i
 nohup sh tools/manticore/manticore.sh > manticore-sybel-token.log 2>&1 &

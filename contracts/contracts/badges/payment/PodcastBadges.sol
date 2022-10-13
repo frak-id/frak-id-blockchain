@@ -12,7 +12,7 @@ import "../../utils/SybelAccessControlUpgradeable.sol";
 /// @custom:security-contact crypto-support@sybel.co
 contract PodcastBadges is IPodcastBadges, SybelAccessControlUpgradeable {
     // Map podcast id to Podcast badge
-    mapping(uint256 => uint256) podcastBadges;
+    mapping(uint256 => uint256) private podcastBadges;
 
     event PodcastBadgeUpdated(uint256 id, uint256 badge);
 
@@ -25,7 +25,7 @@ contract PodcastBadges is IPodcastBadges, SybelAccessControlUpgradeable {
         __SybelAccessControlUpgradeable_init();
 
         // Grant the badge updater role to the contract deployer
-        _grantRole(SybelRoles.BADGE_UPDATER, msg.sender);
+        _grantRole(SybelRoles.BADGE_UPDATER, _msgSender());
     }
 
     /**
@@ -44,14 +44,8 @@ contract PodcastBadges is IPodcastBadges, SybelAccessControlUpgradeable {
     /**
      * @dev Get the payment badges for the given informations
      */
-    function getBadge(uint256 podcastId)
-        external
-        view
-        override
-        whenNotPaused
-        returns (uint256)
-    {
-        uint256 podcastBadge = podcastBadges[podcastId];
+    function getBadge(uint256 podcastId) external view override whenNotPaused returns (uint256 podcastBadge) {
+        podcastBadge = podcastBadges[podcastId];
         if (podcastBadge == 0) {
             // If the badge of this podcast isn't set yet, set it to default
             podcastBadge = 1 ether;

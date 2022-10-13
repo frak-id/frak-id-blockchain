@@ -6,18 +6,14 @@ import "../badges/access/PaymentBadgesAccessor.sol";
 import "../utils/SybelMath.sol";
 import "../utils/SybelRoles.sol";
 import "../tokens/SybelInternalTokens.sol";
-import "../tokens/SybelToken.sol";
+import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 
 /**
  * @dev Represent our rewarder contract
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract Rewarder is
-    IRewarder,
-    SybelAccessControlUpgradeable,
-    PaymentBadgesAccessor
-{
+contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAccessor {
     // Maximum data we can treat in a batch manner
     uint8 private constant MAX_BATCH_AMOUNT = 20;
 
@@ -115,40 +111,25 @@ contract Rewarder is
             podcastIds.length == listenCounts.length,
             "SYB: Can't pay of podcast for id and listen of different length"
         );
-        require(
-            podcastIds.length <= MAX_BATCH_AMOUNT,
-            "SYB: Can't treat more than 20 items at a time"
-        );
+        require(podcastIds.length <= MAX_BATCH_AMOUNT, "SYB: Can't treat more than 20 items at a time");
         // Get our total amopunt to be minted
         uint256 totalAmountToMint = 0;
         // Iterate over each podcast
         for (uint256 i = 0; i < podcastIds.length; ++i) {
             // Find the balance of the listener for this podcast
-            (
-                ListenerBalanceOnPodcast[] memory balances,
-                bool hasAtLeastOneBalance
-            ) = getListenerBalanceForPodcast(listener, podcastIds[i]);
+            (ListenerBalanceOnPodcast[] memory balances, bool hasAtLeastOneBalance) = getListenerBalanceForPodcast(
+                listener,
+                podcastIds[i]
+            );
             // If no balance mint a Standard NFT
             if (!hasAtLeastOneBalance) {
-                sybelInternalTokens.mint(
-                    listener,
-                    SybelMath.buildStandardNftId(podcastIds[i]),
-                    1
-                );
+                sybelInternalTokens.mint(listener, SybelMath.buildStandardNftId(podcastIds[i]), 1);
                 // And then recompute his balance
-                (balances, hasAtLeastOneBalance) = getListenerBalanceForPodcast(
-                    listener,
-                    podcastIds[i]
-                );
+                (balances, hasAtLeastOneBalance) = getListenerBalanceForPodcast(listener, podcastIds[i]);
             }
             // If he as at least one balance
             if (hasAtLeastOneBalance) {
-                totalAmountToMint += mintForUser(
-                    listener,
-                    podcastIds[i],
-                    listenCounts[i],
-                    balances
-                );
+                totalAmountToMint += mintForUser(listener, podcastIds[i], listenCounts[i], balances);
             }
         }
         // Once we have iterate over each item, if we got a positive mint amount, mint it
@@ -170,18 +151,14 @@ contract Rewarder is
         // Build the ids for eachs types
         uint256[] memory tokenIds = SybelMath.buildSnftIds(podcastId, types);
         // Build our initial balance map
-        ListenerBalanceOnPodcast[]
-            memory balances = new ListenerBalanceOnPodcast[](types.length);
+        ListenerBalanceOnPodcast[] memory balances = new ListenerBalanceOnPodcast[](types.length);
         // Boolean used to know if the user have a balance
         bool hasAtLeastOneBalance = false;
         // Iterate over each types to find the balances
         for (uint8 i = 0; i < types.length; ++i) {
             // TODO : Batch balances of to be more gas efficient ??
             // Get the balance and build our balance on podcast object
-            uint256 balance = sybelInternalTokens.balanceOf(
-                listener,
-                tokenIds[i]
-            );
+            uint256 balance = sybelInternalTokens.balanceOf(listener, tokenIds[i]);
             balances[i] = ListenerBalanceOnPodcast(types[i], balance);
             // Update our has at least one balance object
             hasAtLeastOneBalance = hasAtLeastOneBalance || balance > 0;
@@ -197,11 +174,9 @@ contract Rewarder is
         uint256 podcastId,
         uint16 listenCount,
         ListenerBalanceOnPodcast[] memory balances
-    ) private returns (uint256) {
+    ) private returns (uint256 totalAmountToMint) {
         // The user have a balance we can continue
         uint256 podcastBadge = podcastBadges.getBadge(podcastId);
-        // Amout we will mint for user and for owner
-        uint256 totalAmountToMint = 0;
         // Mint each token for each fraction
         for (uint256 i = 0; i < balances.length; ++i) {
             if (balances[i].balance <= 0) {
@@ -224,28 +199,20 @@ contract Rewarder is
         uint256 baseAmountForListener = totalAmountToMint - amountForOwner;
         // Handle the user badge for his amount
         uint64 listenerBadge = listenerBadges.getBadge(listener);
-        uint256 amountForListener = (baseAmountForListener * listenerBadge) /
-            1 ether;
+        uint256 amountForListener = (baseAmountForListener * listenerBadge) / 1 ether;
         // Register the amount for listener
         pendingRewards[listener] += amountForListener;
         // Register the amount for the owner
         address podcastOwner = sybelInternalTokens.ownerOf(podcastId);
         pendingRewards[podcastOwner] += amountForOwner;
         // Emit the reward event
-        emit UserRewarded(
-            podcastId,
-            listener,
-            listenCount,
-            amountForListener,
-            balances
-        );
+        emit UserRewarded(podcastId, listener, listenCount, amountForListener, balances);
         // Return the total amount to mint
         return totalAmountToMint;
     }
 
     /**
      * @dev Compute the user reward for the given fraction
-     * Rules explained here : https://sybel.gitbook.io/the-sybel-ecosystem-white-paper/the-sybel-ecosystem/earning-model/creator-earning-model
      */
     function computeUserRewardForFraction(
         uint256 balance,
@@ -256,23 +223,17 @@ contract Rewarder is
         // Compute the earning factor
         uint256 earningFactor = balance * baseRewardForTokenType(tokenType); // On 1e18 decimals
         // Compute the badge reward (and divied it by 1e18 since we have 2 value on 1e18 decimals)
-        uint256 badgeReward = (podcastBadge *
-            earningFactor *
-            consumedContentUnit);
-        // Add our token generation factor to the computation, and dived it by 1e18 (so we got a result on 1e18 instead of 1e36)
+        uint256 badgeReward = (podcastBadge * earningFactor * consumedContentUnit);
+        // Add our token generation factor to the computation, and dived it by 1e18
         return (badgeReward * tokenGenerationFactor) / (1 ether * 1 ether);
     }
 
     /**
      * @dev Get the base reward to the given token type
-     * We use a pure function instead of a mapping to economise on storage read, and since this reawrd shouldn't evolve really fast
+     * We use a pure function instead of a mapping to economise on storage read,
+     * and since this reawrd shouldn't evolve really fast
      */
-    function baseRewardForTokenType(uint8 tokenType)
-        private
-        pure
-        returns (uint96)
-    {
-        uint96 reward = 0;
+    function baseRewardForTokenType(uint8 tokenType) private pure returns (uint96 reward) {
         if (tokenType == SybelMath.TOKEN_TYPE_STANDARD_MASK) {
             reward = 0.01 ether; // 0.01 SYBL
         } else if (tokenType == SybelMath.TOKEN_TYPE_CLASSIC_MASK) {
@@ -290,11 +251,7 @@ contract Rewarder is
     /**
      * @dev Update the token generation factor
      */
-    function updateTpu(uint256 newTpu)
-        external
-        onlyRole(SybelRoles.ADMIN)
-        whenNotPaused
-    {
+    function updateTpu(uint256 newTpu) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
         tokenGenerationFactor = newTpu;
     }
 
@@ -306,24 +263,14 @@ contract Rewarder is
     /**
      * Withdraw the user pending founds
      */
-    function withdrawFounds(address user)
-        external
-        onlyRole(SybelRoles.ADMIN)
-        whenNotPaused
-    {
-        require(
-            user != address(0),
-            "SYB: Can't withdraw referral founds for the 0 address"
-        );
+    function withdrawFounds(address user) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
+        require(user != address(0), "SYB: Can't withdraw referral founds for the 0 address");
         // Ensure the user have a pending reward
         uint256 pendingReward = pendingRewards[user];
         require(pendingReward > 0, "SYB: The user havn't any pending reward");
         // Ensure we have enough founds on this contract to pay the user
         uint256 contractBalance = sybelToken.balanceOf(address(this));
-        require(
-            contractBalance > pendingReward,
-            "SYB: The referral contract hasn't the required founds to pay the user"
-        );
+        require(contractBalance > pendingReward, "SYB: Contract havn't enough founds");
         // Reset the user pending balance
         pendingRewards[user] = 0;
         // Emit the withdraw event

@@ -6,29 +6,18 @@ if [ ! -d "contracts" ]; then
 	exit 1
 fi
 
+# Run mythril analyse on the given contract
+function analyse_contract {
+	docker run --rm -v `pwd`:/src  --workdir=/src mythril/myth -v 4 analyze $1 --solc-json tools/mythril/remapping.json --max-depth 50
+}
+
 echo "<----- Checking SybelMath.sol ----->"
-docker run --rm -v `pwd`:/src  --workdir=/src mythril/myth -v 4 analyze contracts/utils/SybelMath.sol --solc-json tools/mythril/remapping.json --max-depth 50
+analyse_contract contracts/utils/SybelMath.sol
 
 echo ""
-echo "<----- Checking SybelToken.sol ----->"
-docker run --rm -v `pwd`:/src  --workdir=/src mythril/myth -v 4 analyze contracts/tokens/SybelToken.sol --solc-json tools/mythril/remapping.json --max-depth 50
+echo "<----- Checking MultiVestingWallets.sol ----->"
+analyse_contract contracts/wallets/MultiVestingWallets.sol
 
 echo ""
-echo "<----- Checking VestingWallets.sol ----->"
-docker run --rm -v `pwd`:/src  --workdir=/src mythril/myth -v 4 analyze contracts/wallets/VestingWallets.sol --solc-json tools/mythril/remapping.json --max-depth 50
-
-echo ""
-echo "<----- Checking SybelInternalTokens.sol ----->"
-docker run --rm -v `pwd`:/src  --workdir=/src mythril/myth -v 4 analyze contracts/tokens/SybelInternalTokens.sol --solc-json tools/mythril/remapping.json --max-depth 50
-
-echo ""
-echo "<----- Checking Minter.sol ----->"
-docker run --rm -v `pwd`:/src  --workdir=/src mythril/myth -v 4 analyze contracts/minter/Minter.sol --solc-json tools/mythril/remapping.json --max-depth 50
-
-echo ""
-echo "<----- Checking Rewarder.sol ----->"
-docker run --rm -v `pwd`:/src  --workdir=/src mythril/myth -v 4 analyze contracts/reward/Rewarder.sol --solc-json tools/mythril/remapping.json --max-depth 50
-
-echo ""
-echo "<----- Checking Referral.sol ----->"
-docker run --rm -v `pwd`:/src  --workdir=/src mythril/myth -v 4 analyze contracts/reward/Referral.sol --solc-json tools/mythril/remapping.json --max-depth 50
+echo "<----- Checking VestingWalletFactory.sol ----->"
+analyse_contract contracts/wallets/VestingWalletFactory.sol

@@ -10,12 +10,9 @@ import "../../utils/SybelAccessControlUpgradeable.sol";
  * @dev Handle the computation of our listener badges
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract FractionCostBadges is
-    IFractionCostBadges,
-    SybelAccessControlUpgradeable
-{
+contract FractionCostBadges is IFractionCostBadges, SybelAccessControlUpgradeable {
     // Map f nft id to cost badge
-    mapping(uint256 => uint256) fractionBadges;
+    mapping(uint256 => uint256) private fractionBadges;
 
     event FractionCostBadgeUpdated(uint256 id, uint256 badge);
 
@@ -28,7 +25,7 @@ contract FractionCostBadges is
         __SybelAccessControlUpgradeable_init();
 
         // Grant the badge updater role to the contract deployer
-        _grantRole(SybelRoles.BADGE_UPDATER, msg.sender);
+        _grantRole(SybelRoles.BADGE_UPDATER, _msgSender());
     }
 
     /**
@@ -47,14 +44,8 @@ contract FractionCostBadges is
     /**
      * @dev Get the payment badges for the given informations
      */
-    function getBadge(uint256 fractionId)
-        external
-        view
-        override
-        whenNotPaused
-        returns (uint256)
-    {
-        uint256 fractionBadge = fractionBadges[fractionId];
+    function getBadge(uint256 fractionId) external view override whenNotPaused returns (uint256 fractionBadge) {
+        fractionBadge = fractionBadges[fractionId];
         if (fractionBadge == 0) {
             // If the badge of this fraction isn't set yet, set it to default
             uint8 tokenType = SybelMath.extractTokenType(fractionId);
@@ -65,14 +56,10 @@ contract FractionCostBadges is
 
     /**
      * @dev The initial cost of a fraction type
-     * We use a pure function instead of a mapping to economise on storage read, and since this reawrd shouldn't evolve really fast
+     * We use a pure function instead of a mapping to economise on storage read,
+     * and since this reawrd shouldn't evolve really fast
      */
-    function initialFractionCost(uint8 tokenType)
-        public
-        pure
-        returns (uint256)
-    {
-        uint256 initialCost = 0;
+    function initialFractionCost(uint8 tokenType) public pure returns (uint256 initialCost) {
         if (tokenType == SybelMath.TOKEN_TYPE_CLASSIC_MASK) {
             initialCost = 20 ether; // 20 SYBL
         } else if (tokenType == SybelMath.TOKEN_TYPE_RARE_MASK) {

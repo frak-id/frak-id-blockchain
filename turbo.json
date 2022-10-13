@@ -12,8 +12,14 @@
     "size": {
       "cache": false
     },
+    "lint": {
+      "cache": false
+    },
+    "pretty": {
+      "cache": false
+    },
     "publish": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "lint", "pretty"]
     }
   }
 }

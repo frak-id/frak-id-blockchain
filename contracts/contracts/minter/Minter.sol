@@ -6,7 +6,7 @@ import "../badges/access/PaymentBadgesAccessor.sol";
 import "../badges/cost/IFractionCostBadges.sol";
 import "../utils/SybelMath.sol";
 import "../tokens/SybelInternalTokens.sol";
-import "../tokens/SybelToken.sol";
+import "../tokens/SybelTokenL2.sol";
 import "../utils/MintingAccessControlUpgradeable.sol";
 
 /**
@@ -16,11 +16,7 @@ import "../utils/MintingAccessControlUpgradeable.sol";
  *   - Add allowance to the user when he mint a fraction (web2)
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract Minter is
-    IMinter,
-    MintingAccessControlUpgradeable,
-    PaymentBadgesAccessor
-{
+contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccessor {
     /**
      * @dev Access our internal tokens
      */
@@ -50,12 +46,7 @@ contract Minter is
     /**
      * @dev Event emitted when a new fraction of podcast is minted
      */
-    event FractionMinted(
-        uint256 fractionId,
-        address user,
-        uint256 amount,
-        uint256 cost
-    );
+    event FractionMinted(uint256 fractionId, address user, uint256 amount, uint256 cost);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -82,10 +73,7 @@ contract Minter is
         foundationWallet = foundationAddr;*/
     }
 
-    function migrateToV2(address sybelTokenAddr, address foundationAddr)
-        external
-        reinitializer(2)
-    {
+    function migrateToV2(address sybelTokenAddr, address foundationAddr) external reinitializer(2) {
         /*
         // Only for v2 upgrade
         sybelToken = SybelToken(sybelTokenAddr);
@@ -93,10 +81,7 @@ contract Minter is
         */
     }
 
-    function migrateToV3(address fractionCostBadgesAddr)
-        external
-        reinitializer(3)
-    {
+    function migrateToV3(address fractionCostBadgesAddr) external reinitializer(3) {
         /*
         // Only for v3 upgrade
         fractionCostBadges = IFractionCostBadges(fractionCostBadgesAddr);
@@ -117,41 +102,15 @@ contract Minter is
         uint256 rareSupply,
         uint256 epicSupply,
         uint256 legendarySupply
-    )
-        external
-        override
-        onlyRole(SybelRoles.MINTER)
-        whenNotPaused
-        returns (uint256)
-    {
-        require(
-            podcastOwnerAddress != address(0),
-            "SYB: Cannot add podcast for the 0 address !"
-        );
-        require(
-            commonSupply > 0,
-            "SYB: Common supply required for initial mint"
-        );
-        require(
-            commonSupply < 500,
-            "SYB: Initial common supply cant' be greater than 500"
-        );
-        require(
-            rareSupply < 200,
-            "SYB: Initial rare supply cant' be greater than 200"
-        );
-        require(
-            epicSupply < 50,
-            "SYB: Initial epic supply cant' be greater than 50"
-        );
-        require(
-            legendarySupply < 5,
-            "SYB: Initial legendary supply cant' be greater than 5"
-        );
+    ) external override onlyRole(SybelRoles.MINTER) whenNotPaused returns (uint256 podcastId) {
+        require(podcastOwnerAddress != address(0), "SYB: Cannot add podcast for the 0 address !");
+        require(commonSupply > 0, "SYB: Common supply required for initial mint");
+        require(commonSupply < 500, "SYB: Initial common supply cant' be greater than 500");
+        require(rareSupply < 200, "SYB: Initial rare supply cant' be greater than 200");
+        require(epicSupply < 50, "SYB: Initial epic supply cant' be greater than 50");
+        require(legendarySupply < 5, "SYB: Initial legendary supply cant' be greater than 5");
         // Try to mint the new podcast
-        uint256 podcastId = sybelInternalTokens.mintNewPodcast(
-            podcastOwnerAddress
-        );
+        podcastId = sybelInternalTokens.mintNewPodcast(podcastOwnerAddress);
         // Then set the supply for each token types
         uint256[] memory ids = new uint256[](4);
         ids[0] = SybelMath.buildClassicNftId(podcastId);
@@ -183,19 +142,14 @@ contract Minter is
         uint256 totalCost = fractionCost * amount;
         // Check if the user have enough the balance
         uint256 userBalance = sybelToken.balanceOf(to);
-        require(
-            userBalance >= totalCost,
-            "SYB: Not enough balance to pay for this fraction"
-        );
+        require(userBalance >= totalCost, "SYB: Not enough balance to pay for this fraction");
         // Mint his Fraction of NFT
         sybelInternalTokens.mint(to, id, amount);
         uint256 amountForFundation = (totalCost * 2) / 10;
         // Send 20% of sybl token to the foundation
         sybelToken.mint(foundationWallet, amountForFundation);
         // Send 80% to the owner
-        address owner = sybelInternalTokens.ownerOf(
-            SybelMath.extractPodcastId(id)
-        );
+        address owner = sybelInternalTokens.ownerOf(SybelMath.extractPodcastId(id));
         uint256 amountForOwner = totalCost - amountForFundation;
         sybelToken.transferFrom(to, owner, amountForOwner);
 
@@ -206,17 +160,10 @@ contract Minter is
     /**
      * @dev Increase the supply for a podcast
      */
-    function increaseSupply(uint256 id, uint256 newSupply)
-        external
-        onlyRole(SybelRoles.MINTER)
-        whenNotPaused
-    {
+    function increaseSupply(uint256 id, uint256 newSupply) external onlyRole(SybelRoles.MINTER) whenNotPaused {
         // Compute the supply difference
         uint256 newRealSupply = sybelInternalTokens.supplyOf(id) + newSupply;
         // Mint his Fraction of NFT
-        sybelInternalTokens.setSupplyBatch(
-            SybelMath.asSingletonArray(id),
-            SybelMath.asSingletonArray(newRealSupply)
-        );
+        sybelInternalTokens.setSupplyBatch(SybelMath.asSingletonArray(id), SybelMath.asSingletonArray(newRealSupply));
     }
 }

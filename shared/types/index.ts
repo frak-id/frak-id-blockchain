@@ -72,6 +72,8 @@ export type { Minter } from "./contracts/minter/Minter";
 export { Minter__factory } from "./factories/contracts/minter/Minter__factory";
 export type { ContentPool } from "./contracts/reward/ContentPool";
 export { ContentPool__factory } from "./factories/contracts/reward/ContentPool__factory";
+export type { ContentPoolReview } from "./contracts/reward/ContentPoolReview2.sol/ContentPoolReview";
+export { ContentPoolReview__factory } from "./factories/contracts/reward/ContentPoolReview2.sol/ContentPoolReview__factory";
 export type { IRewarder } from "./contracts/reward/IRewarder";
 export { IRewarder__factory } from "./factories/contracts/reward/IRewarder__factory";
 export type { Referral } from "./contracts/reward/Referral";

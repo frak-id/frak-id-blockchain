@@ -1,30 +1,24 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
-import { ethers, upgrades } from "hardhat";
 import * as fs from "fs";
 
-const hre = require("hardhat");
+import hre from "hardhat";
 
-import { Contract, utils } from "ethers";
-
-import { SybelInternalTokens } from "../typechain-types/contracts/tokens/SybelInternalTokens";
-import { SybelToken } from "../typechain-types/contracts/tokens/SybelToken";
-import { ListenerBadges } from "../typechain-types/contracts/badges/payment/ListenerBadges";
-import { PodcastBadges } from "../typechain-types/contracts/badges/payment/PodcastBadges";
-import { FractionCostBadges } from "../typechain-types/contracts/badges/cost/FractionCostBadges";
-import { Minter } from "../typechain-types/contracts/minter/Minter";
-import { Rewarder } from "../typechain-types/contracts/reward/Rewarder";
-import { FoundationWallet } from "../typechain-types/contracts/wallets/FoundationWallet";
+import { SybelInternalTokens } from "../types/contracts/tokens/SybelInternalTokens";
+import { SybelToken } from "../types/contracts/tokens/SybelToken";
+import { ListenerBadges } from "../types/contracts/badges/payment/ListenerBadges";
+import { PodcastBadges } from "../types/contracts/badges/payment/PodcastBadges";
+import { FractionCostBadges } from "../types/contracts/badges/cost/FractionCostBadges";
+import { Minter } from "../types/contracts/minter/Minter";
+import { Rewarder } from "../types/contracts/reward/Rewarder";
+import { FoundationWallet } from "../types/contracts/wallets/FoundationWallet";
+import { deployContract } from "./utils/deploy";
 
 (async () => {
   try {
-    console.log(
-      "Deploying all the contract for a simple blockchain intergration"
-    );
+    console.log("Deploying all the contract for a simple blockchain intergration");
 
     // Deploy our internal token contract
-    const internalToken = await deployContract<SybelInternalTokens>(
-      "SybelInternalTokens"
-    );
+    const internalToken = await deployContract<SybelInternalTokens>("SybelInternalTokens");
     console.log("Internal tokens deployed to " + internalToken.address);
 
     // Deploy our sybl token contract
@@ -33,24 +27,15 @@ import { FoundationWallet } from "../typechain-types/contracts/wallets/Foundatio
 
     // Deploy our sybel foundation wallet contract
     const sybelCorpWallet = (await hre.ethers.getSigners())[0].address;
-    const fondationWallet = await deployContract<FoundationWallet>(
-      "FoundationWallet",
-      [sybelCorpWallet]
-    );
-    console.log(
-      `FoundationWallet deployed to ${fondationWallet.address} with corp wallet ${sybelCorpWallet}`
-    );
+    const fondationWallet = await deployContract<FoundationWallet>("FoundationWallet", [sybelCorpWallet]);
+    console.log(`FoundationWallet deployed to ${fondationWallet.address} with corp wallet ${sybelCorpWallet}`);
 
     // Deploy our listener and podcast badges contract
-    const listenerBadges = await deployContract<ListenerBadges>(
-      "ListenerBadges"
-    );
+    const listenerBadges = await deployContract<ListenerBadges>("ListenerBadges");
     console.log("Listener badges deployed to " + listenerBadges.address);
     const podcastBadges = await deployContract<PodcastBadges>("PodcastBadges");
     console.log("Podcast badges deployed to " + podcastBadges.address);
-    const factionCostBadges = await deployContract<FractionCostBadges>(
-      "FractionCostBadges"
-    );
+    const factionCostBadges = await deployContract<FractionCostBadges>("FractionCostBadges");
     console.log("Fraction badges deployed to " + factionCostBadges.address);
 
     // Deploy our rewarder contract
@@ -96,40 +81,8 @@ import { FoundationWallet } from "../typechain-types/contracts/wallets/Foundatio
     const jsonAddresses = JSON.stringify(addresses);
     fs.writeFileSync("addresses.json", jsonAddresses);
     // Write another addresses with the name of the current network as backup
-    fs.writeFileSync(
-      `addresses-${hre.hardhatArguments.network}.json`,
-      jsonAddresses
-    );
+    fs.writeFileSync(`addresses-${hre.hardhatArguments.network}.json`, jsonAddresses);
   } catch (e: any) {
     console.log(e.message);
   }
 })();
-
-async function deployContract<Type extends Contract>(
-  name: string,
-  args?: unknown[]
-): Promise<Type> {
-  const contractFactory = await ethers.getContractFactory(name);
-  const contract = (await upgrades.deployProxy(contractFactory, args, {
-    kind: "uups",
-  })) as Type;
-  await contract.deployed();
-  return contract;
-}
-
-// Immutable data object
-class DeployedAddress {
-  constructor(
-    readonly internalTokenAddr: String,
-    readonly sybelTokenAddr: String,
-    readonly listenBadgesAddr: String,
-    readonly podcastBadgesAddr: String,
-    readonly fractionCostBadgesAddr: String,
-    readonly rewarderAddr: String,
-    readonly minterAddr: String
-  ) {}
-
-  toJson(): string {
-    return JSON.stringify(this);
-  }
-}

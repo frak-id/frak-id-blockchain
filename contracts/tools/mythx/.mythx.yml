@@ -2,13 +2,13 @@ output: mythx.json
 format: json
 
 analyze:
-    mode: deep
-    create-group: true
-    group-name: Sybel.io Project
-    solc: 0.8.17
-    remappings:
-        - "@openzeppelin/=$(pwd)/node_modules/@openzeppelin/"
-    contracts:
-        - contracts/tokens/SybelToken.sol
-        - contracts/tokens/SybelInternalTokens.sol
-        - contracts/wallets/VestingWallets.sol 
+  mode: deep
+  create-group: true
+  group-name: Sybel.io Project
+  solc: 0.8.17
+  remappings:
+    - "@openzeppelin/=$(pwd)/node_modules/@openzeppelin/"
+  contracts:
+    - contracts/tokens/SybelToken.sol
+    - contracts/tokens/SybelInternalTokens.sol
+    - contracts/wallets/VestingWallets.sol

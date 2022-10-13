@@ -12,7 +12,7 @@ import "../../utils/SybelAccessControlUpgradeable.sol";
 /// @custom:security-contact crypto-support@sybel.co
 contract ListenerBadges is IListenerBadges, SybelAccessControlUpgradeable {
     // Map of user address to listener badge
-    mapping(address => uint64) listenerBadges;
+    mapping(address => uint64) private listenerBadges;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -23,7 +23,7 @@ contract ListenerBadges is IListenerBadges, SybelAccessControlUpgradeable {
         __SybelAccessControlUpgradeable_init();
 
         // Grant the badge updater role to the contract deployer
-        _grantRole(SybelRoles.BADGE_UPDATER, msg.sender);
+        _grantRole(SybelRoles.BADGE_UPDATER, _msgSender());
     }
 
     /**
@@ -41,13 +41,8 @@ contract ListenerBadges is IListenerBadges, SybelAccessControlUpgradeable {
     /**
      * @dev Find the badge for the given listener (on a 1e18 scale)
      */
-    function getBadge(address listener)
-        external
-        view
-        override
-        returns (uint64)
-    {
-        uint64 listenerBadge = listenerBadges[listener];
+    function getBadge(address listener) external view override returns (uint64 listenerBadge) {
+        listenerBadge = listenerBadges[listener];
         if (listenerBadge == 0) {
             // If the badge of this listener isn't set yet, set it to default
             listenerBadge = 1 ether;

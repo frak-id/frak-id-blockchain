@@ -6,7 +6,7 @@ import "../badges/access/PaymentBadgesAccessor.sol";
 import "../utils/SybelMath.sol";
 import "../utils/SybelRoles.sol";
 import "../tokens/SybelInternalTokens.sol";
-import "../tokens/SybelToken.sol";
+import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
@@ -34,11 +34,7 @@ contract ContentPool {
     /**
      * @dev Event emitted when a user share is updated in a pool
      */
-    event PoolParticipantShareUpdated(
-        uint256 podcastId,
-        address user,
-        uint256 share
-    );
+    event PoolParticipantShareUpdated(uint256 podcastId, address user, uint256 share);
     /**
      * @dev Event
      */
@@ -76,10 +72,7 @@ contract ContentPool {
     }
 
     function addUserShare(address user, uint256 shareToAdd) external {
-        require(
-            user != address(0),
-            "SYB: Can't update shares of the 0 address"
-        );
+        require(user != address(0), "SYB: Can't update shares of the 0 address");
         require(shareToAdd > 0, "SYB: Can't add 0 share to the user");
         // Try to get the user
         (bool success, uint256 previousShare) = addressesToShare.tryGet(user);
@@ -96,10 +89,7 @@ contract ContentPool {
     }
 
     function removeUserShare(address user, uint256 shareToRemove) external {
-        require(
-            user != address(0),
-            "SYB: Can't update shares of the 0 address"
-        );
+        require(user != address(0), "SYB: Can't update shares of the 0 address");
         require(shareToRemove > 0, "SYB: Can't remove 0 share to the user");
         // Try to get the user
         (bool success, uint256 previousShare) = addressesToShare.tryGet(user);
@@ -138,19 +128,13 @@ contract ContentPool {
      * Withdraw the user pending founds
      */
     function withdrawFounds(address user) external {
-        require(
-            user != address(0),
-            "SYB: Can't withdraw content pool founds for the 0 address"
-        );
+        require(user != address(0), "SYB: Can't withdraw content pool founds for the 0 address");
         // Ensure the user have a pending reward
         uint256 pendingReward = userPendingReward[user];
         require(pendingReward > 0, "SYB: The user havn't any pending reward");
         // Ensure we have enough founds on this contract to pay the user
         uint256 contractBalance = sybelToken.balanceOf(address(this));
-        require(
-            contractBalance > pendingReward,
-            "SYB: The referral contract hasn't the required founds to pay the user"
-        );
+        require(contractBalance > pendingReward, "SYB: Contract havn't enought founds to pay the user");
         // Reset the user pending balance
         userPendingReward[user] = 0;
         // Perform the transfer of the founds
