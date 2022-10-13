@@ -6,5 +6,5 @@ if [ ! -d "contracts" ]; then
 	exit 1
 fi
 
-docker run --rm -v "$(pwd)/../":/src --workdir=/src/contracts trailofbits/eth-security-toolbox -c 'solc-select install 0.8.17 && solc-select use 0.8.17 && 
+docker run --rm -v "$(pwd)":/src --workdir=/src trailofbits/eth-security-toolbox -c 'solc-select install 0.8.17 && solc-select use 0.8.17 && 
 slither . --solc-args="--optimize" --solc-remaps @openzeppelin=node_modules/@openzeppelin'
