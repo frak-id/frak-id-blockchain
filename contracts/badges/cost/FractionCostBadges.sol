@@ -29,7 +29,7 @@ contract FractionCostBadges is IFractionCostBadges, SybelAccessControlUpgradeabl
     }
 
     /**
-     * @dev Update the podcast internal coefficient
+     * @dev Update the content internal coefficient
      */
     function updateBadge(uint256 fractionId, uint256 badge)
         external

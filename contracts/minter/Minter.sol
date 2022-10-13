@@ -39,12 +39,12 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
     address public foundationWallet;
 
     /**
-     * @dev Event emitted when a new podcast is minted
+     * @dev Event emitted when a new content is minted
      */
-    event PodcastMinted(uint256 baseId, address owner);
+    event ContentMinted(uint256 baseId, address owner);
 
     /**
-     * @dev Event emitted when a new fraction of podcast is minted
+     * @dev Event emitted when a new fraction of content is minted
      */
     event FractionMinted(uint256 fractionId, address user, uint256 amount, uint256 cost);
 
@@ -57,14 +57,14 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
         address sybelTokenAddr,
         address internalTokenAddr,
         address listenerBadgesAddr,
-        address podcastBadgesAddr,
+        address contentBadgesAddr,
         address fractionCostBadgesAddr,
         address foundationAddr
     ) external initializer {
         /*
         // Only for v1 deployment
         __MintingAccessControlUpgradeable_init();
-        __PaymentBadgesAccessor_init(listenerBadgesAddr, podcastBadgesAddr);
+        __PaymentBadgesAccessor_init(listenerBadgesAddr, contentBadgesAddr);
 
         sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
         sybelToken = SybelToken(sybelTokenAddr);
@@ -88,35 +88,35 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
         */
     }
 
-    function migrateToV4(address podcastBadgesAddr) external reinitializer(4) {
+    function migrateToV4(address contentBadgesAddr) external reinitializer(4) {
         // Only for v4 upgrade
-        podcastBadges = IPodcastBadges(podcastBadgesAddr);
+        contentBadges = IContentBadges(contentBadgesAddr);
     }
 
     /**
-     * @dev Add a new podcast to our eco system
+     * @dev Add a new content to our eco system
      */
-    function addPodcast(
-        address podcastOwnerAddress,
+    function addContent(
+        address contentOwnerAddress,
         uint256 commonSupply,
         uint256 rareSupply,
         uint256 epicSupply,
         uint256 legendarySupply
-    ) external override onlyRole(SybelRoles.MINTER) whenNotPaused returns (uint256 podcastId) {
-        require(podcastOwnerAddress != address(0), "SYB: Cannot add podcast for the 0 address !");
-        require(commonSupply > 0, "SYB: Common supply required for initial mint");
-        require(commonSupply < 500, "SYB: Initial common supply cant' be greater than 500");
-        require(rareSupply < 200, "SYB: Initial rare supply cant' be greater than 200");
-        require(epicSupply < 50, "SYB: Initial epic supply cant' be greater than 50");
-        require(legendarySupply < 5, "SYB: Initial legendary supply cant' be greater than 5");
-        // Try to mint the new podcast
-        podcastId = sybelInternalTokens.mintNewPodcast(podcastOwnerAddress);
+    ) external override onlyRole(SybelRoles.MINTER) whenNotPaused returns (uint256 contentId) {
+        require(contentOwnerAddress != address(0), "SYB: Invalid owner address");
+        require(commonSupply > 0, "SYB: Invalid common supply");
+        require(commonSupply < 500, "SYB: Invalid common supply");
+        require(rareSupply < 200, "SYB: Invalid rare supply");
+        require(epicSupply < 50, "SYB: Invalid epic supply");
+        require(legendarySupply < 5, "SYB: Invalid legendary supply");
+        // Try to mint the new content
+        contentId = sybelInternalTokens.mintNewContent(contentOwnerAddress);
         // Then set the supply for each token types
         uint256[] memory ids = new uint256[](4);
-        ids[0] = SybelMath.buildClassicNftId(podcastId);
-        ids[1] = SybelMath.buildRareNftId(podcastId);
-        ids[2] = SybelMath.buildEpicNftId(podcastId);
-        ids[3] = SybelMath.buildLegendaryNftId(podcastId);
+        ids[0] = SybelMath.buildClassicNftId(contentId);
+        ids[1] = SybelMath.buildRareNftId(contentId);
+        ids[2] = SybelMath.buildEpicNftId(contentId);
+        ids[3] = SybelMath.buildLegendaryNftId(contentId);
         uint256[] memory supplies = new uint256[](4);
         supplies[0] = commonSupply; // Common
         supplies[1] = rareSupply; // Rare
@@ -124,9 +124,9 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
         supplies[3] = legendarySupply; // Legendary
         sybelInternalTokens.setSupplyBatch(ids, supplies);
         // Emit the event
-        emit PodcastMinted(podcastId, podcastOwnerAddress);
-        // Return the minted podcast id
-        return podcastId;
+        emit ContentMinted(contentId, contentOwnerAddress);
+        // Return the minted content id
+        return contentId;
     }
 
     /**
@@ -149,7 +149,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
         // Send 20% of sybl token to the foundation
         sybelToken.mint(foundationWallet, amountForFundation);
         // Send 80% to the owner
-        address owner = sybelInternalTokens.ownerOf(SybelMath.extractPodcastId(id));
+        address owner = sybelInternalTokens.ownerOf(SybelMath.extractContentId(id));
         uint256 amountForOwner = totalCost - amountForFundation;
         sybelToken.transferFrom(to, owner, amountForOwner);
 

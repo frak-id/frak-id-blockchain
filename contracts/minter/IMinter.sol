@@ -8,10 +8,10 @@ import "../utils/IPausable.sol";
  */
 interface IMinter is IPausable {
     /**
-     * @dev Add a new podcast to our eco system
+     * @dev Add a new content to our eco system
      */
-    function addPodcast(
-        address _podcastOwnerAddress,
+    function addContent(
+        address contentOwnerAddress,
         uint256 commonSupply,
         uint256 rareSupply,
         uint256 epicSupply,
@@ -22,13 +22,13 @@ interface IMinter is IPausable {
      * @dev Mint a new fraction of nft
      */
     function mintFraction(
-        uint256 _id,
-        address _to,
-        uint256 _amount
+        uint256 id,
+        address to,
+        uint256 amount
     ) external;
 
     /**
-     * @dev Increase the supply for a podcast
+     * @dev Increase the supply for a content
      */
     function increaseSupply(uint256 _id, uint256 _newSupply) external;
 }

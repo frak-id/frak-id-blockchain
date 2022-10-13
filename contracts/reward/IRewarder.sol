@@ -8,11 +8,11 @@ import "../utils/IPausable.sol";
  */
 interface IRewarder is IPausable {
     /**
-     * @dev Pay a user for all the listening he have done on different podcast
+     * @dev Pay a user for all the listening he have done on different badge
      */
     function payUser(
-        address _listener,
-        uint256[] calldata _podcastIds,
-        uint16[] calldata _listenCounts
+        address listener,
+        uint256[] calldata contentIds,
+        uint16[] calldata listenCounts
     ) external;
 }

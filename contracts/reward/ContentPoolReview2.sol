@@ -23,7 +23,7 @@ contract ContentPoolReview {
         bool open;
     }
 
-    // TODO : Do we reduce shares or not ? 
+    // TODO : Do we reduce shares or not ?
     // TODO : How to update the state, callback on the erc1155 ? Not too costy for each operation ?
     struct Participant {
         uint256 shares;

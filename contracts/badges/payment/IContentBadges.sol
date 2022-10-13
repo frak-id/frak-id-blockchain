@@ -4,16 +4,16 @@ pragma solidity ^0.8.7;
 import "../../utils/IPausable.sol";
 
 /**
- * @dev Represent our podcast badge contract
+ * @dev Represent our content badge contract
  */
-interface IPodcastBadges is IPausable {
+interface IContentBadges is IPausable {
     /**
      * @dev Update the listener custom coefficient
      */
-    function updateBadge(uint256 _podcastId, uint256 _badge) external;
+    function updateBadge(uint256 contentId, uint256 _badge) external;
 
     /**
      * @dev Get the payment badges for the given informations
      */
-    function getBadge(uint256 _podcastId) external returns (uint256);
+    function getBadge(uint256 contentId) external returns (uint256);
 }
