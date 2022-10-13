@@ -1,25 +1,26 @@
-# Turbo exclusion
-.turbo/
-
 # Manticore
-contracts/mcore_*/
+mcore_*/
 
 # Coverage report
-contracts/coverage/
-contracts/coverage.json
+coverage/
+coverage.json
 
 # Generic contracts exclusions
-contracts/.openzeppelin/unknwon-*.json
-contracts/.deps/*
+.openzeppelin/unknwon-*.json
+.deps/*
 
 # Blockchain parts
-contracts/artifacts/
-contracts/cache/
-contracts/contracts/artifacts/
-contracts/typechain-types/
+artifacts/
+cache/
+typechain-types/
 
 # Node.js dependency directory
 node_modules/
 
 # .env files
 .env
+
+abi/
+types/
+
+tools/**/*.log
