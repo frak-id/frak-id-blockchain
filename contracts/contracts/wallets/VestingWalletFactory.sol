@@ -90,10 +90,11 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         uint32 duration,
         bool revocable
     ) private whenNotPaused {
-        require(vestingGroup[id].rewardCap == 0, "SYB: This vesting group already exist");
-        require(rewardCap > 0, "SYB: The reward cap should be superior to 0");
-        require(duration > 0, "SYB: The duration should be superior to 0");
-        require(rewardCap + totalGroupCap <= SYBL_VESTING_CAP, "SYB: Reward cap exceeding total cap for vesting");
+        require(vestingGroup[id].rewardCap == 0, "SYB: id already taken");
+        require(rewardCap > 0, "SYB: invalid reward cap");
+        require(duration > 0, "SYB: invalid duration");
+        require(initialDropPerthousand <= 1000, "SYB: Initial drop too large");
+        require(rewardCap + totalGroupCap <= SYBL_VESTING_CAP, "SYB: Reward cap too large");
         // Increase the total group supply
         totalGroupCap += rewardCap;
         // Build and save this group
@@ -149,8 +150,7 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         uint48 startDate
     ) external onlyRole(SybelRoles.VESTING_CREATOR) whenNotPaused {
         // Ensure all the param are correct
-        require(reward!= 0, "SYBL : Reward shouldn't 0");
-        require(reward< SYBL_VESTING_CAP, "SYBL : Reward too large"); // Ensure the reward pass in a uint96 also
+        require(reward != 0, "SYBL : Reward shouldn't 0");
         require(beneficiary != address(0), "SYB: Wrong investor address");
         // Find the group and check basic properties
         VestingGroup storage group = _getVestingGroup(groupId);

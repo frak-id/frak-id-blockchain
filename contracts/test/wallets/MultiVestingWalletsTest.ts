@@ -369,7 +369,7 @@ describe("MultipleVestingWallets", () => {
   });
 });
 
-async function extractVestingCreatedEvent(tx: ContractTransaction): Promise<VestingCreatedEvent> {
+export async function extractVestingCreatedEvent(tx: ContractTransaction): Promise<VestingCreatedEvent> {
   const createReceipt = await tx.wait();
   const creationEvent = createReceipt.events?.filter(event => {
     return event.event == "VestingCreated";

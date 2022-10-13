@@ -9,26 +9,21 @@ import { expect } from "chai";
 import { deployContract } from "../../scripts/utils/deploy";
 import { testPauses } from "../utils/test-pauses";
 import { adminRole, minterRole, vestingCreatorRole, vestingManagerRole } from "../../scripts/utils/roles";
-import { address0, updateTimestampToEndOfDuration } from "../utils/test-utils";
+import { address0, getTimestampInAFewMoment, updateTimestampToEndOfDuration } from "../utils/test-utils";
 import { BigNumber, utils } from "ethers";
 import { testRoles } from "../utils/test-roles";
+import { extractVestingCreatedEvent } from "./MultiVestingWalletsTest";
 
-const GROUP_INVESTOR_ID = 1;
-const GROUP_TEAM_ID = 2;
-const GROUP_PRE_SALES_1_ID = 10;
-const GROUP_PRE_SALES_2_ID = 11;
-const GROUP_PRE_SALES_3_ID = 12;
-const GROUP_PRE_SALES_4_ID = 13;
-const vestingGroupIds = [
-  GROUP_INVESTOR_ID,
-  GROUP_TEAM_ID,
-  GROUP_PRE_SALES_1_ID,
-  GROUP_PRE_SALES_2_ID,
-  GROUP_PRE_SALES_3_ID,
-  GROUP_PRE_SALES_4_ID,
-];
+const REVOCABLE_GROUP = 1;
+const NON_REVOCABLE_GROUP = 2;
+const INITIAL_DROP_GROUP = 3;
+const groupIds = [REVOCABLE_GROUP, NON_REVOCABLE_GROUP, INITIAL_DROP_GROUP];
 
-describe("VestingWalletFactory", () => {
+const INEXISTANT_GROUP = 100;
+
+const GROUP_CAP = BigNumber.from(10).pow(10);
+
+describe.only("VestingWalletFactory", () => {
   let vestingWalletFactory: VestingWalletFactory;
   let multiVestingWallets: MultiVestingWallets;
   let sybelToken: SybelToken;
@@ -57,13 +52,18 @@ describe("VestingWalletFactory", () => {
     await sybelToken.grantRole(minterRole, vestingWalletFactory.address);
 
     // Add some initial supply to our vesting group
-    await sybelToken.mint(multiVestingWallets.address, 1000);
+    await sybelToken.mint(multiVestingWallets.address, BigNumber.from(10).pow(20));
+
+    // Create an initial vesting groups
+    await vestingWalletFactory.addVestingGroup(REVOCABLE_GROUP, GROUP_CAP, 0, 10, true);
+    await vestingWalletFactory.addVestingGroup(NON_REVOCABLE_GROUP, GROUP_CAP, 0, 10, false);
+    await vestingWalletFactory.addVestingGroup(INITIAL_DROP_GROUP, GROUP_CAP, 100, 10, false);
   });
 
-  describe("Vesting group", () => {
+  describe("Vesting group creation", () => {
     it("Have all the initial vesting group", async () => {
       // Ensure all the programmed group are present
-      for await (const groupId of vestingGroupIds) {
+      for await (const groupId of groupIds) {
         const fetchedGroup = await vestingWalletFactory.getVestingGroup(groupId);
         expect(fetchedGroup.rewardCap).not.to.equal(0);
         expect(fetchedGroup.supply).to.equal(0);
@@ -71,44 +71,159 @@ describe("VestingWalletFactory", () => {
       }
 
       // Ensure group without predicted id arn't present
-      const inexistantGroup = await vestingWalletFactory.getVestingGroup(6);
-      expect(inexistantGroup.rewardCap).to.equal(0);
-      expect(inexistantGroup.duration).to.equal(0);
+      await expect(vestingWalletFactory.getVestingGroup(INEXISTANT_GROUP)).to.be.reverted;
     });
-
-    it("Can't go past group supply", async () => {
-      // Ensure a group supply increase when new vesting created
-      const groupId = vestingGroupIds[0];
-      const initialVestingGroup = await vestingWalletFactory.getVestingGroup(groupId);
-
-      // Add a new vesting
-      // const addTx = await vestingWalletFactory.addVestingWallet(addr1.address, 1, groupId);
-      // expect(addTx.hash).to.not.be.null;
-      // await updateTimestampToEndOfDuration(addTx);
-
-      // Add a second vesting
-      // await expect(vestingWalletFactory.addVestingWallet(addr1.address, initialVestingGroup.rewardCap, groupId)).to
-      //   .reverted;
-      // expect(addTx.hash).to.not.be.null;
+    it("Can't create a group for an existing id", async () => {
+      await expect(vestingWalletFactory.addVestingGroup(NON_REVOCABLE_GROUP, GROUP_CAP, 0, 10, false)).to.be.reverted;
     });
-
-    it("Can't add existing vesting group", async () => {
-      // await expect(vestingWalletFactory.addVestingGroup(GROUP_INVESTOR_ID, 10, 10, 10)).to.reverted;
+    it("Can't create a group with 0 reward", async () => {
+      await expect(vestingWalletFactory.addVestingGroup(INEXISTANT_GROUP, 0, 0, 10, false)).to.be.reverted;
     });
-
-    it("Can't add vesting group with no reward", async () => {
-      // await expect(vestingWalletFactory.addVestingGroup(6, 0, 10, 10)).to.reverted;
+    it("Can't create a group with 0 duration", async () => {
+      await expect(vestingWalletFactory.addVestingGroup(INEXISTANT_GROUP, 10, 0, 0, false)).to.be.reverted;
     });
-    it("Can't add vesting group with no duration", async () => {
-      // await expect(vestingWalletFactory.addVestingGroup(6, 10, 0, 10)).to.reverted;
+    it("Can't create a group with drop per thousand too large", async () => {
+      await expect(vestingWalletFactory.addVestingGroup(INEXISTANT_GROUP, 10, 1001, 10, false)).to.be.reverted;
     });
-    it("Can't add vesting group that exceed the total cap group", async () => {
-      //await expect(vestingWalletFactory.addVestingGroup(6, BigNumber.from(10).pow(18).mul(1_500_000_000), 10, 10)).to
-      //  .reverted;
+    it("Can't exceed reward cap", async () => {
+      await expect(
+        vestingWalletFactory.addVestingGroup(
+          INEXISTANT_GROUP,
+          BigNumber.from(10).pow(18).mul(1_500_000_000),
+          1000,
+          10,
+          false,
+        ),
+      ).to.be.reverted;
     });
   });
 
-  describe("Vesting group", () => {
+  describe("Vesting wallet creation", () => {
+    it("Can add a new beneficiary", async () => {
+      // Ensure a group supply increase when new vesting created
+      const initialVestingGroup = await vestingWalletFactory.getVestingGroup(REVOCABLE_GROUP);
+
+      // Add a new vesting
+      await expect(
+        vestingWalletFactory.addVestingWallet(addr1.address, 10, REVOCABLE_GROUP, getTimestampInAFewMoment()),
+      ).not.to.be.reverted;
+
+      // Ensure the group supply has increased
+      const updatedVestingGroup = await vestingWalletFactory.getVestingGroup(REVOCABLE_GROUP);
+      expect(updatedVestingGroup.supply).to.equal(initialVestingGroup.supply.add(10));
+    });
+    it("Can't create to unknown group", async () => {
+      // Add a new vesting
+      await expect(
+        vestingWalletFactory.addVestingWallet(addr1.address, 10, INEXISTANT_GROUP, getTimestampInAFewMoment()),
+      ).to.be.reverted;
+    });
+    it("Can't exceed group reward cap", async () => {
+      // Add a new vesting
+      await expect(
+        vestingWalletFactory.addVestingWallet(
+          addr1.address,
+          GROUP_CAP.add(10),
+          REVOCABLE_GROUP,
+          getTimestampInAFewMoment(),
+        ),
+      ).to.be.reverted;
+    });
+    it("Can't exceed total cap", async () => {
+      // Add a new vesting
+      await expect(
+        vestingWalletFactory.addVestingWallet(
+          addr1.address,
+          BigNumber.from(10).pow(18).mul(1_500_000_000),
+          REVOCABLE_GROUP,
+          getTimestampInAFewMoment(),
+        ),
+      ).to.be.reverted;
+    });
+    it("Can't create with beneficary 0", async () => {
+      // Add a new vesting
+      await expect(vestingWalletFactory.addVestingWallet(address0, 10, REVOCABLE_GROUP, getTimestampInAFewMoment())).to
+        .be.reverted;
+    });
+    it("Can't create with 0 reward", async () => {
+      // Add a new vesting
+      await expect(vestingWalletFactory.addVestingWallet(addr1.address, 0, REVOCABLE_GROUP, getTimestampInAFewMoment()))
+        .to.be.reverted;
+    });
+  });
+
+  describe("Vesting wallet batch creation", () => {
+    it("Can add a new beneficiary", async () => {
+      // Ensure a group supply increase when new vesting created
+      const initialVestingGroup = await vestingWalletFactory.getVestingGroup(REVOCABLE_GROUP);
+
+      // Add a new vesting
+      await expect(
+        vestingWalletFactory.addVestingWalletBatch([addr1.address], [10], REVOCABLE_GROUP, getTimestampInAFewMoment()),
+      ).not.to.be.reverted;
+
+      // Ensure the group supply has increased
+      const updatedVestingGroup = await vestingWalletFactory.getVestingGroup(REVOCABLE_GROUP);
+      expect(updatedVestingGroup.supply).to.equal(initialVestingGroup.supply.add(10));
+    });
+    it("Can't create with empty array size", async () => {
+      // Add a new vesting
+      await expect(vestingWalletFactory.addVestingWalletBatch([], [], REVOCABLE_GROUP, getTimestampInAFewMoment())).to
+        .be.reverted;
+    });
+    it("Can't create with different array size", async () => {
+      // Add a new vesting
+      await expect(
+        vestingWalletFactory.addVestingWalletBatch(
+          [addr1.address],
+          [10, 10],
+          REVOCABLE_GROUP,
+          getTimestampInAFewMoment(),
+        ),
+      ).to.be.reverted;
+    });
+    it("Can't create to unknown group", async () => {
+      // Add a new vesting
+      await expect(
+        vestingWalletFactory.addVestingWalletBatch([addr1.address], [10], INEXISTANT_GROUP, getTimestampInAFewMoment()),
+      ).to.be.reverted;
+    });
+    it("Can't exceed group reward cap", async () => {
+      // Add a new vesting
+      await expect(
+        vestingWalletFactory.addVestingWalletBatch(
+          [addr1.address, addr2.address],
+          [GROUP_CAP, 1],
+          REVOCABLE_GROUP,
+          getTimestampInAFewMoment(),
+        ),
+      ).to.be.reverted;
+    });
+    it("Can't create with beneficary 0", async () => {
+      // Add a new vesting
+      await expect(
+        vestingWalletFactory.addVestingWalletBatch(
+          [addr1.address, address0],
+          [10, 10],
+          REVOCABLE_GROUP,
+          getTimestampInAFewMoment(),
+        ),
+      ).to.be.reverted;
+    });
+    it("Can't create with 0 reward", async () => {
+      // Add a new vesting
+      await expect(
+        vestingWalletFactory.addVestingWalletBatch(
+          [addr1.address, addr2.address],
+          [10, 0],
+          REVOCABLE_GROUP,
+          getTimestampInAFewMoment(),
+        ),
+      ).to.be.reverted;
+    });
+  });
+
+  /*describe("Vesting group", () => {
     it("Can add new vesting, group supplied increased", async () => {
       // Ensure a group supply increase when new vesting created
       const groupId = vestingGroupIds[0];
@@ -132,7 +247,7 @@ describe("VestingWalletFactory", () => {
     it("Can't add new vesting to inexistant group", async () => {
       // await expect(vestingWalletFactory.addVestingWallet(addr1.address, 10, 6)).to.be.reverted;
     });
-  });
+  });*/
 
   // Check the pausable capabilities
   describe("Pauses", () => {
