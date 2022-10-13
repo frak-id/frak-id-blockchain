@@ -1,8 +1,8 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
 import { ethers, upgrades } from "hardhat";
 
-import { Rewarder } from "../types/contracts/reward/Rewarder";
 import * as deployedAddresses from "../addresses.json";
+import { Rewarder } from "../types/contracts/reward/Rewarder";
 
 (async () => {
   try {

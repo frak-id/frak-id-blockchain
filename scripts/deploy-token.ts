@@ -1,7 +1,6 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
-import { ethers, upgrades } from "hardhat";
-
 import { Contract } from "ethers";
+import { ethers, upgrades } from "hardhat";
 
 import { SybelToken } from "../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 

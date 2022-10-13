@@ -1,5 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+
 import { SybelAccessControlUpgradeable } from "../../types/contracts/utils/SybelAccessControlUpgradeable";
 
 // Check the Roles managment

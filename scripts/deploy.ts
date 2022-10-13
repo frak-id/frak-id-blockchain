@@ -1,15 +1,14 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
 import * as fs from "fs";
-
 import hre from "hardhat";
 
-import { SybelInternalTokens } from "../types/contracts/tokens/SybelInternalTokens";
-import { SybelToken } from "../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
+import { FractionCostBadges } from "../types/contracts/badges/cost/FractionCostBadges";
 import { ListenerBadges } from "../types/contracts/badges/payment/ListenerBadges";
 import { PodcastBadges } from "../types/contracts/badges/payment/PodcastBadges";
-import { FractionCostBadges } from "../types/contracts/badges/cost/FractionCostBadges";
 import { Minter } from "../types/contracts/minter/Minter";
 import { Rewarder } from "../types/contracts/reward/Rewarder";
+import { SybelInternalTokens } from "../types/contracts/tokens/SybelInternalTokens";
+import { SybelToken } from "../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { FoundationWallet } from "../types/contracts/wallets/FoundationWallet";
 import { deployContract } from "./utils/deploy";
 

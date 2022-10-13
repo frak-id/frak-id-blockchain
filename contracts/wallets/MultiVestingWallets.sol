@@ -24,25 +24,13 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     );
 
     /// Emitted when a vesting is transfered between 2 address
-    event VestingTransfered(
-        uint24 indexed vestingId,
-        address indexed from,
-        address indexed to
-    );
+    event VestingTransfered(uint24 indexed vestingId, address indexed from, address indexed to);
 
     /// Emitted when a vesting is revoked
-    event VestingRevoked(
-        uint24 indexed vestingId,
-        address indexed beneficiary,
-        uint96 refund
-    );
+    event VestingRevoked(uint24 indexed vestingId, address indexed beneficiary, uint96 refund);
 
     /// Emitted when a part of the vesting is released
-    event VestingReleased(
-        uint24 indexed vestingId,
-        address indexed beneficiary,
-        uint96 amount
-    );
+    event VestingReleased(uint24 indexed vestingId, address indexed beneficiary, uint96 amount);
 
     /**
      * @dev Represent a vesting wallet
@@ -55,11 +43,9 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         uint24 id; // id of the vesting
         bool isRevoked; // Is this vesting revoked ?
         bool isRevocable; // Is this vesting revocable ?
-        
         // Second slot (remain 86 bytes)
         uint96 initialDrop; // initial drop when start date is reached
         uint48 startDate; // start date of this vesting
-
         // Third slot (full)
         address beneficiary; // beneficiary wallet of this vesting
     }
@@ -198,7 +184,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         address beneficiary,
         uint256 amount,
         uint256 initialDrop,
-        uint32 duration, 
+        uint32 duration,
         uint48 startDate,
         bool revocable
     ) private {
@@ -412,7 +398,8 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
             return vesting.amount;
         } else {
             // Otherwise, the proportionnal amount
-            uint256 amountForVesting = ((vesting.amount - vesting.initialDrop) * (block.timestamp - vesting.startDate)) / vesting.duration;
+            uint256 amountForVesting = ((vesting.amount - vesting.initialDrop) *
+                (block.timestamp - vesting.startDate)) / vesting.duration;
             uint256 linearAmountComputed = amountForVesting + vesting.initialDrop;
             require(linearAmountComputed < REWARD_CAP, "SYB: Computation error"); // Ensure we are still on a uint96
             return uint96(linearAmountComputed);
@@ -459,7 +446,13 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     /**
      * @notice Revoke a vesting wallet
      */
-    function revoke(uint24 vestingId) external whenNotPaused onlyRole(SybelRoles.ADMIN) onlyIfNotRevoked(vestingId) returns (uint96 vestAmountRemaining) {
+    function revoke(uint24 vestingId)
+        external
+        whenNotPaused
+        onlyRole(SybelRoles.ADMIN)
+        onlyIfNotRevoked(vestingId)
+        returns (uint96 vestAmountRemaining)
+    {
         // Get the vesting
         Vesting storage vesting = _getVesting(vestingId);
         require(vesting.isRevocable, "SYB: Vesting not revocable");
@@ -477,7 +470,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         vestAmountRemaining = vesting.amount - vesting.released;
 
         // Then perform the refund transfer if needed
-        if(releasable != 0) {
+        if (releasable != 0) {
             sybelToken.safeTransfer(vesting.beneficiary, releasable);
         }
 

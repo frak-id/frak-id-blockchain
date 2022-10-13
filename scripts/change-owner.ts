@@ -1,18 +1,17 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
+import { BaseContract, BytesLike, Contract, ContractTransaction, Overrides, utils } from "ethers";
 import { ethers } from "hardhat";
 
-import { BaseContract, BytesLike, Contract, ContractTransaction, Overrides, utils } from "ethers";
-
-import { Minter } from "../types/contracts/minter/Minter";
 import * as addr from "../../shared/addresses.json";
+import { PromiseOrValue } from "../types/common";
 import { FractionCostBadges } from "../types/contracts/badges/cost/FractionCostBadges";
-import { Rewarder } from "../types/contracts/reward/Rewarder";
 import { ListenerBadges } from "../types/contracts/badges/payment/ListenerBadges";
 import { PodcastBadges } from "../types/contracts/badges/payment/PodcastBadges";
-import { SybelToken } from "../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
+import { Minter } from "../types/contracts/minter/Minter";
+import { Rewarder } from "../types/contracts/reward/Rewarder";
 import { SybelInternalTokens } from "../types/contracts/tokens/SybelInternalTokens";
+import { SybelToken } from "../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { FoundationWallet } from "../types/contracts/wallets/FoundationWallet";
-import { PromiseOrValue } from "../types/common";
 
 let adminRole = "0x00";
 const minterRole = utils.keccak256(utils.toUtf8Bytes("MINTER_ROLE"));

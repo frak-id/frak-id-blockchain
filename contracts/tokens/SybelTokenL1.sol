@@ -37,23 +37,17 @@ contract SybelTokenL1 is ERC20, ERC20Burnable, Pausable, AccessControl, NativeMe
         _mint(to, amount);
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 amount)
-        internal
-        whenNotPaused
-        override
-    {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override whenNotPaused {
         super._beforeTokenTransfer(from, to, amount);
-    }    
-    
-    // This is to support Native meta transactions
-    // never use msg.sender directly, use _msgSender() instead
-    function _msgSender()
-        internal
-        override
-        view
-        returns (address sender)
-    {
-        return ContextMixin.msgSender();
     }
 
+    // This is to support Native meta transactions
+    // never use msg.sender directly, use _msgSender() instead
+    function _msgSender() internal view override returns (address sender) {
+        return ContextMixin.msgSender();
+    }
 }

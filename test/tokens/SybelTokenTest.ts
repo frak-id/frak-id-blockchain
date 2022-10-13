@@ -1,15 +1,14 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
-import { ethers } from "hardhat";
-
-import { BigNumber } from "ethers";
-
-import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+import { BigNumber } from "ethers";
+import { ethers } from "hardhat";
+
 import { deployContract } from "../../scripts/utils/deploy";
-import { testRoles } from "../utils/test-roles";
-import { testPauses } from "../utils/test-pauses";
 import { minterRole, pauserRole } from "../../scripts/utils/roles";
+import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
+import { testPauses } from "../utils/test-pauses";
+import { testRoles } from "../utils/test-roles";
 
 describe("SybelToken", () => {
   let sybelToken: SybelToken;

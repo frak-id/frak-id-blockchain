@@ -1,17 +1,17 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { expect } from "chai";
+import { BigNumber, utils } from "ethers";
 import { ethers } from "hardhat";
 
+import { deployContract } from "../../scripts/utils/deploy";
+import { adminRole, minterRole, vestingCreatorRole, vestingManagerRole } from "../../scripts/utils/roles";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { MultiVestingWallets } from "../../types/contracts/wallets/MultiVestingWallets";
 import { VestingWalletFactory } from "../../types/contracts/wallets/VestingWalletFactory";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { expect } from "chai";
-import { deployContract } from "../../scripts/utils/deploy";
 import { testPauses } from "../utils/test-pauses";
-import { adminRole, minterRole, vestingCreatorRole, vestingManagerRole } from "../../scripts/utils/roles";
-import { address0, getTimestampInAFewMoment, updateTimestampToEndOfDuration } from "../utils/test-utils";
-import { BigNumber, utils } from "ethers";
 import { testRoles } from "../utils/test-roles";
+import { address0, getTimestampInAFewMoment, updateTimestampToEndOfDuration } from "../utils/test-utils";
 import { extractVestingCreatedEvent } from "./MultiVestingWalletsTest";
 
 const REVOCABLE_GROUP = 1;

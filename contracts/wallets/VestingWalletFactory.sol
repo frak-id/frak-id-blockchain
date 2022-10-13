@@ -8,7 +8,6 @@ import "../utils/SybelAccessControlUpgradeable.sol";
 import "../utils/SybelRoles.sol";
 
 contract VestingWalletFactory is SybelAccessControlUpgradeable {
-
     // The cap of sybl token propose to vester
     uint96 internal constant SYBL_VESTING_CAP = 1_500_000_000 ether;
 
@@ -95,9 +94,9 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         totalGroupCap += rewardCap;
         // Build and save this group
         vestingGroup[id] = VestingGroup({
-            rewardCap : rewardCap, 
-            supply : 0, 
-            duration: duration, 
+            rewardCap: rewardCap,
+            supply: 0,
+            duration: duration,
             initialDropPerthousand: initialDropPerthousand,
             isRevocable: revocable
         });
@@ -108,7 +107,11 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
     /**
      * @notice Transfer a group reserve to another one
      */
-    function transferGroupReserve(uint8 initialId, uint8 targetId, uint96 amount) external whenNotPaused onlyRole(SybelRoles.ADMIN) {
+    function transferGroupReserve(
+        uint8 initialId,
+        uint8 targetId,
+        uint96 amount
+    ) external whenNotPaused onlyRole(SybelRoles.ADMIN) {
         // Ensure the group as enough supply
         VestingGroup storage initialGroup = _getVestingGroup(initialId);
         require(initialGroup.rewardCap - amount >= initialGroup.supply, "SYB: Not enought group supply");
@@ -153,7 +156,7 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         require(group.supply + reward <= group.rewardCap, "SYB: Reward too big");
         // Compute the initial drop if needed
         uint256 initialDrop = 0;
-        if(group.initialDropPerthousand != 0) {
+        if (group.initialDropPerthousand != 0) {
             initialDrop = (reward * group.initialDropPerthousand) / 1000;
         }
         // Update the group supply
@@ -189,7 +192,7 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
             // Increase the total rewards
             totalReward += rewards[index];
             // Compute the initial drops
-            if(group.initialDropPerthousand != 0) {
+            if (group.initialDropPerthousand != 0) {
                 initialDrops[index] = (rewards[index] * group.initialDropPerthousand) / 1000;
             }
         }
@@ -201,7 +204,14 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         group.supply += uint96(totalReward);
 
         // Create the vests
-        multiVestingWallets.createVestBatch(beneficiaries, rewards, initialDrops, group.duration, startDate, group.isRevocable);
+        multiVestingWallets.createVestBatch(
+            beneficiaries,
+            rewards,
+            initialDrops,
+            group.duration,
+            startDate,
+            group.isRevocable
+        );
 
         // Emit the event's
         for (uint256 index = 0; index < beneficiaries.length; ++index) {
@@ -212,7 +222,7 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
     /**
      * @notice Revoke a user vest wallet, and so reduce the group supply by the amount unlocked
      */
-    function revokeUserVest(uint8 groupId, uint24 vestId) external onlyRole(SybelRoles.VESTING_CREATOR) whenNotPaused  {
+    function revokeUserVest(uint8 groupId, uint24 vestId) external onlyRole(SybelRoles.VESTING_CREATOR) whenNotPaused {
         // Get our group and the previous sybl balance of the contract
         VestingGroup storage group = _getVestingGroup(groupId);
 

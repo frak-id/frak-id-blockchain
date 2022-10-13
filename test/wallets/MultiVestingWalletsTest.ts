@@ -1,15 +1,15 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
-import { ethers } from "hardhat";
-
-import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
-import { MultiVestingWallets, VestingCreatedEvent } from "../../types/contracts/wallets/MultiVestingWallets";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { deployContract } from "../../scripts/utils/deploy";
-import { testRoles } from "../utils/test-roles";
-import { pauserRole, minterRole, adminRole, vestingManagerRole } from "../../scripts/utils/roles";
-import { address0, getTimestampInAFewMoment, updatToGivenTimestamp } from "../utils/test-utils";
 import { BigNumber, ContractTransaction } from "ethers";
+import { ethers } from "hardhat";
+
+import { deployContract } from "../../scripts/utils/deploy";
+import { adminRole, minterRole, pauserRole, vestingManagerRole } from "../../scripts/utils/roles";
+import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
+import { MultiVestingWallets, VestingCreatedEvent } from "../../types/contracts/wallets/MultiVestingWallets";
+import { testRoles } from "../utils/test-roles";
+import { address0, getTimestampInAFewMoment, updatToGivenTimestamp } from "../utils/test-utils";
 
 const initialMintSupply = BigNumber.from(10).pow(18).mul(500_000_000);
 

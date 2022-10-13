@@ -1,5 +1,5 @@
-import { ethers, upgrades } from "hardhat";
 import { Contract } from "ethers";
+import { ethers, upgrades } from "hardhat";
 
 /**
  * Deploy a new contract

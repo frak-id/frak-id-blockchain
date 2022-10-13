@@ -1,11 +1,11 @@
-import dotenv from "dotenv";
-import "@typechain/hardhat";
-import "@nomiclabs/hardhat-etherscan";
-import "@openzeppelin/hardhat-upgrades";
-import "hardhat-contract-sizer";
-import "hardhat-abi-exporter";
 // import "hardhat-docgen"; // TODO : Error with vue for now
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomiclabs/hardhat-etherscan";
+import "@openzeppelin/hardhat-upgrades";
+import "@typechain/hardhat";
+import dotenv from "dotenv";
+import "hardhat-abi-exporter";
+import "hardhat-contract-sizer";
 
 dotenv.config();
 

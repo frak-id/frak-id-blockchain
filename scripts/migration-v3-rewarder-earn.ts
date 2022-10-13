@@ -1,7 +1,6 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
-import { ethers, upgrades } from "hardhat";
 import * as fs from "fs";
-
+import { ethers, upgrades } from "hardhat";
 import hre from "hardhat";
 
 import * as deployedAddresses from "../addresses.json";

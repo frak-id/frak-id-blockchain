@@ -9,7 +9,6 @@ import "../utils/SybelRoles.sol";
 
 /// @custom:security-contact crypto-support@sybel.co
 abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgradeable, IPausable, UUPSUpgradeable {
-
     /// Event emitted when contract is paused or unpaused
     event Paused();
     event Unpaused();
@@ -108,11 +107,7 @@ abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgrade
      */
     function _checkRole(bytes32 role, address account) internal view virtual {
         if (!hasRole(role, account)) {
-            revert(
-                string(
-                    abi.encodePacked("AccessControl: account  is missing role")
-                )
-            );
+            revert(string(abi.encodePacked("AccessControl: account  is missing role")));
         }
     }
 

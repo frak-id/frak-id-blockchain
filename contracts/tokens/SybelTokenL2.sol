@@ -12,7 +12,6 @@ import "../utils/NativeMetaTransaction.sol";
  */
 /// @custom:security-contact crypto-support@sybel.co
 contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
-
     bytes32 public constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
 
     uint256 private _cap;
@@ -28,20 +27,14 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
         __MintingAccessControlUpgradeable_init();
         _initializeEIP712(name);
 
-
         _grantRole(DEPOSITOR_ROLE, childChainManager);
 
         _cap = 3_000_000_000 ether; // 3 billion SYBL
-    }    
-    
+    }
+
     // This is to support Native meta transactions
     // never use msg.sender directly, use _msgSender() instead
-    function _msgSender()
-        internal
-        override
-        view
-        returns (address sender)
-    {
+    function _msgSender() internal view override returns (address sender) {
         return ContextMixin.msgSender();
     }
 
@@ -76,8 +69,8 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
      */
     function cap() public view virtual returns (uint256) {
         return _cap;
-    }    
-    
+    }
+
     /**
      * @notice called when token is deposited on root chain
      * @dev Should be callable only by ChildChainManager
@@ -86,11 +79,7 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
      * @param user user address for whom deposit is being done
      * @param depositData abi encoded amount
      */
-    function deposit(address user, bytes calldata depositData)
-        external
-        whenNotPaused
-        onlyRole(DEPOSITOR_ROLE)
-    {
+    function deposit(address user, bytes calldata depositData) external whenNotPaused onlyRole(DEPOSITOR_ROLE) {
         uint256 amount = abi.decode(depositData, (uint256));
         _mint(user, amount);
     }

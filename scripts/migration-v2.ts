@@ -1,16 +1,14 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
-import { ethers, upgrades } from "hardhat";
+import { utils } from "ethers";
 import * as fs from "fs";
-
+import { ethers, upgrades } from "hardhat";
 import hre from "hardhat";
 
-import { utils } from "ethers";
-
-import { SybelToken } from "../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
-import { FoundationWallet } from "../types/contracts/wallets/FoundationWallet";
+import * as deployedAddresses from "../addresses.json";
 import { Minter } from "../types/contracts/minter/Minter";
 import { Rewarder } from "../types/contracts/reward/Rewarder";
-import * as deployedAddresses from "../addresses.json";
+import { SybelToken } from "../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
+import { FoundationWallet } from "../types/contracts/wallets/FoundationWallet";
 import { deployContract } from "./utils/deploy";
 
 (async () => {

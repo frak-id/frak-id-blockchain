@@ -1,12 +1,11 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
-import { ethers, upgrades } from "hardhat";
 import * as fs from "fs";
-
+import { ethers, upgrades } from "hardhat";
 import hre from "hardhat";
 
-import { Minter } from "../types/contracts/minter/Minter";
 import * as deployedAddresses from "../addresses.json";
 import { FractionCostBadges } from "../types/contracts/badges/cost/FractionCostBadges";
+import { Minter } from "../types/contracts/minter/Minter";
 import { deployContract } from "./utils/deploy";
 
 (async () => {
