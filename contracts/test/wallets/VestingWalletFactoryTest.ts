@@ -96,6 +96,22 @@ describe.only("VestingWalletFactory", () => {
         ),
       ).to.be.reverted;
     });
+    it("Can transfer founds between two group", async () => {
+      const initialGroup = await vestingWalletFactory.getVestingGroup(NON_REVOCABLE_GROUP);
+      await vestingWalletFactory.transferGroupReserve(REVOCABLE_GROUP, NON_REVOCABLE_GROUP, 10);
+      const afterTransferGroup = await vestingWalletFactory.getVestingGroup(NON_REVOCABLE_GROUP);
+      expect(afterTransferGroup.rewardCap).to.equal(initialGroup.rewardCap.add(10));
+    });
+    it("Can't transfer founds if supply is to low", async () => {
+      const initialRevoGroup = await vestingWalletFactory.getVestingGroup(REVOCABLE_GROUP);
+      await vestingWalletFactory.addVestingWallet(
+        addr1.address,
+        initialRevoGroup.rewardCap.sub(50),
+        REVOCABLE_GROUP,
+        getTimestampInAFewMoment(),
+      );
+      await expect(vestingWalletFactory.transferGroupReserve(REVOCABLE_GROUP, NON_REVOCABLE_GROUP, 51)).to.be.reverted;
+    });
   });
 
   describe("Vesting wallet creation", () => {
@@ -162,6 +178,16 @@ describe.only("VestingWalletFactory", () => {
         vestingWalletFactory.addVestingWalletBatch([addr1.address], [10], REVOCABLE_GROUP, getTimestampInAFewMoment()),
       ).not.to.be.reverted;
 
+      // Add a new vesting with inition drop
+      await expect(
+        vestingWalletFactory.addVestingWalletBatch(
+          [addr1.address],
+          [10],
+          INITIAL_DROP_GROUP,
+          getTimestampInAFewMoment(),
+        ),
+      ).not.to.be.reverted;
+
       // Ensure the group supply has increased
       const updatedVestingGroup = await vestingWalletFactory.getVestingGroup(REVOCABLE_GROUP);
       expect(updatedVestingGroup.supply).to.equal(initialVestingGroup.supply.add(10));
@@ -223,31 +249,41 @@ describe.only("VestingWalletFactory", () => {
     });
   });
 
-  /*describe("Vesting group", () => {
-    it("Can add new vesting, group supplied increased", async () => {
-      // Ensure a group supply increase when new vesting created
-      const groupId = vestingGroupIds[0];
-      const initialVestingGroup = await vestingWalletFactory.getVestingGroup(groupId);
-
-      // Add a new vesting
-      // const addTx = await vestingWalletFactory.addVestingWallet(addr1.address, 10, groupId);
-      expect(addTx.hash).to.not.be.null;
-      await updateTimestampToEndOfDuration(addTx);
-
-      // Ensure the supply increased
-      const newVestingGroup = await vestingWalletFactory.getVestingGroup(groupId);
-      expect(newVestingGroup.supply).to.equal(initialVestingGroup.supply.add(10));
-    });
-    it("Can't add new vesting with 0 reward", async () => {
-      // await expect(vestingWalletFactory.addVestingWallet(addr1.address, 0, GROUP_INVESTOR_ID)).to.be.reverted;
-    });
-    it("Can't add new vesting to 0 addr", async () => {
-      // await expect(vestingWalletFactory.addVestingWallet(address0, 10, GROUP_INVESTOR_ID)).to.be.reverted;
-    });
-    it("Can't add new vesting to inexistant group", async () => {
-      // await expect(vestingWalletFactory.addVestingWallet(addr1.address, 10, 6)).to.be.reverted;
-    });
-  });*/
+  // Test the roles
+  describe("Vesting creator roles", () => {
+    testRoles(
+      () => vestingWalletFactory,
+      () => addr1,
+      vestingCreatorRole,
+      [
+        async () => {
+          // Can't add vesting wallet if paused
+          await vestingWalletFactory
+            .connect(addr1)
+            .addVestingWallet(addr1.address, 10, INITIAL_DROP_GROUP, getTimestampInAFewMoment());
+        },
+        async () => {
+          // Can't add vesting wallet if paused
+          await vestingWalletFactory
+            .connect(addr1)
+            .addVestingWalletBatch([addr1.address], [10], REVOCABLE_GROUP, getTimestampInAFewMoment());
+        },
+      ],
+    );
+  });
+  describe("Admin roles", () => {
+    testRoles(
+      () => vestingWalletFactory,
+      () => addr1,
+      adminRole,
+      [
+        async () => {
+          // Can't add vesting groyp if paused
+          await vestingWalletFactory.connect(addr1).addVestingGroup(INEXISTANT_GROUP, 10, 10, 10, false);
+        },
+      ],
+    );
+  });
 
   // Check the pausable capabilities
   describe("Pauses", () => {
@@ -257,10 +293,24 @@ describe.only("VestingWalletFactory", () => {
       [
         async () => {
           // Can't add vesting wallet if paused
-          // await vestingWalletFactory.addVestingWallet(addr1.address, 10, GROUP_INVESTOR_ID);
+          await vestingWalletFactory.addVestingWallet(addr1.address, 10, REVOCABLE_GROUP, getTimestampInAFewMoment());
         },
         async () => {
-          // await vestingWalletFactory.addVestingGroup(6, 10, 10, 10);
+          // Can't add vesting wallet if paused
+          await vestingWalletFactory.addVestingWalletBatch(
+            [addr1.address],
+            [10],
+            REVOCABLE_GROUP,
+            getTimestampInAFewMoment(),
+          );
+        },
+        async () => {
+          // Can't add vesting groyp if paused
+          await vestingWalletFactory.addVestingGroup(INEXISTANT_GROUP, 10, 10, 10, false);
+        },
+        async () => {
+          // Can't transfer if paused
+          await vestingWalletFactory.transferGroupReserve(REVOCABLE_GROUP, NON_REVOCABLE_GROUP, 10);
         },
       ],
     );
