@@ -35,6 +35,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
 
     /**
      * The pending reward for the given address
+     * TODO : Can be uint96 (since sybl cap is a 1.5 billion 1e18 so it shouldn't exceed that value)
      */
     mapping(address => uint256) public pendingRewards;
 

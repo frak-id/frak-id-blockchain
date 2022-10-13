@@ -19,10 +19,12 @@ import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 contract ContentPoolReview {
     struct RewardState {
         uint256 totalShares;
-        uint256 currentPoolReward;
+        uint256 currentPoolReward; // TODO : Can be uint96 (since sybl cap is a 1.5 billion 1e18 so it shouldn't exceed that value)
         bool open;
     }
 
+    // TODO : Do we reduce shares or not ? 
+    // TODO : How to update the state, callback on the erc1155 ? Not too costy for each operation ?
     struct Participant {
         uint256 shares;
         uint256 enterStateIndex;

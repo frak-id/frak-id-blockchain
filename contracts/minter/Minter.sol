@@ -158,11 +158,13 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
     }
 
     /**
-     * @dev Increase the supply for a podcast
+     * @dev Increase the supply for a content fraction
      */
     function increaseSupply(uint256 id, uint256 newSupply) external onlyRole(SybelRoles.MINTER) whenNotPaused {
+        uint256 currentSupply = sybelInternalTokens.supplyOf(id);
+        require(currentSupply == 0, "SYB: Fraction remaining");
         // Compute the supply difference
-        uint256 newRealSupply = sybelInternalTokens.supplyOf(id) + newSupply;
+        uint256 newRealSupply = currentSupply + newSupply;
         // Mint his Fraction of NFT
         sybelInternalTokens.setSupplyBatch(SybelMath.asSingletonArray(id), SybelMath.asSingletonArray(newRealSupply));
     }

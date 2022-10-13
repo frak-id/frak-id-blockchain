@@ -11,8 +11,11 @@ import "../utils/MintingAccessControlUpgradeable.sol";
 /// @custom:security-contact crypto-support@sybel.co
 /// @custom:oz-upgrades-unsafe-allow external-library-linking
 contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable, IERC2981Upgradeable {
+
+    using SybelMath for uint256;
+
     // The current podcast token id
-    uint256 private _currentPodcastTokenID;
+    uint256 private _currentContentTokenId;
 
     // Id of podcast to owner of this podcast
     mapping(uint256 => address) public owners;
@@ -31,7 +34,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     /**
      * @dev Event emitted when the owner of a podcast changed
      */
-    event PodcastOwnerUpdated(uint256 id, address owner);
+    event ContentOwnerUpdated(uint256 id, address owner);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -42,26 +45,26 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
         __ERC1155_init("https://storage.googleapis.com/sybel-io.appspot.com/json/{id}.json");
         __MintingAccessControlUpgradeable_init();
         // Set the initial podcast id
-        _currentPodcastTokenID = 1;
+        _currentContentTokenId = 1;
     }
 
     /**
      * @dev Mint a new podcast, return the id of the built podcast
      */
-    function mintNewPodcast(address podcastOwnerAddress)
+    function mintNewPodcast(address ownerAddress)
         external
         onlyRole(SybelRoles.MINTER)
         whenNotPaused
         returns (uint256 id)
     {
         // Get the next podcast id and increment the current podcast token id
-        id = ++_currentPodcastTokenID;
+        id = ++_currentContentTokenId;
 
         // Mint the podcast nft into the podcast owner wallet directly
-        uint256 nftId = SybelMath.buildNftId(id);
+        uint256 nftId = id.buildNftId();
         _isSupplyAware[nftId] = true;
         _availableSupplies[nftId] = 1;
-        _mint(podcastOwnerAddress, nftId, 1, new bytes(0x0));
+        _mint(ownerAddress, nftId, 1, new bytes(0x0));
 
         // Return the podcast id
         return id;
@@ -138,11 +141,11 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
             }
 
             // Then check if the owner of this podcast have changed
-            if (SybelMath.isPodcastNft(id)) {
+            if (id.isPodcastNft()) {
                 // If this token is a podcast NFT, change the owner of this podcast
-                uint256 podcastId = SybelMath.extractPodcastId(id);
+                uint256 podcastId = id.extractPodcastId();
                 owners[podcastId] = to;
-                emit PodcastOwnerUpdated(podcastId, to);
+                emit ContentOwnerUpdated(podcastId, to);
             }
         }
     }
@@ -174,9 +177,9 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
      * exchange. The royalty amount is denominated and should be paid in that same unit of exchange.
      */
     function royaltyInfo(uint256 tokenId, uint256 salePrice) external view override returns (address, uint256) {
-        if (salePrice > 0 && SybelMath.isPodcastRelatedToken(tokenId)) {
+        if (salePrice > 0 && tokenId.isPodcastRelatedToken()) {
             // Find the address of the owner of this podcast
-            address ownerAddress = owners[SybelMath.extractPodcastId(tokenId)];
+            address ownerAddress = owners[tokenId.extractPodcastId()];
             uint256 royaltyForOwner = (salePrice * 4) / 100;
             return (ownerAddress, royaltyForOwner);
         } else {
