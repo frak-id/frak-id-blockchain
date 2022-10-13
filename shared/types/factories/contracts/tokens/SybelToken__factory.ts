@@ -7,7 +7,7 @@ import type { PromiseOrValue } from "../../../common";
 import type {
   SybelToken,
   SybelTokenInterface,
-} from "../../../contracts/tokens/SybelToken";
+} from "../../../contracts/tokens/SybelTokenL2.sol/SybelToken";
 
 const _abi = [
   {

@@ -1,7 +1,7 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
 import { ethers } from "hardhat";
 
-import { SybelToken } from "../../types/contracts/tokens/SybelToken";
+import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { MultiVestingWallets } from "../../types/contracts/wallets/MultiVestingWallets";
 import { VestingWalletFactory } from "../../types/contracts/wallets/VestingWalletFactory";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -35,15 +35,15 @@ describe("VestingWalletFactory", () => {
 
   let _owner: SignerWithAddress;
   let addr1: SignerWithAddress;
-  let _addr2: SignerWithAddress;
+  let addr2: SignerWithAddress;
   let _addrs: SignerWithAddress[];
 
   // Deploy our sybel contract
   beforeEach(async function () {
-    [_owner, addr1, _addr2, ..._addrs] = await ethers.getSigners();
+    [_owner, addr1, addr2, ..._addrs] = await ethers.getSigners();
 
     // Deploy our sybel token and vesting wallets
-    sybelToken = await deployContract("SybelToken");
+    sybelToken = await deployContract("SybelToken", [addr2.address]);
     multiVestingWallets = await deployContract("MultiVestingWallets", [sybelToken.address]);
     vestingWalletFactory = await deployContract("VestingWalletFactory", [
       sybelToken.address,

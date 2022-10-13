@@ -4,7 +4,7 @@ import * as fs from "fs";
 import hre from "hardhat";
 
 import { SybelInternalTokens } from "../types/contracts/tokens/SybelInternalTokens";
-import { SybelToken } from "../types/contracts/tokens/SybelToken";
+import { SybelToken } from "../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { ListenerBadges } from "../types/contracts/badges/payment/ListenerBadges";
 import { PodcastBadges } from "../types/contracts/badges/payment/PodcastBadges";
 import { FractionCostBadges } from "../types/contracts/badges/cost/FractionCostBadges";

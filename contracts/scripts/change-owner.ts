@@ -9,7 +9,7 @@ import { FractionCostBadges } from "../types/contracts/badges/cost/FractionCostB
 import { Rewarder } from "../types/contracts/reward/Rewarder";
 import { ListenerBadges } from "../types/contracts/badges/payment/ListenerBadges";
 import { PodcastBadges } from "../types/contracts/badges/payment/PodcastBadges";
-import { SybelToken } from "../types/contracts/tokens/SybelToken";
+import { SybelToken } from "../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { SybelInternalTokens } from "../types/contracts/tokens/SybelInternalTokens";
 import { FoundationWallet } from "../types/contracts/wallets/FoundationWallet";
 import { PromiseOrValue } from "../types/common";

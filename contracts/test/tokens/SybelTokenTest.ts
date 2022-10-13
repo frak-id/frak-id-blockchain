@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 
 import { BigNumber } from "ethers";
 
-import { SybelToken } from "../../types/contracts/tokens/SybelToken";
+import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { deployContract } from "../../scripts/utils/deploy";
@@ -23,7 +23,7 @@ describe("SybelToken", () => {
     [owner, addr1, addr2, ..._addrs] = await ethers.getSigners();
 
     // Deploy our sybel token
-    sybelToken = await deployContract("SybelToken");
+    sybelToken = await deployContract("SybelToken", [addr2.address]);
 
     // Mint a fiew sybl to the owner and first addr
     const syblToMint = BigNumber.from(10).pow(18).mul(50);

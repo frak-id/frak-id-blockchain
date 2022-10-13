@@ -3,7 +3,7 @@ import { ethers, upgrades } from "hardhat";
 
 import { Contract } from "ethers";
 
-import { SybelToken } from "../types/contracts/tokens/SybelToken";
+import { SybelToken } from "../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 
 (async () => {
   try {

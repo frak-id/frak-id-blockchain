@@ -1,7 +1,7 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
 import { ethers } from "hardhat";
 
-import { SybelToken } from "../../types/contracts/tokens/SybelToken";
+import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { MultiVestingWallets } from "../../types/contracts/wallets/MultiVestingWallets";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
@@ -11,7 +11,7 @@ import { testRoles } from "../utils/test-roles";
 import { pauserRole, minterRole, adminRole, vestingCreatorRole, vestingManagerRole } from "../../scripts/utils/roles";
 import { getTimestampInAFewMoment, updateTimestampToEndOfDuration, updatToGivenTimestamp } from "../utils/test-utils";
 
-describe.only("MultipleVestingWallets", () => {
+describe("MultipleVestingWallets", () => {
   let multiVestingWallets: MultiVestingWallets;
   let sybelToken: SybelToken;
 
@@ -25,7 +25,7 @@ describe.only("MultipleVestingWallets", () => {
     [_owner, addr1, addr2, ..._addrs] = await ethers.getSigners();
 
     // Deploy our sybel token and vesting wallets
-    sybelToken = await deployContract("SybelToken");
+    sybelToken = await deployContract("SybelToken", [addr2.address]);
     multiVestingWallets = await deployContract("MultiVestingWallets", [sybelToken.address]);
 
     // Grant the minter role to the vesting wallets

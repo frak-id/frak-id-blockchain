@@ -25,11 +25,11 @@ contract SybelTokenL1 is ERC20, ERC20Burnable, Pausable, AccessControl, NativeMe
         _initializeEIP712("Sybel Token");
     }
 
-    function pause() public onlyRole(SybelRoles.PAUSER_ROLE) {
+    function pause() public onlyRole(SybelRoles.PAUSER) {
         _pause();
     }
 
-    function unpause() public onlyRole(SybelRoles.PAUSER_ROLE) {
+    function unpause() public onlyRole(SybelRoles.PAUSER) {
         _unpause();
     }
 

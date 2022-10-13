@@ -1,16 +1,16 @@
 {
   "folders": [
 	{
+		"name": "📦 @sybel-io-blockchain/eslint-hardhat",
+		"path": "packages/eslint/hardhat"
+	},
+	{
 		"name": "✨ sybel-io-blockchain",
 		"path": "."
 	},
 	{
 		"name": "@sybel-io-blockchain/contracts",
 		"path": "contracts"
-	},
-	{
-		"name": "📦 @sybel-io-blockchain/eslint-hardhat",
-		"path": "packages/eslint/hardhat"
 	},
 	{
 		"name": "@sybel-io-blockchain/shared",

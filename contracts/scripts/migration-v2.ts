@@ -6,7 +6,7 @@ import hre from "hardhat";
 
 import { utils } from "ethers";
 
-import { SybelToken } from "../types/contracts/tokens/SybelToken";
+import { SybelToken } from "../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { FoundationWallet } from "../types/contracts/wallets/FoundationWallet";
 import { Minter } from "../types/contracts/minter/Minter";
 import { Rewarder } from "../types/contracts/reward/Rewarder";

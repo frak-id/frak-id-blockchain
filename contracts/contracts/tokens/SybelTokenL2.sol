@@ -2,7 +2,7 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "../utils/SybelMath.sol";
+import "../utils/SybelRoles.sol";
 import "../utils/MintingAccessControlUpgradeable.sol";
 import "../utils/ContextMixin.sol";
 import "../utils/NativeMetaTransaction.sol";
