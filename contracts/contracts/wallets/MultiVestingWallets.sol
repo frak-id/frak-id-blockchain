@@ -204,7 +204,6 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         require(amount > 0, "SYB: amount invalid");
         require(amount > initialDrop, "SYB: initial drop invalid");
         require(amount < REWARD_CAP, "SYB: amount invalid");
-        require(initialDrop < REWARD_CAP, "SYB: initial drop invalid");
 
         require(availableReserve() >= amount, "SYB: Doesn't have enough founds");
 
@@ -330,7 +329,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @param vestingId Vesting ID to check.
      * @return The releasable amounts.
      */
-    function releasableAmount(uint24 vestingId) public view returns (uint256) {
+    function releasableAmount(uint24 vestingId) public view onlyIfNotRevoked(vestingId) returns (uint256) {
         return _releasableAmount(_getVesting(vestingId));
     }
 
@@ -490,14 +489,6 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      */
     modifier onlyIfNotRevoked(uint24 vestingId) {
         require(_getVesting(vestingId).isRevoked == false, "SYB: Vesting revoked");
-        _;
-    }
-
-    /**
-     * @dev Revert if the start date is not zero.
-     */
-    modifier onlyIfStarted(uint24 vestingId) {
-        require(_getVesting(vestingId).startDate > block.timestamp, "SYB: Not started yet");
         _;
     }
 }

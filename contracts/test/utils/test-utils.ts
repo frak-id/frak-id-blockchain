@@ -23,6 +23,7 @@ export async function updatToGivenTimestamp(timestamp: number) {
 }
 
 export async function getTimestampInAFewMoment(): Promise<number> {
-  const currentTimestamp = (await ethers.provider.getBlock(ethers.provider.blockNumber)).timestamp;
-  return currentTimestamp + 100;
+  const blockNumber = await ethers.provider.getBlockNumber();
+  const currentTimestamp = (await ethers.provider.getBlock(blockNumber)).timestamp;
+  return currentTimestamp + 10;
 }
