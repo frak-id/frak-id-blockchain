@@ -2,11 +2,13 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "../utils/SybelRoles.sol";
 
 contract MultiVestingWallets is SybelAccessControlUpgradeable {
+    using SafeERC20Upgradeable for SybelToken;
 
     // Add the library methods
     using EnumerableSet for EnumerableSet.UintSet;
@@ -142,7 +144,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     function transferAvailableReserve(address receiver) external whenNotPaused onlyRole(SybelRoles.ADMIN) {
         uint256 available = availableReserve();
         require(available > 0, "SYB: No token to transfer");
-        sybelToken.transfer(receiver, available);
+        sybelToken.safeTransfer(receiver, available);
     }
 
     /**
@@ -313,7 +315,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
             totalSupply -= releasable;
 
             // Then perform the transfer
-            sybelToken.transfer(vesting.beneficiary, releasable);
+            sybelToken.safeTransfer(vesting.beneficiary, releasable);
         }
     }
 
@@ -476,7 +478,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
 
         // Then perform the refund transfer if needed
         if(releasable != 0) {
-            sybelToken.transfer(vesting.beneficiary, releasable);
+            sybelToken.safeTransfer(vesting.beneficiary, releasable);
         }
 
         // Emit the event's

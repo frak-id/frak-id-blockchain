@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "./MultiVestingWallets.sol";
 import "../tokens/SybelTokenL2.sol";
@@ -9,9 +8,6 @@ import "../utils/SybelAccessControlUpgradeable.sol";
 import "../utils/SybelRoles.sol";
 
 contract VestingWalletFactory is SybelAccessControlUpgradeable {
-
-    // Perform safe transfer
-    using SafeERC20Upgradeable for SybelToken;
 
     // The cap of sybl token propose to vester
     uint96 internal constant SYBL_VESTING_CAP = 1_500_000_000 ether;
