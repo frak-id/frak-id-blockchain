@@ -9,7 +9,7 @@ import { deployContract } from "../../scripts/utils/deploy";
 import { testPauses } from "../utils/test-pauses";
 import { testRoles } from "../utils/test-roles";
 import { pauserRole, minterRole, adminRole, vestingCreatorRole, vestingManagerRole } from "../../scripts/utils/roles";
-import { updateTimestampToEndOfDuration } from "../utils/test-utils";
+import { getTimestampInAFewMoment, updateTimestampToEndOfDuration, updatToGivenTimestamp } from "../utils/test-utils";
 
 describe.only("MultipleVestingWallets", () => {
   let multiVestingWallets: MultiVestingWallets;
@@ -32,7 +32,7 @@ describe.only("MultipleVestingWallets", () => {
     await sybelToken.grantRole(minterRole, multiVestingWallets.address);
 
     // Add some initial supply to our vesting group
-    await sybelToken.mint(multiVestingWallets.address, 1000);
+    await sybelToken.mint(multiVestingWallets.address, 10000000);
   });
 
   describe("Faking ERC20", () => {
@@ -53,31 +53,42 @@ describe.only("MultipleVestingWallets", () => {
     it("Can add a new vesting wallet, user release itself his founds, and balance update", async () => {
       // Get the original balance of an investor
       const oldAddr1Balance = await sybelToken.balanceOf(addr1.address);
+      // Get the current blockchain timestamp
+      const startTimestamp = await getTimestampInAFewMoment();
       // Create the vest
-      await multiVestingWallets.createVest(addr1.address, 100, 10, 10);
-      // Start the vesting phase
-      const beginTx = await multiVestingWallets.beginNow();
+      await multiVestingWallets.createVest(addr1.address, 100, 50, 100, startTimestamp, false);
       // Check the number of vesting the beneficiary add
       const balanceOfVest = await multiVestingWallets.balanceOf(addr1.address);
       expect(balanceOfVest).to.equal(100);
       // Check the number of vesting the beneficiary add
       const numberOfVest = await multiVestingWallets.ownedCount(addr1.address);
       expect(numberOfVest).to.equal(1);
-      // Go to the end of the delay and unlock duration
-      await updateTimestampToEndOfDuration(beginTx, 2000);
+      // Ensure the user can unlock the initial drop amount
+      await updatToGivenTimestamp(startTimestamp);
       // Ensure the user can release his amount, and ensure his balance was updated
       await multiVestingWallets.connect(addr1).releaseAll();
-      // Get the original balance of an investor
-      const newAddr1Balance = await sybelToken.balanceOf(addr1.address);
+      // Ensure the initial drop of the investor is unlockable
+      let newAddr1Balance = await sybelToken.balanceOf(addr1.address);
+      expect(newAddr1Balance).to.equal(oldAddr1Balance.add(50));
+      // Wait for end of the cliff, and ensure the remaining amount can be unlocked
+      await updatToGivenTimestamp(startTimestamp + 100);
+      await multiVestingWallets.connect(addr1).releaseAll();
+      newAddr1Balance = await sybelToken.balanceOf(addr1.address);
       expect(newAddr1Balance).to.equal(oldAddr1Balance.add(100));
     });
     it("Can add multiple vesting wallets, owner release user founds, and balance update", async () => {
       // Get the original balance of an investor
       const oldAddr1Balance = await sybelToken.balanceOf(addr1.address);
       // Create the vest
-      await multiVestingWallets.createVestBatch([addr1.address, addr2.address, addr1.address], [100, 100, 100], 10, 10);
-      // Start the vesting phase
-      const beginTx = await multiVestingWallets.beginNow();
+      const startTimestamp = await getTimestampInAFewMoment();
+      await multiVestingWallets.createVestBatch(
+        [addr1.address, addr2.address, addr1.address],
+        [100, 100, 100],
+        [50, 50, 50],
+        100,
+        startTimestamp,
+        false,
+      );
       // Check the number of vesting the beneficiary add
       const balanceOfVest = await multiVestingWallets.balanceOf(addr1.address);
       expect(balanceOfVest).to.equal(200);
@@ -87,50 +98,47 @@ describe.only("MultipleVestingWallets", () => {
       // Check the number of vesting the beneficiary add
       const numberOfVestAddr2 = await multiVestingWallets.ownedCount(addr2.address);
       expect(numberOfVestAddr2).to.equal(1);
-      // Go to the end of the delay and unlock duration
-      await updateTimestampToEndOfDuration(beginTx, 2000);
+      // Got to the end of vesting
+      await updatToGivenTimestamp(startTimestamp + 100);
       // Ensure the user can release his amount, and ensure his balance was updated
       await multiVestingWallets.releaseAllFor(addr1.address);
       // Get the original balance of an investor
       const newAddr1Balance = await sybelToken.balanceOf(addr1.address);
       expect(newAddr1Balance).to.equal(oldAddr1Balance.add(200));
     });
-    it("Can't add single vesting wallet after begin", async () => {
-      // Start the vesting phase
-      await multiVestingWallets.beginNow();
-      // Try to create the vest
-      await expect(multiVestingWallets.createVest(addr1.address, 100, 10, 10)).to.be.reverted;
-    });
-    it("Can't unlock if not started", async () => {
-      await multiVestingWallets.createVest(addr1.address, 100, 10, 10);
-      // Try to create the vest
+    it("Can't create if past date", async () => {
+      await multiVestingWallets.createVest(addr1.address, 100, 10, 10, (await getTimestampInAFewMoment()) - 5, false);
       await expect(multiVestingWallets.releaseAllFor(addr1.address)).to.be.reverted;
     });
-    it("Can't add multiple vesting wallet after begin", async () => {
-      // Start the vesting phase
-      await multiVestingWallets.beginNow();
+    it("Can't add single vesting wallet with 0 duration", async () => {
       // Try to create the vest
-      await expect(multiVestingWallets.createVestBatch([addr1.address], [100], 10, 10)).to.be.reverted;
-    });
-    it("Can't add single vesting wallet with 0 delay and duration", async () => {
-      // Try to create the vest
-      await expect(multiVestingWallets.createVest(addr1.address, 100, 0, 0)).to.be.reverted;
+      await expect(multiVestingWallets.createVest(addr1.address, 100, 10, 0, await getTimestampInAFewMoment(), false))
+        .to.be.reverted;
     });
     it("Can't add multiple vesting wallet with 0 delay and duration", async () => {
-      // Start the vesting phase
-      await multiVestingWallets.beginNow();
       // Try to create the vest
-      await expect(multiVestingWallets.createVestBatch([addr1.address], [100], 0, 0)).to.be.reverted;
+      await expect(
+        multiVestingWallets.createVestBatch([addr1.address], [100], [10], 0, await getTimestampInAFewMoment(), false),
+      ).to.be.reverted;
     });
     it("Can't add multiple vesting wallet with different sizes", async () => {
-      // Start the vesting phase
-      await multiVestingWallets.beginNow();
       // Try to create the vest
-      await expect(multiVestingWallets.createVestBatch([addr1.address], [100, 100, 100], 0, 0)).to.be.reverted;
+      await expect(
+        multiVestingWallets.createVestBatch(
+          [addr1.address],
+          [100, 100, 100],
+          [10, 10, 10],
+          0,
+          await getTimestampInAFewMoment(),
+          false,
+        ),
+      ).to.be.reverted;
     });
     it("Can't add walletthat exceed the balance of the adress", async () => {
       // Try to create the vest
-      await expect(multiVestingWallets.createVest(addr1.address, 1000000, 10, 10)).to.be.reverted;
+      await expect(
+        multiVestingWallets.createVest(addr1.address, 1000000, 1000, 10, await getTimestampInAFewMoment(), false),
+      ).to.be.reverted;
     });
   });
 
@@ -142,22 +150,14 @@ describe.only("MultipleVestingWallets", () => {
       vestingManagerRole,
       [
         async () => {
-          await multiVestingWallets.connect(addr1).createVest(addr1.address, 10, 10, 10);
+          await multiVestingWallets
+            .connect(addr1)
+            .createVest(addr1.address, 10, 10, 10, await getTimestampInAFewMoment(), false);
         },
         async () => {
-          await multiVestingWallets.connect(addr1).createVestBatch([addr1.address], [10], 10, 10);
-        },
-      ],
-    );
-  });
-  describe("Admin roles", () => {
-    testRoles(
-      () => multiVestingWallets,
-      () => addr1,
-      adminRole,
-      [
-        async () => {
-          await multiVestingWallets.connect(addr1).beginNow();
+          await multiVestingWallets
+            .connect(addr1)
+            .createVestBatch([addr1.address], [10], [10], 10, await getTimestampInAFewMoment(), false);
         },
       ],
     );
@@ -171,28 +171,6 @@ describe.only("MultipleVestingWallets", () => {
         async () => {
           await multiVestingWallets.connect(addr1).pause();
           await multiVestingWallets.connect(addr1).unpause();
-        },
-      ],
-    );
-  });
-
-  // Check the pausable capabilities
-  describe("Pauses", () => {
-    testPauses(
-      () => multiVestingWallets,
-      () => addr1,
-      [
-        async () => {
-          // Can't create vest and release
-          await multiVestingWallets.createVest(addr1.address, 100, 10, 10);
-          await multiVestingWallets.createVestBatch([addr1.address, addr2.address], [100, 100], 10, 10);
-
-          const beginTx = await multiVestingWallets.beginNow();
-
-          await updateTimestampToEndOfDuration(beginTx, 20);
-
-          await multiVestingWallets.releaseAllFor(addr1.address);
-          await multiVestingWallets.connect(addr2).releaseAll();
         },
       ],
     );

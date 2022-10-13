@@ -17,3 +17,12 @@ export async function updateTimestampToEndOfDuration(tx: ContractTransaction, du
   // Increase the blockchain timestamp
   await ethers.provider.send("evm_mine", [newTimestamp]);
 }
+
+export async function updatToGivenTimestamp(timestamp: number) {
+  await ethers.provider.send("evm_mine", [timestamp]);
+}
+
+export async function getTimestampInAFewMoment(): Promise<number> {
+  const currentTimestamp = (await ethers.provider.getBlock(ethers.provider.blockNumber)).timestamp;
+  return currentTimestamp + 100;
+}

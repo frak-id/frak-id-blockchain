@@ -17,7 +17,6 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         address indexed beneficiary,
         uint96 amount,
         uint96 initialDrop,
-        uint32 delay,
         uint32 duration,
         uint48 startDate
     );
@@ -47,18 +46,17 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @dev Represent a vesting wallet
      */
     struct Vesting {
-        // First storage slot (full)
+        // First storage slot, remain 6 bytes
         uint96 amount; // amount vested
         uint96 released; // amount already released
-        uint32 delay; // delay before start of vesting as uint32, max 136 years
         uint32 duration; // duration of the vesting
-        
-        // Second slot (remain 86 bytes)
         uint24 id; // id of the vesting
-        uint96 initialDrop; // initial drop when start date is reached
-        uint48 startDate; // start date of this vesting
         bool isRevoked; // Is this vesting revoked ?
         bool isRevocable; // Is this vesting revocable ?
+        
+        // Second slot (remain 86 bytes)
+        uint96 initialDrop; // initial drop when start date is reached
+        uint48 startDate; // start date of this vesting
 
         // Third slot (full)
         address beneficiary; // beneficiary wallet of this vesting
@@ -154,13 +152,12 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         address beneficiary,
         uint256 amount,
         uint256 initialDrop,
-        uint32 delay,
         uint32 duration,
         uint48 startDate,
         bool revocable
     ) external whenNotPaused onlyRole(SybelRoles.VESTING_MANAGER) {
-        _requireVestInputs(delay, duration, startDate);
-        _createVesting(beneficiary, amount, initialDrop, delay, duration, startDate, revocable);
+        _requireVestInputs(duration, startDate);
+        _createVesting(beneficiary, amount, initialDrop, duration, startDate, revocable);
     }
 
     /**
@@ -170,7 +167,6 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         address[] calldata beneficiaries,
         uint256[] calldata amounts,
         uint256[] calldata initialDrops,
-        uint32 delay,
         uint32 duration,
         uint48 startDate,
         bool revocable
@@ -178,18 +174,18 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         require(beneficiaries.length > 0, "SYB: Empty array");
         require(beneficiaries.length == amounts.length, "SYB: Invalid array lengths");
         require(beneficiaries.length == initialDrops.length, "SYB: Invalid array lengths");
-        _requireVestInputs(delay, duration, startDate);
+        _requireVestInputs(duration, startDate);
 
         for (uint256 index = 0; index < beneficiaries.length; ++index) {
-            _createVesting(beneficiaries[index], amounts[index], initialDrops[index], delay, duration, startDate, revocable);
+            _createVesting(beneficiaries[index], amounts[index], initialDrops[index], duration, startDate, revocable);
         }
     }
 
     /**
      * @notice Check the input when create a new vesting
      */
-    function _requireVestInputs(uint32 delay, uint32 duration, uint48 startDate) internal view {
-        require((duration + delay) > 0, "SYB: Duration or delay invalid");
+    function _requireVestInputs(uint32 duration, uint48 startDate) internal view {
+        require(duration > 0, "SYB: Duration invalid");
         require(startDate > block.timestamp, "SYB: Start date invalid");
     }
 
@@ -200,7 +196,6 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         address beneficiary,
         uint256 amount,
         uint256 initialDrop,
-        uint32 delay, 
         uint32 duration, 
         uint48 startDate,
         bool revocable
@@ -218,7 +213,6 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         vestings[vestingId] = Vesting({
             amount: uint96(amount), // We can safely parse it since it don't increase the cap
             released: 0,
-            delay: delay,
             duration: duration,
             id: vestingId,
             initialDrop: uint96(initialDrop), // Same here
@@ -234,7 +228,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         totalSupply += uint96(amount);
 
         // Emit the creation and transfer event
-        emit VestingCreated(vestingId, beneficiary, uint96(amount), uint96(initialDrop), delay, duration, startDate);
+        emit VestingCreated(vestingId, beneficiary, uint96(amount), uint96(initialDrop), duration, startDate);
         emit VestingTransfered(vestingId, address(0), beneficiary);
     }
 
@@ -408,17 +402,17 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
             return 0;
         }
 
-        uint64 cliffEnd = vesting.startDate + vesting.delay;
-        if (block.timestamp < cliffEnd) {
+        uint64 vestingEnd = vesting.startDate + vesting.duration;
+        if (block.timestamp < vesting.startDate) {
             // If not started yet, nothing can have been vested
             return 0;
-        } else if (block.timestamp >= cliffEnd + vesting.duration) {
+        } else if (block.timestamp >= vestingEnd) {
             // If ended, all can be unlocked
             return vesting.amount;
         } else {
             // Otherwise, the proportionnal amount
-            uint96 amountFreeForLinear = vesting.amount - vesting.initialDrop;
-            uint256 linearAmountComputed = vesting.initialDrop + ((amountFreeForLinear * (block.timestamp - cliffEnd)) / vesting.duration);
+            uint256 amountForVesting = ((vesting.amount - vesting.initialDrop) * (block.timestamp - vesting.startDate)) / vesting.duration;
+            uint256 linearAmountComputed = amountForVesting + vesting.initialDrop;
             require(linearAmountComputed < REWARD_CAP, "SYB: Computation error"); // Ensure we are still on a uint96
             return uint96(linearAmountComputed);
         }
