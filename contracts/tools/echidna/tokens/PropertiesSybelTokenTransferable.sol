@@ -2,7 +2,7 @@
 pragma solidity ^0.8.7;
 
 import "../CryticInterface.sol";
-import "../../../contracts/tokens/SybelToken.sol";
+import "../../../contracts/tokens/SybelTokenL2.sol";
 
 contract PropertiesSybelTokenTransferable is CryticInterface, SybelToken {
     function crytic_zero_always_empty_ERC20Properties() public returns (bool) {

@@ -6,7 +6,7 @@ import "../badges/access/PaymentBadgesAccessor.sol";
 import "../badges/cost/IFractionCostBadges.sol";
 import "../utils/SybelMath.sol";
 import "../tokens/SybelInternalTokens.sol";
-import "../tokens/SybelToken.sol";
+import "../tokens/SybelTokenL2.sol";
 import "../utils/MintingAccessControlUpgradeable.sol";
 
 /**

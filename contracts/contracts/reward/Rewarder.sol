@@ -6,7 +6,7 @@ import "../badges/access/PaymentBadgesAccessor.sol";
 import "../utils/SybelMath.sol";
 import "../utils/SybelRoles.sol";
 import "../tokens/SybelInternalTokens.sol";
-import "../tokens/SybelToken.sol";
+import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 
 /**

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "../tokens/SybelToken.sol";
+import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "../utils/SybelRoles.sol";
 
