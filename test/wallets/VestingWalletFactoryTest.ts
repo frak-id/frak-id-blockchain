@@ -1,7 +1,7 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { BigNumber, utils } from "ethers";
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
@@ -11,8 +11,7 @@ import { MultiVestingWallets } from "../../types/contracts/wallets/MultiVestingW
 import { VestingWalletFactory } from "../../types/contracts/wallets/VestingWalletFactory";
 import { testPauses } from "../utils/test-pauses";
 import { testRoles } from "../utils/test-roles";
-import { address0, getTimestampInAFewMoment, updateTimestampToEndOfDuration } from "../utils/test-utils";
-import { extractVestingCreatedEvent } from "./MultiVestingWalletsTest";
+import { address0, getTimestampInAFewMoment } from "../utils/test-utils";
 
 const REVOCABLE_GROUP = 1;
 const NON_REVOCABLE_GROUP = 2;
@@ -23,7 +22,7 @@ const INEXISTANT_GROUP = 100;
 
 const GROUP_CAP = BigNumber.from(10).pow(10);
 
-describe.only("VestingWalletFactory", () => {
+describe("VestingWalletFactory", () => {
   let vestingWalletFactory: VestingWalletFactory;
   let multiVestingWallets: MultiVestingWallets;
   let sybelToken: SybelToken;
