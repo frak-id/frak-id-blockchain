@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "../utils/ContextMixin.sol";
+import "../utils/SybelAccessControlUpgradeable.sol";
 import "../utils/NativeMetaTransaction.sol";
 import "../utils/SybelRoles.sol";
 
@@ -13,24 +11,25 @@ import "../utils/SybelRoles.sol";
  * Sybel token on the ethereum mainnet, simpler
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract SybelTokenL1 is ERC20, ERC20Burnable, Pausable, AccessControl, NativeMetaTransaction, ContextMixin {
+contract SybelTokenL1 is ERC20Upgradeable, SybelAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
     bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
 
     uint256 private _cap;
 
-    constructor() ERC20("Sybel Token", "SYBL") {
-        _grantRole(SybelRoles.ADMIN, _msgSender());
-        _grantRole(SybelRoles.PAUSER, _msgSender());
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+
+    function initialize() external initializer {
+        string memory name = "Frak Token (by Sybel)";
+        __ERC20_init(name, "FRAK");
+        _initializeEIP712(name);
+        __SybelAccessControlUpgradeable_init();
+
         _grantRole(PREDICATE_ROLE, _msgSender());
-        _initializeEIP712("Sybel Token");
-    }
-
-    function pause() public onlyRole(SybelRoles.PAUSER) {
-        _pause();
-    }
-
-    function unpause() public onlyRole(SybelRoles.PAUSER) {
-        _unpause();
     }
 
     function mint(address to, uint256 amount) public onlyRole(PREDICATE_ROLE) {
