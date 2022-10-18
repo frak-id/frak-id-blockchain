@@ -1,8 +1,8 @@
 import * as fs from "fs";
 import hre from "hardhat";
 
+import * as deployedAddresses from "../../addresses.json";
 import { SybelTokenL1 } from "../../types/contracts/tokens/SybelTokenL1";
-import * as deployedAddresses from "../addresses.json";
 import { deployContract } from "../utils/deploy";
 
 (async () => {
@@ -19,11 +19,14 @@ import { deployContract } from "../utils/deploy";
       l1: {
         sybelToken: sybelToken.address,
       },
+      default: null,
     };
+    console.log("New addresses : ");
+    console.log(addresses);
     // Then wrote it into a file
     const jsonAddresses = JSON.stringify(addresses);
-    fs.writeFileSync("../addresses.json", jsonAddresses);
-    fs.writeFileSync(`../addresses-${hre.hardhatArguments.network}.json`, jsonAddresses);
+    fs.writeFileSync("addresses.json", jsonAddresses);
+    fs.writeFileSync(`addresses-${hre.hardhatArguments.network}.json`, jsonAddresses);
   } catch (e: any) {
     console.log(e.message);
   }

@@ -1,19 +1,21 @@
 import * as fs from "fs";
 import hre from "hardhat";
 
+import * as deployedAddresses from "../../addresses.json";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { MultiVestingWallets } from "../../types/contracts/wallets/MultiVestingWallets";
 import { VestingWalletFactory } from "../../types/contracts/wallets/VestingWalletFactory";
-import * as deployedAddresses from "../addresses.json";
 import { deployContract } from "../utils/deploy";
 import { vestingManagerRole } from "../utils/roles";
 
 (async () => {
   try {
     console.log("Starting to deploy the SybelToken and the VestingWallet");
-    // TODO : Ensure we are on the Polygon blockchain ! ChainId of the provider or spmething like that
     // Deploy our sybl token contract
-    const sybelToken = await deployContract<SybelToken>("SybelToken");
+    const childManagerProxy = "0xb5505a6d998549090530911180f38aC5130101c6";
+    // mainnet proxy :
+    // const childManagerProxy = "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa";
+    const sybelToken = await deployContract<SybelToken>("SybelToken", [childManagerProxy]);
     console.log(`Sybel token L2 was deployed to ${sybelToken.address}`);
     // Deploy vesting wallet and vesting wallt factory
     const multiVestingWallet = await deployContract<MultiVestingWallets>("MultiVestingWallets", [sybelToken.address]);
@@ -37,11 +39,12 @@ import { vestingManagerRole } from "../utils/roles";
         multiVestingWallet: multiVestingWallet.address,
         vestingWalletFactory: vestingWalletFactory.address,
       },
+      default: null,
     };
     // Then wrote it into a file
     const jsonAddresses = JSON.stringify(addresses);
-    fs.writeFileSync("../addresses.json", jsonAddresses);
-    fs.writeFileSync(`../addresses-${hre.hardhatArguments.network}.json`, jsonAddresses);
+    fs.writeFileSync("addresses.json", jsonAddresses);
+    fs.writeFileSync(`addresses-${hre.hardhatArguments.network}.json`, jsonAddresses);
 
     console.log("Finished to deploy the SybelToken and the VestingWallet");
   } catch (e: any) {
