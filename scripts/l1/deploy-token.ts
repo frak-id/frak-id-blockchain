@@ -1,5 +1,8 @@
-// This script can be used to deploy the "PodcastHandler" contract using Web3 library.
+import * as fs from "fs";
+import hre from "hardhat";
+
 import { SybelTokenL1 } from "../../types/contracts/tokens/SybelTokenL1";
+import * as deployedAddresses from "../addresses.json";
 import { deployContract } from "../utils/deploy";
 
 (async () => {
@@ -9,6 +12,18 @@ import { deployContract } from "../utils/deploy";
     // Deploy our sybl token contract
     const sybelToken = await deployContract<SybelTokenL1>("SybelTokenL1");
     console.log(`Sybel token L1 was deployed to ${sybelToken.address}`);
+
+    // Build our deplyoed address object
+    const addresses = {
+      ...deployedAddresses,
+      l1: {
+        sybelToken: sybelToken.address,
+      },
+    };
+    // Then wrote it into a file
+    const jsonAddresses = JSON.stringify(addresses);
+    fs.writeFileSync("../addresses.json", jsonAddresses);
+    fs.writeFileSync(`../addresses-${hre.hardhatArguments.network}.json`, jsonAddresses);
   } catch (e: any) {
     console.log(e.message);
   }
