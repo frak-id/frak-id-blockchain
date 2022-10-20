@@ -113,10 +113,10 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
         contentId = sybelInternalTokens.mintNewContent(contentOwnerAddress);
         // Then set the supply for each token types
         uint256[] memory ids = new uint256[](4);
-        ids[0] = SybelMath.buildClassicNftId(contentId);
-        ids[1] = SybelMath.buildRareNftId(contentId);
-        ids[2] = SybelMath.buildEpicNftId(contentId);
-        ids[3] = SybelMath.buildLegendaryNftId(contentId);
+        ids[0] = SybelMath.buildCommonNftId(contentId);
+        ids[1] = SybelMath.buildPremiumNftId(contentId);
+        ids[2] = SybelMath.buildGoldNftId(contentId);
+        ids[3] = SybelMath.buildDiamondNftId(contentId);
         uint256[] memory supplies = new uint256[](4);
         supplies[0] = commonSupply; // Common
         supplies[1] = rareSupply; // Rare

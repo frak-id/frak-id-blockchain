@@ -60,13 +60,13 @@ contract FractionCostBadges is IFractionCostBadges, SybelAccessControlUpgradeabl
      * and since this reawrd shouldn't evolve really fast
      */
     function initialFractionCost(uint8 tokenType) public pure returns (uint256 initialCost) {
-        if (tokenType == SybelMath.TOKEN_TYPE_CLASSIC_MASK) {
+        if (tokenType == SybelMath.TOKEN_TYPE_COMMON_MASK) {
             initialCost = 20 ether; // 20 SYBL
-        } else if (tokenType == SybelMath.TOKEN_TYPE_RARE_MASK) {
+        } else if (tokenType == SybelMath.TOKEN_TYPE_PREMIUM_MASK) {
             initialCost = 100 ether; // 100 SYBL
-        } else if (tokenType == SybelMath.TOKEN_TYPE_EPIC_MASK) {
+        } else if (tokenType == SybelMath.TOKEN_TYPE_GOLD_MASK) {
             initialCost = 200 ether; // 200 SYBL
-        } else if (tokenType == SybelMath.TOKEN_TYPE_LEGENDARY_MASK) {
+        } else if (tokenType == SybelMath.TOKEN_TYPE_DIAMOND_MASK) {
             initialCost = 400 ether; // 400 SYBL
         }
         return initialCost;

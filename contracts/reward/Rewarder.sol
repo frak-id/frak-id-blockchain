@@ -121,7 +121,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
             );
             // If no balance mint a Standard NFT
             if (!hasAtLeastOneBalance) {
-                sybelInternalTokens.mint(listener, SybelMath.buildStandardNftId(contentIds[i]), 1);
+                sybelInternalTokens.mint(listener, SybelMath.buildFreeNftId(contentIds[i]), 1);
                 // And then recompute his balance
                 (balances, hasAtLeastOneBalance) = getListenerBalanceForContent(listener, contentIds[i]);
             }
@@ -232,15 +232,15 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
      * and since this reawrd shouldn't evolve really fast
      */
     function baseRewardForTokenType(uint8 tokenType) private pure returns (uint96 reward) {
-        if (tokenType == SybelMath.TOKEN_TYPE_STANDARD_MASK) {
+        if (tokenType == SybelMath.TOKEN_TYPE_FREE_MASK) {
             reward = 0.01 ether; // 0.01 SYBL
-        } else if (tokenType == SybelMath.TOKEN_TYPE_CLASSIC_MASK) {
+        } else if (tokenType == SybelMath.TOKEN_TYPE_COMMON_MASK) {
             reward = 0.1 ether; // 0.1 SYBL
-        } else if (tokenType == SybelMath.TOKEN_TYPE_RARE_MASK) {
+        } else if (tokenType == SybelMath.TOKEN_TYPE_PREMIUM_MASK) {
             reward = 0.5 ether; // 0.5 SYBL
-        } else if (tokenType == SybelMath.TOKEN_TYPE_EPIC_MASK) {
+        } else if (tokenType == SybelMath.TOKEN_TYPE_GOLD_MASK) {
             reward = 1 ether; // 1 SYBL
-        } else if (tokenType == SybelMath.TOKEN_TYPE_LEGENDARY_MASK) {
+        } else if (tokenType == SybelMath.TOKEN_TYPE_DIAMOND_MASK) {
             reward = 2 ether; // 2 SYBL
         }
         return reward;
