@@ -18,15 +18,15 @@ contract Referral is SybelAccessControlUpgradeable {
     /**
      * @dev Event emitted when a user is rewarded for his listen
      */
-    event UserReferred(uint256 podcastId, address referer, address referee);
+    event UserReferred(uint256 indexed contentId, address indexed referer, address indexed referee);
     /**
      * @dev Event emitted when a user is rewarded by the referral program
      */
-    event ReferralReward(uint256 podcastId, address user, uint256 amount);
+    event ReferralReward(uint256 indexed contentId, address indexed user, uint256 amount);
     /**
      * @dev Event emitted when a user withdraw his pending reward
      */
-    event ReferralRewardWithdrawed(address user, uint256 amount);
+    event ReferralRewardWithdrawed(address indexed user, uint256 amount);
 
     /**
      * @dev Access our sybel token
@@ -34,9 +34,9 @@ contract Referral is SybelAccessControlUpgradeable {
     SybelToken private sybelToken;
 
     /**
-     * Mapping of podcast id to referee to referer
+     * Mapping of content id to referee to referer
      */
-    mapping(uint256 => mapping(address => address)) private podcastIdToRefereeToReferer;
+    mapping(uint256 => mapping(address => address)) private contentIdToRefereeToReferer;
 
     /**
      * The pending referal reward for the given address
@@ -59,28 +59,28 @@ contract Referral is SybelAccessControlUpgradeable {
      * @dev Update the listener snft amount
      */
     function userReferred(
-        uint256 podcastId,
+        uint256 contentId,
         address user,
         address referer
     ) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
         // Ensure the user doesn't have a referer yet
-        address actualReferer = podcastIdToRefereeToReferer[podcastId][user];
+        address actualReferer = contentIdToRefereeToReferer[contentId][user];
         require(actualReferer == address(0), "SYB: already got a referrer");
-        bool isInRefererChain = isUserInRefererChain(podcastId, user, referer);
+        bool isInRefererChain = isUserInRefererChain(contentId, user, referer);
         require(!isInRefererChain, "SYB: already in referee chain");
         // Check if the user isn't in the referrer chain
         // If that's got, set it and emit the event
-        podcastIdToRefereeToReferer[podcastId][user] = referer;
-        emit UserReferred(podcastId, referer, user);
+        contentIdToRefereeToReferer[contentId][user] = referer;
+        emit UserReferred(contentId, referer, user);
     }
 
     function isUserInRefererChain(
-        uint256 podcastId,
+        uint256 contentId,
         address user,
         address referer
     ) internal returns (bool) {
         // Get the referer of our referer
-        address referrerReferrer = podcastIdToRefereeToReferer[podcastId][referer];
+        address referrerReferrer = contentIdToRefereeToReferer[contentId][referer];
         if (referrerReferrer == address(0)) {
             // If he don't have any referer, exit
             return false;
@@ -89,7 +89,7 @@ contract Referral is SybelAccessControlUpgradeable {
             return true;
         } else {
             // Otherwise, go down a level and check again
-            return isUserInRefererChain(podcastId, user, referrerReferrer);
+            return isUserInRefererChain(contentId, user, referrerReferrer);
         }
     }
 
@@ -97,7 +97,7 @@ contract Referral is SybelAccessControlUpgradeable {
      * Pay all the user referer, and return the amount paid
      */
     function payAllReferer(
-        uint256 podcastId,
+        uint256 contentId,
         address user,
         uint256 amount
     ) public onlyRole(SybelRoles.ADMIN) whenNotPaused returns (uint256 totalAmount) {
@@ -105,16 +105,16 @@ contract Referral is SybelAccessControlUpgradeable {
         require(amount > 0, "SYB: invalid amount");
         // Store the pending reward for this user, and emit the associated event's
         userPendingReward[user] += amount;
-        emit ReferralReward(podcastId, user, amount);
+        emit ReferralReward(contentId, user, amount);
         // The total amount to be paid
         totalAmount = amount;
         // Check if the user got a referer
-        address userReferer = podcastIdToRefereeToReferer[podcastId][user];
+        address userReferer = contentIdToRefereeToReferer[contentId][user];
         if (userReferer != address(0) && amount > 0) {
             // If yes, recursively get all the amount to be paid for all of his referer,
             // dividing by 2 each time we go up a level
             uint256 refererAmount = amount / 2;
-            totalAmount += payAllReferer(podcastId, user, refererAmount);
+            totalAmount += payAllReferer(contentId, user, refererAmount);
         }
         // Then return the amount to be paid
         return totalAmount;

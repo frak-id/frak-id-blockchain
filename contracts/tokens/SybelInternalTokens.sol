@@ -28,12 +28,12 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     /**
      * @dev Event emitted when a new fraction of content is minted
      */
-    event SuplyUpdated(uint256 id, uint256 supply);
+    event SuplyUpdated(uint256 indexed id, uint256 supply);
 
     /**
      * @dev Event emitted when the owner of a content changed
      */
-    event ContentOwnerUpdated(uint256 id, address owner);
+    event ContentOwnerUpdated(uint256 indexed id, address indexed owner);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -133,7 +133,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     }
 
     /**
-     * @dev Handle the transfer token (so update the podcast investor, change the owner of some podcast etc)
+     * @dev Handle the transfer token (so update the content investor, change the owner of some content etc)
      */
     function _afterTokenTransfer(
         address,
@@ -157,12 +157,12 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
                 }
             }
 
-            // Then check if the owner of this podcast have changed
+            // Then check if the owner of this content have changed
             if (id.isContentNft()) {
-                // If this token is a podcast NFT, change the owner of this podcast
-                uint256 podcastId = id.extractContentId();
-                owners[podcastId] = to;
-                emit ContentOwnerUpdated(podcastId, to);
+                // If this token is a content NFT, change the owner of this content
+                uint256 contentId = id.extractContentId();
+                owners[contentId] = to;
+                emit ContentOwnerUpdated(contentId, to);
             }
         }
     }
@@ -195,7 +195,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
      */
     function royaltyInfo(uint256 tokenId, uint256 salePrice) external view override returns (address, uint256) {
         if (salePrice > 0 && tokenId.isContentRelatedToken()) {
-            // Find the address of the owner of this podcast
+            // Find the address of the owner of this content
             address ownerAddress = owners[tokenId.extractContentId()];
             uint256 royaltyForOwner = (salePrice * 4) / 100;
             return (ownerAddress, royaltyForOwner);
@@ -206,10 +206,10 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     }
 
     /**
-     * @dev Find the owner of the given podcast is
+     * @dev Find the owner of the given content is
      */
-    function ownerOf(uint256 podcastId) external view returns (address) {
-        return owners[podcastId];
+    function ownerOf(uint256 contentId) external view returns (address) {
+        return owners[contentId];
     }
 
     /**

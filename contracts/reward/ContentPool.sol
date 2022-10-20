@@ -17,23 +17,23 @@ contract ContentPool {
     /**
      * @dev Event emitted when the pool receive some money
      */
-    event PoolProvisionned(uint256 podcastId, uint256 amount);
+    event PoolProvisionned(uint256 contentId, uint256 amount);
     /**
      * @dev Event emitted when a user is withdraw his found in the pool
      */
-    event PoolWithdraw(uint256 podcastId, address user, uint256 amount);
+    event PoolWithdraw(uint256 contentId, address user, uint256 amount);
     /**
      * @dev Event emitted when a user is added to a pool
      */
-    event PoolParticipantAdded(uint256 podcastId, address user);
+    event PoolParticipantAdded(uint256 contentId, address user);
     /**
      * @dev Event emitted when a user is removed from a pool
      */
-    event PoolParticipantRemoved(uint256 podcastId, address user);
+    event PoolParticipantRemoved(uint256 contentId, address user);
     /**
      * @dev Event emitted when a user share is updated in a pool
      */
-    event PoolParticipantShareUpdated(uint256 podcastId, address user, uint256 share);
+    event PoolParticipantShareUpdated(uint256 contentId, address user, uint256 share);
     /**
      * @dev Event
      */
