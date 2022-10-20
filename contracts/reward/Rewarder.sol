@@ -108,8 +108,8 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
         uint256[] calldata contentIds,
         uint16[] calldata listenCounts
     ) external override onlyRole(SybelRoles.REWARDER) whenNotPaused {
-        require(contentIds.length == listenCounts.length, "SYB: Different array length");
-        require(contentIds.length <= MAX_BATCH_AMOUNT, "SYB: Can't treat more than 20 items at a time");
+        require(contentIds.length == listenCounts.length, "SYB: invalid array length");
+        require(contentIds.length <= MAX_BATCH_AMOUNT, "SYB: array too large");
         // Get our total amopunt to be minted
         uint256 totalAmountToMint = 0;
         // Iterate over each content
@@ -152,12 +152,13 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
         ListenerBalanceOnContent[] memory balances = new ListenerBalanceOnContent[](types.length);
         // Boolean used to know if the user have a balance
         bool hasAtLeastOneBalance = false;
+        // Get the balance
+        uint256[] memory tokenBalances = sybelInternalTokens.balanceOfIdsBatch(listener, tokenIds);
         // Iterate over each types to find the balances
         for (uint8 i = 0; i < types.length; ++i) {
-            // TODO : Batch balances of to be more gas efficient ??
             // Get the balance and build our balance on content object
-            uint256 balance = sybelInternalTokens.balanceOf(listener, tokenIds[i]);
-            balances[i] = ListenerBalanceOnContent(types[i], balance);
+            uint256 balance = tokenBalances[i];
+            balances[i] = ListenerBalanceOnContent(types[i], tokenBalances[i]);
             // Update our has at least one balance object
             hasAtLeastOneBalance = hasAtLeastOneBalance || balance > 0;
         }
@@ -262,13 +263,13 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
      * Withdraw the user pending founds
      */
     function withdrawFounds(address user) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
-        require(user != address(0), "SYB: Can't withdraw referral founds for the 0 address");
+        require(user != address(0), "SYB: invlid address");
         // Ensure the user have a pending reward
         uint256 pendingReward = pendingRewards[user];
-        require(pendingReward > 0, "SYB: The user havn't any pending reward");
+        require(pendingReward > 0, "SYB: no pending reward");
         // Ensure we have enough founds on this contract to pay the user
         uint256 contractBalance = sybelToken.balanceOf(address(this));
-        require(contractBalance > pendingReward, "SYB: Contract havn't enough founds");
+        require(contractBalance > pendingReward, "SYB: not enough founds");
         // Reset the user pending balance
         pendingRewards[user] = 0;
         // Emit the withdraw event

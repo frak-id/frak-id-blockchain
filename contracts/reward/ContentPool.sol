@@ -71,8 +71,8 @@ contract ContentPool {
     }
 
     function addUserShare(address user, uint256 shareToAdd) external {
-        require(user != address(0), "SYB: Can't update shares of the 0 address");
-        require(shareToAdd > 0, "SYB: Can't add 0 share to the user");
+        require(user != address(0), "SYB: invalid address");
+        require(shareToAdd > 0, "SYB: invalid share");
         // Try to get the user
         (bool success, uint256 previousShare) = addressesToShare.tryGet(user);
         if (success) {
@@ -88,8 +88,8 @@ contract ContentPool {
     }
 
     function removeUserShare(address user, uint256 shareToRemove) external {
-        require(user != address(0), "SYB: Can't update shares of the 0 address");
-        require(shareToRemove > 0, "SYB: Can't remove 0 share to the user");
+        require(user != address(0), "SYB: invalid address");
+        require(shareToRemove > 0, "SYB: invalid share");
         // Try to get the user
         (bool success, uint256 previousShare) = addressesToShare.tryGet(user);
         if (success && (previousShare - shareToRemove > 0)) {
@@ -111,7 +111,7 @@ contract ContentPool {
      * When this contract got some reward
      */
     function computeRewardForUser(uint256 rewardAmount) external {
-        require(rewardAmount > 0, "SYB: Can't add 0 as reward");
+        require(rewardAmount > 0, "SYB: invalid reward");
         // Compute the reward for each one of our user
         for (uint256 index = 0; index < addressesToShare.length(); index++) {
             // Get the address at the current index
@@ -127,13 +127,13 @@ contract ContentPool {
      * Withdraw the user pending founds
      */
     function withdrawFounds(address user) external {
-        require(user != address(0), "SYB: Can't withdraw content pool founds for the 0 address");
+        require(user != address(0), "SYB: invalid address");
         // Ensure the user have a pending reward
         uint256 pendingReward = userPendingReward[user];
-        require(pendingReward > 0, "SYB: The user havn't any pending reward");
+        require(pendingReward > 0, "SYB: no reward");
         // Ensure we have enough founds on this contract to pay the user
         uint256 contractBalance = sybelToken.balanceOf(address(this));
-        require(contractBalance > pendingReward, "SYB: Contract havn't enought founds to pay the user");
+        require(contractBalance > pendingReward, "SYB: not enought founds");
         // Reset the user pending balance
         userPendingReward[user] = 0;
         // Perform the transfer of the founds

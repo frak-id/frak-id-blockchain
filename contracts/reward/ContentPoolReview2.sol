@@ -74,7 +74,7 @@ contract ContentPoolReview {
      * @dev Modifier to make a function callable only when the reward state isn't locked
      */
     modifier whenNotLocked() {
-        require(!isStateLocked, "SYB: Current reward state locked");
+        require(!isStateLocked, "SYB: Current state locked");
         _;
     }
 
@@ -87,9 +87,9 @@ contract ContentPoolReview {
      * TODO : Should be able to handle reward amount directly from sybel token ??
      */
     function addReward(uint256 rewardAmount) external whenNotLocked {
-        require(rewardAmount > 0, "SYB: Can't add 0 reward to the pool");
+        require(rewardAmount > 0, "SYB: invalid reward");
         RewardState storage currentState = rewardStates[currentStateIndex];
-        require(currentState.open, "SYB: The current reward state isn't open");
+        require(currentState.open, "SYB: reward state closed");
         currentState.currentPoolReward += rewardAmount;
     }
 
@@ -97,15 +97,15 @@ contract ContentPoolReview {
      * @dev Update a participant share on this pool
      */
     function updateParticipant(address user, uint256 shares) external whenNotLocked {
-        require(user != address(0), "SYBL: Can't update share on the 0 address");
+        require(user != address(0), "SYBL: invalid address");
         // Close the last RewardState (is it enough as lock ??)
         RewardState storage currentState = rewardStates[currentStateIndex];
         currentState.open = false;
         // Get the participant and check the share differences
         Participant storage currentParticipant = participants[user];
-        require(shares != currentParticipant.shares, "SYB: Can't update share for the same share amount");
+        require(shares != currentParticipant.shares, "SYB: invalid share");
         uint256 reward = claimableReward(user);
-        require(reward == 0, "SYB: User need to claim his reward before updating his position");
+        require(reward == 0, "SYB: claim required before update");
         // Lock the current state
         isStateLocked = true;
         // Compute the share difference
@@ -140,12 +140,12 @@ contract ContentPoolReview {
      * @dev Claim the user reward
      */
     function claimReward(address user) external whenNotLocked {
-        require(user != address(0), "SYBL: Can't claim reward on the 0 address");
+        require(user != address(0), "SYBL: invalid address");
         // Get the participant and it's claimable reward
         Participant storage participant = participants[user];
         uint256 toBePayed = claimableReward(user);
         // Ensure the user got a claimable reward
-        require(toBePayed > 0, "SYB: No reward to be claimed");
+        require(toBePayed > 0, "SYB: no reward");
         for (uint256 stateIndex = participant.lastStateIndex; stateIndex < currentStateIndex; stateIndex++) {
             // Get the reward the user claimed on this state
             uint256 alreadyClaimedRewards = claimedRewards[stateIndex][user];
@@ -167,14 +167,14 @@ contract ContentPoolReview {
      * TODO : Max reward state to iterate over
      */
     function claimableReward(address user) public returns (uint256) {
-        require(user != address(0), "SYBL: Can't check the reward for the 0 address");
+        require(user != address(0), "SYBL: invalid address");
         // Get the participant
         Participant storage participant = participants[user];
         uint256 claimable = 0;
         uint256 lastStateIndexChecked = 0;
         require(
             currentStateIndex - participant.lastStateIndex < MAX_CLAIMABLE_REWARD_STATE_ROUNDS,
-            "SYB: Trying to claim too much reward state at the same time"
+            "SYB: too much state to iterate over"
         );
         // If the difference between the user claim and the last cap is too big,
         for (uint256 stateIndex = participant.lastStateIndex; stateIndex < currentStateIndex; stateIndex++) {

@@ -103,12 +103,12 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
         uint256 epicSupply,
         uint256 legendarySupply
     ) external override onlyRole(SybelRoles.MINTER) whenNotPaused returns (uint256 contentId) {
-        require(contentOwnerAddress != address(0), "SYB: Invalid owner address");
-        require(commonSupply > 0, "SYB: Invalid common supply");
-        require(commonSupply < 500, "SYB: Invalid common supply");
-        require(rareSupply < 200, "SYB: Invalid rare supply");
-        require(epicSupply < 50, "SYB: Invalid epic supply");
-        require(legendarySupply < 5, "SYB: Invalid legendary supply");
+        require(contentOwnerAddress != address(0), "SYB: invalid address");
+        require(commonSupply > 0, "SYB: invalid common supply");
+        require(commonSupply < 500, "SYB: invalid common supply");
+        require(rareSupply < 200, "SYB: invalid rare supply");
+        require(epicSupply < 50, "SYB: invalid epic supply");
+        require(legendarySupply < 5, "SYB: invalid legendary supply");
         // Try to mint the new content
         contentId = sybelInternalTokens.mintNewContent(contentOwnerAddress);
         // Then set the supply for each token types
@@ -142,7 +142,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
         uint256 totalCost = fractionCost * amount;
         // Check if the user have enough the balance
         uint256 userBalance = sybelToken.balanceOf(to);
-        require(userBalance >= totalCost, "SYB: Not enough balance to pay for this fraction");
+        require(userBalance >= totalCost, "SYB: not enough balance");
         // Mint his Fraction of NFT
         sybelInternalTokens.mint(to, id, amount);
         uint256 amountForFundation = (totalCost * 2) / 10;
@@ -162,7 +162,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
      */
     function increaseSupply(uint256 id, uint256 newSupply) external onlyRole(SybelRoles.MINTER) whenNotPaused {
         uint256 currentSupply = sybelInternalTokens.supplyOf(id);
-        require(currentSupply == 0, "SYB: Fraction remaining");
+        require(currentSupply == 0, "SYB: fraction remain");
         // Compute the supply difference
         uint256 newRealSupply = currentSupply + newSupply;
         // Mint his Fraction of NFT
