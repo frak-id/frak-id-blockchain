@@ -14,8 +14,13 @@ import "../utils/SybelAccessControlUpgradeable.sol";
  */
 /// @custom:security-contact crypto-support@sybel.co
 contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAccessor {
+    // The cap of frak token we can mint for the reward
+    uint96 internal constant REWARD_MINT_CAP = 1_500_000_000 ether;
+    uint96 internal constant SINGLE_REWARD_CAP = 1_000 ether;
+
     // Maximum data we can treat in a batch manner
     uint8 private constant MAX_BATCH_AMOUNT = 20;
+    uint16 private constant MAX_CCU_PER_CONTENT = 300; // The mac ccu per content, currently maxed at 5hr 
 
     /**
      * @dev Access our internal tokens
@@ -34,6 +39,11 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
     uint256 public tokenGenerationFactor;
 
     /**
+     * @dev The total frak minted for reward
+     */
+    uint96 public totalFrakMinted;
+
+    /**
      * The pending reward for the given address
      * TODO : Can be uint96 (since sybl cap is a 1.5 billion 1e18 so it shouldn't exceed that value)
      */
@@ -43,18 +53,11 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
      * @dev Event emitted when a user is rewarded for his listen
      */
     event UserRewarded(
-        uint256 indexed contentId,
         address indexed user,
-        uint256 listenCount,
-        uint256 amountPaid
-    );
-
-    /**
-     * @dev Event emitted when a reward is minted from our frak token
-     */
-    event RewardMinted(
-        address indexed user,
-        uint256 mintAmount
+        uint256[] contentIds,
+        uint16[] listenCount,
+        uint96 userReward,
+        uint96 poolRewards
     );
 
     /**
@@ -119,9 +122,13 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
         require(contentIds.length == listenCounts.length, "SYB: invalid array length");
         require(contentIds.length <= MAX_BATCH_AMOUNT, "SYB: array too large");
         // Get our total amopunt to be minted
-        uint256 totalAmountToMint = 0;
+        uint96 totalAmountToMintForOwnerAndPool = 0;
+        uint96 totalAmountToMintForUser = 0;
         // Iterate over each content
         for (uint256 i = 0; i < contentIds.length; ++i) {
+            // TODO : Do we need to ensure that the podcast exist ???
+            // Ensure we don't exceed the max ccu / content
+            require(listenCounts[i] < MAX_CCU_PER_CONTENT, "SYB: too much ccu");
             // Find the balance of the listener for this content
             (ListenerBalanceOnContent[] memory balances, bool hasAtLeastOneBalance) = getListenerBalanceForContent(
                 listener,
@@ -135,12 +142,27 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
             }
             // If he as at least one balance
             if (hasAtLeastOneBalance) {
-                totalAmountToMint += mintForUser(listener, contentIds[i], listenCounts[i], balances);
+                (uint96 totalContentPool, uint96 totalForUser) = computeContentReward(contentIds[i], listenCounts[i], balances);
+                totalAmountToMintForOwnerAndPool += totalContentPool;
+                totalAmountToMintForUser += totalForUser;
             }
         }
+        // Get the listener badge and recompute his reward
+        uint64 listenerBadge = listenerBadges.getBadge(listener);
+        uint96 amountForListener = (totalAmountToMintForUser * listenerBadge) / 1 ether;
+        // Register the amount for listener
+        pendingRewards[listener] += amountForListener;
+        // Compute the total amount to mint
+        uint96 totalAmountToMint = amountForListener + totalAmountToMintForOwnerAndPool;
+        // Ensure we don't go poast our mint cap
+        require(totalAmountToMint + totalFrakMinted <= REWARD_MINT_CAP, "SYB: exceed mint cap");
+        require(totalAmountToMint != 0, "SYB: no reward to be given");
+        // If good, update our total frak minted and emit the event
+        totalFrakMinted += totalAmountToMint;
+        emit UserRewarded(listener, contentIds, listenCounts, amountForListener, totalAmountToMintForOwnerAndPool);
+
         // Once we have iterate over each item, if we got a positive mint amount, mint it
         if (totalAmountToMint > 0) {
-            emit RewardMinted(listener, totalAmountToMint);
             sybelToken.mint(address(this), totalAmountToMint);
         }
     }
@@ -177,46 +199,43 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
     /**
      * @dev Mint the reward for the given user, and take in account his balances for the given content
      */
-    function mintForUser(
-        address listener,
+    function computeContentReward(
         uint256 contentId,
         uint16 listenCount,
         ListenerBalanceOnContent[] memory balances
-    ) private returns (uint256 totalAmountToMint) {
+    ) private returns (uint96 poolAndOwnerRewardAmount, uint96 userReward) {
         // The user have a balance we can continue
         uint256 contentBadge = contentBadges.getBadge(contentId);
         // Mint each token for each fraction
-        for (uint256 i = 0; i < balances.length; ++i) {
+        uint96 totalReward = 0;
+        for (uint8 i = 0; i < balances.length; ++i) {
             if (balances[i].balance <= 0) {
                 // Jump this iteration if the user havn't go any balance of this token types
                 continue;
             }
-            // Compute the amount for the owner and the users
-            totalAmountToMint += computeUserRewardForFraction(
+            // Compute the total reward amount
+            totalReward += computeUserRewardForFraction(
                 balances[i].balance,
                 balances[i].tokenType,
                 contentBadge,
                 listenCount
             );
         }
-        // If nothing to mint, directly exit
-        if (totalAmountToMint == 0) {
-            return 0;
+        // If no reward, directly exit
+        if (totalReward == 0) {
+            return (0, 0);
         }
-        uint256 amountForOwner = totalAmountToMint / 2;
-        uint256 baseAmountForListener = totalAmountToMint - amountForOwner;
-        // Handle the user badge for his amount
-        uint64 listenerBadge = listenerBadges.getBadge(listener);
-        uint256 amountForListener = (baseAmountForListener * listenerBadge) / 1 ether;
-        // Register the amount for listener
-        pendingRewards[listener] += amountForListener;
-        // Register the amount for the owner
+        // Ensure the reward isn't too large, and also ensure it fit inside a uint96
+        require(totalReward < SINGLE_REWARD_CAP, "SYB: reward too large");
+        // Then split the payment for owner and user (TODO : Also referral and content pools)
+        userReward = totalReward / 2;
+        poolAndOwnerRewardAmount = totalReward - userReward; // This is the part that should be split for owner, content pool and referral
+
+        // Split the total shares for owner, referral and content pool
+        uint96 ownerReward = poolAndOwnerRewardAmount;
+        // Save the amount for the owner
         address owner = sybelInternalTokens.ownerOf(contentId);
-        pendingRewards[owner] += amountForOwner;
-        // Emit the reward eventcontentId
-        emit UserRewarded(contentId, listener, listenCount, amountForListener);
-        // Return the total amount to mint
-        return totalAmountToMint;
+        pendingRewards[owner] += ownerReward;
     }
 
     /**
@@ -227,13 +246,12 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
         uint8 tokenType,
         uint256 contentBadge, // Badge on 1e18 decimals
         uint16 consumedContentUnit
-    ) private view returns (uint256) {
+    ) private view returns (uint96 reward) {
         // Compute the earning factor
         uint256 earningFactor = balance * baseRewardForTokenType(tokenType); // On 1e18 decimals
         // Compute the badge reward (and divied it by 1e18 since we have 2 value on 1e18 decimals)
         uint256 badgeReward = (contentBadge * earningFactor * consumedContentUnit);
-        // Add our token generation factor to the computation, and dived it by 1e18
-        return (badgeReward * tokenGenerationFactor) / (1 ether * 1 ether);
+        reward = uint96((badgeReward * tokenGenerationFactor) / (1 ether * 1 ether));
     }
 
     /**
@@ -266,6 +284,13 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
     struct ListenerBalanceOnContent {
         uint8 tokenType;
         uint256 balance;
+    }
+
+    /**
+     * @dev Return the total frak minted
+     */
+    function getFrakMinted() external view returns(uint96) {
+        return totalFrakMinted;
     }
 
     /**
