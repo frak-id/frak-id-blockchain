@@ -2,7 +2,6 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../utils/SybelMath.sol";
@@ -10,7 +9,7 @@ import "../utils/MintingAccessControlUpgradeable.sol";
 
 /// @custom:security-contact crypto-support@sybel.co
 /// @custom:oz-upgrades-unsafe-allow external-library-linking
-contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable, IERC2981Upgradeable {
+contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     using SybelMath for uint256;
 
     // The current content token id
@@ -190,22 +189,6 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     }
 
     /**
-     * @dev Returns how much royalty is owed and to whom, based on a sale price that may be denominated in any unit of
-     * exchange. The royalty amount is denominated and should be paid in that same unit of exchange.
-     */
-    function royaltyInfo(uint256 tokenId, uint256 salePrice) external view override returns (address, uint256) {
-        if (salePrice > 0 && tokenId.isContentRelatedToken()) {
-            // Find the address of the owner of this content
-            address ownerAddress = owners[tokenId.extractContentId()];
-            uint256 royaltyForOwner = (salePrice * 4) / 100;
-            return (ownerAddress, royaltyForOwner);
-        } else {
-            // Otherwise, return address 0 with no royalty amount
-            return (address(0), 0);
-        }
-    }
-
-    /**
      * @dev Find the owner of the given content is
      */
     function ownerOf(uint256 contentId) external view returns (address) {
@@ -217,18 +200,5 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
      */
     function supplyOf(uint256 tokenId) external view returns (uint256) {
         return _availableSupplies[tokenId];
-    }
-
-    /**
-     * @dev Required extension to support access control and ERC1155
-     */
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC1155Upgradeable, IERC165Upgradeable)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
     }
 }

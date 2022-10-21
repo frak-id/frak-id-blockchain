@@ -43,12 +43,20 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
      * @dev Event emitted when a user is rewarded for his listen
      */
     event UserRewarded(
-        uint256 contentId,
-        address user,
+        uint256 indexed contentId,
+        address indexed user,
         uint256 listenCount,
-        uint256 amountPaid,
-        ListenerBalanceOnContent[] listenerBalance
+        uint256 amountPaid
     );
+
+    /**
+     * @dev Event emitted when a reward is minted from our frak token
+     */
+    event RewardMinted(
+        address indexed user,
+        uint256 mintAmount
+    );
+
     /**
      * @dev Event emitted when a user withdraw his pending reward
      */
@@ -132,6 +140,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
         }
         // Once we have iterate over each item, if we got a positive mint amount, mint it
         if (totalAmountToMint > 0) {
+            emit RewardMinted(listener, totalAmountToMint);
             sybelToken.mint(address(this), totalAmountToMint);
         }
     }
@@ -205,7 +214,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
         address owner = sybelInternalTokens.ownerOf(contentId);
         pendingRewards[owner] += amountForOwner;
         // Emit the reward eventcontentId
-        emit UserRewarded(contentId, listener, listenCount, amountForListener, balances);
+        emit UserRewarded(contentId, listener, listenCount, amountForListener);
         // Return the total amount to mint
         return totalAmountToMint;
     }
