@@ -22,7 +22,7 @@ contract Referral is SybelAccessControlUpgradeable {
     /**
      * @dev Event emitted when a user is rewarded by the referral program
      */
-    event ReferralReward(uint256 indexed contentId, address indexed user, uint256 amount);
+    event ReferralReward(uint256 indexed contentId, address indexed user, uint96 amount);
     /**
      * @dev Event emitted when a user withdraw his pending reward
      */
@@ -41,7 +41,7 @@ contract Referral is SybelAccessControlUpgradeable {
     /**
      * The pending referal reward for the given address
      */
-    mapping(address => uint256) private userPendingReward;
+    mapping(address => uint96) private userPendingReward;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -99,8 +99,8 @@ contract Referral is SybelAccessControlUpgradeable {
     function payAllReferer(
         uint256 contentId,
         address user,
-        uint256 amount
-    ) public onlyRole(SybelRoles.ADMIN) whenNotPaused returns (uint256 totalAmount) {
+        uint96 amount
+    ) public onlyRole(SybelRoles.ADMIN) whenNotPaused returns (uint96 totalAmount) {
         require(user != address(0), "SYBL: invalid address");
         require(amount > 0, "SYB: invalid amount");
         // Store the pending reward for this user, and emit the associated event's
@@ -113,7 +113,7 @@ contract Referral is SybelAccessControlUpgradeable {
         if (userReferer != address(0) && amount > 0) {
             // If yes, recursively get all the amount to be paid for all of his referer,
             // dividing by 2 each time we go up a level
-            uint256 refererAmount = amount / 2;
+            uint96 refererAmount = amount / 2;
             totalAmount += payAllReferer(contentId, user, refererAmount);
         }
         // Then return the amount to be paid
@@ -126,7 +126,7 @@ contract Referral is SybelAccessControlUpgradeable {
     function withdrawFounds(address user) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
         require(user != address(0), "SYBL: invalid address");
         // Ensure the user have a pending reward
-        uint256 pendingReward = userPendingReward[user];
+        uint96 pendingReward = userPendingReward[user];
         require(pendingReward > 0, "SYB: no reward");
         // Ensure we have enough founds on this contract to pay the user
         uint256 contractBalance = sybelToken.balanceOf(address(this));

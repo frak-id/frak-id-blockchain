@@ -8,6 +8,8 @@ import "../utils/SybelRoles.sol";
 import "../tokens/SybelInternalTokens.sol";
 import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
+import "./ContentPool.sol";
+import "./Referral.sol";
 
 /**
  * @dev Represent our rewarder contract
@@ -15,8 +17,8 @@ import "../utils/SybelAccessControlUpgradeable.sol";
 /// @custom:security-contact crypto-support@sybel.co
 contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAccessor {
     // The cap of frak token we can mint for the reward
-    uint96 internal constant REWARD_MINT_CAP = 1_500_000_000 ether;
-    uint96 internal constant SINGLE_REWARD_CAP = 1_000 ether;
+    uint96 public constant REWARD_MINT_CAP = 1_500_000_000 ether;
+    uint96 private constant SINGLE_REWARD_CAP = 1_000 ether;
 
     // Maximum data we can treat in a batch manner
     uint8 private constant MAX_BATCH_AMOUNT = 20;
@@ -28,10 +30,20 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
     SybelInternalTokens private sybelInternalTokens;
 
     /**
-     * @dev Access our governance token
+     * @dev Access our token
      */
     /// @custom:oz-renamed-from tokenSybelEcosystem
     SybelToken private sybelToken;
+
+    /**
+     * @dev Access our referral system
+     */
+    Referral private referral;
+
+    /**
+     * @dev Access our content pool
+     */
+    ContentPool private contentPool;
 
     /**
      * @dev factor user to compute the number of token to generate (on 1e18 decimals)
@@ -45,9 +57,8 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
 
     /**
      * The pending reward for the given address
-     * TODO : Can be uint96 (since sybl cap is a 1.5 billion 1e18 so it shouldn't exceed that value)
      */
-    mapping(address => uint256) public pendingRewards;
+    mapping(address => uint96) public pendingRewards;
 
     /**
      * @dev Event emitted when a user is rewarded for his listen
@@ -74,7 +85,9 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
         address syblTokenAddr,
         address internalTokenAddr,
         address listenerBadgesAddr,
-        address contentBadgesAddr
+        address contentBadgesAddr,
+        address contentPoolAddr,
+        address referralAddr
     ) external initializer {
         /*
         // Only for v1 deployment
@@ -83,6 +96,8 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
 
         sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
         sybelToken = SybelToken(syblTokenAddr);
+        contentPoolAddr = ContentPool(contentPoolAddr);
+        referral = Referral(referralAddr);
 
         // Default TPU
         tokenGenerationFactor = 4.22489708885 ether;
@@ -142,7 +157,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
             }
             // If he as at least one balance
             if (hasAtLeastOneBalance) {
-                (uint96 totalContentPool, uint96 totalForUser) = computeContentReward(contentIds[i], listenCounts[i], balances);
+                (uint96 totalContentPool, uint96 totalForUser) = computeContentReward(listener, contentIds[i], listenCounts[i], balances);
                 totalAmountToMintForOwnerAndPool += totalContentPool;
                 totalAmountToMintForUser += totalForUser;
             }
@@ -200,6 +215,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
      * @dev Mint the reward for the given user, and take in account his balances for the given content
      */
     function computeContentReward(
+        address listener,
         uint256 contentId,
         uint16 listenCount,
         ListenerBalanceOnContent[] memory balances
@@ -228,14 +244,25 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
         // Ensure the reward isn't too large, and also ensure it fit inside a uint96
         require(totalReward < SINGLE_REWARD_CAP, "SYB: reward too large");
         // Then split the payment for owner and user (TODO : Also referral and content pools)
-        userReward = totalReward / 2;
-        poolAndOwnerRewardAmount = totalReward - userReward; // This is the part that should be split for owner, content pool and referral
+        userReward = (totalReward * 40) / 100;
 
-        // Split the total shares for owner, referral and content pool
-        uint96 ownerReward = poolAndOwnerRewardAmount;
+        // Send the reward to the content pool
+        uint96 poolReward = (totalReward * 10) / 100; 
+        contentPool.addReward(poolReward);
+
+        // Compute the reward for the referral
+        uint96 baseReferralReward = (totalReward * 15) / 100; // Reward for the referral
+        uint96 usedReferralReward = referral.payAllReferer(contentId, listener, baseReferralReward);
+
+        // Compute the reward for the owner
+        uint96 ownerReward = totalReward - userReward - poolReward - usedReferralReward;
+        // Update the global reward
+        poolAndOwnerRewardAmount = ownerReward + poolReward + usedReferralReward;
         // Save the amount for the owner
         address owner = sybelInternalTokens.ownerOf(contentId);
         pendingRewards[owner] += ownerReward;
+        // Return our result
+        return (poolAndOwnerRewardAmount, userReward);
     }
 
     /**
@@ -287,19 +314,12 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
     }
 
     /**
-     * @dev Return the total frak minted
-     */
-    function getFrakMinted() external view returns(uint96) {
-        return totalFrakMinted;
-    }
-
-    /**
      * Withdraw the user pending founds
      */
     function withdrawFounds(address user) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
         require(user != address(0), "SYB: invlid address");
         // Ensure the user have a pending reward
-        uint256 pendingReward = pendingRewards[user];
+        uint96 pendingReward = pendingRewards[user];
         require(pendingReward > 0, "SYB: no pending reward");
         // Ensure we have enough founds on this contract to pay the user
         uint256 contractBalance = sybelToken.balanceOf(address(this));
