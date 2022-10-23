@@ -116,6 +116,13 @@ library SybelMath {
     }
 
     /**
+     * @dev Check if the token is payed or not
+     */
+    function isPayedTokenToken(uint8 tokenType) internal pure returns (bool) {
+        return tokenType > TOKEN_TYPE_COMMON_MASK && tokenType <= TOKEN_TYPE_DIAMOND_MASK;
+    }
+
+    /**
      * @dev Check if the given token id is a content NFT
      * @param id uint256 ID of the token to check
      * @return bool true if the token is a content nft, false otherwise

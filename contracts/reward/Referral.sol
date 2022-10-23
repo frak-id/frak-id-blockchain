@@ -112,8 +112,8 @@ contract Referral is SybelAccessControlUpgradeable {
         address userReferer = contentIdToRefereeToReferer[contentId][user];
         if (userReferer != address(0) && amount > 0) {
             // If yes, recursively get all the amount to be paid for all of his referer,
-            // dividing by 2 each time we go up a level
-            uint96 refererAmount = amount / 2;
+            // multiplying by 0.8 each time we go up a level
+            uint96 refererAmount = (amount * 4) / 5;
             totalAmount += payAllReferer(contentId, user, refererAmount);
         }
         // Then return the amount to be paid

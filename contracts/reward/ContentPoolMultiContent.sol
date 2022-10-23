@@ -14,7 +14,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
  * what's the max uint we can use for the price ?, What the max array size ? So what max uint for indexes ?)
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract ContentPool {
+contract ContentPoolMultiContent {
     struct RewardState {
         // First storage slot, remain 31 bytes
         uint128 totalShares;
@@ -28,7 +28,6 @@ contract ContentPool {
         // First storage slot, remain 40 bytes
         uint120 shares; // Number of shares in the content pool
         uint96 lastStateClaim; // The last state amount claimed
-
         // Second storage slot
         uint256 enterStateIndex; // When does this entered the pool. Really usefull to store that ?
         // Third storage slot
@@ -79,7 +78,11 @@ contract ContentPool {
     /**
      * @dev Update a participant share in a pool
      */
-    function updateParticipant(uint256 contentId, address user, uint120 newShares) external {
+    function updateParticipant(
+        uint256 contentId,
+        address user,
+        uint120 newShares
+    ) external {
         require(user != address(0), "SYBL: invalid address");
         // Close the last RewardState and lock it
         (RewardState storage currentState, uint256 stateIndex) = lastContentStateWithIndex(contentId);
@@ -89,11 +92,11 @@ contract ContentPool {
         require(newShares != currentParticipant.shares, "SYB: invalid share");
         // Compute the new reward state shares
         // TODO : WARNIIIING, Ensure this don't update previous state (and so not a a memory ref to the var)
-        uint128 newTotalShares = currentState.totalShares;
+        uint128 newTotalShares;
         if (newShares > currentParticipant.shares) {
-            newTotalShares += newShares - currentParticipant.shares;
+            newTotalShares = currentState.totalShares + newShares - currentParticipant.shares;
         } else {
-            newTotalShares -= currentParticipant.shares - newShares;
+            newTotalShares = currentState.totalShares - currentParticipant.shares - newShares;
         }
         // Check if the pool contain some reward
         if (currentState.currentPoolReward == 0) {
@@ -103,24 +106,29 @@ contract ContentPool {
             // Otherwise, create a new reward state
             stateIndex++;
             rewardStates[contentId][stateIndex] = RewardState({
-                totalShares: newTotalShares, // total shares
-                currentPoolReward: 0, // current reward
-                open: true // open state
+                totalShares: newTotalShares,
+                currentPoolReward: 0,
+                open: true
             });
             // Update this participant shares
             currentParticipant.shares = newShares;
         }
+        // TODO : If evolving from 0, set the last claimed reward to previous one
+        // TODO : In all the case, ensure the user havn't reward to claim (This should fix the last point)
         // Once the pool is all set, update the participant shares
         currentParticipant.shares = newShares;
     }
 
-    function lastContentState(uint256 contentId) internal view returns(RewardState storage state) {
-        (state,) = lastContentStateWithIndex(contentId);
+    function lastContentState(uint256 contentId) internal view returns (RewardState storage state) {
+        (state, ) = lastContentStateWithIndex(contentId);
     }
 
-    function lastContentStateWithIndex(uint256 contentId) internal view returns(RewardState storage state, uint256 rewardIndex) {
+    function lastContentStateWithIndex(uint256 contentId)
+        internal
+        view
+        returns (RewardState storage state, uint256 rewardIndex)
+    {
         rewardIndex = currentStateIndex[contentId];
         state = rewardStates[contentId][rewardIndex];
     }
-
 }

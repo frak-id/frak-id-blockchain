@@ -16,12 +16,10 @@ contract SybelTokenL1 is ERC20Upgradeable, SybelAccessControlUpgradeable, Native
 
     uint256 private _cap;
 
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
-
 
     function initialize() external initializer {
         string memory name = "Frak Token (by Sybel)";

@@ -66,17 +66,12 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
 
         // Return the content id
         return id;
-    }    
-    
+    }
+
     /**
      * @dev Batch balance of for single address
      */
-    function balanceOfIdsBatch(address account, uint256[] memory ids)
-        public
-        view
-        virtual
-        returns (uint256[] memory)
-    {
+    function balanceOfIdsBatch(address account, uint256[] memory ids) public view virtual returns (uint256[] memory) {
         uint256[] memory batchBalances = new uint256[](ids.length);
 
         for (uint256 i = 0; i < ids.length; ++i) {
@@ -122,10 +117,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
                 // Only allow minter to perform mint operation
                 _checkRole(SybelRoles.MINTER);
                 if (_isSupplyAware[ids[i]]) {
-                    require(
-                        amounts[i] <= _availableSupplies[ids[i]],
-                        "SYB: Not enough supply"
-                    );
+                    require(amounts[i] <= _availableSupplies[ids[i]], "SYB: Not enough supply");
                 }
             }
         }
