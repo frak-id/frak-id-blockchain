@@ -383,8 +383,8 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
     }
 
     function withdrawFounds() external virtual override whenNotPaused {
-        _computeAndSaveAllForUser(_msgSender());
-        _withdraw(_msgSender());
+        _computeAndSaveAllForUser(msg.sender);
+        _withdraw(msg.sender);
     }
 
     function withdrawFounds(address user) external virtual override onlyRole(SybelRoles.ADMIN) whenNotPaused {

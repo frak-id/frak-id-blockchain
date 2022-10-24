@@ -309,3 +309,20 @@
 ·-----------------------------------------------------|-------------|-------------|-------------|---------------|-------------·
 
 // TODO : For now, best for execution is without IR and without CSE, check with more complexe function later
+
+// Trying a few code optimisation, run with IR and without CSE
+
+Without opti (focussing on this method since it's the most costly one) : 
+|  MultiVestingWallets   ·  createVestBatch           ·     180564  ·     463790  ·     322177  ·            2  ·       0.02  │
+
+// With small opti (only adding one unchecked op)
+|  MultiVestingWallets  ·  createVestBatch           ·     180455  ·     463463  ·     321959  ·            2  ·       0.02  │
+
+// With another unchecked op
+|  MultiVestingWallets  ·  createVestBatch           ·     180383  ·     463247  ·     321815  ·            2  ·       0.02  │
+
+// By updating the way we compute the reserve
+|  MultiVestingWallets  ·  createVestBatch           ·     180529  ·     460277  ·     320403  ·            2  ·       0.03  │
+
+// Removing reserve caching and keeping only indexes uncheck op
+|  MultiVestingWallets  ·  createVestBatch           ·     180383  ·     463247  ·     321815  ·            2  ·       0.03  │

@@ -164,8 +164,11 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         require(beneficiaries.length == initialDrops.length, "SYB: Invalid array lengths");
         _requireVestInputs(duration, startDate);
 
-        for (uint256 index = 0; index < beneficiaries.length; ++index) {
+        for (uint256 index = 0; index < beneficiaries.length;) {
             _createVesting(beneficiaries[index], amounts[index], initialDrops[index], duration, startDate, revocable);
+            unchecked {
+                ++index;
+            }
         }
     }
 
@@ -212,7 +215,9 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         // Add the user the ownership, and increase the total supply
         bool isAdded = _addOwnership(beneficiary, vestingId);
         require(isAdded, "SYB: Unable to add the vesting");
-        totalSupply += uint96(amount);
+        unchecked {
+            totalSupply += uint96(amount);
+        }
 
         // Emit the creation and transfer event
         emit VestingCreated(vestingId, beneficiary, uint96(amount), uint96(initialDrop), duration, startDate);
@@ -226,7 +231,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         require(to != address(0), "SYB: target is the zero address");
 
         // Get the vesting
-        Vesting storage vesting = _getVestingForBeneficiary(vestingId, _msgSender());
+        Vesting storage vesting = _getVestingForBeneficiary(vestingId, msg.sender);
         address from = vesting.beneficiary;
 
         require(from != to, "SYB: cannot transfer to itself");
@@ -248,14 +253,14 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @notice Release the tokens for the specified vesting.
      */
     function release(uint24 vestingId) external returns (uint256) {
-        return _release(_getVestingForBeneficiary(vestingId, _msgSender()));
+        return _release(_getVestingForBeneficiary(vestingId, msg.sender));
     }
 
     /**
      * @notice Release the tokens of a all of sender's vesting.
      */
     function releaseAll() external returns (uint256) {
-        return _releaseAll(_msgSender());
+        return _releaseAll(msg.sender);
     }
 
     /**
@@ -279,11 +284,15 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     function _releaseAll(address beneficiary) internal whenNotPaused returns (uint256 released) {
         EnumerableSet.UintSet storage indexes = owned[beneficiary];
 
-        for (uint256 index = 0; index < indexes.length(); ++index) {
+        for (uint256 index = 0; index < indexes.length();) {
             uint24 vestingId = uint24(indexes.at(index));
             Vesting storage vesting = _getVesting(vestingId);
 
             released += _doRelease(vesting);
+
+            unchecked {
+                ++index;
+            }
         }
 
         _checkAmount(released);
@@ -347,10 +356,11 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     function balanceOf(address beneficiary) external view returns (uint256 balance) {
         EnumerableSet.UintSet storage indexes = owned[beneficiary];
 
-        for (uint256 index = 0; index < indexes.length(); ++index) {
+        for (uint256 index = 0; index < indexes.length();) {
             uint24 vestingId = uint24(indexes.at(index));
-
             balance += balanceOfVesting(vestingId);
+            
+            unchecked { ++index; }
         }
     }
 

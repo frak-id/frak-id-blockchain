@@ -319,7 +319,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, P
     }
 
     function withdrawFounds() external virtual override whenNotPaused {
-        _withdraw(_msgSender());
+        _withdraw(msg.sender);
     }
 
     function withdrawFounds(address user) external virtual override onlyRole(SybelRoles.ADMIN) whenNotPaused {

@@ -23,7 +23,7 @@ contract ListenerBadges is IListenerBadges, SybelAccessControlUpgradeable {
         __SybelAccessControlUpgradeable_init();
 
         // Grant the badge updater role to the contract deployer
-        _grantRole(SybelRoles.BADGE_UPDATER, _msgSender());
+        _grantRole(SybelRoles.BADGE_UPDATER, msg.sender);
     }
 
     /**
