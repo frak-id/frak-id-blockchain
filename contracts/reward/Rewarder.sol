@@ -8,7 +8,7 @@ import "../utils/SybelRoles.sol";
 import "../tokens/SybelInternalTokens.sol";
 import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
-import "./ContentPool.sol";
+import "./ContentPoolMultiContent.sol";
 import "./Referral.sol";
 
 /**
@@ -43,7 +43,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
     /**
      * @dev Access our content pool
      */
-    ContentPool private contentPool;
+    ContentPoolMultiContent private contentPool;
 
     /**
      * @dev factor user to compute the number of token to generate (on 1e18 decimals)
@@ -96,7 +96,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
 
         sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
         sybelToken = SybelToken(syblTokenAddr);
-        contentPoolAddr = ContentPool(contentPoolAddr);
+        contentPoolAddr = ContentPoolMultiContent(contentPoolAddr);
         referral = Referral(referralAddr);
 
         // Default TPU
@@ -279,7 +279,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
             // Send the reward to the content pool, and decrease the owner reward
             uint96 contentPoolReward = (totalReward * 10) / 100;
             poolReward += contentPoolReward;
-            contentPool.addReward(poolReward);
+            contentPool.addReward(param.contentId, poolReward);
 
             // Compute the reward for the referral
             uint96 baseReferralReward = (totalReward * 6) / 100; // Reward for the referral

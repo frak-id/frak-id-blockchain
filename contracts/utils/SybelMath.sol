@@ -106,6 +106,15 @@ library SybelMath {
     }
 
     /**
+     * @dev Return the token type
+     * @param id uint256 ID of the token to extract the mask from
+     * @return uint256 The token type
+     */
+    function extractContentIdAndTokenType(uint256 id) internal pure returns (uint256, uint8) {
+        return (id >> ID_OFFSET, uint8(id & TYPE_MASK));
+    }
+
+    /**
      * @dev Check if the given token exist
      * @param id uint256 ID of the token to check
      * @return bool true if the token is related to a content, false otherwise
