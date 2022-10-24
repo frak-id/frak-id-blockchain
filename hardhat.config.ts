@@ -24,7 +24,7 @@ export default {
             details: {
               orderLiterals: true,
               deduplicate: true,
-              cse: true,
+              cse: false,
               constantOptimizer: true,
             },
           },

@@ -80,7 +80,6 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, P
         address contentPoolAddr,
         address referralAddr
     ) external initializer {
-        /*
         // Only for v1 deployment
         __SybelAccessControlUpgradeable_init();
         __PaymentBadgesAccessor_init(listenerBadgesAddr, contentBadgesAddr);
@@ -88,7 +87,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, P
 
         sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
         sybelToken = SybelToken(syblTokenAddr);
-        contentPoolAddr = ContentPoolMultiContent(contentPoolAddr);
+        contentPool = ContentPoolMultiContent(contentPoolAddr);
         referral = Referral(referralAddr);
 
         // Default TPU
@@ -96,26 +95,6 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, P
 
         // Grant the rewarder role to the contract deployer
         _grantRole(SybelRoles.REWARDER, msg.sender);
-        */
-    }
-
-    function migrateToV2(address sybelTokenAddr) external reinitializer(2) {
-        /*
-        // Only for v2 upgrade
-        sybelToken = SybelToken(sybelTokenAddr);
-        */
-    }
-
-    function migrateToV3() external reinitializer(3) {
-        /*
-        // Only for v3 upgrade
-        tokenGenerationFactor = 4.22489708885 ether;
-        */
-    }
-
-    function migrateToV4(address contentBadgesAddr) external reinitializer(4) {
-        // Only for v4 upgrade
-        contentBadges = IContentBadges(contentBadgesAddr);
     }
 
     /**
