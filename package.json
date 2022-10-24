@@ -15,7 +15,7 @@
     "build": "hardhat compile",
     "test": "hardhat test",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"test/**/*.ts\" && npm typechain",
-    "size": "hardhat size-contracts",
+    "size": "hardhat size-contracts --concurrency 4",
     "lint": "npm lint:sol && npm lint:ts && npm prettier:check",
     "lint:sol": "solhint --config ./.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:ts": "eslint --config ./.eslintrc.yml --ignore-path ./.eslintignore --ext .js,.ts .",
@@ -70,7 +70,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.3",
-    "@openzeppelin/contracts-upgradeable": "^4.8.0-rc.1",
+    "@openzeppelin/contracts-upgradeable": "^4.7.3",
     "cpy-cli": "^4.2.0"
   },
   "private": true

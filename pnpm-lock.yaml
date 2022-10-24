@@ -12,7 +12,7 @@ specifiers:
   '@nomiclabs/hardhat-ethers': ^2.2.0
   '@nomiclabs/hardhat-etherscan': ^3.1.1
   '@openzeppelin/contracts': ^4.7.3
-  '@openzeppelin/contracts-upgradeable': ^4.8.0-rc.1
+  '@openzeppelin/contracts-upgradeable': ^4.7.3
   '@openzeppelin/hardhat-upgrades': ^1.21.0
   '@trivago/prettier-plugin-sort-imports': ^3.4.0
   '@typechain/ethers-v5': ^10.1.0
@@ -50,7 +50,7 @@ specifiers:
 
 dependencies:
   '@openzeppelin/contracts': 4.7.3
-  '@openzeppelin/contracts-upgradeable': 4.8.0-rc.1
+  '@openzeppelin/contracts-upgradeable': 4.7.3
   cpy-cli: 4.2.0
 
 devDependencies:
@@ -1144,8 +1144,8 @@ packages:
       - supports-color
     dev: true
 
-  /@openzeppelin/contracts-upgradeable/4.8.0-rc.1:
-    resolution: {integrity: sha512-yywl0OC8ZGyRLDf0hQqGt2qtm5DZcDf6CggfE+J0bNw2mF6ySaXW6lovAZwXI/frtevUGog4WKNm6EPXtpoh3A==}
+  /@openzeppelin/contracts-upgradeable/4.7.3:
+    resolution: {integrity: sha512-+wuegAMaLcZnLCJIvrVUDzA9z/Wp93f0Dla/4jJvIhijRrPabjQbZe6fWiECLaJyfn5ci9fqf9vTw3xpQOad2A==}
     dev: false
 
   /@openzeppelin/contracts/4.7.3:
