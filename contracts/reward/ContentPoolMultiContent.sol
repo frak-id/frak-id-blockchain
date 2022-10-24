@@ -16,6 +16,9 @@ import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
  */
 /// @custom:security-contact crypto-support@sybel.co
 contract ContentPoolMultiContent is FraktionTransferCallback {
+    /**
+     * Represent a pool reward state
+     */
     struct RewardState {
         // First storage slot, remain 31 bytes
         uint128 totalShares;
@@ -23,15 +26,14 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
         bool open;
     }
 
-    // TODO : Do we reduce shares or not ?
-    // TODO : How to update the state, callback on the erc1155 ? Not too costy for each operation ?
+    /**
+     * Represent a pool participant
+     */
     struct Participant {
         // First storage slot, remain 40 bytes
         uint120 shares; // Number of shares in the content pool
         uint96 lastStateClaim; // The last state amount claimed
         // Second storage slot
-        uint256 enterStateIndex; // When does this entered the pool. Really usefull to store that ?
-        // Third storage slot
         uint256 lastStateIndex; // What was the last state index he claimed in the pool ?
         // Last withdraw timestamp ? For lock on that ? Like a claim max every 6 hours
     }
@@ -67,6 +69,21 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
     mapping(address => uint256) private userPendingReward;
 
     /**
+     * Event emitted when a reward is added to the pool
+     */
+    event RewardAdded(uint256 indexed contentId, uint96 reward);
+
+    /**
+     * Event emitted when the pool shares are updated
+     */
+    event PoolSharesUpdated(uint256 indexed contentId, uint256 indexed poolId, uint128 totalShares);
+
+    /**
+     * Event emitted when the pool shares are updated
+     */
+    event PoolSharesUpdated(uint256 indexed contentId, uint128 totalShares);
+
+    /**
      * Add a reward inside a content pool
      */
     function addReward(uint256 contentId, uint96 rewardAmount) external {
@@ -74,6 +91,7 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
         RewardState storage currentState = lastContentState(contentId);
         require(currentState.open, "SYB: reward state closed");
         currentState.currentPoolReward += rewardAmount;
+        emit RewardAdded(contentId, rewardAmount);
     }
 
     /**
@@ -85,44 +103,58 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
         uint256[] calldata ids,
         uint256[] calldata amount
     ) external override {
-        // Handle share transfer between participant, with no update on the total pool rewards
         if (from != address(0) && to != address(0)) {
+            // Handle share transfer between participant, with no update on the total pool rewards
             for (uint256 index = 0; index < ids.length; ++index) {
-                // Extract content id and token type from this tx
-                (uint256 contentId, uint8 tokenType) = SybelMath.extractContentIdAndTokenType(ids[index]);
-                // Get the initial share value of this token
-                uint16 sharesValue = getSharesForTokenType(tokenType);
-                if (sharesValue == 0) continue; // Jump this iteration if this fraktions doesn't count for any shares
-                // Get the last state index
-                uint256 lastContentIndex = currentStateIndex[contentId];
-                // Get the total shares moved
-                uint96 totalShares = uint96(sharesValue * amount[index]);
-                // Get the previous participant and compute his reward for this content
-                Participant storage sender = participants[contentId][from];
-                // Compute and save the reward for the participant before updating his shares
-                computeAndSaveReward(contentId, from, sender, lastContentIndex);
-                // Do the same thing for the receiver
-                Participant storage receiver = participants[contentId][to];
-                computeAndSaveReward(contentId, to, receiver, lastContentIndex);
-                // Then update the shares for each one of them
-                sender.shares -= totalShares;
-                receiver.shares += totalShares;
+                updateParticipants(from, to, ids[index], amount[index]);
             }
-            return;
-        }
-
-        // Iterate over each pool concerned by this update
-        for (uint256 index = 0; index < ids.length; ++index) {
-            updateParticipantAndPool(from, to, ids[index], amount[index]);
+        } else {
+            // Otherwise (in case of mined or burned token), also update the pool
+            for (uint256 index = 0; index < ids.length; ++index) {
+                updateParticipantAndPool(from, to, ids[index], amount[index]);
+            }
         }
     }
 
+    /**
+     * Update the participants of a pool after fraktion transfer
+     */
+    function updateParticipants(
+        address from,
+        address to,
+        uint256 fraktionId,
+        uint256 amountMoved
+    ) private {
+        // Extract content id and token type from this tx
+        (uint256 contentId, uint8 tokenType) = SybelMath.extractContentIdAndTokenType(fraktionId);
+        // Get the initial share value of this token
+        uint16 sharesValue = getSharesForTokenType(tokenType);
+        if (sharesValue == 0) return; // Jump this iteration if this fraktions doesn't count for any shares
+        // Get the last state index
+        uint256 lastContentIndex = currentStateIndex[contentId];
+        // Get the total shares moved
+        uint96 totalShares = uint96(sharesValue * amountMoved);
+        // Get the previous participant and compute his reward for this content
+        Participant storage sender = participants[contentId][from];
+        // Compute and save the reward for the participant before updating his shares
+        computeAndSaveReward(contentId, from, sender, lastContentIndex);
+        // Do the same thing for the receiver
+        Participant storage receiver = participants[contentId][to];
+        computeAndSaveReward(contentId, to, receiver, lastContentIndex);
+        // Then update the shares for each one of them
+        sender.shares -= totalShares;
+        receiver.shares += totalShares;
+    }
+
+    /**
+     * Update participant and pool after fraktion transfer
+     */
     function updateParticipantAndPool(
         address from,
         address to,
         uint256 fraktionId,
         uint256 amountMoved
-    ) internal {
+    ) private {
         // Extract content id and token type from this tx
         (uint256 contentId, uint8 tokenType) = SybelMath.extractContentIdAndTokenType(fraktionId);
         // Get the initial share value of this token

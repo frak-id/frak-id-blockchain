@@ -12,7 +12,7 @@
   },
   "scripts": {
     "clean": "hardhat clean",
-    "build": "hardhat compile",
+    "build": "hardhat compile --concurrency 4",
     "test": "hardhat test",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"test/**/*.ts\" && npm typechain",
     "size": "hardhat size-contracts --concurrency 4",

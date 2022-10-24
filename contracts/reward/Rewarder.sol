@@ -8,6 +8,7 @@ import "../utils/SybelRoles.sol";
 import "../tokens/SybelInternalTokens.sol";
 import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
+import "../utils/PushPullReward.sol";
 import "./ContentPoolMultiContent.sol";
 import "./Referral.sol";
 
@@ -15,7 +16,7 @@ import "./Referral.sol";
  * @dev Represent our rewarder contract
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAccessor {
+contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, PaymentBadgesAccessor {
     // The cap of frak token we can mint for the reward
     uint96 public constant REWARD_MINT_CAP = 1_500_000_000 ether;
     uint96 private constant SINGLE_REWARD_CAP = 1_000 ether;
@@ -54,11 +55,6 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
      * @dev The total frak minted for reward
      */
     uint96 public totalFrakMinted;
-
-    /**
-     * The pending reward for the given address
-     */
-    mapping(address => uint96) public pendingRewards;
 
     /**
      * @dev Event emitted when a user is rewarded for his listen
@@ -177,7 +173,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
         uint64 listenerBadge = listenerBadges.getBadge(listener);
         uint96 amountForListener = (totalAmountToMintForUser * listenerBadge) / 1 ether;
         // Register the amount for listener
-        pendingRewards[listener] += amountForListener;
+        _addFounds(listener, amountForListener);
         // Compute the total amount to mint
         uint96 totalAmountToMint = amountForListener + totalAmountToMintForOwnerAndPool;
         // Ensure we don't go poast our mint cap
@@ -294,7 +290,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
         poolAndOwnerRewardAmount = ownerReward + poolReward;
         // Save the amount for the owner
         address owner = sybelInternalTokens.ownerOf(param.contentId);
-        pendingRewards[owner] += ownerReward;
+        _addFounds(owner, ownerReward);
         // Return our result
         return (poolAndOwnerRewardAmount, userReward);
     }
@@ -347,22 +343,11 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PaymentBadgesAcce
         uint256 balance;
     }
 
-    /**
-     * Withdraw the user pending founds
-     */
-    function withdrawFounds(address user) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
-        require(user != address(0), "SYB: invlid address");
-        // Ensure the user have a pending reward
-        uint96 pendingReward = pendingRewards[user];
-        require(pendingReward > 0, "SYB: no pending reward");
-        // Ensure we have enough founds on this contract to pay the user
-        uint256 contractBalance = sybelToken.balanceOf(address(this));
-        require(contractBalance > pendingReward, "SYB: not enough founds");
-        // Reset the user pending balance
-        pendingRewards[user] = 0;
-        // Emit the withdraw event
-        emit RewardWithdrawed(user, pendingReward);
-        // Perform the transfer of the founds
-        sybelToken.transfer(user, pendingReward);
+    function withdrawFounds() external whenNotPaused virtual override {
+        _withdraw(_msgSender());
+    }
+
+    function withdrawFounds(address user) external onlyRole(SybelRoles.ADMIN) whenNotPaused virtual override {
+        _withdraw(user);
     }
 }

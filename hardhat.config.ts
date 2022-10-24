@@ -60,6 +60,9 @@ export default {
   etherscan: {
     apiKey: process.env.POLYGON_SCAN_API_KEY,
   },
+  contractSizer: {
+    runOnCompile: true,
+  },
   include: ["./scripts", "./test", "./typechain-types"],
   files: ["./hardhat.config.ts"],
   typechain: {
