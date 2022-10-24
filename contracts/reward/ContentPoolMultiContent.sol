@@ -4,7 +4,6 @@ pragma solidity ^0.8.7;
 import "../utils/SybelMath.sol";
 import "../utils/SybelRoles.sol";
 import "../tokens/SybelInternalTokens.sol";
-import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "../tokens/FraktionTransferCallback.sol";
 import "../utils/PushPullReward.sol";
@@ -47,11 +46,6 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
      * @dev The cap to prevent excessive gaz fees when computing user reward
      */
     uint256 private constant MAX_CLAIMABLE_REWARD_STATE_ROUNDS = 500;
-
-    /**
-     * @dev Access our sybel token
-     */
-    SybelToken private sybelToken;
 
     /**
      * @dev All the different reward states per content id

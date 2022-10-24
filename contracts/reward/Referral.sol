@@ -5,7 +5,7 @@ import "./IRewarder.sol";
 import "../utils/SybelMath.sol";
 import "../utils/SybelRoles.sol";
 import "../tokens/SybelInternalTokens.sol";
-import "../tokens/SybelTokenL2.sol";
+import "../utils/PushPullReward.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
@@ -14,7 +14,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
  * @dev Represent our referral contract
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract Referral is SybelAccessControlUpgradeable {
+contract Referral is SybelAccessControlUpgradeable, PushPullReward {
     /**
      * @dev Event emitted when a user is rewarded for his listen
      */
@@ -23,15 +23,6 @@ contract Referral is SybelAccessControlUpgradeable {
      * @dev Event emitted when a user is rewarded by the referral program
      */
     event ReferralReward(uint256 indexed contentId, address indexed user, uint96 amount);
-    /**
-     * @dev Event emitted when a user withdraw his pending reward
-     */
-    event ReferralRewardWithdrawed(address indexed user, uint256 amount);
-
-    /**
-     * @dev Access our sybel token
-     */
-    SybelToken private sybelToken;
 
     /**
      * Mapping of content id to referee to referer
@@ -50,9 +41,7 @@ contract Referral is SybelAccessControlUpgradeable {
 
     function initialize(address sybelTokenAddr) external initializer {
         __SybelAccessControlUpgradeable_init();
-
-        // Init our sybel token
-        sybelToken = SybelToken(sybelTokenAddr);
+        __PushPullReward_init(sybelTokenAddr);
     }
 
     /**
@@ -120,20 +109,11 @@ contract Referral is SybelAccessControlUpgradeable {
         return totalAmount;
     }
 
-    /**
-     * Withdraw the user pending founds
-     */
-    function withdrawFounds(address user) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
-        require(user != address(0), "SYBL: invalid address");
-        // Ensure the user have a pending reward
-        uint96 pendingReward = userPendingReward[user];
-        require(pendingReward > 0, "SYB: no reward");
-        // Ensure we have enough founds on this contract to pay the user
-        uint256 contractBalance = sybelToken.balanceOf(address(this));
-        require(contractBalance > pendingReward, "SYB: not enought found");
-        // Reset the user pending balance
-        userPendingReward[user] = 0;
-        // Perform the transfer of the founds
-        sybelToken.transfer(user, pendingReward);
+    function withdrawFounds() external virtual override whenNotPaused {
+        _withdraw(_msgSender());
+    }
+
+    function withdrawFounds(address user) external virtual override onlyRole(SybelRoles.ADMIN) whenNotPaused {
+        _withdraw(user);
     }
 }
