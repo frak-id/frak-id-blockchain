@@ -94,14 +94,14 @@ describe("Rewarder", () => {
     contentId = ownerUpdateEvent.args.id;
   });
 
-  describe.only("Base reward", () => {
+  describe.skip("Base reward", () => {
     it("Reward with free account", async () => {
       // Get all the events emitted
       const owner = await internalToken.ownerOf(contentId);
       console.log(owner);
       // TODO : Should be ko if the podcast isn't existing
       // TODO : We are failing but on the owner address fetching, not goood, should failed before
-      await rewarder.payUser(addr1.address, [contentId], [1]);
+      await rewarder.payUser(addr1.address, [contentId], [100]);
     });
   });
 });

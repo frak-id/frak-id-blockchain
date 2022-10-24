@@ -17,14 +17,14 @@ export default {
       {
         version: "0.8.17",
         settings: {
-          viaIR: true,
+          viaIR: false, // Gain a lot on contract size, performance impact ?
           optimizer: {
             enabled: true,
             runs: 200,
             details: {
               orderLiterals: true,
               deduplicate: true,
-              cse: false,
+              cse: false, // Gain on contract size, but more costly operation
               constantOptimizer: true,
             },
           },
@@ -72,7 +72,7 @@ export default {
     currency: "EUR",
     token: "MATIC",
     gasPriceApi: "https://api.polygonscan.com/api?module=proxy&action=eth_gasPrice",
-    enabled: false,
+    enabled: true,
     excludeContracts: [],
     src: "./contracts",
     coinmarketcap: process.env.COIN_MARKET_CAP_API_KEY,
