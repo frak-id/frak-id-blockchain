@@ -67,11 +67,6 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, P
         uint96 poolRewards
     );
 
-    /**
-     * @dev Event emitted when a user withdraw his pending reward
-     */
-    event RewardWithdrawed(address user, uint256 amount);
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -89,6 +84,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, P
         // Only for v1 deployment
         __SybelAccessControlUpgradeable_init();
         __PaymentBadgesAccessor_init(listenerBadgesAddr, contentBadgesAddr);
+        __PushPullReward_init(syblTokenAddr);
 
         sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
         sybelToken = SybelToken(syblTokenAddr);
@@ -343,11 +339,11 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, P
         uint256 balance;
     }
 
-    function withdrawFounds() external whenNotPaused virtual override {
+    function withdrawFounds() external virtual override whenNotPaused {
         _withdraw(_msgSender());
     }
 
-    function withdrawFounds(address user) external onlyRole(SybelRoles.ADMIN) whenNotPaused virtual override {
+    function withdrawFounds(address user) external virtual override onlyRole(SybelRoles.ADMIN) whenNotPaused {
         _withdraw(user);
     }
 }

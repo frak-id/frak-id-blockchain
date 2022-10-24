@@ -4,6 +4,7 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "./FraktionTransferCallback.sol";
 import "../utils/SybelMath.sol";
 import "../utils/MintingAccessControlUpgradeable.sol";
 
@@ -15,6 +16,9 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     // The current content token id
     uint256 private _currentContentTokenId;
 
+    // The current callback
+    FraktionTransferCallback private transferCallback;
+
     // Id of content to owner of this content
     mapping(uint256 => address) public owners;
 
@@ -25,7 +29,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     mapping(uint256 => bool) private _isSupplyAware;
 
     /**
-     * @dev Event emitted when a new fraction of content is minted
+     * @dev Event emitted when the supply of a fraktion is updated
      */
     event SuplyUpdated(uint256 indexed id, uint256 supply);
 
@@ -44,6 +48,13 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
         __MintingAccessControlUpgradeable_init();
         // Set the initial content id
         _currentContentTokenId = 1;
+    }
+
+    /**
+     * Register a new transaction callback
+     */
+    function registerNewCallback(address callbackAddr) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
+        transferCallback = FraktionTransferCallback(callbackAddr);
     }
 
     /**
@@ -155,6 +166,11 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
                 owners[contentId] = to;
                 emit ContentOwnerUpdated(contentId, to);
             }
+        }
+
+        // Call our callback
+        if (address(transferCallback) != address(0)) {
+            transferCallback.onFraktionsTransfered(from, to, ids, amounts);
         }
     }
 

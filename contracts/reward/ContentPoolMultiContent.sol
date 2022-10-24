@@ -7,7 +7,9 @@ import "../tokens/SybelInternalTokens.sol";
 import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "../tokens/FraktionTransferCallback.sol";
+import "../utils/PushPullReward.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /**
  * @dev Represent our content pool contract
@@ -15,7 +17,10 @@ import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
  * what's the max uint we can use for the price ?, What the max array size ? So what max uint for indexes ?)
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract ContentPoolMultiContent is FraktionTransferCallback {
+contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullReward, FraktionTransferCallback {
+    // Add the library methods
+    using EnumerableSet for EnumerableSet.UintSet;
+
     /**
      * Represent a pool reward state
      */
@@ -64,14 +69,14 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
     mapping(uint256 => uint256) private currentStateIndex;
 
     /**
-     * The pending reward for the given address
+     * User address to list of content pool he is in
      */
-    mapping(address => uint256) private userPendingReward;
+    mapping(address => EnumerableSet.UintSet) private userContentPools;
 
     /**
      * Event emitted when a reward is added to the pool
      */
-    event RewardAdded(uint256 indexed contentId, uint96 reward);
+    event PoolRewardAdded(uint256 indexed contentId, uint96 reward);
 
     /**
      * Event emitted when the pool shares are updated
@@ -79,9 +84,20 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
     event PoolSharesUpdated(uint256 indexed contentId, uint256 indexed poolId, uint128 totalShares);
 
     /**
-     * Event emitted when the pool shares are updated
+     * Event emitted when participant share are updated
      */
-    event PoolSharesUpdated(uint256 indexed contentId, uint128 totalShares);
+    event ParticipantShareUpdated(address indexed user, uint256 indexed contentId, uint120 shares);
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address syblTokenAddr) external initializer {
+        // Only for v1 deployment
+        __SybelAccessControlUpgradeable_init();
+        __PushPullReward_init(syblTokenAddr);
+    }
 
     /**
      * Add a reward inside a content pool
@@ -91,7 +107,7 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
         RewardState storage currentState = lastContentState(contentId);
         require(currentState.open, "SYB: reward state closed");
         currentState.currentPoolReward += rewardAmount;
-        emit RewardAdded(contentId, rewardAmount);
+        emit PoolRewardAdded(contentId, rewardAmount);
     }
 
     /**
@@ -100,8 +116,8 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
     function onFraktionsTransfered(
         address from,
         address to,
-        uint256[] calldata ids,
-        uint256[] calldata amount
+        uint256[] memory ids,
+        uint256[] memory amount
     ) external override {
         if (from != address(0) && to != address(0)) {
             // Handle share transfer between participant, with no update on the total pool rewards
@@ -142,8 +158,8 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
         Participant storage receiver = participants[contentId][to];
         computeAndSaveReward(contentId, to, receiver, lastContentIndex);
         // Then update the shares for each one of them
-        sender.shares -= totalShares;
-        receiver.shares += totalShares;
+        increaseParticipantShare(contentId, receiver, to, totalShares);
+        decreaseParticipantShare(contentId, sender, from, totalShares);
     }
 
     /**
@@ -173,7 +189,7 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
             Participant storage receiver = participants[contentId][to];
             computeAndSaveReward(contentId, to, receiver, stateIndex);
             // Update his shares
-            receiver.shares += sharesMoved;
+            increaseParticipantShare(contentId, receiver, to, sharesMoved);
             // Update the new total shares
             newTotalShares = currentState.totalShares + sharesMoved;
         } else if (from != address(0)) {
@@ -182,7 +198,11 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
             Participant storage sender = participants[contentId][from];
             computeAndSaveReward(contentId, from, sender, stateIndex);
             // Update his shares
-            sender.shares -= sharesMoved;
+            decreaseParticipantShare(contentId, sender, from, sharesMoved);
+            // Remove this content pool from the sender if he now have 0 shares
+            if (sender.shares == 0) {
+                userContentPools[from].remove(contentId);
+            }
             // Update the new total shares
             newTotalShares = currentState.totalShares - sharesMoved;
         }
@@ -200,52 +220,58 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
                 open: true
             });
         }
+        // Emit the pool update event
+        emit PoolSharesUpdated(contentId, stateIndex, newTotalShares);
     }
 
     /**
-     * @dev Update a participant share in a pool
+     * Increase the share the user got in a pool
      */
-    function updateParticipant(
+    function increaseParticipantShare(
         uint256 contentId,
+        Participant storage participant,
         address user,
-        uint120 newShares
-    ) external {
-        require(user != address(0), "SYBL: invalid address");
-        // Close the last RewardState and lock it
-        (RewardState storage currentState, uint256 stateIndex) = lastContentStateWithIndex(contentId);
-        currentState.open = false;
-        // Get the participant and check the share differences
-        Participant storage currentParticipant = participants[contentId][user];
-        require(newShares != currentParticipant.shares, "SYB: invalid share");
-        // Compute and save the reward for the participant before updating his shares
-        computeAndSaveReward(contentId, user, currentParticipant, stateIndex);
-        // Compute the new reward state shares
-        uint128 newTotalShares = currentState.totalShares + newShares - currentParticipant.shares;
-        // Check if the pool contain some reward
-        if (currentState.currentPoolReward == 0) {
-            // If it havn't any, just update the pool total shares
-            currentState.totalShares = newTotalShares;
-        } else {
-            // Otherwise, create a new reward state
-            stateIndex++;
-            rewardStates[contentId][stateIndex] = RewardState({
-                totalShares: newTotalShares,
-                currentPoolReward: 0,
-                open: true
-            });
-            // Update this participant shares
-            currentParticipant.shares = newShares;
+        uint120 amount
+    ) internal {
+        // Add this pool to the user participating pool if he have 0 shares before
+        if (participant.shares == 0) {
+            userContentPools[user].add(contentId);
         }
-        // TODO : If evolving from 0, set the last claimed reward to previous one
-        // TODO : In all the case, ensure the user havn't reward to claim (This should fix the last point)
-        // Once the pool is all set, update the participant shares
-        currentParticipant.shares = newShares;
+        // Increase his share
+        participant.shares += amount;
+        // Emit the update event
+        emit ParticipantShareUpdated(user, contentId, participant.shares);
     }
 
+    /**
+     * Decrease the share the user got in a pool
+     */
+    function decreaseParticipantShare(
+        uint256 contentId,
+        Participant storage participant,
+        address user,
+        uint120 amount
+    ) internal {
+        // Decrease his share
+        participant.shares -= amount;
+        // If he know have 0 shares, remove it from the pool
+        if (participant.shares == 0) {
+            userContentPools[user].remove(contentId);
+        }
+        // Emit the update event
+        emit ParticipantShareUpdated(user, contentId, participant.shares);
+    }
+
+    /**
+     * Find only the last reward state for the given content
+     */
     function lastContentState(uint256 contentId) internal view returns (RewardState storage state) {
         (state, ) = lastContentStateWithIndex(contentId);
     }
 
+    /**
+     * Find the last reward state, with it's index for the given content
+     */
     function lastContentStateWithIndex(uint256 contentId)
         internal
         view
@@ -257,7 +283,6 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
 
     /**
      * @dev Compute and save the user reward to the given state
-     * TODO : Max reward state to iterate over
      */
     function computeAndSaveReward(
         uint256 contentId,
@@ -288,7 +313,7 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
         if (participant.lastStateIndex == toStateIndex) {
             // Increase the user pending reward (if needed), and return this amount
             if (claimable > 0) {
-                userPendingReward[user] += claimable;
+                _addFounds(user, claimable);
             }
             return claimable;
         }
@@ -312,7 +337,7 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
         participant.lastStateIndex = toStateIndex;
         participant.lastStateClaim = lastStateReward;
         // Update the participant claimable reward
-        userPendingReward[user] += claimable;
+        _addFounds(user, claimable);
         // Return the added claimable reward
         return claimable;
     }
@@ -346,5 +371,30 @@ contract ContentPoolMultiContent is FraktionTransferCallback {
             shares = 0;
         }
         return shares;
+    }
+
+    /**
+     * Compute all the reward for the given user
+     */
+    function _computeAndSaveAllForUser(address user) internal {
+        EnumerableSet.UintSet storage contentPoolIds = userContentPools[user];
+
+        for (uint256 index = 0; index < contentPoolIds.length(); ++index) {
+            // Get the content pool id and the participant and last pool id
+            uint256 contentId = contentPoolIds.at(index);
+            Participant storage participant = participants[contentId][user];
+            uint256 lastPoolIndex = currentStateIndex[contentId];
+            computeAndSaveReward(contentId, user, participant, lastPoolIndex);
+        }
+    }
+
+    function withdrawFounds() external virtual override whenNotPaused {
+        _computeAndSaveAllForUser(_msgSender());
+        _withdraw(_msgSender());
+    }
+
+    function withdrawFounds(address user) external virtual override onlyRole(SybelRoles.ADMIN) whenNotPaused {
+        _computeAndSaveAllForUser(user);
+        _withdraw(user);
     }
 }

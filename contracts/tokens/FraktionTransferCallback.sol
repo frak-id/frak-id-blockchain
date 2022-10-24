@@ -12,7 +12,7 @@ interface FraktionTransferCallback {
     function onFraktionsTransfered(
         address from,
         address to,
-        uint256[] calldata ids,
-        uint256[] calldata amount
+        uint256[] memory ids,
+        uint256[] memory amount
     ) external;
 }

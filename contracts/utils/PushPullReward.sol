@@ -68,7 +68,7 @@ abstract contract PushPullReward is Initializable {
     /**
      * Get the available founds for the given user
      */
-    function getAvailableFounds(address user) external view returns(uint96) {
+    function getAvailableFounds(address user) external view returns (uint96) {
         require(user != address(0), "SYB: invalid address");
         return pendingRewards[user];
     }
