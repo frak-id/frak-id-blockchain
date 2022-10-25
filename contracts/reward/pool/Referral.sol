@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "./IRewarder.sol";
-import "../utils/SybelMath.sol";
-import "../utils/SybelRoles.sol";
-import "../tokens/SybelInternalTokens.sol";
-import "../utils/PushPullReward.sol";
-import "../utils/SybelAccessControlUpgradeable.sol";
+import "../../utils/SybelMath.sol";
+import "../../utils/SybelRoles.sol";
+import "../../tokens/SybelInternalTokens.sol";
+import "../../utils/PushPullReward.sol";
+import "../../utils/SybelAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "./IFractionCostBadges.sol";
 import "../../utils/SybelMath.sol";
 import "../../utils/SybelRoles.sol";
 import "../../utils/SybelAccessControlUpgradeable.sol";
@@ -10,33 +9,18 @@ import "../../utils/SybelAccessControlUpgradeable.sol";
  * @dev Handle the computation of our listener badges
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract FractionCostBadges is IFractionCostBadges, SybelAccessControlUpgradeable {
+abstract contract FractionCostBadges {
+    event FractionCostBadgeUpdated(uint256 id, uint96 badge);
+
     // Map f nft id to cost badge
-    mapping(uint256 => uint256) private fractionBadges;
+    mapping(uint256 => uint96) private fractionBadges;
 
-    event FractionCostBadgeUpdated(uint256 id, uint256 badge);
-
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
-    function initialize() external initializer {
-        __SybelAccessControlUpgradeable_init();
-
-        // Grant the badge updater role to the contract deployer
-        _grantRole(SybelRoles.BADGE_UPDATER, msg.sender);
-    }
+    function updateCostBadge(uint256 fractionId, uint96 badge) external virtual;
 
     /**
      * @dev Update the content internal coefficient
      */
-    function updateBadge(uint256 fractionId, uint256 badge)
-        external
-        override
-        onlyRole(SybelRoles.BADGE_UPDATER)
-        whenNotPaused
-    {
+    function _updateCostBadge(uint256 fractionId, uint96 badge) internal {
         fractionBadges[fractionId] = badge;
         emit FractionCostBadgeUpdated(fractionId, badge);
     }
@@ -44,7 +28,7 @@ contract FractionCostBadges is IFractionCostBadges, SybelAccessControlUpgradeabl
     /**
      * @dev Get the payment badges for the given informations
      */
-    function getBadge(uint256 fractionId) external view override whenNotPaused returns (uint256 fractionBadge) {
+    function getCostBadge(uint256 fractionId) public view returns (uint96 fractionBadge) {
         fractionBadge = fractionBadges[fractionId];
         if (fractionBadge == 0) {
             // If the badge of this fraction isn't set yet, set it to default
@@ -59,7 +43,7 @@ contract FractionCostBadges is IFractionCostBadges, SybelAccessControlUpgradeabl
      * We use a pure function instead of a mapping to economise on storage read,
      * and since this reawrd shouldn't evolve really fast
      */
-    function initialFractionCost(uint8 tokenType) public pure returns (uint256 initialCost) {
+    function initialFractionCost(uint8 tokenType) public pure returns (uint96 initialCost) {
         if (tokenType == SybelMath.TOKEN_TYPE_COMMON_MASK) {
             initialCost = 20 ether; // 20 SYBL
         } else if (tokenType == SybelMath.TOKEN_TYPE_PREMIUM_MASK) {

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "../utils/SybelMath.sol";
-import "../utils/SybelRoles.sol";
-import "../tokens/SybelInternalTokens.sol";
-import "../utils/SybelAccessControlUpgradeable.sol";
-import "../tokens/FraktionTransferCallback.sol";
-import "../utils/PushPullReward.sol";
+import "../../utils/SybelMath.sol";
+import "../../utils/SybelRoles.sol";
+import "../../tokens/SybelInternalTokens.sol";
+import "../../utils/SybelAccessControlUpgradeable.sol";
+import "../../tokens/FraktionTransferCallback.sol";
+import "../../utils/PushPullReward.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
@@ -115,7 +115,7 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
     ) external override {
         if (from != address(0) && to != address(0)) {
             // Handle share transfer between participant, with no update on the total pool rewards
-            for (uint256 index = 0; index < ids.length;) {
+            for (uint256 index = 0; index < ids.length; ) {
                 updateParticipants(from, to, ids[index], amount[index]);
                 unchecked {
                     ++index;
@@ -123,7 +123,7 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
             }
         } else {
             // Otherwise (in case of mined or burned token), also update the pool
-            for (uint256 index = 0; index < ids.length;) {
+            for (uint256 index = 0; index < ids.length; ) {
                 updateParticipantAndPool(from, to, ids[index], amount[index]);
                 unchecked {
                     ++index;
@@ -184,10 +184,10 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
         uint256 stateIndex = currentStateIndex[contentId];
         // If state index is at 0, we perform state creation directly
         RewardState storage currentState;
-        if(contentRewardStates.length == 0) {
+        if (contentRewardStates.length == 0) {
             currentState = contentRewardStates.push();
         } else {
-            currentState  = contentRewardStates[stateIndex];
+            currentState = contentRewardStates[stateIndex];
         }
         currentState.open = false;
         // Then update the states and participant, and save the new total shares
@@ -219,11 +219,7 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
             currentState.open = true;
         } else {
             // Otherwise, create a new reward state
-            contentRewardStates.push(RewardState({
-                totalShares: newTotalShares,
-                currentPoolReward: 0,
-                open: true
-            }));
+            contentRewardStates.push(RewardState({ totalShares: newTotalShares, currentPoolReward: 0, open: true }));
             currentStateIndex[contentId] = contentRewardStates.length - 1;
         }
         // Emit the pool update event

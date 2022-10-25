@@ -2,16 +2,16 @@
 pragma solidity ^0.8.7;
 
 import "./IRewarder.sol";
-import "../badges/payment/ContentBadges.sol";
-import "../badges/payment/ListenerBadges.sol";
+import "./badges/ContentBadges.sol";
+import "./badges/ListenerBadges.sol";
+import "./pool/ContentPoolMultiContent.sol";
+import "./pool/Referral.sol";
 import "../utils/SybelMath.sol";
 import "../utils/SybelRoles.sol";
 import "../tokens/SybelInternalTokens.sol";
 import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "../utils/PushPullReward.sol";
-import "./ContentPoolMultiContent.sol";
-import "./Referral.sol";
 
 /**
  * @dev Represent our rewarder contract
@@ -144,7 +144,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
             }
         }
         // Get the listener badge and recompute his reward
-        uint64 listenerBadge = _getListenerBadge(listener);
+        uint64 listenerBadge = getListenerBadge(listener);
         uint96 amountForListener = uint96((uint256(totalAmountToMintForUser) * listenerBadge) / 1 ether);
         // Register the amount for listener
         _addFounds(listener, amountForListener);
@@ -215,7 +215,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         returns (uint96 poolAndOwnerRewardAmount, uint96 userReward)
     {
         // The user have a balance we can continue
-        uint256 contentBadge = _getContentBadge(param.contentId);
+        uint256 contentBadge = getContentBadge(param.contentId);
         // Mint each token for each fraction
         uint96 totalReward = 0;
         for (uint8 i = 0; i < param.balances.length; ++i) {
@@ -325,13 +325,21 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         _withdraw(user);
     }
 
-    function updateContentBadge(uint256 contentId, uint256 badge) external         onlyRole(SybelRoles.BADGE_UPDATER)
-        whenNotPaused override {
-            _updateContentBadge(contentId, badge);
-        }
+    function updateContentBadge(uint256 contentId, uint256 badge)
+        external
+        override
+        onlyRole(SybelRoles.BADGE_UPDATER)
+        whenNotPaused
+    {
+        _updateContentBadge(contentId, badge);
+    }
 
-    function updateListenerBadge(address listener, uint64 badge) external onlyRole(SybelRoles.BADGE_UPDATER)
-        whenNotPaused override {
-            _updateListenerBadge(listener, badge);
-        }
+    function updateListenerBadge(address listener, uint64 badge)
+        external
+        override
+        onlyRole(SybelRoles.BADGE_UPDATER)
+        whenNotPaused
+    {
+        _updateListenerBadge(listener, badge);
+    }
 }

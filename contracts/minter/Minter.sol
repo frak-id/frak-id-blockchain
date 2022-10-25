@@ -2,7 +2,7 @@
 pragma solidity ^0.8.7;
 
 import "./IMinter.sol";
-import "../badges/cost/IFractionCostBadges.sol";
+import "./badges/FractionCostBadges.sol";
 import "../utils/SybelMath.sol";
 import "../tokens/SybelInternalTokens.sol";
 import "../tokens/SybelTokenL2.sol";
@@ -15,7 +15,7 @@ import "../utils/MintingAccessControlUpgradeable.sol";
  *   - Add allowance to the user when he mint a fraction (web2)
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract Minter is IMinter, MintingAccessControlUpgradeable {
+contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges {
     /**
      * @dev Access our internal tokens
      */
@@ -26,11 +26,6 @@ contract Minter is IMinter, MintingAccessControlUpgradeable {
      */
     /// @custom:oz-renamed-from tokenSybelEcosystem
     SybelToken private sybelToken;
-
-    /**
-     * @dev Access our fraction cost badges
-     */
-    IFractionCostBadges public fractionCostBadges;
 
     /**
      * @dev Address of the foundation wallet
@@ -55,7 +50,6 @@ contract Minter is IMinter, MintingAccessControlUpgradeable {
     function initialize(
         address sybelTokenAddr,
         address internalTokenAddr,
-        address fractionCostBadgesAddr,
         address foundationAddr
     ) external initializer {
         // Only for v1 deployment
@@ -63,9 +57,11 @@ contract Minter is IMinter, MintingAccessControlUpgradeable {
 
         sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
         sybelToken = SybelToken(sybelTokenAddr);
-        fractionCostBadges = IFractionCostBadges(fractionCostBadgesAddr);
 
         foundationWallet = foundationAddr;
+
+        // Grant the badge updater role to the sender
+        _grantRole(SybelRoles.BADGE_UPDATER, msg.sender);
     }
 
     /**
@@ -113,7 +109,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable {
         uint256 amount
     ) external override onlyRole(SybelRoles.MINTER) whenNotPaused {
         // Get the cost of the fraction
-        uint256 fractionCost = fractionCostBadges.getBadge(id);
+        uint256 fractionCost = getCostBadge(id);
         uint256 totalCost = fractionCost * amount;
         // Check if the user have enough the balance
         uint256 userBalance = sybelToken.balanceOf(to);
@@ -142,5 +138,14 @@ contract Minter is IMinter, MintingAccessControlUpgradeable {
         uint256 newRealSupply = currentSupply + newSupply;
         // Mint his Fraction of NFT
         sybelInternalTokens.setSupplyBatch(SybelMath.asSingletonArray(id), SybelMath.asSingletonArray(newRealSupply));
+    }
+
+    function updateCostBadge(uint256 fractionId, uint96 badge)
+        external
+        override
+        onlyRole(SybelRoles.BADGE_UPDATER)
+        whenNotPaused
+    {
+        _updateCostBadge(fractionId, badge);
     }
 }

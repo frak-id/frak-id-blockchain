@@ -85,9 +85,9 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     function balanceOfIdsBatch(address account, uint256[] memory ids) public view virtual returns (uint256[] memory) {
         uint256[] memory batchBalances = new uint256[](ids.length);
 
-        for (uint256 i = 0; i < ids.length;) {
+        for (uint256 i = 0; i < ids.length; ) {
             batchBalances[i] = balanceOf(account, ids[i]);
-            unchecked { 
+            unchecked {
                 ++i;
             }
         }
@@ -113,7 +113,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
             // Emit the supply update event
             emit SuplyUpdated(id, supplies[i]);
             // Increase our counter
-            unchecked { 
+            unchecked {
                 ++i;
             }
         }
@@ -131,7 +131,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
         bytes memory
     ) internal override whenNotPaused {
         // In the case we are sending the token to a given wallet
-        for (uint256 i = 0; i < ids.length;) {
+        for (uint256 i = 0; i < ids.length; ) {
             uint256 id = ids[i];
 
             if (_isSupplyAware[id]) {
@@ -157,7 +157,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
                 emit ContentOwnerUpdated(contentId, to);
             }
             // Increase our counter
-            unchecked { 
+            unchecked {
                 ++i;
             }
         }
