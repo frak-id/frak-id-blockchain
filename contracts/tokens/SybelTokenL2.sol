@@ -22,8 +22,8 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
     }
 
     function initialize(address childChainManager) external initializer {
-        string memory name = "Frak Token (by Sybel)";
-        __ERC20_init(name, "FRAK");
+        string memory name = "Frak";
+        __ERC20_init(name, "FRK");
         __MintingAccessControlUpgradeable_init();
         _initializeEIP712(name);
 
