@@ -326,3 +326,32 @@ Without opti (focussing on this method since it's the most costly one) :
 
 // Removing reserve caching and keeping only indexes uncheck op
 |  MultiVestingWallets  ·  createVestBatch           ·     180383  ·     463247  ·     321815  ·            2  ·       0.03  │
+
+// Goind to 1000 run of Optimizer
+|  MultiVestingWallets  ·  createVestBatch           ·     180350  ·     463214  ·      321782  ·            2  ·       0.04  │
+
+// Going to 5000 run of optimizer 
+|  MultiVestingWallets  ·  createVestBatch           ·     180158  ·     462638  ·      321398  ·            2  ·       0.03  │
+
+// Going to 5000 run of optimizer with CSE
+|  MultiVestingWallets  ·  createVestBatch           ·     178924  ·     459572  ·      319248  ·            2  ·       0.03  │
+deploy cost = 3 279 445
+
+// 1000 run with CSE (reducing by average 1kb contract size)
+|  MultiVestingWallets  ·  createVestBatch           ·     179068  ·     460004  ·      319536  ·            2  ·       0.04  │
+deploy cost = 3 060 669
+
+// 1000 run with CSE, without uint mapping
+|  MultiVestingWallets  ·  createVestBatch           ·     179483  ·     461271  ·      320377  ·            2  ·       0.03  │
+
+// 1000 run with CSE, with uint mapping, without array add check
+|  MultiVestingWallets  ·  createVestBatch           ·     179035  ·     459905  ·      319470  ·            2  ·       0.03  │
+
+// 1000 run with CSE, with uint mapping, without array add check, without reserve check
+|  MultiVestingWallets  ·  createVestBatch           ·     168266  ·     445598  ·      306932  ·            2  ·       0.03  │
+
+// 1000 run with CSE, with uint mapping, without array add check, without reserve check cached
+|  MultiVestingWallets  ·  createVestBatch           ·     179098  ·     456846  ·      317972  ·            2  ·       0.07  │
+
+// 1000 run with CSE, with uint mapping, without array add check, without reserve check cached
+|  MultiVestingWallets  ·  createVestBatch           ·     178939  ·     456369  ·      317654  ·            2  ·       0.03  │

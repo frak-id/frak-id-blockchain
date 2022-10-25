@@ -20,11 +20,11 @@ export default {
           viaIR: false, // Gain a lot on contract size, performance impact ?
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: 1000,
             details: {
               orderLiterals: true,
               deduplicate: true,
-              cse: false, // Gain on contract size, but more costly operation
+              cse: true, // Gain on contract size, but more costly operation
               constantOptimizer: true,
             },
           },
