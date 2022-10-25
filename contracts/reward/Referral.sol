@@ -89,7 +89,7 @@ contract Referral is SybelAccessControlUpgradeable, PushPullReward {
         uint256 contentId,
         address user,
         uint96 amount
-    ) public onlyRole(SybelRoles.ADMIN) whenNotPaused returns (uint96 totalAmount) {
+    ) public onlyRole(SybelRoles.REWARDER) whenNotPaused returns (uint96 totalAmount) {
         require(user != address(0), "SYBL: invalid address");
         require(amount > 0, "SYB: invalid amount");
         // Store the pending reward for this user, and emit the associated event's

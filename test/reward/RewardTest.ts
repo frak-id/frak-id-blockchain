@@ -5,7 +5,7 @@ import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
-import { adminRole, minterRole, vestingCreatorRole, vestingManagerRole } from "../../scripts/utils/roles";
+import { adminRole, minterRole, rewarderRole, vestingCreatorRole, vestingManagerRole } from "../../scripts/utils/roles";
 import { ContentBadges } from "../../types/contracts/badges/payment/ContentBadges";
 import { ListenerBadges } from "../../types/contracts/badges/payment/ListenerBadges";
 import { ContentOwnerUpdatedEvent, SybelInternalTokens } from "../../types/contracts/tokens/SybelInternalTokens";
@@ -18,6 +18,7 @@ import { testPauses } from "../utils/test-pauses";
 import { testRoles } from "../utils/test-roles";
 import { address0, getTimestampInAFewMoment } from "../utils/test-utils";
 import { Rewarder } from "../../types/contracts/reward/Rewarder";
+import { buildFractionId, TOKEN_TYPE_COMMON, TOKEN_TYPE_DIAMOND, TOKEN_TYPE_GOLD } from "../../scripts/utils/mathUtils";
 
 const REVOCABLE_GROUP = 1;
 const NON_REVOCABLE_GROUP = 2;
@@ -64,9 +65,13 @@ describe("Rewarder", () => {
       referral.address,
     ]);
 
-    // Grand the minter role on the rewarder contract for our nft and frak
+    // Grant the minter role on the rewarder contract for our nft and frak
     await internalToken.grantRole(minterRole, rewarder.address);
     await sybelToken.grantRole(minterRole, rewarder.address);
+
+    // Grant the rewarder role to the referral contract
+    await referral.grantRole(rewarderRole, rewarder.address);
+    await contentPool.grantRole(rewarderRole, rewarder.address);
 
     // Setup the callback on the internal tokens for our content pool
     await internalToken.registerNewCallback(contentPool.address);
@@ -94,20 +99,51 @@ describe("Rewarder", () => {
     contentId = ownerUpdateEvent.args.id;
   });
 
-  describe.skip("Base reward", () => {
+  describe.only("Base reward", () => {
     it("Reward with free account", async () => {
-      // Get all the events emitted
-      const owner = await internalToken.ownerOf(contentId);
-      console.log(owner);
       // TODO : Should be ko if the podcast isn't existing
       // TODO : We are failing but on the owner address fetching, not goood, should failed before
       await rewarder.payUser(addr1.address, [contentId], [100]);
+      // This other run should cost less money since the free fraktion is already minted
+      await rewarder.payUser(addr1.address, [contentId], [100]);
+      await rewarder.payUser(addr1.address, [contentId], [100]);
+      await rewarder.payUser(addr1.address, [contentId], [100]);
+      await rewarder.payUser(addr1.address, [contentId], [100]);
+      await rewarder.payUser(addr1.address, [contentId], [100]);
+      await rewarder.payUser(addr1.address, [contentId], [100]);
+      await rewarder.payUser(addr1.address, [contentId], [100]);
+      await rewarder.payUser(addr1.address, [contentId], [100]);
+    });
+    it.only("Reward with payed account", async () => {
+      await internalToken.setSupplyBatch(
+        [
+          buildFractionId(contentId, TOKEN_TYPE_DIAMOND),
+          buildFractionId(contentId, TOKEN_TYPE_COMMON),
+          buildFractionId(contentId, TOKEN_TYPE_GOLD),
+        ],
+        [10000, 10000, 1000],
+      );
+      await internalToken.mint(addr2.address, buildFractionId(contentId, TOKEN_TYPE_DIAMOND), 10);
+      await internalToken.mint(addr2.address, buildFractionId(contentId, TOKEN_TYPE_COMMON), 10);
+      await internalToken.mint(addr2.address, buildFractionId(contentId, TOKEN_TYPE_GOLD), 10);
+      // Rewarder with only one payed fraktion
+      await rewarder.payUser(addr2.address, [contentId], [100]);
+      await rewarder.payUser(addr2.address, [contentId], [100]);
+      await rewarder.payUser(addr2.address, [contentId], [100]);
+      await rewarder.payUser(addr2.address, [contentId], [100]);
+      // |  Rewarder             ·  payUser              ·          -  ·          -  ·      277550  ·            1  ·       0.02  │
+      await internalToken.mint(addr1.address, buildFractionId(contentId, TOKEN_TYPE_GOLD), 10);
+
+      const maxIteration = 50;
+      for (let index = 0; index < maxIteration; index++) {
+        console.log(`iteration ${index}`);
+        await internalToken.mint(addr2.address, buildFractionId(contentId, TOKEN_TYPE_COMMON), 10);
+        await rewarder.payUser(addr2.address, [contentId, contentId, contentId], [100, 100, 100]);
+        await internalToken.mint(addr1.address, buildFractionId(contentId, TOKEN_TYPE_DIAMOND), 10);
+        await rewarder.payUser(addr2.address, [contentId, contentId, contentId], [100, 100, 100]);
+        await internalToken.mint(_owner.address, buildFractionId(contentId, TOKEN_TYPE_GOLD), 10);
+        await rewarder.payUser(addr2.address, [contentId, contentId, contentId], [100, 100, 100]);
+      }
     });
   });
 });
-
-/**
- * Idée transparance boite coté produit :
- *  - Wallet fondation ++ team + vesting -> addresse publique
- *  - Affichage montant locker / deloquable / deloquer dessus (si deloquable > deloquer notion de confiance)
- */

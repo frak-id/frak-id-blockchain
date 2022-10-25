@@ -96,7 +96,7 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
     /**
      * Add a reward inside a content pool
      */
-    function addReward(uint256 contentId, uint96 rewardAmount) external {
+    function addReward(uint256 contentId, uint96 rewardAmount) external onlyRole(SybelRoles.REWARDER) whenNotPaused {
         require(rewardAmount > 0, "SYB: invalid reward");
         RewardState storage currentState = lastContentState(contentId);
         require(currentState.open, "SYB: reward state closed");
@@ -115,13 +115,19 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
     ) external override {
         if (from != address(0) && to != address(0)) {
             // Handle share transfer between participant, with no update on the total pool rewards
-            for (uint256 index = 0; index < ids.length; ++index) {
+            for (uint256 index = 0; index < ids.length;) {
                 updateParticipants(from, to, ids[index], amount[index]);
+                unchecked {
+                    ++index;
+                }
             }
         } else {
             // Otherwise (in case of mined or burned token), also update the pool
-            for (uint256 index = 0; index < ids.length; ++index) {
+            for (uint256 index = 0; index < ids.length;) {
                 updateParticipantAndPool(from, to, ids[index], amount[index]);
+                unchecked {
+                    ++index;
+                }
             }
         }
     }
@@ -152,8 +158,8 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
         Participant storage receiver = participants[contentId][to];
         computeAndSaveReward(contentId, to, receiver, lastContentIndex);
         // Then update the shares for each one of them
-        increaseParticipantShare(contentId, receiver, to, totalShares);
-        decreaseParticipantShare(contentId, sender, from, totalShares);
+        _increaseParticipantShare(contentId, receiver, to, totalShares);
+        _decreaseParticipantShare(contentId, sender, from, totalShares);
     }
 
     /**
@@ -167,23 +173,32 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
     ) private {
         // Extract content id and token type from this tx
         (uint256 contentId, uint8 tokenType) = SybelMath.extractContentIdAndTokenType(fraktionId);
-        // Get the initial share value of this token
-        uint16 sharesValue = getSharesForTokenType(tokenType);
-        if (sharesValue == 0) return; // Jump this iteration if this fraktions doesn't count for any shares
-        // Lock the current state for this content (since we will be updating his share)
-        (RewardState storage currentState, uint256 stateIndex) = lastContentStateWithIndex(contentId);
-        currentState.open = false;
         // Get the total shares moved
-        uint96 sharesMoved = uint96(sharesValue * amountMoved);
+        uint96 sharesMoved = uint96(getSharesForTokenType(tokenType) * amountMoved);
+        if (sharesMoved == 0) return; // Jump this iteration if this fraktions doesn't count for any shares
+        // Get the mapping and array concerned by this content
+
+        // mapping(address => Participant) storage contentParticipants = participants[contentId]; // TODO : Probably not necessary since accessed only one time, check if init needed or not
+        RewardState[] storage contentRewardStates = rewardStates[contentId];
+        // Lock the current state for this content (since we will be updating his share)
+        uint256 stateIndex = currentStateIndex[contentId];
+        // If state index is at 0, we perform state creation directly
+        RewardState storage currentState;
+        if(contentRewardStates.length == 0) {
+            currentState = contentRewardStates.push();
+        } else {
+            currentState  = contentRewardStates[stateIndex];
+        }
+        currentState.open = false;
         // Then update the states and participant, and save the new total shares
-        uint128 newTotalShares;
+        uint128 newTotalShares = sharesMoved;
         if (to != address(0)) {
             // In case of fraktions mint
             // Get the previous participant and compute his reward for this content
             Participant storage receiver = participants[contentId][to];
             computeAndSaveReward(contentId, to, receiver, stateIndex);
             // Update his shares
-            increaseParticipantShare(contentId, receiver, to, sharesMoved);
+            _increaseParticipantShare(contentId, receiver, to, sharesMoved);
             // Update the new total shares
             newTotalShares = currentState.totalShares + sharesMoved;
         } else if (from != address(0)) {
@@ -192,27 +207,24 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
             Participant storage sender = participants[contentId][from];
             computeAndSaveReward(contentId, from, sender, stateIndex);
             // Update his shares
-            decreaseParticipantShare(contentId, sender, from, sharesMoved);
-            // Remove this content pool from the sender if he now have 0 shares
-            if (sender.shares == 0) {
-                userContentPools[from].remove(contentId);
-            }
+            _decreaseParticipantShare(contentId, sender, from, sharesMoved);
             // Update the new total shares
             newTotalShares = currentState.totalShares - sharesMoved;
         }
 
         // Finally, update the content pool with the new shares
         if (currentState.currentPoolReward == 0) {
-            // If it havn't any, just update the pool total shares
+            // If it havn't any, just update the pool total shares and reopen it
             currentState.totalShares = newTotalShares;
+            currentState.open = true;
         } else {
             // Otherwise, create a new reward state
-            stateIndex++;
-            rewardStates[contentId][stateIndex] = RewardState({
+            contentRewardStates.push(RewardState({
                 totalShares: newTotalShares,
                 currentPoolReward: 0,
                 open: true
-            });
+            }));
+            currentStateIndex[contentId] = contentRewardStates.length - 1;
         }
         // Emit the pool update event
         emit PoolSharesUpdated(contentId, stateIndex, newTotalShares);
@@ -221,7 +233,7 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
     /**
      * Increase the share the user got in a pool
      */
-    function increaseParticipantShare(
+    function _increaseParticipantShare(
         uint256 contentId,
         Participant storage participant,
         address user,
@@ -240,7 +252,7 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
     /**
      * Decrease the share the user got in a pool
      */
-    function decreaseParticipantShare(
+    function _decreaseParticipantShare(
         uint256 contentId,
         Participant storage participant,
         address user,
@@ -286,7 +298,7 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
     ) internal returns (uint96 claimable) {
         require(user != address(0), "SYBL: invalid address");
         // Ensure the state target is not already claimed, and that we don't have too many state to fetched
-        require(participant.lastStateClaim >= toStateIndex, "SYB: already claimed");
+        require(toStateIndex >= participant.lastStateIndex, "SYB: already claimed");
         require(
             toStateIndex - participant.lastStateIndex < MAX_CLAIMABLE_REWARD_STATE_ROUNDS,
             "SYB: too much state for computation"
@@ -300,7 +312,7 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
         // Check if he got some more reward to claim on the last state he fetched, and init our claimable reward with that
         RewardState storage lastParticipantState = rewardStates[contentId][participant.lastStateIndex];
         uint96 userReward = computeUserReward(lastParticipantState, participant);
-        claimable = participant.lastStateClaim - userReward;
+        claimable = userReward - participant.lastStateClaim;
         // Then reset his last state claim
         participant.lastStateClaim = 0;
         // If we don't have more iteration to do, exit directly
@@ -321,7 +333,7 @@ contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullRewar
             // If we are on the last iteration, save the reward
             if (stateIndex == toStateIndex) {
                 lastStateReward = computeUserReward(currentState, participant);
-                claimable += computeUserReward(currentState, participant);
+                claimable += lastStateReward;
             } else {
                 // Otherwise, just compute the total reward tor this user in this state
                 claimable += computeUserReward(currentState, participant);

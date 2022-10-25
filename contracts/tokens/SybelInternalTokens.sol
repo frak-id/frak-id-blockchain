@@ -85,8 +85,11 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     function balanceOfIdsBatch(address account, uint256[] memory ids) public view virtual returns (uint256[] memory) {
         uint256[] memory batchBalances = new uint256[](ids.length);
 
-        for (uint256 i = 0; i < ids.length; ++i) {
+        for (uint256 i = 0; i < ids.length;) {
             batchBalances[i] = balanceOf(account, ids[i]);
+            unchecked { 
+                ++i;
+            }
         }
 
         return batchBalances;
@@ -102,34 +105,16 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     {
         require(ids.length == supplies.length, "SYB: invalid array length");
         // Iterate over each ids and increment their supplies
-        for (uint256 i = 0; i < ids.length; ++i) {
+        for (uint256 i = 0; i < ids.length; ) {
             uint256 id = ids[i];
 
             _availableSupplies[id] = supplies[i];
             _isSupplyAware[id] = true;
             // Emit the supply update event
             emit SuplyUpdated(id, supplies[i]);
-        }
-    }
-
-    /**
-     * @dev Perform some check before the transfer token
-     */
-    function _beforeTokenTransfer(
-        address,
-        address from,
-        address,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory
-    ) internal view override whenNotPaused {
-        for (uint256 i = 0; i < ids.length; ++i) {
-            if (from == address(0)) {
-                // Only allow minter to perform mint operation
-                _checkRole(SybelRoles.MINTER);
-                if (_isSupplyAware[ids[i]]) {
-                    require(amounts[i] <= _availableSupplies[ids[i]], "SYB: Not enough supply");
-                }
+            // Increase our counter
+            unchecked { 
+                ++i;
             }
         }
     }
@@ -144,13 +129,18 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory
-    ) internal override {
+    ) internal override whenNotPaused {
         // In the case we are sending the token to a given wallet
-        for (uint256 i = 0; i < ids.length; ++i) {
+        for (uint256 i = 0; i < ids.length;) {
             uint256 id = ids[i];
 
             if (_isSupplyAware[id]) {
                 if (from == address(0)) {
+                    // Only allow minter to perform mint operation
+                    _checkRole(SybelRoles.MINTER);
+                    if (_isSupplyAware[ids[i]]) {
+                        require(amounts[i] <= _availableSupplies[ids[i]], "SYB: Not enough supply");
+                    }
                     // If it's a minted token
                     _availableSupplies[id] -= amounts[i];
                 } else if (to == address(0)) {
@@ -165,6 +155,10 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
                 uint256 contentId = id.extractContentId();
                 owners[contentId] = to;
                 emit ContentOwnerUpdated(contentId, to);
+            }
+            // Increase our counter
+            unchecked { 
+                ++i;
             }
         }
 

@@ -19,7 +19,7 @@ import "./Referral.sol";
 contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, PaymentBadgesAccessor {
     // The cap of frak token we can mint for the reward
     uint96 public constant REWARD_MINT_CAP = 1_500_000_000 ether;
-    uint96 private constant SINGLE_REWARD_CAP = 1_000 ether;
+    uint96 private constant SINGLE_REWARD_CAP = 1_000_000 ether;
 
     // Maximum data we can treat in a batch manner
     uint8 private constant MAX_BATCH_AMOUNT = 20;
@@ -146,7 +146,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, P
         }
         // Get the listener badge and recompute his reward
         uint64 listenerBadge = listenerBadges.getBadge(listener);
-        uint96 amountForListener = (totalAmountToMintForUser * listenerBadge) / 1 ether;
+        uint96 amountForListener = uint96((uint256(totalAmountToMintForUser) * listenerBadge) / 1 ether);
         // Register the amount for listener
         _addFounds(listener, amountForListener);
         // Compute the total amount to mint

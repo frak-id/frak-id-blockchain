@@ -13,7 +13,7 @@ import { address0, getTimestampInAFewMoment, updatToGivenTimestamp } from "../ut
 
 const initialMintSupply = BigNumber.from(10).pow(18).mul(500_000_000);
 
-describe.only("MultipleVestingWallets", () => {
+describe("MultipleVestingWallets", () => {
   let multiVestingWallets: MultiVestingWallets;
   let sybelToken: SybelToken;
 

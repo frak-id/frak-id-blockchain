@@ -16,7 +16,7 @@ import "../utils/MintingAccessControlUpgradeable.sol";
  *   - Add allowance to the user when he mint a fraction (web2)
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccessor {
+contract Minter is IMinter, MintingAccessControlUpgradeable {
     /**
      * @dev Access our internal tokens
      */
@@ -56,41 +56,17 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
     function initialize(
         address sybelTokenAddr,
         address internalTokenAddr,
-        address listenerBadgesAddr,
-        address contentBadgesAddr,
         address fractionCostBadgesAddr,
         address foundationAddr
     ) external initializer {
-        /*
         // Only for v1 deployment
         __MintingAccessControlUpgradeable_init();
-        __PaymentBadgesAccessor_init(listenerBadgesAddr, contentBadgesAddr);
 
         sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
         sybelToken = SybelToken(sybelTokenAddr);
         fractionCostBadges = IFractionCostBadges(fractionCostBadgesAddr);
 
-        foundationWallet = foundationAddr;*/
-    }
-
-    function migrateToV2(address sybelTokenAddr, address foundationAddr) external reinitializer(2) {
-        /*
-        // Only for v2 upgrade
-        sybelToken = SybelToken(sybelTokenAddr);
         foundationWallet = foundationAddr;
-        */
-    }
-
-    function migrateToV3(address fractionCostBadgesAddr) external reinitializer(3) {
-        /*
-        // Only for v3 upgrade
-        fractionCostBadges = IFractionCostBadges(fractionCostBadgesAddr);
-        */
-    }
-
-    function migrateToV4(address contentBadgesAddr) external reinitializer(4) {
-        // Only for v4 upgrade
-        contentBadges = IContentBadges(contentBadgesAddr);
     }
 
     /**
