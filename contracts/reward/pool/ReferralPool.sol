@@ -8,12 +8,20 @@ import "../../utils/PushPullReward.sol";
 import "../../utils/SybelAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "hardhat/console.sol";
 
 /**
  * @dev Represent our referral contract
  */
 /// @custom:security-contact crypto-support@sybel.co
 contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
+
+    // The minimum reward is 1 mwei, to prevent iteration on really small amount
+    uint24 internal constant MINIMUM_REWARD = 1_000_000;
+
+    // The maximal referal depth we can pay
+    uint8 internal constant MAX_DEPTH = 10;
+
     /**
      * @dev Event emitted when a user is rewarded for his listen
      */
@@ -21,17 +29,12 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
     /**
      * @dev Event emitted when a user is rewarded by the referral program
      */
-    event ReferralReward(uint256 indexed contentId, address indexed user, uint96 amount);
+    event ReferralReward(uint256 contentId, address user, uint96 amount);
 
     /**
      * Mapping of content id to referee to referer
      */
     mapping(uint256 => mapping(address => address)) private contentIdToRefereeToReferer;
-
-    /**
-     * The pending referal reward for the given address
-     */
-    mapping(address => uint96) private userPendingReward;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -51,34 +54,24 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
         address user,
         address referer
     ) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
-        // Ensure the user doesn't have a referer yet
-        address actualReferer = contentIdToRefereeToReferer[contentId][user];
-        require(actualReferer == address(0), "SYB: already got a referrer");
-        bool isInRefererChain = isUserInRefererChain(contentId, user, referer);
-        require(!isInRefererChain, "SYB: already in referee chain");
-        // Check if the user isn't in the referrer chain
-        // If that's got, set it and emit the event
-        contentIdToRefereeToReferer[contentId][user] = referer;
-        emit UserReferred(contentId, referer, user);
-    }
+        require(user != address(0) && referer != address(0) && user != referer, "SYBL: invalid address");
+        // Get our content referer chain (to prevent multi kecack hash each time we access it)
+        mapping(address => address) storage contentRefererChain = contentIdToRefereeToReferer[contentId];
 
-    function isUserInRefererChain(
-        uint256 contentId,
-        address user,
-        address referer
-    ) internal returns (bool) {
-        // Get the referer of our referer
-        address referrerReferrer = contentIdToRefereeToReferer[contentId][referer];
-        if (referrerReferrer == address(0)) {
-            // If he don't have any referer, exit
-            return false;
-        } else if (referrerReferrer == user) {
-            // If that's the same address as the user, exit
-            return true;
-        } else {
-            // Otherwise, go down a level and check again
-            return isUserInRefererChain(contentId, user, referrerReferrer);
+        // Ensure the user doesn't have a referer yet
+        address actualReferer = contentRefererChain[user];
+        require(actualReferer == address(0), "SYB: already got a referrer");
+
+        // Then, explore our referer chain to find a potential loop, or just the last address
+        address refererExploration = contentRefererChain[referer];
+        while(refererExploration != address(0) && refererExploration != user) {
+            refererExploration = contentRefererChain[refererExploration];
         }
+        require(refererExploration != user, "SYB: already in referee chain");
+        
+        // If that's got, set it and emit the event
+        contentRefererChain[user] = referer;
+        emit UserReferred(contentId, referer, user);
     }
 
     /**
@@ -91,18 +84,27 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
     ) public onlyRole(SybelRoles.REWARDER) whenNotPaused returns (uint96 totalAmount) {
         require(user != address(0), "SYBL: invalid address");
         require(amount > 0, "SYB: invalid amount");
-        // Store the pending reward for this user, and emit the associated event's
-        userPendingReward[user] += amount;
-        emit ReferralReward(contentId, user, amount);
-        // The total amount to be paid
-        totalAmount = amount;
+        // Get our content referer chain (to prevent multi kecack hash each time we access it)
+        mapping(address => address) storage contentRefererChain = contentIdToRefereeToReferer[contentId];
         // Check if the user got a referer
-        address userReferer = contentIdToRefereeToReferer[contentId][user];
-        if (userReferer != address(0) && amount > 0) {
-            // If yes, recursively get all the amount to be paid for all of his referer,
-            // multiplying by 0.8 each time we go up a level
-            uint96 refererAmount = (amount * 4) / 5;
-            totalAmount += payAllReferer(contentId, user, refererAmount);
+        address userReferer = contentRefererChain[user];
+        uint8 depth = 0;
+        while (userReferer != address(0) && amount > MINIMUM_REWARD && depth < MAX_DEPTH) {
+            // Store the pending reward for this user referrer, and emit the associated event's
+            _addFoundsUnchecked(userReferer, amount);
+            emit ReferralReward(contentId, userReferer, amount);
+            // Then increase the total rewarded amount, and prepare the amount for the next referer
+            unchecked {
+                // Increase the total amount to be paid
+                totalAmount += amount;
+                // If yes, recursively get all the amount to be paid for all of his referer,
+                // multiplying by 0.8 each time we go up a level
+                amount = (amount * 4) / 5;
+                // Increase our depth
+                ++depth;
+            }
+            // Finally, fetch the referer of the previous referer
+            userReferer = contentRefererChain[userReferer];
         }
         // Then return the amount to be paid
         return totalAmount;

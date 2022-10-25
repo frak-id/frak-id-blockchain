@@ -19,21 +19,14 @@ import { testRoles } from "../utils/test-roles";
 import { address0, getTimestampInAFewMoment } from "../utils/test-utils";
 import { Rewarder } from "../../types/contracts/reward/Rewarder";
 import { buildFractionId, TOKEN_TYPE_COMMON, TOKEN_TYPE_DIAMOND, TOKEN_TYPE_GOLD } from "../../scripts/utils/mathUtils";
-
-const REVOCABLE_GROUP = 1;
-const NON_REVOCABLE_GROUP = 2;
-const INITIAL_DROP_GROUP = 3;
-const groupIds = [REVOCABLE_GROUP, NON_REVOCABLE_GROUP, INITIAL_DROP_GROUP];
-
-const INEXISTANT_GROUP = 100;
-
-const GROUP_CAP = BigNumber.from(10).pow(10);
+import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
+import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
 
 describe("Rewarder", () => {
   let sybelToken: SybelToken;
   let internalToken: SybelInternalTokens;
-  let referral: Referral;
-  let contentPool: ContentPoolMultiContent;
+  let referral: ReferralPool;
+  let contentPool: ContentPool;
   let rewarder: Rewarder;
 
   let contentId: BigNumber;
@@ -50,8 +43,8 @@ describe("Rewarder", () => {
     // Deploy all the necessary contract for our rewarder
     sybelToken = await deployContract("SybelToken", [addr2.address]);
     internalToken = await deployContract("SybelInternalTokens");
-    referral = await deployContract("Referral", [sybelToken.address]);
-    contentPool = await deployContract("ContentPoolMultiContent", [sybelToken.address]);
+    referral = await deployContract("ReferralPool", [sybelToken.address]);
+    contentPool = await deployContract("ContentPool", [sybelToken.address]);
     rewarder = await deployContract("Rewarder", [
       sybelToken.address,
       internalToken.address,
@@ -93,7 +86,7 @@ describe("Rewarder", () => {
     contentId = ownerUpdateEvent.args.id;
   });
 
-  describe.only("Base reward", () => {
+  describe("Base reward", () => {
     it("Reward with free account", async () => {
       // TODO : Should be ko if the podcast isn't existing
       // TODO : We are failing but on the owner address fetching, not goood, should failed before
@@ -108,7 +101,7 @@ describe("Rewarder", () => {
       await rewarder.payUser(addr1.address, [contentId], [100]);
       await rewarder.payUser(addr1.address, [contentId], [100]);
     });
-    it.only("Reward with payed account", async () => {
+    it("Reward with payed account", async () => {
       await internalToken.setSupplyBatch(
         [
           buildFractionId(contentId, TOKEN_TYPE_DIAMOND),

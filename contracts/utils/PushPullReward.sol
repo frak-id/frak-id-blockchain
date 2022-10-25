@@ -13,14 +13,14 @@ abstract contract PushPullReward is Initializable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     /**
-     * The pending reward for the given address
-     */
-    mapping(address => uint96) private pendingRewards;
-
-    /**
      * Access the token that will deliver the tokens
      */
-    IERC20Upgradeable token;
+    IERC20Upgradeable internal token;
+
+    /**
+     * The pending reward for the given address
+     */
+    mapping(address => uint96) internal _pendingRewards;
 
     /**
      * @dev Event emitted when a user withdraw his pending reward
@@ -39,7 +39,14 @@ abstract contract PushPullReward is Initializable {
      */
     function _addFounds(address user, uint96 founds) internal {
         require(user != address(0), "SYB: invalid address");
-        pendingRewards[user] += founds;
+        _pendingRewards[user] += founds;
+    }
+
+    /**
+     * Add founds for the given user
+     */
+    function _addFoundsUnchecked(address user, uint96 founds) internal {
+        unchecked { _pendingRewards[user] += founds; }
     }
 
     function withdrawFounds() external virtual;
@@ -52,13 +59,13 @@ abstract contract PushPullReward is Initializable {
     function _withdraw(address user) internal {
         require(user != address(0), "SYB: invalid address");
         // Ensure the user have a pending reward
-        uint96 pendingReward = pendingRewards[user];
+        uint96 pendingReward = _pendingRewards[user];
         require(pendingReward > 0, "SYB: no pending reward");
         // Ensure we have enough founds on this contract to pay the user
         uint256 contractBalance = token.balanceOf(address(this));
         require(contractBalance > pendingReward, "SYB: not enough founds");
         // Reset the user pending balance
-        pendingRewards[user] = 0;
+        _pendingRewards[user] = 0;
         // Emit the withdraw event
         emit RewardWithdrawed(user, pendingReward);
         // Perform the transfer of the founds
@@ -70,6 +77,6 @@ abstract contract PushPullReward is Initializable {
      */
     function getAvailableFounds(address user) external view returns (uint96) {
         require(user != address(0), "SYB: invalid address");
-        return pendingRewards[user];
+        return _pendingRewards[user];
     }
 }
