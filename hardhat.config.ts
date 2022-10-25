@@ -20,7 +20,7 @@ export default {
           viaIR: true, // Gain a lot on contract size, performance impact ?
           optimizer: {
             enabled: true,
-            runs: 1000,
+            runs: 1000000,
             details: {
               peephole: true,
               inliner: true,

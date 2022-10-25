@@ -5,20 +5,13 @@ import { ethers } from "hardhat";
 import { deployContract } from "../../scripts/utils/deploy";
 import { rewarderRole } from "../../scripts/utils/roles";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
-import { expect } from "chai";
 import { address0 } from "../utils/test-utils";
 import { BigNumber } from "ethers";
-import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
 import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
-import { cp } from "fs";
-import { allTokenTypesToRarity, buildFractionId, BUYABLE_TOKEN_TYPES } from "../../scripts/utils/mathUtils";
+import { buildFractionId, BUYABLE_TOKEN_TYPES } from "../../scripts/utils/mathUtils";
 
-// Build our initial reward
-const baseReward = BigNumber.from(10).pow(16); // So 0.001 frk
-
-const contentId = BigNumber.from(1);
-
-describe.only("ContentPool", () => {
+// Testing our content pool contract
+describe("ContentPool", () => {
   let sybelToken: SybelToken;
   let contentPool: ContentPool;
 
@@ -61,11 +54,8 @@ describe.only("ContentPool", () => {
   const buildLotOfStates = async () => {
     // Ensure when no referrer are in the chain, no reward are given
     for (let index = 0; index < 5; index++) {
-      for (let addrIndex = 0; addrIndex < addrs.length; addrIndex++) {
-        for (let typeIndex = 0; typeIndex < BUYABLE_TOKEN_TYPES.length; typeIndex++) {
-          const tokenType = BUYABLE_TOKEN_TYPES[typeIndex];
-          const addr = addrs[addrIndex];
-
+      for (const addr of addrs) {
+        for (const tokenType of BUYABLE_TOKEN_TYPES) {
           // Update the share, and add some reward for this content
           await contentPool.onFraktionsTransfered(address0, addr.address, [buildFractionId(index, tokenType)], [5]);
           await contentPool.addReward(index, BigNumber.from(10).pow(18).mul(10));
@@ -115,9 +105,20 @@ Reputting a safe checked operation for safety purpose :
 |  ContentPool   ·  onFraktionsTransfered  ·      89 207  ·      166 544  ·      111120  ·          340  ·       0.02  │
 |  Rewarder      ·  withdrawFounds         ·     201 321  ·    1 125 605  ·      661534  ·           17  ·       0.10  │
 
-
 Same test with bigger reward (to ensure we got overflow revertion if needed) : 
 |  ContentPool   ·  onFraktionsTransfered  ·      92 007  ·      166 544  ·      111741  ·          340  ·       0.01  │
 |  Rewarder      ·  withdrawFounds         ·     201 321  ·    1 125 605  ·      663181  ·           17  ·       0.06  │
+
+Reputting IR compilation
+|  ContentPool   ·  onFraktionsTransfered  ·      91 799  ·      166 847  ·      111605  ·          340  ·       0.01  │
+|  Rewarder      ·  withdrawFounds         ·     198 324  ·    1 101 804  ·      649782  ·           17  ·       0.06  │
+
+Finally adding the unchecked operator on the reward computation, since all the value are checked before : 
+|  ContentPool   ·  onFraktionsTransfered  ·      91 743  ·      166 847  ·      111564  ·          340  ·       0.01  │
+|  Rewarder      ·  withdrawFounds         ·     198 044  ·    1 092 564  ·      645022  ·           17  ·       0.08  │
+
+Testing assembly for shares values fetching (minor improvment, not to be applied every where)
+|  ContentPool   ·  onFraktionsTransfered  ·      91 737  ·      166 842  ·      111557  ·          340  ·       0.01  │
+|  Rewarder      ·  withdrawFounds         ·     198 044  ·    1 092 564  ·      645022  ·           17  ·       0.06  │
 
 */

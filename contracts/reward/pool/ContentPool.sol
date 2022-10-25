@@ -317,7 +317,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         RewardState[] storage contentStates = rewardStates[contentId];
         RewardState memory currentState = contentStates[_participant.lastStateIndex];
         uint96 userReward = computeUserReward(currentState, _participant);
-        unchecked { 
+        unchecked {
             claimable = userReward - _participant.lastStateClaim;
         }
         // Then reset his last state claim if needed
@@ -368,8 +368,10 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         pure
         returns (uint96 stateReward)
     {
-        // TODO : Is it really safe to add unchecked here ? 
-        stateReward = uint96((state.currentPoolReward * participant.shares) / state.totalShares);
+        // We can safely do an unchecked operation here since the pool reward, participant shares and total shares are all verified before being stored
+        unchecked {
+            stateReward = uint96(uint256(state.currentPoolReward * participant.shares) / state.totalShares);
+        }
     }
 
     /**
@@ -378,18 +380,24 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
      * and since this reawrd shouldn't evolve really fast
      */
     function getSharesForTokenType(uint8 tokenType) private pure returns (uint16 shares) {
-        if (tokenType == SybelMath.TOKEN_TYPE_COMMON_MASK) {
-            shares = 10;
-        } else if (tokenType == SybelMath.TOKEN_TYPE_PREMIUM_MASK) {
-            shares = 50;
-        } else if (tokenType == SybelMath.TOKEN_TYPE_GOLD_MASK) {
-            shares = 100;
-        } else if (tokenType == SybelMath.TOKEN_TYPE_DIAMOND_MASK) {
-            shares = 200;
-        } else {
-            shares = 0;
+        assembly {
+            switch tokenType
+            case 3 { // common
+                shares := 10
+            } 
+            case 4 { // premium
+                shares := 50
+            } 
+            case 5 { // gold
+                shares := 100
+            } 
+            case 6 { // diamond
+                shares := 200
+            } 
+            default {
+                shares := 0
+            }
         }
-        return shares;
     }
 
     /**

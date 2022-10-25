@@ -7,6 +7,11 @@ import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "./IPausable.sol";
 import "../utils/SybelRoles.sol";
 
+error ContractPaused();
+error ContractNotPaused();
+error NotAuthorized();
+error RenounceForCallerOnly();
+
 /// @custom:security-contact crypto-support@sybel.co
 abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgradeable, IPausable, UUPSUpgradeable {
     /// Event emitted when contract is paused or unpaused
@@ -50,7 +55,7 @@ abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgrade
      * - The contract must not be paused.
      */
     modifier whenNotPaused() {
-        require(!paused(), "Pausable: paused");
+        if(paused()) revert ContractPaused();
         _;
     }
 
@@ -62,7 +67,7 @@ abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgrade
      * - The contract must be paused.
      */
     modifier whenPaused() {
-        require(paused(), "Pausable: not paused");
+        if(!paused()) revert ContractNotPaused();
         _;
     }
 
@@ -106,9 +111,8 @@ abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgrade
      * @notice Check the given user have the role
      */
     function _checkRole(bytes32 role, address account) internal view virtual {
-        if (!hasRole(role, account)) {
-            revert(string(abi.encodePacked("AccessControl: account  is missing role")));
-        }
+        if (!hasRole(role, account)) revert NotAuthorized();
+        
     }
 
     /**
@@ -139,7 +143,7 @@ abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgrade
      * @notice User renounce to the role
      */
     function renounceRole(bytes32 role, address account) public virtual {
-        require(account == _msgSender(), "AccessControl: can only renounce roles for self");
+        if(account != _msgSender()) revert RenounceForCallerOnly();
 
         _revokeRole(role, account);
     }

@@ -18,27 +18,34 @@ import { testPauses } from "../utils/test-pauses";
 import { testRoles } from "../utils/test-roles";
 import { address0, getTimestampInAFewMoment } from "../utils/test-utils";
 import { Rewarder } from "../../types/contracts/reward/Rewarder";
-import { buildFractionId, TOKEN_TYPE_COMMON, TOKEN_TYPE_DIAMOND, TOKEN_TYPE_GOLD } from "../../scripts/utils/mathUtils";
+import {
+  buildFractionId,
+  BUYABLE_TOKEN_TYPES,
+  TOKEN_TYPE_COMMON,
+  TOKEN_TYPE_DIAMOND,
+  TOKEN_TYPE_GOLD,
+} from "../../scripts/utils/mathUtils";
 import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
 import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
 
-describe("Rewarder", () => {
+describe.only("Rewarder", () => {
   let sybelToken: SybelToken;
   let internalToken: SybelInternalTokens;
   let referral: ReferralPool;
   let contentPool: ContentPool;
   let rewarder: Rewarder;
 
-  let contentId: BigNumber;
+  const contentIds: BigNumber[] = [];
+  const ccus: number[] = [];
 
   let _owner: SignerWithAddress;
   let addr1: SignerWithAddress;
   let addr2: SignerWithAddress;
-  let _addrs: SignerWithAddress[];
+  let addrs: SignerWithAddress[];
 
   // Deploy our sybel contract
   beforeEach(async function () {
-    [_owner, addr1, addr2, ..._addrs] = await ethers.getSigners();
+    [_owner, addr1, addr2, ...addrs] = await ethers.getSigners();
 
     // Deploy all the necessary contract for our rewarder
     sybelToken = await deployContract("SybelToken", [addr2.address]);
@@ -63,74 +70,84 @@ describe("Rewarder", () => {
     // Setup the callback on the internal tokens for our content pool
     await internalToken.registerNewCallback(contentPool.address);
 
-    // Mint a few contents
-    await internalToken.mintNewContent(addr1.address);
-    await internalToken.mintNewContent(addr1.address);
-    await internalToken.mintNewContent(addr1.address);
-    await internalToken.mintNewContent(addr1.address);
-    await internalToken.mintNewContent(addr1.address);
-    await internalToken.mintNewContent(addr1.address);
-    await internalToken.mintNewContent(addr1.address);
-    await internalToken.mintNewContent(addr1.address);
-    await internalToken.mintNewContent(addr1.address);
+    for (let index = 0; index < 5; index++) {
+      // Perform a mint and we will use this one as content id reference
+      const mintEventTxReceipt = await internalToken.mintNewContent(addr1.address);
 
-    // Perform a mint and we will use this one as content id reference
-    const mintEventTxReceipt = await internalToken.mintNewContent(addr1.address);
+      // Extract the content id from mint tx
+      const mintReceipt = await mintEventTxReceipt.wait();
+      const ownerUpdateEvent = mintReceipt.events?.filter(contractEvent => {
+        return contractEvent.event == "ContentOwnerUpdated";
+      })[0] as ContentOwnerUpdatedEvent;
+      if (!ownerUpdateEvent || !ownerUpdateEvent.args) throw new Error("Unable to find creation event");
+      const mintedTokenId = ownerUpdateEvent.args.id;
+      contentIds.push(ownerUpdateEvent.args.id);
+      ccus.push(50);
 
-    // Extract the content id from mint tx
-    const mintReceipt = await mintEventTxReceipt.wait();
-    const ownerUpdateEvent = mintReceipt.events?.filter(contractEvent => {
-      return contractEvent.event == "ContentOwnerUpdated";
-    })[0] as ContentOwnerUpdatedEvent;
-    if (!ownerUpdateEvent || !ownerUpdateEvent.args) throw new Error("Unable to find creation event");
-    contentId = ownerUpdateEvent.args.id;
+      // Set the supply for each tokens
+      for (let typeIndex = 0; typeIndex < BUYABLE_TOKEN_TYPES.length; typeIndex++) {
+        const tokenType = BUYABLE_TOKEN_TYPES[typeIndex];
+        await internalToken.setSupplyBatch([buildFractionId(mintedTokenId, tokenType)], [100000]);
+      }
+    }
   });
 
   describe("Base reward", () => {
     it("Reward with free account", async () => {
-      // TODO : Should be ko if the podcast isn't existing
-      // TODO : We are failing but on the owner address fetching, not goood, should failed before
-      await rewarder.payUser(addr1.address, [contentId], [100]);
-      // This other run should cost less money since the free fraktion is already minted
-      await rewarder.payUser(addr1.address, [contentId], [100]);
-      await rewarder.payUser(addr1.address, [contentId], [100]);
-      await rewarder.payUser(addr1.address, [contentId], [100]);
-      await rewarder.payUser(addr1.address, [contentId], [100]);
-      await rewarder.payUser(addr1.address, [contentId], [100]);
-      await rewarder.payUser(addr1.address, [contentId], [100]);
-      await rewarder.payUser(addr1.address, [contentId], [100]);
-      await rewarder.payUser(addr1.address, [contentId], [100]);
+      // TODO : Add some check on each pool, on the amount minted etc
+      await rewarder.payUser(addr1.address, [contentIds[0]], [100]);
     });
     it("Reward with payed account", async () => {
-      await internalToken.setSupplyBatch(
-        [
-          buildFractionId(contentId, TOKEN_TYPE_DIAMOND),
-          buildFractionId(contentId, TOKEN_TYPE_COMMON),
-          buildFractionId(contentId, TOKEN_TYPE_GOLD),
-        ],
-        [10000, 10000, 1000],
-      );
-      await internalToken.mint(addr2.address, buildFractionId(contentId, TOKEN_TYPE_DIAMOND), 10);
-      await internalToken.mint(addr2.address, buildFractionId(contentId, TOKEN_TYPE_COMMON), 10);
-      await internalToken.mint(addr2.address, buildFractionId(contentId, TOKEN_TYPE_GOLD), 10);
+      // Mint token for each user
+      await mintTokenForEachUser();
       // Rewarder with only one payed fraktion
-      await rewarder.payUser(addr2.address, [contentId], [100]);
-      await rewarder.payUser(addr2.address, [contentId], [100]);
-      await rewarder.payUser(addr2.address, [contentId], [100]);
-      await rewarder.payUser(addr2.address, [contentId], [100]);
-      // |  Rewarder             ·  payUser              ·          -  ·          -  ·      277550  ·            1  ·       0.02  │
-      await internalToken.mint(addr1.address, buildFractionId(contentId, TOKEN_TYPE_GOLD), 10);
-
-      const maxIteration = 5;
-      for (let index = 0; index < maxIteration; index++) {
-        console.log(`iteration ${index}`);
-        await internalToken.mint(addr2.address, buildFractionId(contentId, TOKEN_TYPE_COMMON), 10);
-        await rewarder.payUser(addr2.address, [contentId, contentId, contentId], [100, 100, 100]);
-        await internalToken.mint(addr1.address, buildFractionId(contentId, TOKEN_TYPE_DIAMOND), 10);
-        await rewarder.payUser(addr2.address, [contentId, contentId, contentId], [100, 100, 100]);
-        await internalToken.mint(_owner.address, buildFractionId(contentId, TOKEN_TYPE_GOLD), 10);
-        await rewarder.payUser(addr2.address, [contentId, contentId, contentId], [100, 100, 100]);
-      }
+      await rewarder.payUser(addr1.address, contentIds, ccus);
     });
   });
+
+  /**
+   * Build a large referee chain with all the known address
+   */
+  const mintTokenForEachUser = async () => {
+    // Ensure when no referrer are in the chain, no reward are given
+    for (const contentId of contentIds) {
+      for (const addr of addrs) {
+        // Update the share, and add some reward for this content
+        await internalToken.mint(addr.address, buildFractionId(contentId, TOKEN_TYPE_GOLD), 5);
+      }
+    }
+
+    for (const contentId of contentIds) {
+      for (const tokenType of BUYABLE_TOKEN_TYPES) {
+        // Update the share, and add some reward for this content
+        await internalToken.mint(addr1.address, buildFractionId(contentId, tokenType), 10);
+        await internalToken.mint(addr2.address, buildFractionId(contentId, tokenType), 10);
+      }
+    }
+  };
 });
+
+/*
+Base with lot of states : 
+|  Rewarder             ·  payUser              ·     256 733  ·     621 326  ·      439 030  ·            2  ·       0.04  │
+
+// With a few unchecked option mores
+|  Rewarder             ·  payUser              ·     25 5948  ·     614 169  ·      435 059  ·            2  ·       0.04  │
+
+// Increasing optimizer to 1 billions runs
+|  Rewarder             ·  payUser              ·     25 5186  ·     610 317  ·         432752  ·            2  ·       0.06  │
+
+*/
+
+/**
+ * TODO : Solmate / UDS contract lookup
+ *
+ *  => https://github.com/transmissions11/solmate
+ *  => https://github.com/0xPhaze/UDS -> Other upgradeable pattern, prevent memory clash,
+ *
+ * TODO : Foundry, is it really better ? Deploy and test transpilation ??
+ *
+ *  => https://github.com/foundry-rs/foundry
+ *
+ * Really faster but not ready for production yet
+ */
