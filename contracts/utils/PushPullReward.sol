@@ -46,7 +46,9 @@ abstract contract PushPullReward is Initializable {
      * Add founds for the given user
      */
     function _addFoundsUnchecked(address user, uint96 founds) internal {
-        unchecked { _pendingRewards[user] += founds; }
+        unchecked {
+            _pendingRewards[user] += founds;
+        }
     }
 
     function withdrawFounds() external virtual;

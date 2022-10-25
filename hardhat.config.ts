@@ -20,7 +20,7 @@ export default {
           viaIR: true, // Gain a lot on contract size, performance impact ?
           optimizer: {
             enabled: true,
-            runs: 10000,
+            runs: 1000,
             details: {
               peephole: true,
               inliner: true,
@@ -76,7 +76,7 @@ export default {
     currency: "EUR",
     token: "MATIC",
     gasPriceApi: "https://api.polygonscan.com/api?module=proxy&action=eth_gasPrice",
-    enabled: false,
+    enabled: true,
     excludeContracts: [],
     src: "./contracts",
     coinmarketcap: process.env.COIN_MARKET_CAP_API_KEY,

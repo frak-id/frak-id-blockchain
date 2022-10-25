@@ -100,7 +100,9 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         require(rewardAmount > 0, "SYB: invalid reward");
         RewardState storage currentState = lastContentState(contentId);
         require(currentState.open, "SYB: reward state closed");
-        currentState.currentPoolReward += rewardAmount;
+        unchecked {
+            currentState.currentPoolReward += rewardAmount;
+        }
         emit PoolRewardAdded(contentId, rewardAmount);
     }
 
@@ -240,7 +242,9 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
             userContentPools[user].add(contentId);
         }
         // Increase his share
-        participant.shares += amount;
+        unchecked {
+            participant.shares += amount;
+        }
         // Emit the update event
         emit ParticipantShareUpdated(user, contentId, participant.shares);
     }
@@ -255,7 +259,9 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         uint120 amount
     ) internal {
         // Decrease his share
-        participant.shares -= amount;
+        unchecked {
+            participant.shares -= amount;
+        }
         // If he know have 0 shares, remove it from the pool
         if (participant.shares == 0) {
             userContentPools[user].remove(contentId);
@@ -292,30 +298,37 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         Participant storage participant,
         uint256 toStateIndex
     ) internal returns (uint96 claimable) {
-        require(user != address(0), "SYBL: invalid address");
+        // Replicate our participant to memory
+        Participant memory _participant = participant;
+
         // Ensure the state target is not already claimed, and that we don't have too many state to fetched
-        require(toStateIndex >= participant.lastStateIndex, "SYB: already claimed");
+        require(toStateIndex >= _participant.lastStateIndex, "SYB: already claimed");
         require(
-            toStateIndex - participant.lastStateIndex < MAX_CLAIMABLE_REWARD_STATE_ROUNDS,
+            toStateIndex - _participant.lastStateIndex < MAX_CLAIMABLE_REWARD_STATE_ROUNDS,
             "SYB: too much state for computation"
         );
         // Check the participant got some shares
-        if (participant.shares == 0) {
+        if (_participant.shares == 0) {
             // If not, just increase the last iterated index and return
             participant.lastStateIndex = toStateIndex;
             return 0;
         }
         // Check if he got some more reward to claim on the last state he fetched, and init our claimable reward with that
-        RewardState storage lastParticipantState = rewardStates[contentId][participant.lastStateIndex];
-        uint96 userReward = computeUserReward(lastParticipantState, participant);
-        claimable = userReward - participant.lastStateClaim;
-        // Then reset his last state claim
-        participant.lastStateClaim = 0;
+        RewardState[] storage contentStates = rewardStates[contentId];
+        RewardState memory currentState = contentStates[_participant.lastStateIndex];
+        uint96 userReward = computeUserReward(currentState, _participant);
+        unchecked { 
+            claimable = userReward - _participant.lastStateClaim;
+        }
+        // Then reset his last state claim if needed
+        if (_participant.lastStateClaim != 0) {
+            participant.lastStateClaim = 0;
+        }
         // If we don't have more iteration to do, exit directly
-        if (participant.lastStateIndex == toStateIndex) {
+        if (_participant.lastStateIndex == toStateIndex) {
             // Increase the user pending reward (if needed), and return this amount
             if (claimable > 0) {
-                _addFounds(user, claimable);
+                _addFoundsUnchecked(user, claimable);
             }
             return claimable;
         }
@@ -323,23 +336,26 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         // Var used to backup the reward the user got on the last state
         uint96 lastStateReward;
         // Then, iterate over all the states from the last states he fetched
-        for (uint256 stateIndex = participant.lastStateIndex + 1; stateIndex <= toStateIndex; stateIndex++) {
+        for (uint256 stateIndex = _participant.lastStateIndex + 1; stateIndex <= toStateIndex; ) {
             // Get the reward state
-            RewardState storage currentState = rewardStates[contentId][stateIndex];
-            // If we are on the last iteration, save the reward
-            if (stateIndex == toStateIndex) {
-                lastStateReward = computeUserReward(currentState, participant);
-                claimable += lastStateReward;
-            } else {
-                // Otherwise, just compute the total reward tor this user in this state
-                claimable += computeUserReward(currentState, participant);
+            currentState = contentStates[stateIndex];
+            unchecked {
+                // If we are on the last iteration, save the reward
+                if (stateIndex == toStateIndex) {
+                    lastStateReward = computeUserReward(currentState, _participant);
+                    claimable += lastStateReward;
+                } else {
+                    // Otherwise, just compute the total reward tor this user in this state
+                    claimable += computeUserReward(currentState, _participant);
+                }
+                ++stateIndex;
             }
         }
         // Update the participant last state checked, and increase his pending reward
         participant.lastStateIndex = toStateIndex;
         participant.lastStateClaim = lastStateReward;
         // Update the participant claimable reward
-        _addFounds(user, claimable);
+        _addFoundsUnchecked(user, claimable);
         // Return the added claimable reward
         return claimable;
     }
@@ -352,6 +368,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         pure
         returns (uint96 stateReward)
     {
+        // TODO : Is it really safe to add unchecked here ? 
         stateReward = uint96((state.currentPoolReward * participant.shares) / state.totalShares);
     }
 
@@ -380,12 +397,14 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
      */
     function _computeAndSaveAllForUser(address user) internal {
         EnumerableSet.UintSet storage contentPoolIds = userContentPools[user];
+        uint256[] memory _poolsIds = contentPoolIds.values();
 
-        for (uint256 index = 0; index < contentPoolIds.length(); ++index) {
+        for (uint256 index = 0; index < _poolsIds.length; ++index) {
             // Get the content pool id and the participant and last pool id
             uint256 contentId = contentPoolIds.at(index);
             Participant storage participant = participants[contentId][user];
             uint256 lastPoolIndex = currentStateIndex[contentId];
+            // Compute and save the reward for this pool
             computeAndSaveReward(contentId, user, participant, lastPoolIndex);
         }
     }
@@ -396,6 +415,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
     }
 
     function withdrawFounds(address user) external virtual override onlyRole(SybelRoles.ADMIN) whenNotPaused {
+        require(user != address(0), "SYBL: invalid address");
         _computeAndSaveAllForUser(user);
         _withdraw(user);
     }

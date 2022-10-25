@@ -15,7 +15,6 @@ import "hardhat/console.sol";
  */
 /// @custom:security-contact crypto-support@sybel.co
 contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
-
     // The minimum reward is 1 mwei, to prevent iteration on really small amount
     uint24 internal constant MINIMUM_REWARD = 1_000_000;
 
@@ -64,11 +63,11 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
 
         // Then, explore our referer chain to find a potential loop, or just the last address
         address refererExploration = contentRefererChain[referer];
-        while(refererExploration != address(0) && refererExploration != user) {
+        while (refererExploration != address(0) && refererExploration != user) {
             refererExploration = contentRefererChain[refererExploration];
         }
         require(refererExploration != user, "SYB: already in referee chain");
-        
+
         // If that's got, set it and emit the event
         contentRefererChain[user] = referer;
         emit UserReferred(contentId, referer, user);
@@ -89,7 +88,7 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
         // Check if the user got a referer
         address userReferer = contentRefererChain[user];
         uint8 depth = 0;
-        while (userReferer != address(0) && amount > MINIMUM_REWARD && depth < MAX_DEPTH) {
+        while (userReferer != address(0) && depth < MAX_DEPTH && amount > MINIMUM_REWARD) {
             // Store the pending reward for this user referrer, and emit the associated event's
             _addFoundsUnchecked(userReferer, amount);
             emit ReferralReward(contentId, userReferer, amount);

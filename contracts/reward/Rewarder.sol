@@ -159,6 +159,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
 
         // Once we have iterate over each item, if we got a positive mint amount, mint it
         if (totalAmountToMint > 0) {
+            // TODO : We should only mint user and owner amount here, the amount for content pool and referral pool should be minted directly to the token addresses
             sybelToken.mint(address(this), totalAmountToMint);
         }
     }

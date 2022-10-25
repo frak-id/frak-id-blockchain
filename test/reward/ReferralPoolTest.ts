@@ -5,7 +5,6 @@ import { ethers } from "hardhat";
 import { deployContract } from "../../scripts/utils/deploy";
 import { rewarderRole } from "../../scripts/utils/roles";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
-import { Referral } from "../../types/contracts/reward/Referral";
 import { expect } from "chai";
 import { address0 } from "../utils/test-utils";
 import { BigNumber } from "ethers";
@@ -14,7 +13,7 @@ import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
 // Build our initial reward
 const baseReward = BigNumber.from(10).pow(16); // So 0.001 frk
 
-describe.only("Referral", () => {
+describe("Referral Pool", () => {
   let sybelToken: SybelToken;
   let referral: ReferralPool;
 
@@ -170,6 +169,8 @@ describe.only("Referral", () => {
 // With 10 max depth, 10k runs, with all optimizer settings, and with IR
 // |  ReferralPool  ·  payAllReferer  ·      33 768  ·     295 598  ·       126 544  ·            8  ·       0.02  │
 // |  ReferralPool  ·  userReferred   ·      58 425  ·      96 896  ·        59 447  ·           38  ·       0.01  │
+// With 10 max depth, switching while condition, 10k runs, with all optimizer settings, and with IR
+// |  ReferralPool     payAllReferer  ·      33 768  ·     295 569  ·       126 522  ·            8  ·       0.02  │
 
 // Without event emission (gaining 30K GAS !!!)
 // |  ReferralPool  ·  payAllReferer  ·      33734  ·     474 788  ·      188935  ·            3  ·       0.10  │
