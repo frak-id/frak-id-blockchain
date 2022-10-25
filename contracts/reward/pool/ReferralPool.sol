@@ -13,7 +13,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
  * @dev Represent our referral contract
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract Referral is SybelAccessControlUpgradeable, PushPullReward {
+contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
     /**
      * @dev Event emitted when a user is rewarded for his listen
      */

@@ -47,6 +47,13 @@ import { vestingManagerRole } from "../utils/roles";
     fs.writeFileSync(`addresses-${hre.hardhatArguments.network}.json`, jsonAddresses);
 
     console.log("Finished to deploy the SybelToken and the VestingWallet");
+
+    // Finally, check them
+    console.log("Starting to verify the deployed contracts");
+    await hre.run("verify:verify", { address: sybelToken.address });
+    await hre.run("verify:verify", { address: multiVestingWallet.address });
+    await hre.run("verify:verify", { address: vestingWalletFactory.address });
+    console.log("Ended the contract verification");
   } catch (e: any) {
     console.log(e.message);
   }

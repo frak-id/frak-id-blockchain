@@ -4,8 +4,8 @@ pragma solidity ^0.8.7;
 import "./IRewarder.sol";
 import "./badges/ContentBadges.sol";
 import "./badges/ListenerBadges.sol";
-import "./pool/ContentPoolMultiContent.sol";
-import "./pool/Referral.sol";
+import "./pool/ContentPool.sol";
+import "./pool/ReferralPool.sol";
 import "../utils/SybelMath.sol";
 import "../utils/SybelRoles.sol";
 import "../tokens/SybelInternalTokens.sol";
@@ -40,12 +40,12 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     /**
      * @dev Access our referral system
      */
-    Referral private referral;
+    ReferralPool private referral;
 
     /**
      * @dev Access our content pool
      */
-    ContentPoolMultiContent private contentPool;
+    ContentPool private contentPool;
 
     /**
      * @dev factor user to compute the number of token to generate (on 1e18 decimals)
@@ -85,8 +85,8 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
 
         sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
         sybelToken = SybelToken(syblTokenAddr);
-        contentPool = ContentPoolMultiContent(contentPoolAddr);
-        referral = Referral(referralAddr);
+        contentPool = ContentPool(contentPoolAddr);
+        referral = ReferralPool(referralAddr);
 
         // Default TPU
         tokenGenerationFactor = 4.22489708885 ether;

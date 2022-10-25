@@ -16,7 +16,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
  * what's the max uint we can use for the price ?, What the max array size ? So what max uint for indexes ?)
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract ContentPoolMultiContent is SybelAccessControlUpgradeable, PushPullReward, FraktionTransferCallback {
+contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionTransferCallback {
     // Add the library methods
     using EnumerableSet for EnumerableSet.UintSet;
 

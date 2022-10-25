@@ -21,8 +21,6 @@ import { deployContract } from "../utils/deploy";
       },
       default: null,
     };
-    console.log("New addresses : ");
-    console.log(addresses);
     // Then wrote it into a file
     const jsonAddresses = JSON.stringify(addresses);
     fs.writeFileSync("addresses.json", jsonAddresses);
