@@ -32,8 +32,6 @@ const GROUP_CAP = BigNumber.from(10).pow(10);
 describe("Rewarder", () => {
   let sybelToken: SybelToken;
   let internalToken: SybelInternalTokens;
-  let listenerBadges: ListenerBadges;
-  let contentBadges: ContentBadges;
   let referral: Referral;
   let contentPool: ContentPoolMultiContent;
   let rewarder: Rewarder;
@@ -52,15 +50,11 @@ describe("Rewarder", () => {
     // Deploy all the necessary contract for our rewarder
     sybelToken = await deployContract("SybelToken", [addr2.address]);
     internalToken = await deployContract("SybelInternalTokens");
-    listenerBadges = await deployContract("ListenerBadges");
-    contentBadges = await deployContract("ContentBadges");
     referral = await deployContract("Referral", [sybelToken.address]);
     contentPool = await deployContract("ContentPoolMultiContent", [sybelToken.address]);
     rewarder = await deployContract("Rewarder", [
       sybelToken.address,
       internalToken.address,
-      listenerBadges.address,
-      contentBadges.address,
       contentPool.address,
       referral.address,
     ]);
@@ -134,7 +128,7 @@ describe("Rewarder", () => {
       // |  Rewarder             ·  payUser              ·          -  ·          -  ·      277550  ·            1  ·       0.02  │
       await internalToken.mint(addr1.address, buildFractionId(contentId, TOKEN_TYPE_GOLD), 10);
 
-      const maxIteration = 50;
+      const maxIteration = 5;
       for (let index = 0; index < maxIteration; index++) {
         console.log(`iteration ${index}`);
         await internalToken.mint(addr2.address, buildFractionId(contentId, TOKEN_TYPE_COMMON), 10);

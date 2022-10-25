@@ -10,43 +10,40 @@ import "../../utils/SybelAccessControlUpgradeable.sol";
  * @dev Handle the computation of our listener badges
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract ListenerBadges is IListenerBadges, SybelAccessControlUpgradeable {
+abstract contract ListenerBadges is IListenerBadges {
     // Map of user address to listener badge
-    mapping(address => uint64) private listenerBadges;
+    mapping(address => uint64) private _listenerBadges;
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
-    function initialize() external initializer {
-        __SybelAccessControlUpgradeable_init();
-
-        // Grant the badge updater role to the contract deployer
-        _grantRole(SybelRoles.BADGE_UPDATER, msg.sender);
-    }
+    function updateListenerBadge(address listener, uint64 badge) external virtual;
 
     /**
-     * @dev Update the listener snft amount
+     * @dev Update the content internal coefficient
      */
-    function updateBadge(address listener, uint64 badge)
-        external
-        override
-        onlyRole(SybelRoles.BADGE_UPDATER)
-        whenNotPaused
+    function _updateListenerBadge(address listener, uint64 badge)
+        internal
     {
-        listenerBadges[listener] = badge;
+        _listenerBadges[listener] = badge;
+        emit ListenerBadgeUpdated(listener, badge);
     }
 
     /**
-     * @dev Find the badge for the given listener (on a 1e18 scale)
+     * @dev Update the content internal coefficient
      */
-    function getBadge(address listener) external view override returns (uint64 listenerBadge) {
-        listenerBadge = listenerBadges[listener];
+    function _getListenerBadge(address listener)
+        internal view returns (uint64 listenerBadge)
+    {
+                listenerBadge = _listenerBadges[listener];
         if (listenerBadge == 0) {
             // If the badge of this listener isn't set yet, set it to default
             listenerBadge = 1 ether;
         }
         return listenerBadge;
+    }
+
+    /**
+     * @dev Find the badge for the given listener (on a 1e18 scale)
+     */
+    function getListenerBadge(address listener) external view override returns (uint64 listenerBadge) {
+        return _getListenerBadge(listener);
     }
 }

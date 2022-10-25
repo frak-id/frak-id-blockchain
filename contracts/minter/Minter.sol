@@ -2,7 +2,6 @@
 pragma solidity ^0.8.7;
 
 import "./IMinter.sol";
-import "../badges/access/PaymentBadgesAccessor.sol";
 import "../badges/cost/IFractionCostBadges.sol";
 import "../utils/SybelMath.sol";
 import "../tokens/SybelInternalTokens.sol";

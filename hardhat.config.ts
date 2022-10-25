@@ -72,7 +72,7 @@ export default {
     currency: "EUR",
     token: "MATIC",
     gasPriceApi: "https://api.polygonscan.com/api?module=proxy&action=eth_gasPrice",
-    enabled: false,
+    enabled: true,
     excludeContracts: [],
     src: "./contracts",
     coinmarketcap: process.env.COIN_MARKET_CAP_API_KEY,

@@ -7,13 +7,16 @@ import "../../utils/IPausable.sol";
  * @dev Represent our content badge contract
  */
 interface IContentBadges is IPausable {
+
+    event ContentBadgeUpdated(uint256 indexed id, uint256 badge);
+
     /**
      * @dev Update the listener custom coefficient
      */
-    function updateBadge(uint256 contentId, uint256 _badge) external;
+    function updateContentBadge(uint256 contentId, uint256 badge) external;
 
     /**
      * @dev Get the payment badges for the given informations
      */
-    function getBadge(uint256 contentId) external returns (uint256);
+    function getContentBadge(uint256 contentId) external returns (uint256);
 }

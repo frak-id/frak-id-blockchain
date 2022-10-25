@@ -2,7 +2,8 @@
 pragma solidity ^0.8.7;
 
 import "./IRewarder.sol";
-import "../badges/access/PaymentBadgesAccessor.sol";
+import "../badges/payment/ContentBadges.sol";
+import "../badges/payment/ListenerBadges.sol";
 import "../utils/SybelMath.sol";
 import "../utils/SybelRoles.sol";
 import "../tokens/SybelInternalTokens.sol";
@@ -16,7 +17,7 @@ import "./Referral.sol";
  * @dev Represent our rewarder contract
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, PaymentBadgesAccessor {
+contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, ListenerBadges, PushPullReward {
     // The cap of frak token we can mint for the reward
     uint96 public constant REWARD_MINT_CAP = 1_500_000_000 ether;
     uint96 private constant SINGLE_REWARD_CAP = 1_000_000 ether;
@@ -75,14 +76,11 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, P
     function initialize(
         address syblTokenAddr,
         address internalTokenAddr,
-        address listenerBadgesAddr,
-        address contentBadgesAddr,
         address contentPoolAddr,
         address referralAddr
     ) external initializer {
         // Only for v1 deployment
         __SybelAccessControlUpgradeable_init();
-        __PaymentBadgesAccessor_init(listenerBadgesAddr, contentBadgesAddr);
         __PushPullReward_init(syblTokenAddr);
 
         sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
@@ -95,6 +93,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, P
 
         // Grant the rewarder role to the contract deployer
         _grantRole(SybelRoles.REWARDER, msg.sender);
+        _grantRole(SybelRoles.BADGE_UPDATER, msg.sender);
     }
 
     /**
@@ -145,7 +144,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, P
             }
         }
         // Get the listener badge and recompute his reward
-        uint64 listenerBadge = listenerBadges.getBadge(listener);
+        uint64 listenerBadge = _getListenerBadge(listener);
         uint96 amountForListener = uint96((uint256(totalAmountToMintForUser) * listenerBadge) / 1 ether);
         // Register the amount for listener
         _addFounds(listener, amountForListener);
@@ -216,7 +215,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, P
         returns (uint96 poolAndOwnerRewardAmount, uint96 userReward)
     {
         // The user have a balance we can continue
-        uint256 contentBadge = contentBadges.getBadge(param.contentId);
+        uint256 contentBadge = _getContentBadge(param.contentId);
         // Mint each token for each fraction
         uint96 totalReward = 0;
         for (uint8 i = 0; i < param.balances.length; ++i) {
@@ -325,4 +324,14 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, PushPullReward, P
     function withdrawFounds(address user) external virtual override onlyRole(SybelRoles.ADMIN) whenNotPaused {
         _withdraw(user);
     }
+
+    function updateContentBadge(uint256 contentId, uint256 badge) external         onlyRole(SybelRoles.BADGE_UPDATER)
+        whenNotPaused override {
+            _updateContentBadge(contentId, badge);
+        }
+
+    function updateListenerBadge(address listener, uint64 badge) external onlyRole(SybelRoles.BADGE_UPDATER)
+        whenNotPaused override {
+            _updateListenerBadge(listener, badge);
+        }
 }
