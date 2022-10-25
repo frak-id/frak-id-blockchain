@@ -7,10 +7,18 @@ import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "./IPausable.sol";
 import "../utils/SybelRoles.sol";
 
+// Pause error
 error ContractPaused();
 error ContractNotPaused();
+
+// Access control error
 error NotAuthorized();
 error RenounceForCallerOnly();
+
+// Generic error
+error InvalidArray();
+error InvalidAddress();
+error NoReward();
 
 /// @custom:security-contact crypto-support@sybel.co
 abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgradeable, IPausable, UUPSUpgradeable {

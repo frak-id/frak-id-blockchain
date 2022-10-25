@@ -137,6 +137,18 @@ Base with lot of states :
 // Increasing optimizer to 1 billions runs
 |  Rewarder             ·  payUser              ·     25 5186  ·     610 317  ·         432752  ·            2  ·       0.06  │
 
+// Switching from revert(xx) to revert error on base contract
+|  Rewarder             ·  payUser              ·     255 071  ·     609 747  ·         432409  ·            2  ·       0.03  │
+
+// Switching to error on all the rewarder contract (gaining 0.4kb on contract size)
+|  Rewarder             ·  payUser              ·     255 233  ·     609 855  ·         432544  ·            2  ·       0.03  │
+
+// Adding missing mint logic
+|  Rewarder             ·  payUser              ·     255 547  ·     642 096  ·         448822  ·            2  ·       0.03  │ // With batching -> solution to adopt, with dynamic sized array
+|  Rewarder             ·  payUser              ·     255 568  ·     643 796  ·         449682  ·            2  ·       0.03  │ // Without batching
+
+
+
 */
 
 /**

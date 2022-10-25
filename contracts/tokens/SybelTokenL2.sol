@@ -7,6 +7,8 @@ import "../utils/MintingAccessControlUpgradeable.sol";
 import "../utils/ContextMixin.sol";
 import "../utils/NativeMetaTransaction.sol";
 
+error CapExceed();
+
 /**
  * Sybel token used on polygon L2
  */
@@ -42,8 +44,20 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
      * @dev Mint some SYBL
      */
     function mint(address to, uint256 amount) external onlyRole(SybelRoles.MINTER) {
-        require(totalSupply() + amount <= cap(), "ERC20Capped: cap exceeded");
+        if(totalSupply() + amount > cap()) revert CapExceed();
         _mint(to, amount);
+    }
+
+    /**
+     * @dev Mint some SYBL
+     */
+    function mintBatch(address[] calldata tos, uint256[] calldata amounts) external onlyRole(SybelRoles.MINTER) {
+        if(tos.length != amounts.length) revert InvalidArray();
+        for (uint256 i = 0; i < tos.length;) {
+            if(totalSupply() + amounts[i] > cap()) revert CapExceed();
+            _mint(tos[i], amounts[i]);
+            unchecked { ++i; }
+        }
     }
 
     /**

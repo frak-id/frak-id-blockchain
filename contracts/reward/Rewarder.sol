@@ -13,6 +13,10 @@ import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "../utils/PushPullReward.sol";
 
+// Error throwned by this contract
+error TooMuchCcu();
+error InvalidReward();
+
 /**
  * @dev Represent our rewarder contract
  */
@@ -34,13 +38,12 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     /**
      * @dev Access our token
      */
-    /// @custom:oz-renamed-from tokenSybelEcosystem
     SybelToken private sybelToken;
 
     /**
      * @dev Access our referral system
      */
-    ReferralPool private referral;
+    ReferralPool private referralPool;
 
     /**
      * @dev Access our content pool
@@ -86,7 +89,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
         sybelToken = SybelToken(syblTokenAddr);
         contentPool = ContentPool(contentPoolAddr);
-        referral = ReferralPool(referralAddr);
+        referralPool = ReferralPool(referralAddr);
 
         // Default TPU
         tokenGenerationFactor = 4.22489708885 ether;
@@ -104,16 +107,17 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         uint256[] calldata contentIds,
         uint16[] calldata listenCounts
     ) external override onlyRole(SybelRoles.REWARDER) whenNotPaused {
-        require(contentIds.length == listenCounts.length, "SYB: invalid array length");
-        require(contentIds.length <= MAX_BATCH_AMOUNT, "SYB: array too large");
+        if(contentIds.length != listenCounts.length || contentIds.length > MAX_BATCH_AMOUNT) revert InvalidArray();
         // Get our total amopunt to be minted
-        uint96 totalAmountToMintForOwnerAndPool = 0;
-        uint96 totalAmountToMintForUser = 0;
+        uint96 totalMintForUser = 0;
+        uint96 totalMintForOwners = 0;
+        uint96 totalMintForReferral = 0;
+        uint96 totalMintForContent = 0;
         // Iterate over each content
         for (uint256 i = 0; i < contentIds.length; ) {
             // TODO : Do we need to ensure that the podcast exist ???
             // Ensure we don't exceed the max ccu / content
-            require(listenCounts[i] < MAX_CCU_PER_CONTENT, "SYB: too much ccu");
+            if(listenCounts[i] > MAX_CCU_PER_CONTENT) revert TooMuchCcu();
             // Find the balance of the listener for this content
             (
                 ListenerBalanceOnContent[] memory balances,
@@ -138,10 +142,12 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
                     hasOnePayedToken: hasOnePayedToken,
                     balances: balances
                 });
-                (uint96 totalContentPool, uint96 totalForUser) = computeContentReward(computeRewardParam);
+                (uint96 userReward, uint96 ownerReward, uint96 referralPoolReward, uint96 contentPoolReward) = computeContentReward(computeRewardParam);
                 unchecked {
-                    totalAmountToMintForOwnerAndPool += totalContentPool;
-                    totalAmountToMintForUser += totalForUser;
+                    totalMintForUser += userReward;
+                    totalMintForOwners += ownerReward;
+                    totalMintForReferral += referralPoolReward;
+                    totalMintForContent += contentPoolReward;
                 }
             }
 
@@ -150,26 +156,35 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
                 ++i;
             }
         }
+        // If we don't find any reward for the user, exit directly
+        if(totalMintForUser == 0) revert InvalidReward();
+
         // Get the listener badge and recompute his reward
         uint64 listenerBadge = getListenerBadge(listener);
-        uint96 amountForListener = uint96((uint256(totalAmountToMintForUser) * listenerBadge) / 1 ether);
+
+        // Update the total mint for user with his listener badges
+        totalMintForUser = uint96((uint256(totalMintForUser) * listenerBadge) / 1 ether);
+
         // Register the amount for listener
-        _addFoundsUnchecked(listener, amountForListener);
-        // Compute the total amount to mint
-        uint96 totalAmountToMint = amountForListener + totalAmountToMintForOwnerAndPool;
-        // Ensure we don't go poast our mint cap
-        require(totalAmountToMint + totalFrakMinted <= REWARD_MINT_CAP, "SYB: exceed mint cap");
-        require(totalAmountToMint != 0, "SYB: no reward to be given");
+        _addFoundsUnchecked(listener, totalMintForUser);
+
+        // Compute the total amount to mint, and ensure we don't exeed our cap
+        uint96 totalMint = totalMintForUser + totalMintForOwners + totalMintForContent + totalMintForReferral;
+        if(totalMint + totalFrakMinted > REWARD_MINT_CAP) revert InvalidReward();
         // If good, update our total frak minted and emit the event
         unchecked {
-            totalFrakMinted += totalAmountToMint;
+            totalFrakMinted += totalMint;
         }
-        emit UserRewarded(listener, contentIds, listenCounts, amountForListener, totalAmountToMintForOwnerAndPool);
+        emit UserRewarded(listener, contentIds, listenCounts, totalMintForUser, totalMintForContent + totalMintForReferral);
 
-        // Once we have iterate over each item, if we got a positive mint amount, mint it
-        if (totalAmountToMint > 0) {
-            // TODO : We should only mint user and owner amount here, the amount for content pool and referral pool should be minted directly to the token addresses
-            sybelToken.mint(address(this), totalAmountToMint);
+        // If we got reward for the pool, mint them
+        if (totalMintForContent > 0 || totalMintForReferral > 0) {
+            sybelToken.mint(address(this), totalMintForUser + totalMintForOwners);
+            sybelToken.mint(address(contentPool), totalMintForContent);
+            sybelToken.mint(address(referralPool), totalMintForReferral);
+        } else {
+            // Otherwise, only mint for this contract
+            sybelToken.mint(address(this), totalMintForUser + totalMintForOwners);
         }
     }
 
@@ -222,7 +237,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
      */
     function computeContentReward(ComputeRewardParam memory param)
         private
-        returns (uint96 poolAndOwnerRewardAmount, uint96 userReward)
+        returns (uint96 userReward, uint96 ownerReward, uint96 referralPoolReward, uint96 contentPoolReward)
     {
         // The user have a balance we can continue
         uint256 contentBadge = getContentBadge(param.contentId);
@@ -243,46 +258,36 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         }
         // If no reward, directly exit
         if (totalReward == 0) {
-            return (0, 0);
+            return (0, 0, 0, 0);
         }
         // Ensure the reward isn't too large, and also ensure it fit inside a uint96
-        require(totalReward < SINGLE_REWARD_CAP, "SYB: reward invalid");
+        if(totalReward > SINGLE_REWARD_CAP) revert InvalidReward();
         // Then split the payment for owner and user (TODO : Also referral and content pools)
         unchecked {
             userReward = (totalReward * 35) / 100;
         }
 
         // Compute the initial owner reward
-        uint96 ownerReward = totalReward - userReward;
-        uint96 poolReward;
+        ownerReward = totalReward - userReward;
 
         // If the user has one payed token, send it to the different pools
         if (param.hasOnePayedToken) {
             // Send the reward to the content pool, and decrease the owner reward
-            uint96 contentPoolReward = totalReward / 10;
+            contentPoolReward = totalReward / 10;
             contentPool.addReward(param.contentId, contentPoolReward);
 
             // Compute the reward for the referral
-            uint96 baseReferralReward = (totalReward * 6) / 100; // Reward for the referral
-            uint96 usedReferralReward = referral.payAllReferer(param.contentId, param.listener, baseReferralReward);
-
-            // Increase the global pool reward
-            unchecked {
-                poolReward += contentPoolReward + usedReferralReward;
-            }
+            uint96 baseReferralReward = (totalReward * 3) / 50; // Reward for the referral
+            referralPoolReward = referralPool.payAllReferer(param.contentId, param.listener, baseReferralReward);
         }
 
         // Decrease the owner reward by the pool amount used
         unchecked {
-            ownerReward -= poolReward;
+            ownerReward -= contentPoolReward - referralPoolReward;
         }
-        // Update the global reward
-        unchecked { poolAndOwnerRewardAmount = ownerReward + poolReward; }
         // Save the amount for the owner
         address owner = sybelInternalTokens.ownerOf(param.contentId);
         _addFoundsUnchecked(owner, ownerReward);
-        // Return our result
-        return (poolAndOwnerRewardAmount, userReward);
     }
 
     /**
