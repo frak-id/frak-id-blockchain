@@ -58,7 +58,7 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
     {
         if (tos.length != amounts.length) revert InvalidArray();
 
-        for (uint256 i = 0; i < tos.length; ) {
+        for (uint256 i; i < tos.length; ) {
             // Ensure we don't exceed the cap
             if (totalSupply() + amounts[i] > _cap) revert CapExceed();
 

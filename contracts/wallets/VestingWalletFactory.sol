@@ -163,7 +163,7 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         if (group.supply + reward > group.rewardCap) revert RewardTooLarge();
 
         // Compute the initial drop if needed
-        uint256 initialDrop = 0;
+        uint256 initialDrop;
         if (group.initialDropPerthousand != 0) {
             unchecked {
                 initialDrop = (reward * group.initialDropPerthousand) / 1000;
@@ -195,9 +195,9 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         VestingGroup storage group = _getSafeVestingGroup(groupId);
 
         // Compute the total rewards to ensure it don't exceed the group cap
-        uint256 totalReward = 0;
+        uint256 totalReward;
         uint256[] memory initialDrops = new uint256[](rewards.length);
-        for (uint256 index = 0; index < rewards.length; ) {
+        for (uint256 index; index < rewards.length; ) {
             unchecked {
                 // Increase the total rewards
                 totalReward += rewards[index];
@@ -227,7 +227,7 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         );
 
         // Emit the event's
-        for (uint256 index = 0; index < beneficiaries.length; ) {
+        for (uint256 index; index < beneficiaries.length; ) {
             emit GroupUserAdded(groupId, beneficiaries[index], uint96(rewards[index]));
 
             // Increment the index
