@@ -22,7 +22,7 @@ const INEXISTANT_GROUP = 100;
 
 const GROUP_CAP = BigNumber.from(10).pow(10);
 
-describe.only("VestingWalletFactory", () => {
+describe("VestingWalletFactory", () => {
   let vestingWalletFactory: VestingWalletFactory;
   let multiVestingWallets: MultiVestingWallets;
   let sybelToken: SybelToken;

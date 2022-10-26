@@ -378,3 +378,35 @@ export async function extractVestingCreatedEvent(tx: ContractTransaction): Promi
   if (!creationEvent || !creationEvent.args) throw new Error("Unable to find creation event");
   return creationEvent;
 }
+
+/*
+
+Base : 
+|  MultiVestingWallets   ·  createVest                ·     189 853  ·     192 653  ·         189 975  ·           25  ·       0.02  │
+|  MultiVestingWallets   ·  createVestBatch           ·     177 485  ·     451 393  ·         314 439  ·            2  ·       0.03  │
+|  MultiVestingWallets                                ·           -  ·           -  ·         3183612  ·       10.6 %  ·       0.27  │
+
+
+Few revert to error migration (0.633 gained on contract size)
+
+Complete update from revert to error (gained 0.633 + 0.215, almost 1kb)
+
+|  MultiVestingWallets   ·  transfer                  ·          -  ·          -  ·            87588  ·            1  ·       0.02  │
+|  MultiVestingWallets   ·  createVest                ·     189 781  ·     192 581  ·         189903  ·           25  ·       0.05  │
+|  MultiVestingWallets   ·  createVestBatch           ·     177 412  ·     451 206  ·         314309  ·            2  ·       0.08  │
+|  MultiVestingWallets   ·  releaseAll                ·      70 273  ·      87 718  ·          78996  ·            2  ·       0.02  │
+|  MultiVestingWallets   ·  releaseAllFor             ·      90 544  ·     108 277  ·          99411  ·            2  ·       0.03  │
+|  MultiVestingWallets                                ·          -  ·          -  ·        2 996 887  ·         10 %  ·       0.87  │
+|  MultiVestingWallets                                ·          -  ·          -  ·        2 992 831  ·         10 %  ·       1.27  │
+
+Test with variable reorg : 
+
+|  MultiVestingWallets   ·  createVest                ·     189 766  ·     192 566  ·         189888  ·           25  ·       0.08  │
+|  MultiVestingWallets   ·  createVestBatch           ·     177 397  ·     451 185  ·         314291  ·            2  ·       0.13  │
+|  MultiVestingWallets   ·  release                   ·          -  ·          -  ·          82905  ·            1  ·       0.04  │
+|  MultiVestingWallets   ·  releaseAll                ·      70 281  ·      87 726  ·          79004  ·            2  ·       0.03  │
+|  MultiVestingWallets   ·  releaseAllFor             ·      90 552  ·     108 293  ·          99423  ·            2  ·       0.04  │
+
+
+
+*/
