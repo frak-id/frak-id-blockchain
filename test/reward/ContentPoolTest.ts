@@ -121,4 +121,28 @@ Testing assembly for shares values fetching (minor improvment, not to be applied
 |  ContentPool   ·  onFraktionsTransfered  ·      91 737  ·      166 842  ·      111557  ·          340  ·       0.01  │
 |  Rewarder      ·  withdrawFounds         ·     198 044  ·    1 092 564  ·      645022  ·           17  ·       0.06  │
 
+Base : 
+|  ContentPool   ·  onFraktionsTransfered  ·      91 527  ·      166 680  ·         111359  ·          340  ·       0.02  │
+|  Rewarder      ·  withdrawFounds         ·     195 103  ·    1 081 943  ·         638241  ·           17  ·       0.11  │
+
+// Test with a simple uint256, checked and reduced to uint96 for packing
+|  ContentPool   ·  onFraktionsTransfered  ·      91 477  ·      166 674  ·         111321  ·          340  ·       0.01  │
+|  Rewarder      ·  withdrawFounds         ·     194 738  ·    1 078 698  ·         636436  ·           17  ·       0.07  │
+
+// uint256 for user reward computation
+|  ContentPool   ·  onFraktionsTransfered  ·      91 468  ·     166 680  ·         111316  ·          340  ·       0.02  │
+|  Rewarder      ·  withdrawFounds         ·     194 671  ·    1 076 711  ·         635409  ·           17  ·       0.14  │
+
+// uint256 for share computation, and back to uint128 inside struct
+|  ContentPool   ·  onFraktionsTransfered  ·      91 465  ·      166 677  ·         111313  ·          340  ·       0.01  │
+|  Rewarder      ·  withdrawFounds         ·     194 671  ·    1 076 711  ·         635409  ·           17  ·       0.04  │
+
+// Remove useless uint96 to uint120 conversion
+|  ContentPool   ·  onFraktionsTransfered  ·      91 435  ·     166 647  ·         111283  ·          340  ·       0.02  │
+|  Rewarder      ·  withdrawFounds         ·     194671  ·    1076711  ·         635409  ·           17  ·       0.09  │
+
+// Warm up access to the content participants mapping during the transfer
+|  ContentPool   ·  onFraktionsTransfered  ·      91 432  ·      166 644  ·         111280  ·          340  ·       0.01  │
+|  Rewarder      ·  withdrawFounds         ·     194 671  ·    1 076 711  ·         635409  ·           17  ·       0.06  │
+
 */

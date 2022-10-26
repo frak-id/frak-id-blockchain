@@ -16,7 +16,7 @@ error CapExceed();
  */
 /// @custom:security-contact crypto-support@sybel.co
 contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
-    bytes32 public constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
+    bytes32 internal constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
 
     uint256 private constant _cap = 3_000_000_000 ether; // 3 billion SYBL
 

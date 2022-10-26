@@ -12,6 +12,7 @@ import "../tokens/SybelInternalTokens.sol";
 import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "../utils/PushPullReward.sol";
+import "../utils/WadMath.sol";
 import "hardhat/console.sol";
 
 // Error throwned by this contract
@@ -24,12 +25,22 @@ error InvalidReward();
 /// @custom:security-contact crypto-support@sybel.co
 contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, ListenerBadges, PushPullReward {
     // The cap of frak token we can mint for the reward
-    uint96 public constant REWARD_MINT_CAP = 1_500_000_000 ether;
+    uint96 private constant REWARD_MINT_CAP = 1_500_000_000 ether;
     uint96 private constant SINGLE_REWARD_CAP = 1_000_000 ether;
 
     // Maximum data we can treat in a batch manner
     uint8 private constant MAX_BATCH_AMOUNT = 20;
     uint16 private constant MAX_CCU_PER_CONTENT = 300; // The mac ccu per content, currently maxed at 5hr
+
+    /**
+     * @dev factor user to compute the number of token to generate (on 1e18 decimals)
+     */
+    uint256 public tokenGenerationFactor;
+
+    /**
+     * @dev The total frak minted for reward
+     */
+    uint96 public totalFrakMinted;
 
     /**
      * @dev Access our internal tokens
@@ -50,16 +61,6 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
      * @dev Access our content pool
      */
     ContentPool private contentPool;
-
-    /**
-     * @dev factor user to compute the number of token to generate (on 1e18 decimals)
-     */
-    uint256 public tokenGenerationFactor;
-
-    /**
-     * @dev The total frak minted for reward
-     */
-    uint96 public totalFrakMinted;
 
     /**
      * @dev Event emitted when a user is rewarded for his listen
@@ -244,7 +245,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         address listener;
         uint256 contentId;
         uint256 tpu;
-        uint16 listenCount;
+        uint256 listenCount;
         bool hasOnePayedToken;
         ListenerBalanceOnContent[] balances;
     }
@@ -275,7 +276,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
             return (0, 0, 0, 0);
         }
         // Compute our total reward (by applying the content badge, TPY, and number of listen performed)
-        // We got earning factor on 1e18, contentBadge on 1e18 and tokenGenerationFactor on 1e18, so dividing by 1e18 * 1e18 (So 1e36) to get a 1e18 amount to mint
+        // We got earning factor on 1e18, contentBadge on 1e18 and tpu on 1e18, so dividing by 1e18 * 1e18 (So 1e36) to get a 1e18 amount to mint
         uint96 totalReward = uint96(
             (earningFactor * contentBadge * param.listenCount * param.tpu) / (1 ether * 1 ether)
         );
@@ -301,7 +302,9 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
             unchecked {
                 baseReferralReward = (totalReward * 3) / 50;
             }
-            referralPoolReward = referralPool.payAllReferer(param.contentId, param.listener, baseReferralReward);
+            referralPoolReward = uint96(
+                referralPool.payAllReferer(param.contentId, param.listener, baseReferralReward)
+            );
 
             // Decrease the owner reward by the pool amount used
             unchecked {

@@ -43,6 +43,7 @@ specifiers:
   solhint: ^3.3.7
   solhint-plugin-prettier: ^0.0.5
   solidity-coverage: ^0.8.2
+  solmate: ^6.6.1
   ts-generator: ^0.1.1
   ts-node: ^10.9.1
   typechain: ^8.1.0
@@ -52,6 +53,7 @@ dependencies:
   '@openzeppelin/contracts': 4.7.3
   '@openzeppelin/contracts-upgradeable': 4.7.3
   cpy-cli: 4.2.0
+  solmate: 6.6.1
 
 devDependencies:
   '@ethersproject/abi': 5.7.0
@@ -6939,6 +6941,10 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /solmate/6.6.1:
+    resolution: {integrity: sha512-WHvRXQvGtgR6R9nmkDTz/d+oULMqf/D33rlzQyadTX2SbuTmaW7ToEjGjGtWUVCQwZsZ/JP3vbOEVv7fB50btg==}
+    dev: false
 
   /source-map-js/1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}

@@ -6,8 +6,6 @@ import "../../utils/SybelRoles.sol";
 import "../../tokens/SybelInternalTokens.sol";
 import "../../utils/PushPullReward.sol";
 import "../../utils/SybelAccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 /// @dev Exception throwned when the user already got a referer
 error AlreadyGotAReferer();
@@ -29,10 +27,11 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
      * @dev Event emitted when a user is rewarded for his listen
      */
     event UserReferred(uint256 indexed contentId, address indexed referer, address indexed referee);
+
     /**
      * @dev Event emitted when a user is rewarded by the referral program
      */
-    event ReferralReward(uint256 contentId, address user, uint96 amount);
+    event ReferralReward(uint256 contentId, address user, uint256 amount);
 
     /**
      * Mapping of content id to referee to referer
@@ -83,15 +82,15 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
     function payAllReferer(
         uint256 contentId,
         address user,
-        uint96 amount
-    ) public onlyRole(SybelRoles.REWARDER) whenNotPaused returns (uint96 totalAmount) {
+        uint256 amount
+    ) public onlyRole(SybelRoles.REWARDER) whenNotPaused returns (uint256 totalAmount) {
         if (user == address(0)) revert InvalidAddress();
         if (amount == 0) revert NoReward();
         // Get our content referer chain (to prevent multi kecack hash each time we access it)
         mapping(address => address) storage contentRefererChain = contentIdToRefereeToReferer[contentId];
         // Check if the user got a referer
         address userReferer = contentRefererChain[user];
-        uint8 depth;
+        uint256 depth;
         while (userReferer != address(0) && depth < MAX_DEPTH && amount > MINIMUM_REWARD) {
             // Store the pending reward for this user referrer, and emit the associated event's
             _addFoundsUnchecked(userReferer, amount);

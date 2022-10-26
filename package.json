@@ -71,7 +71,8 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.3",
     "@openzeppelin/contracts-upgradeable": "^4.7.3",
-    "cpy-cli": "^4.2.0"
+    "cpy-cli": "^4.2.0",
+    "solmate": "^6.6.1"
   },
   "private": true
 }

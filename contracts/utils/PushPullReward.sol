@@ -24,12 +24,12 @@ abstract contract PushPullReward is Initializable {
     /**
      * The pending reward for the given address
      */
-    mapping(address => uint96) internal _pendingRewards;
+    mapping(address => uint256) internal _pendingRewards;
 
     /**
      * @dev Event emitted when a user withdraw his pending reward
      */
-    event RewardWithdrawed(address indexed user, uint96 amount);
+    event RewardWithdrawed(address indexed user, uint256 amount);
 
     /**
      * Init of this contract
@@ -41,7 +41,7 @@ abstract contract PushPullReward is Initializable {
     /**
      * Add founds for the given user
      */
-    function _addFounds(address user, uint96 founds) internal {
+    function _addFounds(address user, uint256 founds) internal {
         if (user == address(0)) revert InvalidAddress();
         _pendingRewards[user] += founds;
     }
@@ -49,7 +49,7 @@ abstract contract PushPullReward is Initializable {
     /**
      * Add founds for the given user
      */
-    function _addFoundsUnchecked(address user, uint96 founds) internal {
+    function _addFoundsUnchecked(address user, uint256 founds) internal {
         unchecked {
             _pendingRewards[user] += founds;
         }
@@ -65,7 +65,7 @@ abstract contract PushPullReward is Initializable {
     function _withdraw(address user) internal {
         if (user == address(0)) revert InvalidAddress();
         // Ensure the user have a pending reward
-        uint96 pendingReward = _pendingRewards[user];
+        uint256 pendingReward = _pendingRewards[user];
         if (pendingReward == 0) revert NoReward();
         // Ensure we have enough founds on this contract to pay the user
         uint256 contractBalance = token.balanceOf(address(this));
@@ -81,7 +81,7 @@ abstract contract PushPullReward is Initializable {
     /**
      * Get the available founds for the given user
      */
-    function getAvailableFounds(address user) external view returns (uint96) {
+    function getAvailableFounds(address user) external view returns (uint256) {
         if (user == address(0)) revert InvalidAddress();
         return _pendingRewards[user];
     }

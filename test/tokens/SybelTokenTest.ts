@@ -10,6 +10,19 @@ import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelT
 import { testPauses } from "../utils/test-pauses";
 import { testRoles } from "../utils/test-roles";
 
+describe.skip("Test deploy cost", () => {
+  it("Deploy and init contract", async () => {
+    const signers = await ethers.getSigners();
+    // Deploy our sybel token
+    await deployContract("SybelToken", [signers[0].address]);
+  });
+
+  // Cost with memory :
+  // |  SybelToken            ·          -  ·          -  ·        3 327 001  ·       11.1 %  ·       0.27  │
+  // Cost without memory (increase size by 0.026) :
+  // |  SybelToken            ·          -  ·          -  ·        3 332 841  ·       11.1 %  ·       0.20  │
+});
+
 describe("SybelToken", () => {
   let sybelToken: SybelToken;
   let owner: SignerWithAddress;

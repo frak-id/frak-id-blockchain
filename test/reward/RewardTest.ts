@@ -174,32 +174,23 @@ Base with lot of states :
 // Base : 
 |  Rewarder             ·  payUser              ·     122977  ·     902974  ·         528534  ·            6  ·       0.08  │
 |  SybelInternalTokens  ·  mint                 ·      84851  ·     222573  ·         102802  ·          500  ·       0.02  │
----
-|  ContentPool                                  ·          -  ·          -  ·        2715220  ·        9.1 %  ·       0.42  │
-|  ReferralPool                                 ·          -  ·          -  ·        1935307  ·        6.5 %  ·       0.30  │
-|  Rewarder                                     ·          -  ·          -  ·        2932275  ·        9.8 %  ·       0.46  │
 
 Switch from require to revert error on the push pull reward contract (gain 0.135 size per contract)
 |  Rewarder             ·  payUser              ·     122 977  ·     902 974  ·         528 534  ·            6  ·       0.02  │
 |  SybelInternalTokens  ·  mint                 ·      84 851  ·     222 573  ·         102 802  ·          500  ·       0.00  │
----
-|  ContentPool                                  ·          -  ·          -  ·        2685430  ·          9 %  ·       0.11  │
-|  ReferralPool                                 ·          -  ·          -  ·        1905531  ·        6.4 %  ·       0.08  │
-|  Rewarder                                     ·          -  ·          -  ·        2902888  ·        9.7 %  ·       0.12  │
 
-// Switch from revert to require on the content pool contract
-|  Rewarder             ·  payUser              ·     122 977  ·     902 734  ·         528 494  ·            6  ·       0.06  │
-|  SybelInternalTokens  ·  mint                 ·      84 795  ·     222 517  ·         102 746  ·          500  ·       0.01  │
-|  ContentPool                                  ·          -  ·          -  ·        2607947  ·        8.7 %  ·       0.29  │
+// Base : 
+|  Rewarder             ·  payUser              ·     122 977  ·     902 134  ·         528394  ·            6  ·       0.04  │
+|  SybelInternalTokens  ·  mint                 ·      84 795  ·     222 517  ·         102746  ·          500  ·       0.01  │
 
-Switch to revert on content and referral pool
-|  Rewarder             ·  payUser              ·     122 977  ·     902 134  ·         528 394  ·            6  ·       0.05  │
-|  SybelInternalTokens  ·  mint                 ·      84 795  ·     222 517  ·         102 746  ·          500  ·       0.01  │
----
-|  ContentPool                                  ·          -  ·          -  ·        2607947  ·        8.7 %  ·       0.25  │
-|  ReferralPool                                 ·          -  ·          -  ·        1864701  ·        6.2 %  ·       0.18  │
-|  Rewarder                                     ·          -  ·          -  ·        2902888  ·        9.7 %  ·       0.27  │
-|  SybelInternalTokens                          ·          -  ·          -  ·        3754992  ·       12.5 %  ·       0.35  │
+// Just moving it some vars : 
+|  Rewarder             ·  payUser              ·     120 900  ·     881 294  ·         514116  ·            6  ·       0.02  │
+|  SybelInternalTokens  ·  mint                 ·      84 795  ·     222 517  ·         102746  ·          500  ·       0.00  │
+
+// Trying to switch listen var to uint256
+|  Rewarder             ·  payUser              ·     120 894  ·     881 174  ·         514059  ·            6  ·       0.03  │
+
+
 
 */
 
