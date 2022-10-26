@@ -2,19 +2,24 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/interfaces/IERC2981Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "./FraktionTransferCallback.sol";
 import "../utils/SybelMath.sol";
 import "../utils/MintingAccessControlUpgradeable.sol";
 
+// Error
+error InsuficiantSupply();
+
 /// @custom:security-contact crypto-support@sybel.co
 /// @custom:oz-upgrades-unsafe-allow external-library-linking
-contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable, IERC2981Upgradeable {
+contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     using SybelMath for uint256;
 
     // The current content token id
     uint256 private _currentContentTokenId;
+
+    // The current callback
+    FraktionTransferCallback private transferCallback;
 
     // Id of content to owner of this content
     mapping(uint256 => address) public owners;
@@ -26,14 +31,14 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     mapping(uint256 => bool) private _isSupplyAware;
 
     /**
-     * @dev Event emitted when a new fraction of content is minted
+     * @dev Event emitted when the supply of a fraktion is updated
      */
-    event SuplyUpdated(uint256 id, uint256 supply);
+    event SuplyUpdated(uint256 indexed id, uint256 supply);
 
     /**
      * @dev Event emitted when the owner of a content changed
      */
-    event ContentOwnerUpdated(uint256 id, address owner);
+    event ContentOwnerUpdated(uint256 indexed id, address indexed owner);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -41,10 +46,17 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     }
 
     function initialize() external initializer {
-        __ERC1155_init("https://storage.googleapis.com/sybel-io.appspot.com/json/{id}.json");
+        __ERC1155_init("https://s3.eu-west-1.amazonaws.com/metadata.sybel.io/json/{id}.json");
         __MintingAccessControlUpgradeable_init();
         // Set the initial content id
         _currentContentTokenId = 1;
+    }
+
+    /**
+     * Register a new transaction callback
+     */
+    function registerNewCallback(address callbackAddr) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
+        transferCallback = FraktionTransferCallback(callbackAddr);
     }
 
     /**
@@ -70,6 +82,23 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     }
 
     /**
+     * @dev Batch balance of for single address
+     */
+    function balanceOfIdsBatch(address account, uint256[] memory ids) public view virtual returns (uint256[] memory) {
+        if (account == address(0)) revert InvalidAddress();
+        uint256[] memory batchBalances = new uint256[](ids.length);
+
+        for (uint256 i; i < ids.length; ) {
+            batchBalances[i] = balanceOf(account, ids[i]);
+            unchecked {
+                ++i;
+            }
+        }
+
+        return batchBalances;
+    }
+
+    /**
      * @dev Set the supply for each token ids
      */
     function setSupplyBatch(uint256[] calldata ids, uint256[] calldata supplies)
@@ -77,45 +106,24 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
         onlyRole(SybelRoles.MINTER)
         whenNotPaused
     {
-        require(ids.length == supplies.length, "SYB: Id and supplies of different length");
+        if (ids.length == 0 || ids.length != supplies.length) revert InvalidArray();
         // Iterate over each ids and increment their supplies
-        for (uint256 i = 0; i < ids.length; ++i) {
+        for (uint256 i; i < ids.length; ) {
             uint256 id = ids[i];
 
             _availableSupplies[id] = supplies[i];
             _isSupplyAware[id] = true;
             // Emit the supply update event
             emit SuplyUpdated(id, supplies[i]);
-        }
-    }
-
-    /**
-     * @dev Perform some check before the transfer token
-     */
-    function _beforeTokenTransfer(
-        address,
-        address from,
-        address,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory
-    ) internal view override whenNotPaused {
-        for (uint256 i = 0; i < ids.length; ++i) {
-            if (from == address(0)) {
-                // Only allow minter to perform mint operation
-                _checkRole(SybelRoles.MINTER);
-                if (_isSupplyAware[ids[i]]) {
-                    require(
-                        amounts[i] <= _availableSupplies[ids[i]],
-                        "SYB: Not enough available supply for mint for id"
-                    );
-                }
+            // Increase our counter
+            unchecked {
+                ++i;
             }
         }
     }
 
     /**
-     * @dev Handle the transfer token (so update the podcast investor, change the owner of some podcast etc)
+     * @dev Handle the transfer token (so update the content investor, change the owner of some content etc)
      */
     function _afterTokenTransfer(
         address,
@@ -124,28 +132,44 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory
-    ) internal override {
+    ) internal override whenNotPaused {
         // In the case we are sending the token to a given wallet
-        for (uint256 i = 0; i < ids.length; ++i) {
+        for (uint256 i; i < ids.length; ) {
             uint256 id = ids[i];
 
             if (_isSupplyAware[id]) {
+                // Update each supplies
                 if (from == address(0)) {
+                    // Ensure we got enough supply
+                    if (amounts[i] > _availableSupplies[id]) revert InsuficiantSupply();
                     // If it's a minted token
-                    _availableSupplies[id] -= amounts[i];
+                    unchecked {
+                        _availableSupplies[id] -= amounts[i];
+                    }
                 } else if (to == address(0)) {
-                    // If it's a burned token
-                    _availableSupplies[id] += amounts[i];
+                    // If it's a burned token, increase th available supply
+                    unchecked {
+                        _availableSupplies[id] += amounts[i];
+                    }
                 }
             }
 
-            // Then check if the owner of this podcast have changed
+            // Then check if the owner of this content have changed
             if (id.isContentNft()) {
-                // If this token is a podcast NFT, change the owner of this podcast
-                uint256 podcastId = id.extractContentId();
-                owners[podcastId] = to;
-                emit ContentOwnerUpdated(podcastId, to);
+                // If this token is a content NFT, change the owner of this content
+                uint256 contentId = id.extractContentId();
+                owners[contentId] = to;
+                emit ContentOwnerUpdated(contentId, to);
             }
+            // Increase our counter
+            unchecked {
+                ++i;
+            }
+        }
+
+        // Call our callback
+        if (address(transferCallback) != address(0)) {
+            transferCallback.onFraktionsTransfered(from, to, ids, amounts);
         }
     }
 
@@ -172,26 +196,10 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     }
 
     /**
-     * @dev Returns how much royalty is owed and to whom, based on a sale price that may be denominated in any unit of
-     * exchange. The royalty amount is denominated and should be paid in that same unit of exchange.
+     * @dev Find the owner of the given content is
      */
-    function royaltyInfo(uint256 tokenId, uint256 salePrice) external view override returns (address, uint256) {
-        if (salePrice > 0 && tokenId.isContentRelatedToken()) {
-            // Find the address of the owner of this podcast
-            address ownerAddress = owners[tokenId.extractContentId()];
-            uint256 royaltyForOwner = (salePrice * 4) / 100;
-            return (ownerAddress, royaltyForOwner);
-        } else {
-            // Otherwise, return address 0 with no royalty amount
-            return (address(0), 0);
-        }
-    }
-
-    /**
-     * @dev Find the owner of the given podcast is
-     */
-    function ownerOf(uint256 podcastId) external view returns (address) {
-        return owners[podcastId];
+    function ownerOf(uint256 contentId) external view returns (address) {
+        return owners[contentId];
     }
 
     /**
@@ -199,18 +207,5 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
      */
     function supplyOf(uint256 tokenId) external view returns (uint256) {
         return _availableSupplies[tokenId];
-    }
-
-    /**
-     * @dev Required extension to support access control and ERC1155
-     */
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC1155Upgradeable, IERC165Upgradeable)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
     }
 }

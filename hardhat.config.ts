@@ -12,12 +12,29 @@ dotenv.config();
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 export default {
-  solidity: "0.8.17",
-  settings: {
-    optimizer: {
-      enabled: true,
-      runs: 1000,
-    },
+  solidity: {
+    compilers: [
+      {
+        version: "0.8.17",
+        settings: {
+          viaIR: true, // Gain a lot on contract size, performance impact ?
+          optimizer: {
+            enabled: true,
+            runs: 1000000,
+            details: {
+              peephole: true,
+              inliner: true,
+              jumpdestRemover: true,
+              deduplicate: true,
+              orderLiterals: true,
+              constantOptimizer: true,
+              cse: true,
+              yul: true,
+            },
+          },
+        },
+      },
+    ],
   },
   paths: {
     sources: "./contracts",
@@ -47,6 +64,9 @@ export default {
   etherscan: {
     apiKey: process.env.POLYGON_SCAN_API_KEY,
   },
+  contractSizer: {
+    runOnCompile: true,
+  },
   include: ["./scripts", "./test", "./typechain-types"],
   files: ["./hardhat.config.ts"],
   typechain: {
@@ -56,7 +76,7 @@ export default {
     currency: "EUR",
     token: "MATIC",
     gasPriceApi: "https://api.polygonscan.com/api?module=proxy&action=eth_gasPrice",
-    enabled: false,
+    enabled: true,
     excludeContracts: [],
     src: "./contracts",
     coinmarketcap: process.env.COIN_MARKET_CAP_API_KEY,

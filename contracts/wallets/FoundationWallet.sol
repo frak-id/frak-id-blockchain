@@ -2,7 +2,6 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts-upgradeable/finance/PaymentSplitterUpgradeable.sol";
-import "../badges/access/PaymentBadgesAccessor.sol";
 import "../utils/SybelMath.sol";
 import "../utils/SybelRoles.sol";
 import "../tokens/SybelInternalTokens.sol";

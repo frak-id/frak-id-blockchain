@@ -12,3 +12,11 @@ export async function deployContract<Type extends Contract>(name: string, args?:
   await contract.deployed();
   return contract;
 }
+
+/**
+ * Find a contract for the type at the given address
+ */
+export async function findContract<Type extends Contract>(name: string, address: string): Promise<Type> {
+  const contractFactory = await ethers.getContractFactory(name);
+  return contractFactory.attach(address) as Type;
+}

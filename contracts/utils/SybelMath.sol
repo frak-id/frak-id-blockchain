@@ -8,17 +8,19 @@ library SybelMath {
 
     // The mask for the different content specfic types
     uint8 internal constant TOKEN_TYPE_NFT_MASK = 1;
-    uint8 internal constant TOKEN_TYPE_STANDARD_MASK = 2;
-    uint8 internal constant TOKEN_TYPE_CLASSIC_MASK = 3;
-    uint8 internal constant TOKEN_TYPE_RARE_MASK = 4;
-    uint8 internal constant TOKEN_TYPE_EPIC_MASK = 5;
-    uint8 internal constant TOKEN_TYPE_LEGENDARY_MASK = 6;
+    uint8 internal constant TOKEN_TYPE_FREE_MASK = 2;
+    uint8 internal constant TOKEN_TYPE_COMMON_MASK = 3;
+    uint8 internal constant TOKEN_TYPE_PREMIUM_MASK = 4;
+    uint8 internal constant TOKEN_TYPE_GOLD_MASK = 5;
+    uint8 internal constant TOKEN_TYPE_DIAMOND_MASK = 6;
 
     /**
      * @dev Build the id for a S FNT
      */
-    function buildSnftId(uint256 id, uint8 tokenType) internal pure returns (uint256) {
-        return (id << ID_OFFSET) | tokenType;
+    function buildSnftId(uint256 id, uint8 tokenType) internal pure returns (uint256 tokenId) {
+        unchecked {
+            tokenId = (id << ID_OFFSET) | tokenType;
+        }
     }
 
     /**
@@ -26,8 +28,11 @@ library SybelMath {
      */
     function buildSnftIds(uint256 id, uint8[] memory types) internal pure returns (uint256[] memory) {
         uint256[] memory tokenIds = new uint256[](types.length);
-        for (uint8 i = 0; i < types.length; ++i) {
+        for (uint8 i; i < types.length; ) {
             tokenIds[i] = buildSnftId(id, types[i]);
+            unchecked {
+                ++i;
+            }
         }
         return tokenIds;
     }
@@ -42,36 +47,36 @@ library SybelMath {
     /**
      * @dev Build the id for a classic NFT id
      */
-    function buildStandardNftId(uint256 id) internal pure returns (uint256) {
-        return (id << ID_OFFSET) | TOKEN_TYPE_STANDARD_MASK;
+    function buildFreeNftId(uint256 id) internal pure returns (uint256) {
+        return (id << ID_OFFSET) | TOKEN_TYPE_FREE_MASK;
     }
 
     /**
      * @dev Build the id for a classic NFT id
      */
-    function buildClassicNftId(uint256 id) internal pure returns (uint256) {
-        return (id << ID_OFFSET) | TOKEN_TYPE_CLASSIC_MASK;
+    function buildCommonNftId(uint256 id) internal pure returns (uint256) {
+        return (id << ID_OFFSET) | TOKEN_TYPE_COMMON_MASK;
     }
 
     /**
      * @dev Build the id for a rare NFT id
      */
-    function buildRareNftId(uint256 id) internal pure returns (uint256) {
-        return (id << ID_OFFSET) | TOKEN_TYPE_RARE_MASK;
+    function buildPremiumNftId(uint256 id) internal pure returns (uint256) {
+        return (id << ID_OFFSET) | TOKEN_TYPE_PREMIUM_MASK;
     }
 
     /**
      * @dev Build the id for a epic NFT id
      */
-    function buildEpicNftId(uint256 id) internal pure returns (uint256) {
-        return (id << ID_OFFSET) | TOKEN_TYPE_EPIC_MASK;
+    function buildGoldNftId(uint256 id) internal pure returns (uint256) {
+        return (id << ID_OFFSET) | TOKEN_TYPE_GOLD_MASK;
     }
 
     /**
      * @dev Build the id for a epic NFT id
      */
-    function buildLegendaryNftId(uint256 id) internal pure returns (uint256) {
-        return (id << ID_OFFSET) | TOKEN_TYPE_LEGENDARY_MASK;
+    function buildDiamondNftId(uint256 id) internal pure returns (uint256) {
+        return (id << ID_OFFSET) | TOKEN_TYPE_DIAMOND_MASK;
     }
 
     /**
@@ -79,11 +84,11 @@ library SybelMath {
      */
     function payableTokenTypes() internal pure returns (uint8[] memory) {
         uint8[] memory types = new uint8[](5);
-        types[0] = SybelMath.TOKEN_TYPE_STANDARD_MASK;
-        types[1] = SybelMath.TOKEN_TYPE_CLASSIC_MASK;
-        types[2] = SybelMath.TOKEN_TYPE_RARE_MASK;
-        types[3] = SybelMath.TOKEN_TYPE_EPIC_MASK;
-        types[4] = SybelMath.TOKEN_TYPE_LEGENDARY_MASK;
+        types[0] = SybelMath.TOKEN_TYPE_FREE_MASK;
+        types[1] = SybelMath.TOKEN_TYPE_COMMON_MASK;
+        types[2] = SybelMath.TOKEN_TYPE_PREMIUM_MASK;
+        types[3] = SybelMath.TOKEN_TYPE_GOLD_MASK;
+        types[4] = SybelMath.TOKEN_TYPE_DIAMOND_MASK;
         return types;
     }
 
@@ -106,13 +111,29 @@ library SybelMath {
     }
 
     /**
+     * @dev Return the token type
+     * @param id uint256 ID of the token to extract the mask from
+     * @return uint256 The token type
+     */
+    function extractContentIdAndTokenType(uint256 id) internal pure returns (uint256, uint8) {
+        return (id >> ID_OFFSET, uint8(id & TYPE_MASK));
+    }
+
+    /**
      * @dev Check if the given token exist
      * @param id uint256 ID of the token to check
      * @return bool true if the token is related to a content, false otherwise
      */
     function isContentRelatedToken(uint256 id) internal pure returns (bool) {
         uint8 tokenType = extractTokenType(id);
-        return tokenType > TOKEN_TYPE_NFT_MASK && tokenType <= TOKEN_TYPE_LEGENDARY_MASK;
+        return tokenType > TOKEN_TYPE_NFT_MASK && tokenType <= TOKEN_TYPE_DIAMOND_MASK;
+    }
+
+    /**
+     * @dev Check if the token is payed or not
+     */
+    function isPayedTokenToken(uint8 tokenType) internal pure returns (bool) {
+        return tokenType > TOKEN_TYPE_COMMON_MASK && tokenType <= TOKEN_TYPE_DIAMOND_MASK;
     }
 
     /**

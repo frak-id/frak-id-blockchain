@@ -2,8 +2,7 @@
 pragma solidity ^0.8.7;
 
 import "./IMinter.sol";
-import "../badges/access/PaymentBadgesAccessor.sol";
-import "../badges/cost/IFractionCostBadges.sol";
+import "./badges/FractionCostBadges.sol";
 import "../utils/SybelMath.sol";
 import "../tokens/SybelInternalTokens.sol";
 import "../tokens/SybelTokenL2.sol";
@@ -16,7 +15,7 @@ import "../utils/MintingAccessControlUpgradeable.sol";
  *   - Add allowance to the user when he mint a fraction (web2)
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccessor {
+contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges {
     /**
      * @dev Access our internal tokens
      */
@@ -27,11 +26,6 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
      */
     /// @custom:oz-renamed-from tokenSybelEcosystem
     SybelToken private sybelToken;
-
-    /**
-     * @dev Access our fraction cost badges
-     */
-    IFractionCostBadges public fractionCostBadges;
 
     /**
      * @dev Address of the foundation wallet
@@ -56,41 +50,18 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
     function initialize(
         address sybelTokenAddr,
         address internalTokenAddr,
-        address listenerBadgesAddr,
-        address contentBadgesAddr,
-        address fractionCostBadgesAddr,
         address foundationAddr
     ) external initializer {
-        /*
         // Only for v1 deployment
         __MintingAccessControlUpgradeable_init();
-        __PaymentBadgesAccessor_init(listenerBadgesAddr, contentBadgesAddr);
 
         sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
         sybelToken = SybelToken(sybelTokenAddr);
-        fractionCostBadges = IFractionCostBadges(fractionCostBadgesAddr);
 
-        foundationWallet = foundationAddr;*/
-    }
-
-    function migrateToV2(address sybelTokenAddr, address foundationAddr) external reinitializer(2) {
-        /*
-        // Only for v2 upgrade
-        sybelToken = SybelToken(sybelTokenAddr);
         foundationWallet = foundationAddr;
-        */
-    }
 
-    function migrateToV3(address fractionCostBadgesAddr) external reinitializer(3) {
-        /*
-        // Only for v3 upgrade
-        fractionCostBadges = IFractionCostBadges(fractionCostBadgesAddr);
-        */
-    }
-
-    function migrateToV4(address contentBadgesAddr) external reinitializer(4) {
-        // Only for v4 upgrade
-        contentBadges = IContentBadges(contentBadgesAddr);
+        // Grant the badge updater role to the sender
+        _grantRole(SybelRoles.BADGE_UPDATER, msg.sender);
     }
 
     /**
@@ -103,20 +74,20 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
         uint256 epicSupply,
         uint256 legendarySupply
     ) external override onlyRole(SybelRoles.MINTER) whenNotPaused returns (uint256 contentId) {
-        require(contentOwnerAddress != address(0), "SYB: Invalid owner address");
-        require(commonSupply > 0, "SYB: Invalid common supply");
-        require(commonSupply < 500, "SYB: Invalid common supply");
-        require(rareSupply < 200, "SYB: Invalid rare supply");
-        require(epicSupply < 50, "SYB: Invalid epic supply");
-        require(legendarySupply < 5, "SYB: Invalid legendary supply");
+        require(contentOwnerAddress != address(0), "SYB: invalid address");
+        require(commonSupply > 0, "SYB: invalid common supply");
+        require(commonSupply < 500, "SYB: invalid common supply");
+        require(rareSupply < 200, "SYB: invalid rare supply");
+        require(epicSupply < 50, "SYB: invalid epic supply");
+        require(legendarySupply < 5, "SYB: invalid legendary supply");
         // Try to mint the new content
         contentId = sybelInternalTokens.mintNewContent(contentOwnerAddress);
         // Then set the supply for each token types
         uint256[] memory ids = new uint256[](4);
-        ids[0] = SybelMath.buildClassicNftId(contentId);
-        ids[1] = SybelMath.buildRareNftId(contentId);
-        ids[2] = SybelMath.buildEpicNftId(contentId);
-        ids[3] = SybelMath.buildLegendaryNftId(contentId);
+        ids[0] = SybelMath.buildCommonNftId(contentId);
+        ids[1] = SybelMath.buildPremiumNftId(contentId);
+        ids[2] = SybelMath.buildGoldNftId(contentId);
+        ids[3] = SybelMath.buildDiamondNftId(contentId);
         uint256[] memory supplies = new uint256[](4);
         supplies[0] = commonSupply; // Common
         supplies[1] = rareSupply; // Rare
@@ -138,11 +109,11 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
         uint256 amount
     ) external override onlyRole(SybelRoles.MINTER) whenNotPaused {
         // Get the cost of the fraction
-        uint256 fractionCost = fractionCostBadges.getBadge(id);
+        uint256 fractionCost = getCostBadge(id);
         uint256 totalCost = fractionCost * amount;
         // Check if the user have enough the balance
         uint256 userBalance = sybelToken.balanceOf(to);
-        require(userBalance >= totalCost, "SYB: Not enough balance to pay for this fraction");
+        require(userBalance >= totalCost, "SYB: not enough balance");
         // Mint his Fraction of NFT
         sybelInternalTokens.mint(to, id, amount);
         uint256 amountForFundation = (totalCost * 2) / 10;
@@ -162,10 +133,19 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, PaymentBadgesAccess
      */
     function increaseSupply(uint256 id, uint256 newSupply) external onlyRole(SybelRoles.MINTER) whenNotPaused {
         uint256 currentSupply = sybelInternalTokens.supplyOf(id);
-        require(currentSupply == 0, "SYB: Fraction remaining");
+        require(currentSupply == 0, "SYB: fraction remain");
         // Compute the supply difference
         uint256 newRealSupply = currentSupply + newSupply;
         // Mint his Fraction of NFT
         sybelInternalTokens.setSupplyBatch(SybelMath.asSingletonArray(id), SybelMath.asSingletonArray(newRealSupply));
+    }
+
+    function updateCostBadge(uint256 fractionId, uint96 badge)
+        external
+        override
+        onlyRole(SybelRoles.BADGE_UPDATER)
+        whenNotPaused
+    {
+        _updateCostBadge(fractionId, badge);
     }
 }

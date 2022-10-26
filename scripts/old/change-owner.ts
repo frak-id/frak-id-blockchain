@@ -3,15 +3,15 @@ import { BaseContract, BytesLike, Contract, ContractTransaction, Overrides, util
 import { ethers } from "hardhat";
 
 import * as addr from "../../shared/addresses.json";
-import { PromiseOrValue } from "../types/common";
-import { FractionCostBadges } from "../types/contracts/badges/cost/FractionCostBadges";
-import { ListenerBadges } from "../types/contracts/badges/payment/ListenerBadges";
+import { PromiseOrValue } from "../../types/common";
+import { FractionCostBadges } from "../../types/contracts/badges/cost/FractionCostBadges";
+import { ListenerBadges } from "../../types/contracts/badges/payment/ListenerBadges";
+import { Minter } from "../../types/contracts/minter/Minter";
+import { Rewarder } from "../../types/contracts/reward/Rewarder";
+import { SybelInternalTokens } from "../../types/contracts/tokens/SybelInternalTokens";
+import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
+import { FoundationWallet } from "../../types/contracts/wallets/FoundationWallet";
 import { PodcastBadges } from "../types/contracts/badges/payment/PodcastBadges";
-import { Minter } from "../types/contracts/minter/Minter";
-import { Rewarder } from "../types/contracts/reward/Rewarder";
-import { SybelInternalTokens } from "../types/contracts/tokens/SybelInternalTokens";
-import { SybelToken } from "../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
-import { FoundationWallet } from "../types/contracts/wallets/FoundationWallet";
 
 let adminRole = "0x00";
 const minterRole = utils.keccak256(utils.toUtf8Bytes("MINTER_ROLE"));
