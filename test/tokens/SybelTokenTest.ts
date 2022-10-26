@@ -10,7 +10,7 @@ import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelT
 import { testPauses } from "../utils/test-pauses";
 import { testRoles } from "../utils/test-roles";
 
-describe("SybelToken", () => {
+describe.only("SybelToken", () => {
   let sybelToken: SybelToken;
   let owner: SignerWithAddress;
   let addr1: SignerWithAddress;
@@ -168,15 +168,33 @@ describe("SybelToken", () => {
       () => addr1,
       [
         async () => {
-          await sybelToken.transfer(addr1.address, 50);
-        },
-        async () => {
-          await sybelToken.connect(addr1).transfer(owner.address, 50);
-        },
-        async () => {
           await sybelToken.mint(addr1.address, 50);
         },
       ],
     );
   });
 });
+
+/*
+
+With 'revert error' instead of require
+|  SybelToken        ·  burn          ·          -  ·          -  ·          40985  ·            1  ·       0.00  │
+·····················|················|·············|·············|·················|···············|··············
+|  SybelTokenL1      ·  mint          ·      43 619  ·      77 891  ·          68179  ·           37  ·       0.01  │
+|  SybelTokenL1      ·  mint          ·      43 646  ·      77 918  ·          68206  ·           37  ·       0.00  │
+|  SybelToken                         ·          -  ·          -  ·        3 374 264  ·       11.2 %  ·       0.26  │
+  SybelToken                         ·          -  ·          -  ·        3 370 856  ·       11.2 %  ·       0.24  │
+
+With 'require' gain 0.018 on contract size (only on sybl token contract)
+Deploy diff : 3 374 264 => 3 370 856
+Mint diff :  43 619  ·      77 891 => 43 646  ·      77 918 (cost a bit more)
+
+With require also in access control (increase all contract size by 0.2)
+Deploy diff : 3 370 856 => 3 421 803
+Mint diff :  43 646  ·      77 918 => 43 676  ·      77 948
+
+Going back to error for sybl token and access control (hain 0.25 on every contract)
+Deploy diff : 3 421 803 => 3 374 276
+Mint diff :  43 676  ·      77 948 => 43 619  ·      77 891
+
+*/

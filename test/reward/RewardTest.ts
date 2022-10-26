@@ -29,7 +29,7 @@ import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
 import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
 import { listenerCount } from "process";
 
-describe.only("Rewarder", () => {
+describe("Rewarder", () => {
   let sybelToken: SybelToken;
   let internalToken: SybelInternalTokens;
   let referral: ReferralPool;
@@ -110,12 +110,12 @@ describe.only("Rewarder", () => {
       // TODO : Add some check on each pool, on the amount minted etc
       await rewarder.payUser(addr1.address, contentIds, ccus);
     });
-    /*it("Reward with payed account", async () => {
+    it("Reward with payed account", async () => {
       // Mint token for each user
       await mintTokenForEachUser();
       // Rewarder with only one payed fraktion
       await rewarder.payUser(addr1.address, contentIds, ccus);
-    });*/
+    });
   });
 
   /**
