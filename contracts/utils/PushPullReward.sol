@@ -42,7 +42,7 @@ abstract contract PushPullReward is Initializable {
      * Add founds for the given user
      */
     function _addFounds(address user, uint96 founds) internal {
-        if(user == address(0)) revert InvalidAddress();
+        if (user == address(0)) revert InvalidAddress();
         _pendingRewards[user] += founds;
     }
 
@@ -63,13 +63,13 @@ abstract contract PushPullReward is Initializable {
      * Core logic of the withdraw method
      */
     function _withdraw(address user) internal {
-        if(user == address(0)) revert InvalidAddress();
+        if (user == address(0)) revert InvalidAddress();
         // Ensure the user have a pending reward
         uint96 pendingReward = _pendingRewards[user];
-        if(pendingReward == 0) revert NoReward();
+        if (pendingReward == 0) revert NoReward();
         // Ensure we have enough founds on this contract to pay the user
         uint256 contractBalance = token.balanceOf(address(this));
-        if(pendingReward > contractBalance) revert NotEnoughFound();
+        if (pendingReward > contractBalance) revert NotEnoughFound();
         // Reset the user pending balance
         _pendingRewards[user] = 0;
         // Emit the withdraw event
@@ -82,7 +82,7 @@ abstract contract PushPullReward is Initializable {
      * Get the available founds for the given user
      */
     function getAvailableFounds(address user) external view returns (uint96) {
-        if(user == address(0)) revert InvalidAddress();
+        if (user == address(0)) revert InvalidAddress();
         return _pendingRewards[user];
     }
 }

@@ -40,7 +40,7 @@ contract NativeMetaTransaction is EIP712Base {
             functionSignature: functionSignature
         });
 
-        if(!verify(userAddress, metaTx, sigR, sigS, sigV)) revert InvalidSignature();
+        if (!verify(userAddress, metaTx, sigR, sigS, sigV)) revert InvalidSignature();
 
         // increase nonce for user (to avoid re-use)
         nonces[userAddress] = nonces[userAddress] + 1;
@@ -49,8 +49,8 @@ contract NativeMetaTransaction is EIP712Base {
 
         // Append userAddress and relayer address at the end to extract it from calling context
         (bool success, bytes memory returnData) = address(this).call(abi.encodePacked(functionSignature, userAddress));
-        if(!success) revert CallError();
-        
+        if (!success) revert CallError();
+
         return returnData;
     }
 
@@ -72,7 +72,7 @@ contract NativeMetaTransaction is EIP712Base {
         bytes32 sigS,
         uint8 sigV
     ) internal view returns (bool) {
-        if(signer == address(0)) revert InvalidSigner();
+        if (signer == address(0)) revert InvalidSigner();
         return signer == ecrecover(toTypedMessageHash(hashMetaTransaction(metaTx)), sigV, sigR, sigS);
     }
 }

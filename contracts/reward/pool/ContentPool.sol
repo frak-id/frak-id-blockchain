@@ -97,9 +97,9 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
      * Add a reward inside a content pool
      */
     function addReward(uint256 contentId, uint96 rewardAmount) external onlyRole(SybelRoles.REWARDER) whenNotPaused {
-        if(rewardAmount == 0) revert NoReward();
+        if (rewardAmount == 0) revert NoReward();
         RewardState storage currentState = lastContentState(contentId);
-        if(!currentState.open) revert PoolStateClosed();
+        if (!currentState.open) revert PoolStateClosed();
         unchecked {
             currentState.currentPoolReward += rewardAmount;
         }
@@ -302,7 +302,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         Participant memory _participant = participant;
 
         // Ensure the state target is not already claimed, and that we don't have too many state to fetched
-        if(toStateIndex < _participant.lastStateIndex) revert PoolStateAlreadyClaimed();
+        if (toStateIndex < _participant.lastStateIndex) revert PoolStateAlreadyClaimed();
         // Check the participant got some shares
         if (_participant.shares == 0) {
             // If not, just increase the last iterated index and return
@@ -423,7 +423,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
     }
 
     function withdrawFounds(address user) external virtual override onlyRole(SybelRoles.ADMIN) whenNotPaused {
-        if(user == address(0)) revert InvalidAddress();
+        if (user == address(0)) revert InvalidAddress();
         _computeAndSaveAllForUser(user);
         _withdraw(user);
     }

@@ -57,20 +57,20 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
         address user,
         address referer
     ) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
-        if(user == address(0) || referer == address(0) || user == referer) revert InvalidAddress();
+        if (user == address(0) || referer == address(0) || user == referer) revert InvalidAddress();
         // Get our content referer chain (to prevent multi kecack hash each time we access it)
         mapping(address => address) storage contentRefererChain = contentIdToRefereeToReferer[contentId];
 
         // Ensure the user doesn't have a referer yet
         address actualReferer = contentRefererChain[user];
-        if(actualReferer != address(0)) revert AlreadyGotAReferer();
+        if (actualReferer != address(0)) revert AlreadyGotAReferer();
 
         // Then, explore our referer chain to find a potential loop, or just the last address
         address refererExploration = contentRefererChain[referer];
         while (refererExploration != address(0) && refererExploration != user) {
             refererExploration = contentRefererChain[refererExploration];
         }
-        if(refererExploration == user) revert AlreadyInRefererChain();
+        if (refererExploration == user) revert AlreadyInRefererChain();
 
         // If that's got, set it and emit the event
         contentRefererChain[user] = referer;
@@ -85,8 +85,8 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
         address user,
         uint96 amount
     ) public onlyRole(SybelRoles.REWARDER) whenNotPaused returns (uint96 totalAmount) {
-        if(user == address(0)) revert InvalidAddress();
-        if(amount == 0) revert NoReward();
+        if (user == address(0)) revert InvalidAddress();
+        if (amount == 0) revert NoReward();
         // Get our content referer chain (to prevent multi kecack hash each time we access it)
         mapping(address => address) storage contentRefererChain = contentIdToRefereeToReferer[contentId];
         // Check if the user got a referer
