@@ -13,7 +13,7 @@ import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
 // Build our initial reward
 const baseReward = BigNumber.from(10).pow(16); // So 0.001 frk
 
-describe.only("Referral Pool", () => {
+describe("Referral Pool", () => {
   let sybelToken: SybelToken;
   let referral: ReferralPool;
 

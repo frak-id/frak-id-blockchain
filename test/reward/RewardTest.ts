@@ -12,7 +12,7 @@ import { buildFractionId, BUYABLE_TOKEN_TYPES, TOKEN_TYPE_GOLD } from "../../scr
 import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
 import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
 
-describe("Rewarder", () => {
+describe.only("Rewarder", () => {
   let sybelToken: SybelToken;
   let internalToken: SybelInternalTokens;
   let referral: ReferralPool;
@@ -190,6 +190,11 @@ Switch from require to revert error on the push pull reward contract (gain 0.135
 // Trying to switch listen var to uint256
 |  Rewarder             ·  payUser              ·     120 894  ·     881 174  ·         514059  ·            6  ·       0.03  │
 
+// After content pool and referral opti check
+|  Rewarder             ·  payUser              ·     120 817  ·     879 299  ·         513550  ·            6  ·       0.04  │
+
+// Switch listener badge to uint256
+|  Rewarder             ·  payUser              ·     120 783  ·     879 265  ·         513516  ·            6  ·       0.06  │
 
 
 */

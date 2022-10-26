@@ -170,7 +170,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         if (totalMintForUser == 0) return;
 
         // Get the listener badge and recompute his reward
-        uint64 listenerBadge = getListenerBadge(listener);
+        uint256 listenerBadge = getListenerBadge(listener);
 
         // Update the total mint for user with his listener badges
         totalMintForUser = uint96((uint256(totalMintForUser) * listenerBadge) / 1 ether);
@@ -365,7 +365,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         _updateContentBadge(contentId, badge);
     }
 
-    function updateListenerBadge(address listener, uint64 badge)
+    function updateListenerBadge(address listener, uint256 badge)
         external
         override
         onlyRole(SybelRoles.BADGE_UPDATER)

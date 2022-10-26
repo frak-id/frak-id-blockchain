@@ -20,6 +20,7 @@ error InvalidArray();
 error InvalidAddress();
 error NoReward();
 error RewardTooLarge();
+error BadgeTooLarge();
 
 /// @custom:security-contact crypto-support@sybel.co
 abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgradeable, IPausable, UUPSUpgradeable {
