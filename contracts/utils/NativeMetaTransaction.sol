@@ -3,6 +3,13 @@ pragma solidity ^0.8.7;
 
 import "./EIP712Base.sol";
 
+/// @dev error throwned when the signer is invalid
+error InvalidSigner();
+/// @dev error throwned when the signer signature isn't valid
+error InvalidSignature();
+/// @dev error throwned when the call is in error
+error CallError();
+
 contract NativeMetaTransaction is EIP712Base {
     bytes32 private constant META_TRANSACTION_TYPEHASH =
         keccak256(bytes("MetaTransaction(uint256 nonce,address from,bytes functionSignature)"));
@@ -33,7 +40,7 @@ contract NativeMetaTransaction is EIP712Base {
             functionSignature: functionSignature
         });
 
-        require(verify(userAddress, metaTx, sigR, sigS, sigV), "Signer and signature do not match");
+        if(!verify(userAddress, metaTx, sigR, sigS, sigV)) revert InvalidSignature();
 
         // increase nonce for user (to avoid re-use)
         nonces[userAddress] = nonces[userAddress] + 1;
@@ -42,8 +49,8 @@ contract NativeMetaTransaction is EIP712Base {
 
         // Append userAddress and relayer address at the end to extract it from calling context
         (bool success, bytes memory returnData) = address(this).call(abi.encodePacked(functionSignature, userAddress));
-        require(success, "Function call not successful");
-
+        if(!success) revert CallError();
+        
         return returnData;
     }
 
@@ -65,7 +72,7 @@ contract NativeMetaTransaction is EIP712Base {
         bytes32 sigS,
         uint8 sigV
     ) internal view returns (bool) {
-        require(signer != address(0), "NativeMetaTransaction: INVALID_SIGNER");
+        if(signer == address(0)) revert InvalidSigner();
         return signer == ecrecover(toTypedMessageHash(hashMetaTransaction(metaTx)), sigV, sigR, sigS);
     }
 }

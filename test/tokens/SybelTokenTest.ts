@@ -189,12 +189,17 @@ With 'require' gain 0.018 on contract size (only on sybl token contract)
 Deploy diff : 3 374 264 => 3 370 856
 Mint diff :  43 619  ·      77 891 => 43 646  ·      77 918 (cost a bit more)
 
-With require also in access control (increase all contract size by 0.2)
+With require also in access control (increase all contract size by approx 0.2)
 Deploy diff : 3 370 856 => 3 421 803
 Mint diff :  43 646  ·      77 918 => 43 676  ·      77 948
 
-Going back to error for sybl token and access control (hain 0.25 on every contract)
+Going back to error for sybl token and access control (gain approx 0.2 on every contract)
 Deploy diff : 3 421 803 => 3 374 276
 Mint diff :  43 676  ·      77 948 => 43 619  ·      77 891
+
+Switching from revert to error in meta transaction (gain 0.2 on the two sybel contract)
+Deploy diff : 3 374 276 => 3 327 001
+Mint diff :  43 619  ·      77 891 0 diff (no impact)
+
 
 */
