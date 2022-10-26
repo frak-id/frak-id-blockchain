@@ -1,33 +1,16 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
-import { adminRole, minterRole, rewarderRole, vestingCreatorRole, vestingManagerRole } from "../../scripts/utils/roles";
-import { ContentBadges } from "../../types/contracts/badges/payment/ContentBadges";
-import { ListenerBadges } from "../../types/contracts/badges/payment/ListenerBadges";
+import { minterRole, rewarderRole } from "../../scripts/utils/roles";
 import { ContentOwnerUpdatedEvent, SybelInternalTokens } from "../../types/contracts/tokens/SybelInternalTokens";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
-import { MultiVestingWallets } from "../../types/contracts/wallets/MultiVestingWallets";
-import { VestingWalletFactory } from "../../types/contracts/wallets/VestingWalletFactory";
-import { ContentPoolMultiContent } from "../../types/contracts/reward/ContentPoolMultiContent";
-import { Referral } from "../../types/contracts/reward/Referral";
-import { testPauses } from "../utils/test-pauses";
-import { testRoles } from "../utils/test-roles";
-import { address0, getTimestampInAFewMoment } from "../utils/test-utils";
 import { Rewarder } from "../../types/contracts/reward/Rewarder";
-import {
-  buildFractionId,
-  BUYABLE_TOKEN_TYPES,
-  TOKEN_TYPE_COMMON,
-  TOKEN_TYPE_DIAMOND,
-  TOKEN_TYPE_GOLD,
-} from "../../scripts/utils/mathUtils";
+import { buildFractionId, BUYABLE_TOKEN_TYPES, TOKEN_TYPE_GOLD } from "../../scripts/utils/mathUtils";
 import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
 import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
-import { listenerCount } from "process";
 
 describe("Rewarder", () => {
   let sybelToken: SybelToken;
@@ -187,6 +170,36 @@ Base with lot of states :
 // Merging check role and not paused into the same modifier (no impact, so useless)
 |  Rewarder             ·  payUser              ·     125 136  ·     814 051  ·         455805  ·            5  ·       0.05  │
 
+
+// Base : 
+|  Rewarder             ·  payUser              ·     122977  ·     902974  ·         528534  ·            6  ·       0.08  │
+|  SybelInternalTokens  ·  mint                 ·      84851  ·     222573  ·         102802  ·          500  ·       0.02  │
+---
+|  ContentPool                                  ·          -  ·          -  ·        2715220  ·        9.1 %  ·       0.42  │
+|  ReferralPool                                 ·          -  ·          -  ·        1935307  ·        6.5 %  ·       0.30  │
+|  Rewarder                                     ·          -  ·          -  ·        2932275  ·        9.8 %  ·       0.46  │
+
+Switch from require to revert error on the push pull reward contract (gain 0.135 size per contract)
+|  Rewarder             ·  payUser              ·     122 977  ·     902 974  ·         528 534  ·            6  ·       0.02  │
+|  SybelInternalTokens  ·  mint                 ·      84 851  ·     222 573  ·         102 802  ·          500  ·       0.00  │
+---
+|  ContentPool                                  ·          -  ·          -  ·        2685430  ·          9 %  ·       0.11  │
+|  ReferralPool                                 ·          -  ·          -  ·        1905531  ·        6.4 %  ·       0.08  │
+|  Rewarder                                     ·          -  ·          -  ·        2902888  ·        9.7 %  ·       0.12  │
+
+// Switch from revert to require on the content pool contract
+|  Rewarder             ·  payUser              ·     122 977  ·     902 734  ·         528 494  ·            6  ·       0.06  │
+|  SybelInternalTokens  ·  mint                 ·      84 795  ·     222 517  ·         102 746  ·          500  ·       0.01  │
+|  ContentPool                                  ·          -  ·          -  ·        2607947  ·        8.7 %  ·       0.29  │
+
+Switch to revert on content and referral pool
+|  Rewarder             ·  payUser              ·     122 977  ·     902 134  ·         528 394  ·            6  ·       0.05  │
+|  SybelInternalTokens  ·  mint                 ·      84 795  ·     222 517  ·         102 746  ·          500  ·       0.01  │
+---
+|  ContentPool                                  ·          -  ·          -  ·        2607947  ·        8.7 %  ·       0.25  │
+|  ReferralPool                                 ·          -  ·          -  ·        1864701  ·        6.2 %  ·       0.18  │
+|  Rewarder                                     ·          -  ·          -  ·        2902888  ·        9.7 %  ·       0.27  │
+|  SybelInternalTokens                          ·          -  ·          -  ·        3754992  ·       12.5 %  ·       0.35  │
 
 */
 

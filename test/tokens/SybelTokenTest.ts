@@ -10,7 +10,7 @@ import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelT
 import { testPauses } from "../utils/test-pauses";
 import { testRoles } from "../utils/test-roles";
 
-describe.only("SybelToken", () => {
+describe("SybelToken", () => {
   let sybelToken: SybelToken;
   let owner: SignerWithAddress;
   let addr1: SignerWithAddress;

@@ -10,6 +10,11 @@ import "../../utils/PushPullReward.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
+/// @dev The pool state is closed
+error PoolStateClosed();
+/// @dev When the user already claimed this pool state
+error PoolStateAlreadyClaimed();
+
 /**
  * @dev Represent our content pool contract
  * @dev TODO : Optimize uint sizes (since max supply of sybl is 3 billion e18,
@@ -41,11 +46,6 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         uint256 lastStateIndex; // What was the last state index he claimed in the pool ?
         // Last withdraw timestamp ? For lock on that ? Like a claim max every 6 hours
     }
-
-    /**
-     * @dev The cap to prevent excessive gaz fees when computing user reward
-     */
-    uint256 private constant MAX_CLAIMABLE_REWARD_STATE_ROUNDS = 500;
 
     /**
      * @dev All the different reward states per content id
@@ -97,9 +97,9 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
      * Add a reward inside a content pool
      */
     function addReward(uint256 contentId, uint96 rewardAmount) external onlyRole(SybelRoles.REWARDER) whenNotPaused {
-        require(rewardAmount > 0, "SYB: invalid reward");
+        if(rewardAmount == 0) revert NoReward();
         RewardState storage currentState = lastContentState(contentId);
-        require(currentState.open, "SYB: reward state closed");
+        if(!currentState.open) revert PoolStateClosed();
         unchecked {
             currentState.currentPoolReward += rewardAmount;
         }
@@ -302,11 +302,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         Participant memory _participant = participant;
 
         // Ensure the state target is not already claimed, and that we don't have too many state to fetched
-        require(toStateIndex >= _participant.lastStateIndex, "SYB: already claimed");
-        require(
-            toStateIndex - _participant.lastStateIndex < MAX_CLAIMABLE_REWARD_STATE_ROUNDS,
-            "SYB: too much state for computation"
-        );
+        if(toStateIndex < _participant.lastStateIndex) revert PoolStateAlreadyClaimed();
         // Check the participant got some shares
         if (_participant.shares == 0) {
             // If not, just increase the last iterated index and return
@@ -427,7 +423,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
     }
 
     function withdrawFounds(address user) external virtual override onlyRole(SybelRoles.ADMIN) whenNotPaused {
-        require(user != address(0), "SYBL: invalid address");
+        if(user == address(0)) revert InvalidAddress();
         _computeAndSaveAllForUser(user);
         _withdraw(user);
     }

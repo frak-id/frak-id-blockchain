@@ -9,6 +9,11 @@ import "../../utils/SybelAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
+/// @dev Exception throwned when the user already got a referer
+error AlreadyGotAReferer();
+/// @dev Exception throwned when the user is already in the referer chain
+error AlreadyInRefererChain();
+
 /**
  * @dev Represent our referral contract
  */
@@ -52,20 +57,20 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
         address user,
         address referer
     ) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
-        require(user != address(0) && referer != address(0) && user != referer, "SYBL: invalid address");
+        if(user == address(0) || referer == address(0) || user == referer) revert InvalidAddress();
         // Get our content referer chain (to prevent multi kecack hash each time we access it)
         mapping(address => address) storage contentRefererChain = contentIdToRefereeToReferer[contentId];
 
         // Ensure the user doesn't have a referer yet
         address actualReferer = contentRefererChain[user];
-        require(actualReferer == address(0), "SYB: already got a referrer");
+        if(actualReferer != address(0)) revert AlreadyGotAReferer();
 
         // Then, explore our referer chain to find a potential loop, or just the last address
         address refererExploration = contentRefererChain[referer];
         while (refererExploration != address(0) && refererExploration != user) {
             refererExploration = contentRefererChain[refererExploration];
         }
-        require(refererExploration != user, "SYB: already in referee chain");
+        if(refererExploration == user) revert AlreadyInRefererChain();
 
         // If that's got, set it and emit the event
         contentRefererChain[user] = referer;
@@ -80,8 +85,8 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
         address user,
         uint96 amount
     ) public onlyRole(SybelRoles.REWARDER) whenNotPaused returns (uint96 totalAmount) {
-        require(user != address(0), "SYBL: invalid address");
-        require(amount > 0, "SYB: invalid amount");
+        if(user == address(0)) revert InvalidAddress();
+        if(amount == 0) revert NoReward();
         // Get our content referer chain (to prevent multi kecack hash each time we access it)
         mapping(address => address) storage contentRefererChain = contentIdToRefereeToReferer[contentId];
         // Check if the user got a referer
