@@ -27,6 +27,7 @@ import {
 } from "../../scripts/utils/mathUtils";
 import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
 import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
+import { listenerCount } from "process";
 
 describe.only("Rewarder", () => {
   let sybelToken: SybelToken;
@@ -85,24 +86,36 @@ describe.only("Rewarder", () => {
       ccus.push(50);
 
       // Set the supply for each tokens
-      for (let typeIndex = 0; typeIndex < BUYABLE_TOKEN_TYPES.length; typeIndex++) {
-        const tokenType = BUYABLE_TOKEN_TYPES[typeIndex];
+      for (const tokenType of BUYABLE_TOKEN_TYPES) {
         await internalToken.setSupplyBatch([buildFractionId(mintedTokenId, tokenType)], [100000]);
       }
     }
   });
 
   describe("Base reward", () => {
-    it("Reward with free account", async () => {
+    it("Single free reward account", async () => {
       // TODO : Add some check on each pool, on the amount minted etc
       await rewarder.payUser(addr1.address, [contentIds[0]], [100]);
+      // Going throught it a second time to prevent fraktion mint
+      await rewarder.payUser(addr1.address, [contentIds[0]], [100]);
     });
-    it("Reward with payed account", async () => {
+    it("Tone of free reward", async () => {
+      // TODO : Add some check on each pool, on the amount minted etc
+      await rewarder.payUser(addr1.address, contentIds, ccus);
+
+      // Perform the run a second time so we don't go past the free fraktion mint
+      await rewarder.payUser(addr1.address, contentIds, ccus);
+    });
+    it("Multiple free reward", async () => {
+      // TODO : Add some check on each pool, on the amount minted etc
+      await rewarder.payUser(addr1.address, contentIds, ccus);
+    });
+    /*it("Reward with payed account", async () => {
       // Mint token for each user
       await mintTokenForEachUser();
       // Rewarder with only one payed fraktion
       await rewarder.payUser(addr1.address, contentIds, ccus);
-    });
+    });*/
   });
 
   /**
@@ -147,6 +160,32 @@ Base with lot of states :
 |  Rewarder             ·  payUser              ·     255 547  ·     642 096  ·         448822  ·            2  ·       0.03  │ // With batching -> solution to adopt, with dynamic sized array
 |  Rewarder             ·  payUser              ·     255 568  ·     643 796  ·         449682  ·            2  ·       0.03  │ // Without batching
 
+// Switching to assembly for token type fetching
+|  Rewarder             ·  payUser              ·     255 639  ·     643 836  ·         449738  ·            2  ·       0.05  │
+
+// Back to simple if cascade
+|  Rewarder             ·  payUser              ·     255 568  ·     643 796  ·         449682  ·            2  ·       0.05  │
+
+// Optimising access of storage in loop
+|  Rewarder             ·  payUser              ·     255 487  ·     632 106  ·         443797  ·            2  ·       0.05  │
+
+// Otpimising int init, cachibng tpu for the complete loop
+|  Rewarder             ·  payUser              ·     255 538  ·     621 526  ·         438532  ·            2  ·       0.66  │
+
+// Same config as before, but with multi free token mint (and post mint call, here the lower cost)
+|  Rewarder             ·  payUser              ·     124 903  ·     904 101  ·         529902  ·            6  ·       0.40  │
+
+// Without fraktion mint (only 7k gain, potential gain of batched content id fetching is minimal)
+|  Rewarder             ·  payUser              ·      69 519  ·     898 095  ·         312880  ·            6  ·       0.10  │
+
+// Only free account with fraktion mint
+ |  Rewarder             ·  payUser              ·     12 5111  ·     813 596  ·         455585  ·            5  ·       0.09  │
+
+ // Some erc1155 error opti (gaining 1.2kb on size but loosing 600 gas)
+  |  Rewarder             ·  payUser              ·     125 136  ·     814 051  ·         455805  ·            5  ·       0.07  │
+
+// Merging check role and not paused into the same modifier (no impact, so useless)
+|  Rewarder             ·  payUser              ·     125 136  ·     814 051  ·         455805  ·            5  ·       0.05  │
 
 
 */

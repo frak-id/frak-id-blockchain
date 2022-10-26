@@ -63,7 +63,7 @@ abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgrade
      * - The contract must not be paused.
      */
     modifier whenNotPaused() {
-        if(paused()) revert ContractPaused();
+        if (paused()) revert ContractPaused();
         _;
     }
 
@@ -75,7 +75,7 @@ abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgrade
      * - The contract must be paused.
      */
     modifier whenPaused() {
-        if(!paused()) revert ContractNotPaused();
+        if (!paused()) revert ContractNotPaused();
         _;
     }
 
@@ -120,7 +120,6 @@ abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgrade
      */
     function _checkRole(bytes32 role, address account) internal view virtual {
         if (!hasRole(role, account)) revert NotAuthorized();
-        
     }
 
     /**
@@ -151,7 +150,7 @@ abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgrade
      * @notice User renounce to the role
      */
     function renounceRole(bytes32 role, address account) public virtual {
-        if(account != _msgSender()) revert RenounceForCallerOnly();
+        if (account != _msgSender()) revert RenounceForCallerOnly();
 
         _revokeRole(role, account);
     }

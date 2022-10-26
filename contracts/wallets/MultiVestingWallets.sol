@@ -160,7 +160,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
 
         uint256 freeReserve = availableReserve();
 
-        for (uint256 index = 0; index < beneficiaries.length; ) {
+        for (uint256 index; index < beneficiaries.length; ) {
             uint256 amount = amounts[index];
             _createVesting(beneficiaries[index], amount, initialDrops[index], duration, startDate, revocable);
             require(freeReserve >= amount, "SYB: Doesn't have enough founds");
@@ -278,7 +278,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     function _releaseAll(address beneficiary) internal whenNotPaused returns (uint256 released) {
         EnumerableSet.UintSet storage indexes = owned[beneficiary];
 
-        for (uint256 index = 0; index < indexes.length(); ) {
+        for (uint256 index; index < indexes.length(); ) {
             uint24 vestingId = uint24(indexes.at(index));
             Vesting storage vesting = _getVesting(vestingId);
 

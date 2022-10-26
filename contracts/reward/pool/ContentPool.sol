@@ -117,7 +117,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
     ) external override {
         if (from != address(0) && to != address(0)) {
             // Handle share transfer between participant, with no update on the total pool rewards
-            for (uint256 index = 0; index < ids.length; ) {
+            for (uint256 index; index < ids.length; ) {
                 updateParticipants(from, to, ids[index], amount[index]);
                 unchecked {
                     ++index;
@@ -125,7 +125,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
             }
         } else {
             // Otherwise (in case of mined or burned token), also update the pool
-            for (uint256 index = 0; index < ids.length; ) {
+            for (uint256 index; index < ids.length; ) {
                 updateParticipantAndPool(from, to, ids[index], amount[index]);
                 unchecked {
                     ++index;
@@ -382,18 +382,22 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
     function getSharesForTokenType(uint8 tokenType) private pure returns (uint16 shares) {
         assembly {
             switch tokenType
-            case 3 { // common
+            case 3 {
+                // common
                 shares := 10
-            } 
-            case 4 { // premium
+            }
+            case 4 {
+                // premium
                 shares := 50
-            } 
-            case 5 { // gold
+            }
+            case 5 {
+                // gold
                 shares := 100
-            } 
-            case 6 { // diamond
+            }
+            case 6 {
+                // diamond
                 shares := 200
-            } 
+            }
             default {
                 shares := 0
             }

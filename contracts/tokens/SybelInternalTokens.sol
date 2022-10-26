@@ -7,6 +7,9 @@ import "./FraktionTransferCallback.sol";
 import "../utils/SybelMath.sol";
 import "../utils/MintingAccessControlUpgradeable.sol";
 
+// Error
+error InsuficiantSupply();
+
 /// @custom:security-contact crypto-support@sybel.co
 /// @custom:oz-upgrades-unsafe-allow external-library-linking
 contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
@@ -43,7 +46,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     }
 
     function initialize() external initializer {
-        __ERC1155_init("https://storage.googleapis.com/sybel-io.appspot.com/json/{id}.json");
+        __ERC1155_init("https://s3.eu-west-1.amazonaws.com/metadata.sybel.io/json/{id}.json");
         __MintingAccessControlUpgradeable_init();
         // Set the initial content id
         _currentContentTokenId = 1;
@@ -82,9 +85,10 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
      * @dev Batch balance of for single address
      */
     function balanceOfIdsBatch(address account, uint256[] memory ids) public view virtual returns (uint256[] memory) {
+        if (account == address(0)) revert InvalidAddress();
         uint256[] memory batchBalances = new uint256[](ids.length);
 
-        for (uint256 i = 0; i < ids.length; ) {
+        for (uint256 i; i < ids.length; ) {
             batchBalances[i] = balanceOf(account, ids[i]);
             unchecked {
                 ++i;
@@ -102,9 +106,9 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
         onlyRole(SybelRoles.MINTER)
         whenNotPaused
     {
-        require(ids.length == supplies.length, "SYB: invalid array length");
+        if (ids.length == 0 || ids.length != supplies.length) revert InvalidArray();
         // Iterate over each ids and increment their supplies
-        for (uint256 i = 0; i < ids.length; ) {
+        for (uint256 i; i < ids.length; ) {
             uint256 id = ids[i];
 
             _availableSupplies[id] = supplies[i];
@@ -130,21 +134,23 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
         bytes memory
     ) internal override whenNotPaused {
         // In the case we are sending the token to a given wallet
-        for (uint256 i = 0; i < ids.length; ) {
+        for (uint256 i; i < ids.length; ) {
             uint256 id = ids[i];
 
             if (_isSupplyAware[id]) {
+                // Update each supplies
                 if (from == address(0)) {
-                    // Only allow minter to perform mint operation
-                    _checkRole(SybelRoles.MINTER);
-                    if (_isSupplyAware[ids[i]]) {
-                        require(amounts[i] <= _availableSupplies[ids[i]], "SYB: Not enough supply");
-                    }
+                    // Ensure we got enough supply
+                    if (amounts[i] > _availableSupplies[id]) revert InsuficiantSupply();
                     // If it's a minted token
-                    _availableSupplies[id] -= amounts[i];
+                    unchecked {
+                        _availableSupplies[id] -= amounts[i];
+                    }
                 } else if (to == address(0)) {
-                    // If it's a burned token
-                    _availableSupplies[id] += amounts[i];
+                    // If it's a burned token, increase th available supply
+                    unchecked {
+                        _availableSupplies[id] += amounts[i];
+                    }
                 }
             }
 

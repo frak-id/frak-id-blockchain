@@ -17,8 +17,10 @@ library SybelMath {
     /**
      * @dev Build the id for a S FNT
      */
-    function buildSnftId(uint256 id, uint8 tokenType) internal pure returns (uint256) {
-        return (id << ID_OFFSET) | tokenType;
+    function buildSnftId(uint256 id, uint8 tokenType) internal pure returns (uint256 tokenId) {
+        unchecked {
+            tokenId = (id << ID_OFFSET) | tokenType;
+        }
     }
 
     /**
@@ -26,8 +28,11 @@ library SybelMath {
      */
     function buildSnftIds(uint256 id, uint8[] memory types) internal pure returns (uint256[] memory) {
         uint256[] memory tokenIds = new uint256[](types.length);
-        for (uint8 i = 0; i < types.length; ++i) {
+        for (uint8 i; i < types.length; ) {
             tokenIds[i] = buildSnftId(id, types[i]);
+            unchecked {
+                ++i;
+            }
         }
         return tokenIds;
     }

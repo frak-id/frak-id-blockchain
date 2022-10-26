@@ -86,7 +86,7 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
         mapping(address => address) storage contentRefererChain = contentIdToRefereeToReferer[contentId];
         // Check if the user got a referer
         address userReferer = contentRefererChain[user];
-        uint8 depth = 0;
+        uint8 depth;
         while (userReferer != address(0) && depth < MAX_DEPTH && amount > MINIMUM_REWARD) {
             // Store the pending reward for this user referrer, and emit the associated event's
             _addFoundsUnchecked(userReferer, amount);
