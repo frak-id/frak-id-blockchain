@@ -196,6 +196,32 @@ Switch from require to revert error on the push pull reward contract (gain 0.135
 // Switch listener badge to uint256
 |  Rewarder             ·  payUser              ·     120 783  ·     879 265  ·         513516  ·            6  ·       0.06  │
 
+// Big refacto from scratch of the payUser function
+|  Rewarder             ·  payUser              ·     116 127  ·     758 419  ·         432194  ·            6  ·       0.03  │
+
+// Testing gain without memory struct to store var (gaining 2k gas)
+|  Rewarder             ·  payUser              ·     115 883  ·     756 416  ·         431153  ·            6  ·       0.02  │
+
+// Testing gain with unsafe wad mul div down on single op
+|  Rewarder             ·  payUser              ·     115 805  ·     756 338  ·         431075  ·            6  ·       0.03  │
+
+// Adding WaD in the earning factor computation
+|  Rewarder             ·  payUser              ·     115 805  ·     756 338  ·         431075  ·            6  ·       0.03  │
+
+// Removing last trace of uint96
+|  Rewarder             ·  payUser              ·     115 790  ·     756 038  ·         430933  ·            6  ·       0.03  │
+
+// Performing total mints cost in unchecked block (since we havn't overflow during the previous computation, we are good)
+|  Rewarder             ·  payUser              ·     115 588  ·     755 836  ·         430731  ·            6  ·       0.03  │
+
+// Test without content and referral pool call (potential gain = 120k gas)
+|  Rewarder             ·  payUser              ·     115 981  ·     630073  ·         401735  ·            6  ·       0.03  │
+
+// Without external calls mint and content / referral pool (gain approx 200k max) :
+|  Rewarder             ·  payUser              ·      88 745  ·     568 483  ·         345450  ·            6  ·       0.02  │
+
+// New refactored base : 
+|  Rewarder             ·  payUser              ·     115563  ·     755336  ·         430493  ·            6  ·       0.03  │
 
 */
 

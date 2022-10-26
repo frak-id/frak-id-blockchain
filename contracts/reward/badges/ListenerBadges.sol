@@ -10,12 +10,10 @@ import "../../utils/SybelAccessControlUpgradeable.sol";
  */
 /// @custom:security-contact crypto-support@sybel.co
 abstract contract ListenerBadges {
-
     uint256 private constant MAX_LISTENER_BADGE = 1_000 ether; // Max badge possible for the listener
 
     // Map of user address to listener badge
     mapping(address => uint256) private _listenerBadges;
-
 
     event ListenerBadgeUpdated(address indexed listener, uint256 badge);
 
@@ -25,7 +23,7 @@ abstract contract ListenerBadges {
      * @dev Update the content internal coefficient
      */
     function _updateListenerBadge(address listener, uint256 badge) internal {
-        if(badge > MAX_LISTENER_BADGE) revert BadgeTooLarge();
+        if (badge > MAX_LISTENER_BADGE) revert BadgeTooLarge();
         _listenerBadges[listener] = badge;
         emit ListenerBadgeUpdated(listener, badge);
     }

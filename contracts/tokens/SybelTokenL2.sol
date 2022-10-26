@@ -51,13 +51,11 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
     /**
      * @dev Mint some SYBL in a batch manner
      */
-    function mintBatch(address[] calldata tos, uint256[] calldata amounts)
+    function mintBatch(address[3] calldata tos, uint256[3] calldata amounts)
         external
         onlyRole(SybelRoles.MINTER)
         whenNotPaused
     {
-        if (tos.length != amounts.length) revert InvalidArray();
-
         for (uint256 i; i < tos.length; ) {
             // Ensure we don't exceed the cap
             if (totalSupply() + amounts[i] > _cap) revert CapExceed();

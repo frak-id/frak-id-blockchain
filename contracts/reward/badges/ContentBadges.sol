@@ -10,12 +10,11 @@ import "../../utils/SybelAccessControlUpgradeable.sol";
  */
 /// @custom:security-contact crypto-support@sybel.co
 abstract contract ContentBadges {
-
     uint256 private constant MAX_CONTENT_BADGE = 1_000 ether; // Max badge possible for the content
 
     // Map content id to content badge
     mapping(uint256 => uint256) private _contentBadges;
-    
+
     event ContentBadgeUpdated(uint256 indexed id, uint256 badge);
 
     function updateContentBadge(uint256 contentId, uint256 badge) external virtual;
@@ -24,7 +23,7 @@ abstract contract ContentBadges {
      * @dev Update the content internal coefficient
      */
     function _updateContentBadge(uint256 contentId, uint256 badge) internal {
-        if(badge > MAX_CONTENT_BADGE) revert BadgeTooLarge();
+        if (badge > MAX_CONTENT_BADGE) revert BadgeTooLarge();
         _contentBadges[contentId] = badge;
         emit ContentBadgeUpdated(contentId, badge);
     }
