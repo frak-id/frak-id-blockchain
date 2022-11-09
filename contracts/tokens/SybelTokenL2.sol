@@ -18,7 +18,7 @@ error CapExceed();
 contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
     bytes32 internal constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
 
-    uint256 private constant _cap = 3_000_000_000 ether; // 3 billion SYBL
+    uint256 private constant _cap = 3_000_000_000 ether; // 3 billion FRK
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -49,28 +49,6 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
     }
 
     /**
-     * @dev Mint some SYBL in a batch manner
-     */
-    function mintBatch(address[3] calldata tos, uint256[3] calldata amounts)
-        external
-        onlyRole(SybelRoles.MINTER)
-        whenNotPaused
-    {
-        for (uint256 i; i < tos.length; ) {
-            // Ensure we don't exceed the cap
-            if (totalSupply() + amounts[i] > _cap) revert CapExceed();
-
-            // Mint
-            _mint(tos[i], amounts[i]);
-
-            // Increment counter
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
-    /**
      * @dev Burn some SYBL
      */
     function burn(uint256 amount) external whenNotPaused {
@@ -91,7 +69,7 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
      * @param user user address for whom deposit is being done
      * @param depositData abi encoded amount (required for polygon bridge)
      */
-    function deposit(address user, bytes calldata depositData) external onlyRole(DEPOSITOR_ROLE) whenNotPaused {
+    function deposit(address user, bytes calldata depositData) external onlyRole(DEPOSITOR_ROLE) {
         uint256 amount = abi.decode(depositData, (uint256));
         if (totalSupply() + amount > _cap) revert CapExceed();
         _mint(user, amount);
@@ -102,7 +80,7 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
      * @dev Should burn user's tokens. This transaction will be verified when exiting on root chain
      * @param amount amount of tokens to withdraw
      */
-    function withdraw(uint256 amount) external whenNotPaused {
+    function withdraw(uint256 amount) external {
         _burn(_msgSender(), amount);
     }
 }
