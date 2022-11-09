@@ -13,7 +13,6 @@ import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "../utils/PushPullReward.sol";
 import "../utils/WadMath.sol";
-import "hardhat/console.sol";
 
 // Error throwned by this contract
 error TooMuchCcu();
