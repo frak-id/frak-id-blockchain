@@ -367,10 +367,10 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @return balance The remaining amount of tokens.
      */
     function balanceOf(address beneficiary) external view returns (uint256 balance) {
-        EnumerableSet.UintSet storage indexes = owned[beneficiary];
+        uint256[] memory _vestingIds = owned[beneficiary].values();
 
-        for (uint256 index; index < indexes.length(); ) {
-            uint24 vestingId = uint24(indexes.at(index));
+        for (uint256 index; index < _vestingIds.length; ) {
+            uint24 vestingId = uint24(_vestingIds[index]);
             balance += balanceOfVesting(vestingId);
 
             unchecked {

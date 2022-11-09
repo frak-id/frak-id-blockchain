@@ -21,6 +21,7 @@ error InvalidAddress();
 error NoReward();
 error RewardTooLarge();
 error BadgeTooLarge();
+error InvalidFraktionType();
 
 /// @custom:security-contact crypto-support@sybel.co
 abstract contract SybelAccessControlUpgradeable is Initializable, ContextUpgradeable, IPausable, UUPSUpgradeable {

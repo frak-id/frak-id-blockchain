@@ -412,7 +412,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
      */
     function _computeAndSaveAllForUser(address user) internal {
         EnumerableSet.UintSet storage contentPoolIds = userContentPools[user];
-        uint256[] memory _poolsIds = contentPoolIds.values();
+        uint256[] memory _poolsIds = userContentPools[user].values();
 
         for (uint256 index = 0; index < _poolsIds.length; ++index) {
             // Get the content pool id and the participant and last pool id
@@ -422,6 +422,14 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
             // Compute and save the reward for this pool
             computeAndSaveReward(contentId, user, participant, lastPoolIndex);
         }
+    }
+
+
+    /**
+     * Compute all the reward for the given user
+     */
+    function computeAllPoolsBalance(address user) external  onlyRole(SybelRoles.ADMIN) whenNotPaused {
+        _computeAndSaveAllForUser(user);
     }
 
     function withdrawFounds() external virtual override whenNotPaused {

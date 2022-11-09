@@ -12,7 +12,7 @@ import { buildFractionId, BUYABLE_TOKEN_TYPES, TOKEN_TYPE_GOLD } from "../../scr
 import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
 import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
 
-describe.only("Rewarder", () => {
+describe("Rewarder", () => {
   let sybelToken: SybelToken;
   let internalToken: SybelInternalTokens;
   let referral: ReferralPool;
@@ -172,7 +172,7 @@ Base with lot of states :
 
 
 // Base : 
-|  Rewarder             ·  payUser              ·     122977  ·     902974  ·         528534  ·            6  ·       0.08  │
+|  Rewarder             ·  payUser              ·     122 977  ·     902 974  ·         528 534  ·            6  ·       0.08  │
 |  SybelInternalTokens  ·  mint                 ·      84851  ·     222573  ·         102802  ·          500  ·       0.02  │
 
 Switch from require to revert error on the push pull reward contract (gain 0.135 size per contract)
@@ -221,7 +221,7 @@ Switch from require to revert error on the push pull reward contract (gain 0.135
 |  Rewarder             ·  payUser              ·      88 745  ·     568 483  ·         345450  ·            6  ·       0.02  │
 
 // New refactored base : 
-|  Rewarder             ·  payUser              ·     115563  ·     755336  ·         430493  ·            6  ·       0.03  │
+|  Rewarder             ·  payUser              ·     115 563  ·     755 336  ·         430493  ·            6  ·       0.03  │
 
 */
 
@@ -237,3 +237,8 @@ Switch from require to revert error on the push pull reward contract (gain 0.135
  *
  * Really faster but not ready for production yet
  */
+
+/*
+Unknown error : cannot estimate gas; transaction may fail or may require manual gas limit [ See: https://links.ethers.org/v5-errors-UNPREDICTABLE_GAS_LIMIT ] (error={"reason":"execution reverted: SYB: invalid legendary supply","code":"UNPREDICTABLE_GAS_LIMIT","method":"estimateGas","transaction":{"from":"0x7caF754C934710D7C73bc453654552BEcA38223F","maxPriorityFeePerGas":{"type":"BigNumber","hex":"0x59682f00"},"maxFeePerGas":{"type":"BigNumber","hex":"0x59682f1a"},"to":"0x85ea8469220E53A5C28B9fAb4328Adf034F3d791","data":"0x9bf4e09b00000000000000000000000006eedba3ff70f6ce55f1233a3c6139aae75973c90000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000005","type":2,"accessList":null},"error":{"reason":"processing response error","code":"SERVER_ERROR","body":"{\"jsonrpc\":\"2.0\",\"id\":45,\"error\":{\"code\":3,\"message\":\"execution reverted: SYB: invalid legendary supply\",\"data\":\"0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001d5359423a20696e76616c6964206c6567656e6461727920737570706c79000000\"}}","error":{"code":3,"data":"0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001d5359423a20696e76616c6964206c6567656e6461727920737570706c79000000"},"requestBody":"{\"method\":\"eth_estimateGas\",\"params\":[{\"type\":\"0x2\",\"maxFeePerGas\":\"0x59682f1a\",\"maxPriorityFeePerGas\":\"0x59682f00\",\"from\":\"0x7caf754c934710d7c73bc453654552beca38223f\",\"to\":\"0x85ea8469220e53a5c28b9fab4328adf034f3d791\",\"data\":\"0x9bf4e09b00000000000000000000000006eedba3ff70f6ce55f1233a3c6139aae75973c90000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000005\"}],\"id\":45,\"jsonrpc\":\"2.0\"}","requestMethod":"POST","url":"https://polygon-mumbai.g.alchemy.com/v2/VaqoMOGWaRkWfVW1WHrK21bTx77MnCXj"}}, tx={"data":"0x9bf4e09b00000000000000000000000006eedba3ff70f6ce55f1233a3c6139aae75973c90000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000005","to":{},"from":"0x7caF754C934710D7C73bc453654552BEcA38223F","type":2,"maxFeePerGas":{"type":"BigNumber","hex":"0x59682f1a"},"maxPriorityFeePerGas":{"type":"BigNumber","hex":"0x59682f00"},"nonce":{},"gasLimit":{},"chainId":{}}, code=UNPREDICTABLE_GAS_LIMIT, version=abstract-signer/5.7.0)
+
+*/

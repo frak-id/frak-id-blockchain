@@ -303,4 +303,8 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     {
         _updateListenerBadge(listener, badge);
     }
+
+    function getTpu() external view returns(uint256) {
+        return tokenGenerationFactor;
+    }
 }
