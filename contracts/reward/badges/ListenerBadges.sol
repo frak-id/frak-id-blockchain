@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity 0.8.17;
 
 import "../../utils/SybelMath.sol";
 import "../../utils/SybelRoles.sol";

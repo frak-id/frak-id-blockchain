@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity 0.8.17;
 
 /**
  * Interface needing to be implemented for contract who want to receive fraktion transfer callback

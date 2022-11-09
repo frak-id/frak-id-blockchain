@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity 0.8.17;
 
 import "../CryticInterface.sol";
 import "../../../contracts/tokens/SybelTokenL2.sol";

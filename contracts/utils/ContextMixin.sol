@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity 0.8.17;
 
 abstract contract ContextMixin {
     function msgSender() internal view returns (address sender) {
