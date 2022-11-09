@@ -8,6 +8,23 @@ import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "../utils/SybelRoles.sol";
 
+/// @dev error emitted when the contract doesn't have enough founds
+error NotEnoughFounds();
+
+/// @dev error throwned when verifying the input param
+error InvalidDate();
+error InvalidDuration();
+
+/// @dev error throwned when a vesting doesn't exist
+error InexistantVesting();
+
+/// @dev error when we encounter a computation error
+error ComputationError();
+
+/// @dev error throwned when a vesting is not revocable, or when it already has been revoced
+error VestingUnrevocable();
+error VestingRevokedError();
+
 contract MultiVestingWallets is SybelAccessControlUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -51,23 +68,23 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         address beneficiary; // beneficiary wallet of this vesting
     }
 
-    /// Vesting id to vesting
-    mapping(uint256 => Vesting) public vestings;
-
-    /// User to list of vesting id owned
-    mapping(address => EnumerableSet.UintSet) private owned;
-
-    /// Access to the sybel token
-    IERC20Upgradeable private token;
-
     /// Hard reward cap, of 200 million sybl
     uint96 private constant REWARD_CAP = 200_000_000 ether;
 
     /// Currently locked tokens that are being used by all of the vestings
     uint96 public totalSupply;
 
+    /// Access to the sybel token
+    IERC20Upgradeable private token;
+
     /// Current id of vesting
     uint24 private _idCounter;
+
+    /// Vesting id to vesting
+    mapping(uint256 => Vesting) public vestings;
+
+    /// User to list of vesting id owned
+    mapping(address => EnumerableSet.UintSet) private owned;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -122,7 +139,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      */
     function transferAvailableReserve(address receiver) external whenNotPaused onlyRole(SybelRoles.ADMIN) {
         uint256 available = availableReserve();
-        require(available > 0, "SYB: No token to transfer");
+        if (available == 0) revert NoReward();
         token.safeTransfer(receiver, available);
     }
 
@@ -138,7 +155,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         bool revocable
     ) external whenNotPaused onlyRole(SybelRoles.VESTING_MANAGER) {
         _requireVestInputs(duration, startDate);
-        require(availableReserve() >= amount, "SYB: Doesn't have enough founds");
+        if (amount > availableReserve()) revert NotEnoughFounds();
         _createVesting(beneficiary, amount, initialDrop, duration, startDate, revocable);
     }
 
@@ -153,9 +170,11 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         uint48 startDate,
         bool revocable
     ) external whenNotPaused onlyRole(SybelRoles.VESTING_MANAGER) {
-        require(beneficiaries.length > 0, "SYB: Empty array");
-        require(beneficiaries.length == amounts.length, "SYB: Invalid array lengths");
-        require(beneficiaries.length == initialDrops.length, "SYB: Invalid array lengths");
+        if (
+            beneficiaries.length == 0 ||
+            beneficiaries.length != amounts.length ||
+            beneficiaries.length != initialDrops.length
+        ) revert InvalidArray();
         _requireVestInputs(duration, startDate);
 
         uint256 freeReserve = availableReserve();
@@ -163,7 +182,8 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         for (uint256 index; index < beneficiaries.length; ) {
             uint256 amount = amounts[index];
             _createVesting(beneficiaries[index], amount, initialDrops[index], duration, startDate, revocable);
-            require(freeReserve >= amount, "SYB: Doesn't have enough founds");
+            if (amount > freeReserve) revert NotEnoughFounds();
+            // Increment free reserve and counter
             unchecked {
                 freeReserve -= amount;
                 ++index;
@@ -175,8 +195,8 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @notice Check the input when create a new vesting
      */
     function _requireVestInputs(uint32 duration, uint48 startDate) internal view {
-        require(duration > 0, "SYB: Duration invalid");
-        require(startDate > block.timestamp, "SYB: Start date invalid");
+        if (duration == 0) revert InvalidDuration();
+        if (block.timestamp > startDate) revert InvalidDate();
     }
 
     /**
@@ -190,10 +210,9 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         uint48 startDate,
         bool revocable
     ) private {
-        require(beneficiary != address(0), "SYB: Address invalid");
-        require(amount > 0, "SYB: amount invalid");
-        require(amount > initialDrop, "SYB: initial drop invalid");
-        require(amount < REWARD_CAP, "SYB: amount invalid");
+        if (beneficiary == address(0)) revert InvalidAddress();
+        if (amount == 0) revert NoReward();
+        if (amount > REWARD_CAP || initialDrop > amount) revert RewardTooLarge();
 
         // Create the vestings
         uint24 vestingId = _idCounter++;
@@ -224,13 +243,13 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @notice Transfer a vesting to another person.
      */
     function transfer(address to, uint24 vestingId) external onlyIfNotRevoked(vestingId) {
-        require(to != address(0), "SYB: target is the zero address");
+        if (to == address(0)) revert InvalidAddress();
 
         // Get the vesting
         Vesting storage vesting = _getVestingForBeneficiary(vestingId, msg.sender);
         address from = vesting.beneficiary;
 
-        require(from != to, "SYB: cannot transfer to itself");
+        if (to == from) revert InvalidAddress();
 
         // Change the ownership of it
         _removeOwnership(from, vesting.id);
@@ -312,7 +331,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @dev Revert the transaction if the value is zero.
      */
     function _checkAmount(uint256 released) internal pure {
-        require(released > 0, "SYB: no tokens are due");
+        if (released == 0) revert NoReward();
     }
 
     /**
@@ -348,11 +367,12 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @return balance The remaining amount of tokens.
      */
     function balanceOf(address beneficiary) external view returns (uint256 balance) {
-        EnumerableSet.UintSet storage indexes = owned[beneficiary];
+        uint256[] memory _vestingIds = owned[beneficiary].values();
 
-        for (uint256 index = 0; index < indexes.length(); ) {
-            uint24 vestingId = uint24(indexes.at(index));
+        for (uint256 index; index < _vestingIds.length; ) {
+            uint24 vestingId = uint24(_vestingIds[index]);
             balance += balanceOfVesting(vestingId);
+
             unchecked {
                 ++index;
             }
@@ -406,7 +426,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
             uint256 amountForVesting = ((vesting.amount - vesting.initialDrop) *
                 (block.timestamp - vesting.startDate)) / vesting.duration;
             uint256 linearAmountComputed = amountForVesting + vesting.initialDrop;
-            require(linearAmountComputed < REWARD_CAP, "SYB: Computation error"); // Ensure we are still on a uint96
+            if (linearAmountComputed > REWARD_CAP) revert ComputationError(); // Ensure we are still on a uint96
             return uint96(linearAmountComputed);
         }
     }
@@ -417,7 +437,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      */
     function _getVesting(uint24 vestingId) internal view returns (Vesting storage vesting) {
         vesting = vestings[vestingId];
-        require(vesting.beneficiary != address(0), "SYB: Vesting does not exists");
+        if (vesting.beneficiary == address(0)) revert InexistantVesting();
     }
 
     /**
@@ -431,7 +451,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         returns (Vesting storage vesting)
     {
         vesting = _getVesting(vestingId);
-        require(vesting.beneficiary == beneficiary, "SYB: Not the vesting beneficiary");
+        if (vesting.beneficiary != beneficiary) revert NotAuthorized();
     }
 
     /**
@@ -460,7 +480,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     {
         // Get the vesting
         Vesting storage vesting = _getVesting(vestingId);
-        require(vesting.isRevocable, "SYB: Vesting not revocable");
+        if (!vesting.isRevocable) revert VestingUnrevocable();
 
         // Update the vesting state
         uint96 releasable = _releasableAmount(vesting);
@@ -488,7 +508,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @dev Revert if the start date is not zero.
      */
     modifier onlyIfNotRevoked(uint24 vestingId) {
-        require(_getVesting(vestingId).isRevoked == false, "SYB: Vesting revoked");
+        if (_getVesting(vestingId).isRevoked) revert VestingRevokedError();
         _;
     }
 }

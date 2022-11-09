@@ -316,8 +316,27 @@ describe("VestingWalletFactory", () => {
   });
 });
 
-/**
- * Idée transparance boite coté produit :
- *  - Wallet fondation ++ team + vesting -> addresse publique
- *  - Affichage montant locker / deloquable / deloquer dessus (si deloquable > deloquer notion de confiance)
- */
+/*
+
+Base with a few opti :
+
+|  VestingWalletFactory  ·  addVestingGroup        ·      61 966  ·      79 102  ·          67 573  ·           92  ·       0.01  │
+|  VestingWalletFactory  ·  addVestingWallet       ·     212 076  ·     212 204  ·         212 111  ·            5  ·       0.02  │
+|  VestingWalletFactory  ·  addVestingWalletBatch  ·     201 027  ·     215 327  ·         205 879  ·            6  ·       0.02  │
+|  VestingWalletFactory  ·  transferGroupReserve   ·          -  ·          -  ·          43 845  ·            2  ·       0.00  │
+
+|  MultiVestingWallets                             ·          -  ·          -  ·        3183612  ·       10.6 %  ·       0.26  │
+|  VestingWalletFactory                            ·          -  ·          -  ·        2394550  ·          8 %  ·       0.19  │
+
+With revert instead of require every where
+|  VestingWalletFactory  ·  addVestingGroup        ·      62 093  ·      79 229  ·          67 700  ·           92  ·       0.00  │
+|  VestingWalletFactory  ·  addVestingWallet       ·     212 076  ·     212 204  ·         212 111  ·            5  ·       0.02  │
+|  VestingWalletFactory  ·  addVestingWalletBatch  ·     201 364  ·     215 664  ·         206 212  ·            6  ·       0.02  │
+|  VestingWalletFactory  ·  transferGroupReserve   ·          -  ·          -  ·          43 842  ·            2  ·       0.00  │
+
+|  VestingWalletFactory                            ·          -  ·          -  ·        2269535  ·        7.6 %  ·       0.17  │
+|  VestingWalletFactory  ·  addVestingGroup        ·      62093  ·      79229  ·          67700  ·           92  ·       0.01  │
+|  VestingWalletFactory  ·  addVestingWallet       ·     212076  ·     212124  ·         212093  ·            5  ·       0.02  │
+|  VestingWalletFactory  ·  addVestingWalletBatch  ·     200848  ·     215148  ·         205672  ·            6  ·       0.02  │
+
+*/

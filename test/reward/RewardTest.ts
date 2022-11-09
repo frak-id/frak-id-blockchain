@@ -1,35 +1,18 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
-import { adminRole, minterRole, rewarderRole, vestingCreatorRole, vestingManagerRole } from "../../scripts/utils/roles";
-import { ContentBadges } from "../../types/contracts/badges/payment/ContentBadges";
-import { ListenerBadges } from "../../types/contracts/badges/payment/ListenerBadges";
+import { minterRole, rewarderRole } from "../../scripts/utils/roles";
 import { ContentOwnerUpdatedEvent, SybelInternalTokens } from "../../types/contracts/tokens/SybelInternalTokens";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
-import { MultiVestingWallets } from "../../types/contracts/wallets/MultiVestingWallets";
-import { VestingWalletFactory } from "../../types/contracts/wallets/VestingWalletFactory";
-import { ContentPoolMultiContent } from "../../types/contracts/reward/ContentPoolMultiContent";
-import { Referral } from "../../types/contracts/reward/Referral";
-import { testPauses } from "../utils/test-pauses";
-import { testRoles } from "../utils/test-roles";
-import { address0, getTimestampInAFewMoment } from "../utils/test-utils";
 import { Rewarder } from "../../types/contracts/reward/Rewarder";
-import {
-  buildFractionId,
-  BUYABLE_TOKEN_TYPES,
-  TOKEN_TYPE_COMMON,
-  TOKEN_TYPE_DIAMOND,
-  TOKEN_TYPE_GOLD,
-} from "../../scripts/utils/mathUtils";
+import { buildFractionId, BUYABLE_TOKEN_TYPES, TOKEN_TYPE_GOLD } from "../../scripts/utils/mathUtils";
 import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
 import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
-import { listenerCount } from "process";
 
-describe.only("Rewarder", () => {
+describe("Rewarder", () => {
   let sybelToken: SybelToken;
   let internalToken: SybelInternalTokens;
   let referral: ReferralPool;
@@ -110,12 +93,12 @@ describe.only("Rewarder", () => {
       // TODO : Add some check on each pool, on the amount minted etc
       await rewarder.payUser(addr1.address, contentIds, ccus);
     });
-    /*it("Reward with payed account", async () => {
+    it("Reward with payed account", async () => {
       // Mint token for each user
       await mintTokenForEachUser();
       // Rewarder with only one payed fraktion
       await rewarder.payUser(addr1.address, contentIds, ccus);
-    });*/
+    });
   });
 
   /**
@@ -188,6 +171,58 @@ Base with lot of states :
 |  Rewarder             ·  payUser              ·     125 136  ·     814 051  ·         455805  ·            5  ·       0.05  │
 
 
+// Base : 
+|  Rewarder             ·  payUser              ·     122 977  ·     902 974  ·         528 534  ·            6  ·       0.08  │
+|  SybelInternalTokens  ·  mint                 ·      84851  ·     222573  ·         102802  ·          500  ·       0.02  │
+
+Switch from require to revert error on the push pull reward contract (gain 0.135 size per contract)
+|  Rewarder             ·  payUser              ·     122 977  ·     902 974  ·         528 534  ·            6  ·       0.02  │
+|  SybelInternalTokens  ·  mint                 ·      84 851  ·     222 573  ·         102 802  ·          500  ·       0.00  │
+
+// Base : 
+|  Rewarder             ·  payUser              ·     122 977  ·     902 134  ·         528394  ·            6  ·       0.04  │
+|  SybelInternalTokens  ·  mint                 ·      84 795  ·     222 517  ·         102746  ·          500  ·       0.01  │
+
+// Just moving it some vars : 
+|  Rewarder             ·  payUser              ·     120 900  ·     881 294  ·         514116  ·            6  ·       0.02  │
+|  SybelInternalTokens  ·  mint                 ·      84 795  ·     222 517  ·         102746  ·          500  ·       0.00  │
+
+// Trying to switch listen var to uint256
+|  Rewarder             ·  payUser              ·     120 894  ·     881 174  ·         514059  ·            6  ·       0.03  │
+
+// After content pool and referral opti check
+|  Rewarder             ·  payUser              ·     120 817  ·     879 299  ·         513550  ·            6  ·       0.04  │
+
+// Switch listener badge to uint256
+|  Rewarder             ·  payUser              ·     120 783  ·     879 265  ·         513516  ·            6  ·       0.06  │
+
+// Big refacto from scratch of the payUser function
+|  Rewarder             ·  payUser              ·     116 127  ·     758 419  ·         432194  ·            6  ·       0.03  │
+
+// Testing gain without memory struct to store var (gaining 2k gas)
+|  Rewarder             ·  payUser              ·     115 883  ·     756 416  ·         431153  ·            6  ·       0.02  │
+
+// Testing gain with unsafe wad mul div down on single op
+|  Rewarder             ·  payUser              ·     115 805  ·     756 338  ·         431075  ·            6  ·       0.03  │
+
+// Adding WaD in the earning factor computation
+|  Rewarder             ·  payUser              ·     115 805  ·     756 338  ·         431075  ·            6  ·       0.03  │
+
+// Removing last trace of uint96
+|  Rewarder             ·  payUser              ·     115 790  ·     756 038  ·         430933  ·            6  ·       0.03  │
+
+// Performing total mints cost in unchecked block (since we havn't overflow during the previous computation, we are good)
+|  Rewarder             ·  payUser              ·     115 588  ·     755 836  ·         430731  ·            6  ·       0.03  │
+
+// Test without content and referral pool call (potential gain = 120k gas)
+|  Rewarder             ·  payUser              ·     115 981  ·     630073  ·         401735  ·            6  ·       0.03  │
+
+// Without external calls mint and content / referral pool (gain approx 200k max) :
+|  Rewarder             ·  payUser              ·      88 745  ·     568 483  ·         345450  ·            6  ·       0.02  │
+
+// New refactored base : 
+|  Rewarder             ·  payUser              ·     115 563  ·     755 336  ·         430493  ·            6  ·       0.03  │
+
 */
 
 /**
@@ -202,3 +237,8 @@ Base with lot of states :
  *
  * Really faster but not ready for production yet
  */
+
+/*
+Unknown error : cannot estimate gas; transaction may fail or may require manual gas limit [ See: https://links.ethers.org/v5-errors-UNPREDICTABLE_GAS_LIMIT ] (error={"reason":"execution reverted: SYB: invalid legendary supply","code":"UNPREDICTABLE_GAS_LIMIT","method":"estimateGas","transaction":{"from":"0x7caF754C934710D7C73bc453654552BEcA38223F","maxPriorityFeePerGas":{"type":"BigNumber","hex":"0x59682f00"},"maxFeePerGas":{"type":"BigNumber","hex":"0x59682f1a"},"to":"0x85ea8469220E53A5C28B9fAb4328Adf034F3d791","data":"0x9bf4e09b00000000000000000000000006eedba3ff70f6ce55f1233a3c6139aae75973c90000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000005","type":2,"accessList":null},"error":{"reason":"processing response error","code":"SERVER_ERROR","body":"{\"jsonrpc\":\"2.0\",\"id\":45,\"error\":{\"code\":3,\"message\":\"execution reverted: SYB: invalid legendary supply\",\"data\":\"0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001d5359423a20696e76616c6964206c6567656e6461727920737570706c79000000\"}}","error":{"code":3,"data":"0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001d5359423a20696e76616c6964206c6567656e6461727920737570706c79000000"},"requestBody":"{\"method\":\"eth_estimateGas\",\"params\":[{\"type\":\"0x2\",\"maxFeePerGas\":\"0x59682f1a\",\"maxPriorityFeePerGas\":\"0x59682f00\",\"from\":\"0x7caf754c934710d7c73bc453654552beca38223f\",\"to\":\"0x85ea8469220e53a5c28b9fab4328adf034f3d791\",\"data\":\"0x9bf4e09b00000000000000000000000006eedba3ff70f6ce55f1233a3c6139aae75973c90000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000005\"}],\"id\":45,\"jsonrpc\":\"2.0\"}","requestMethod":"POST","url":"https://polygon-mumbai.g.alchemy.com/v2/VaqoMOGWaRkWfVW1WHrK21bTx77MnCXj"}}, tx={"data":"0x9bf4e09b00000000000000000000000006eedba3ff70f6ce55f1233a3c6139aae75973c90000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000005","to":{},"from":"0x7caF754C934710D7C73bc453654552BEcA38223F","type":2,"maxFeePerGas":{"type":"BigNumber","hex":"0x59682f1a"},"maxPriorityFeePerGas":{"type":"BigNumber","hex":"0x59682f00"},"nonce":{},"gasLimit":{},"chainId":{}}, code=UNPREDICTABLE_GAS_LIMIT, version=abstract-signer/5.7.0)
+
+*/

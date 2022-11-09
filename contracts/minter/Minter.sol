@@ -7,6 +7,16 @@ import "../utils/SybelMath.sol";
 import "../tokens/SybelInternalTokens.sol";
 import "../tokens/SybelTokenL2.sol";
 import "../utils/MintingAccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+
+/// @dev Error emitted when the input supply is invalid
+error InvalidSupply();
+
+/// @dev Error emitted when the user havn't enought balance
+error NotEnoughBalance();
+
+/// @dev Error emitted when it remain some fraktion supply when wanting to increase it
+error RemainingSupply();
 
 /**
  * @dev Represent our minter contract
@@ -16,6 +26,8 @@ import "../utils/MintingAccessControlUpgradeable.sol";
  */
 /// @custom:security-contact crypto-support@sybel.co
 contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges {
+    using SafeERC20Upgradeable for SybelToken;
+
     /**
      * @dev Access our internal tokens
      */
@@ -74,12 +86,9 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         uint256 epicSupply,
         uint256 legendarySupply
     ) external override onlyRole(SybelRoles.MINTER) whenNotPaused returns (uint256 contentId) {
-        require(contentOwnerAddress != address(0), "SYB: invalid address");
-        require(commonSupply > 0, "SYB: invalid common supply");
-        require(commonSupply < 500, "SYB: invalid common supply");
-        require(rareSupply < 200, "SYB: invalid rare supply");
-        require(epicSupply < 50, "SYB: invalid epic supply");
-        require(legendarySupply < 5, "SYB: invalid legendary supply");
+        if (contentOwnerAddress == address(0)) revert InvalidAddress();
+        if (commonSupply == 0 || commonSupply > 500 || rareSupply > 200 || epicSupply > 50 || legendarySupply > 5)
+            revert InvalidSupply();
         // Try to mint the new content
         contentId = sybelInternalTokens.mintNewContent(contentOwnerAddress);
         // Then set the supply for each token types
@@ -113,7 +122,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         uint256 totalCost = fractionCost * amount;
         // Check if the user have enough the balance
         uint256 userBalance = sybelToken.balanceOf(to);
-        require(userBalance >= totalCost, "SYB: not enough balance");
+        if (totalCost > userBalance) revert NotEnoughBalance();
         // Mint his Fraction of NFT
         sybelInternalTokens.mint(to, id, amount);
         uint256 amountForFundation = (totalCost * 2) / 10;
@@ -122,7 +131,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         // Send 80% to the owner
         address owner = sybelInternalTokens.ownerOf(SybelMath.extractContentId(id));
         uint256 amountForOwner = totalCost - amountForFundation;
-        sybelToken.transferFrom(to, owner, amountForOwner);
+        sybelToken.safeTransferFrom(to, owner, amountForOwner);
 
         // Emit the event
         emit FractionMinted(id, to, amount, totalCost);
@@ -133,7 +142,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
      */
     function increaseSupply(uint256 id, uint256 newSupply) external onlyRole(SybelRoles.MINTER) whenNotPaused {
         uint256 currentSupply = sybelInternalTokens.supplyOf(id);
-        require(currentSupply == 0, "SYB: fraction remain");
+        if (currentSupply > 0) revert RemainingSupply();
         // Compute the supply difference
         uint256 newRealSupply = currentSupply + newSupply;
         // Mint his Fraction of NFT

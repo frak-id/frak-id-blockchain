@@ -60,9 +60,16 @@ export default {
       url: process.env.MUMBAI_PROVIDER,
       accounts: [process.env.SYBEL_DEPLOY_PRIV_KEY],
     },
+    goerli: {
+      url: process.env.GOERLI_PROVIDER,
+      accounts: [process.env.SYBEL_DEPLOY_PRIV_KEY],
+    },
   },
   etherscan: {
-    apiKey: process.env.POLYGON_SCAN_API_KEY,
+    apiKey: {
+      polygonMumbai: process.env.ETHER_SCAN_API_KEY,
+      goerli: process.env.ETHER_SCAN_API_KEY,
+    },
   },
   contractSizer: {
     runOnCompile: true,

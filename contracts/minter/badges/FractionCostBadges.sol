@@ -5,6 +5,7 @@ import "../../utils/SybelMath.sol";
 import "../../utils/SybelRoles.sol";
 import "../../utils/SybelAccessControlUpgradeable.sol";
 
+
 /**
  * @dev Handle the computation of our listener badges
  */
@@ -52,6 +53,8 @@ abstract contract FractionCostBadges {
             initialCost = 200 ether; // 200 SYBL
         } else if (tokenType == SybelMath.TOKEN_TYPE_DIAMOND_MASK) {
             initialCost = 400 ether; // 400 SYBL
+        } else {
+            revert InvalidFraktionType();
         }
         return initialCost;
     }

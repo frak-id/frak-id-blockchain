@@ -7,6 +7,8 @@ import "../utils/MintingAccessControlUpgradeable.sol";
 import "../utils/ContextMixin.sol";
 import "../utils/NativeMetaTransaction.sol";
 
+// Error
+/// @dev error throwned when the contract cap is exceeded
 error CapExceed();
 
 /**
@@ -14,9 +16,9 @@ error CapExceed();
  */
 /// @custom:security-contact crypto-support@sybel.co
 contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
-    bytes32 public constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
+    bytes32 internal constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
 
-    uint256 private _cap;
+    uint256 private constant _cap = 3_000_000_000 ether; // 3 billion SYBL
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -30,8 +32,6 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
         _initializeEIP712(name);
 
         _grantRole(DEPOSITOR_ROLE, childChainManager);
-
-        _cap = 3_000_000_000 ether; // 3 billion SYBL
     }
 
     // This is to support Native meta transactions
@@ -43,19 +43,27 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
     /**
      * @dev Mint some SYBL
      */
-    function mint(address to, uint256 amount) external onlyRole(SybelRoles.MINTER) {
-        if (totalSupply() + amount > cap()) revert CapExceed();
+    function mint(address to, uint256 amount) external onlyRole(SybelRoles.MINTER) whenNotPaused {
+        if (totalSupply() + amount > _cap) revert CapExceed();
         _mint(to, amount);
     }
 
     /**
-     * @dev Mint some SYBL
+     * @dev Mint some SYBL in a batch manner
      */
-    function mintBatch(address[] calldata tos, uint256[] calldata amounts) external onlyRole(SybelRoles.MINTER) {
-        if (tos.length != amounts.length) revert InvalidArray();
-        for (uint256 i = 0; i < tos.length; ) {
-            if (totalSupply() + amounts[i] > cap()) revert CapExceed();
+    function mintBatch(address[3] calldata tos, uint256[3] calldata amounts)
+        external
+        onlyRole(SybelRoles.MINTER)
+        whenNotPaused
+    {
+        for (uint256 i; i < tos.length; ) {
+            // Ensure we don't exceed the cap
+            if (totalSupply() + amounts[i] > _cap) revert CapExceed();
+
+            // Mint
             _mint(tos[i], amounts[i]);
+
+            // Increment counter
             unchecked {
                 ++i;
             }
@@ -65,25 +73,14 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
     /**
      * @dev Burn some SYBL
      */
-    function burn(uint256 amount) external {
+    function burn(uint256 amount) external whenNotPaused {
         _burn(_msgSender(), amount);
-    }
-
-    /**
-     * @dev Ensure the contract isn't paused before the transfer
-     */
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override whenNotPaused {
-        super._beforeTokenTransfer(from, to, amount);
     }
 
     /**
      * @dev Returns the cap on the token's total supply.
      */
-    function cap() public view virtual returns (uint256) {
+    function cap() external view virtual returns (uint256) {
         return _cap;
     }
 
@@ -91,12 +88,12 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
      * @notice called when token is deposited on root chain
      * @dev Should be callable only by ChildChainManager
      * Should handle deposit by minting the required amount for user
-     * Make sure minting is done only by this function
      * @param user user address for whom deposit is being done
-     * @param depositData abi encoded amount
+     * @param depositData abi encoded amount (required for polygon bridge)
      */
-    function deposit(address user, bytes calldata depositData) external whenNotPaused onlyRole(DEPOSITOR_ROLE) {
+    function deposit(address user, bytes calldata depositData) external onlyRole(DEPOSITOR_ROLE) whenNotPaused {
         uint256 amount = abi.decode(depositData, (uint256));
+        if (totalSupply() + amount > _cap) revert CapExceed();
         _mint(user, amount);
     }
 

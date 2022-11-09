@@ -172,6 +172,10 @@ describe("Referral Pool", () => {
 // With 10 max depth, switching while condition, 10k runs, with all optimizer settings, and with IR
 // |  ReferralPool     payAllReferer  ·      33 768  ·     295 569  ·       126 522  ·            8  ·       0.02  │
 
+// Switching to uint256
+// |  ReferralPool  ·  payAllReferer  ·      33645  ·     294720  ·         125846  ·            8  ·       0.01  │
+// |  ReferralPool  ·  userReferred   ·      58360  ·      96831  ·          59382  ·           38  ·       0.00  │
+
 // Without event emission (gaining 30K GAS !!!)
 // |  ReferralPool  ·  payAllReferer  ·      33734  ·     474 788  ·      188935  ·            3  ·       0.10  │
 // Without event and founds add (useless but to check what cost the more)

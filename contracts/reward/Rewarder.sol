@@ -12,6 +12,7 @@ import "../tokens/SybelInternalTokens.sol";
 import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "../utils/PushPullReward.sol";
+import "../utils/WadMath.sol";
 import "hardhat/console.sol";
 
 // Error throwned by this contract
@@ -23,13 +24,25 @@ error InvalidReward();
  */
 /// @custom:security-contact crypto-support@sybel.co
 contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, ListenerBadges, PushPullReward {
+    using SybelMath for uint256;
+
     // The cap of frak token we can mint for the reward
-    uint96 public constant REWARD_MINT_CAP = 1_500_000_000 ether;
-    uint96 private constant SINGLE_REWARD_CAP = 1_000_000 ether;
+    uint256 private constant REWARD_MINT_CAP = 1_500_000_000 ether;
+    uint256 private constant SINGLE_REWARD_CAP = 1_000_000 ether;
 
     // Maximum data we can treat in a batch manner
-    uint8 private constant MAX_BATCH_AMOUNT = 20;
-    uint16 private constant MAX_CCU_PER_CONTENT = 300; // The mac ccu per content, currently maxed at 5hr
+    uint256 private constant MAX_BATCH_AMOUNT = 20;
+    uint256 private constant MAX_CCU_PER_CONTENT = 300; // The mac ccu per content, currently maxed at 5hr
+
+    /**
+     * @dev factor user to compute the number of token to generate (on 1e18 decimals)
+     */
+    uint256 public tokenGenerationFactor;
+
+    /**
+     * @dev The total frak minted for reward
+     */
+    uint256 public totalFrakMinted;
 
     /**
      * @dev Access our internal tokens
@@ -52,24 +65,14 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     ContentPool private contentPool;
 
     /**
-     * @dev factor user to compute the number of token to generate (on 1e18 decimals)
-     */
-    uint256 public tokenGenerationFactor;
-
-    /**
-     * @dev The total frak minted for reward
-     */
-    uint96 public totalFrakMinted;
-
-    /**
      * @dev Event emitted when a user is rewarded for his listen
      */
     event UserRewarded(
         address indexed user,
         uint256[] contentIds,
         uint16[] listenCount,
-        uint96 userReward,
-        uint96 poolRewards
+        uint256 userReward,
+        uint256 poolRewards
     );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -100,218 +103,153 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         _grantRole(SybelRoles.BADGE_UPDATER, msg.sender);
     }
 
-    /**
-     * @dev Pay a user for all the listening he have done on different content
-     */
+    struct ToBeMinted {
+        uint256 user;
+        uint256 owners;
+        uint256 referral;
+        uint256 content;
+    }
+
     function payUser(
         address listener,
         uint256[] calldata contentIds,
         uint16[] calldata listenCounts
-    ) external override onlyRole(SybelRoles.REWARDER) whenNotPaused {
+    ) external onlyRole(SybelRoles.REWARDER) whenNotPaused {
+        // Ensure we got valid data
         if (contentIds.length != listenCounts.length || contentIds.length > MAX_BATCH_AMOUNT) revert InvalidArray();
-        // Get our current tpu in memory
+
+        // Load our current tpu in memory
         uint256 _tpu = tokenGenerationFactor;
-        // Get our total amopunt to be minted
-        uint96 totalMintForUser;
-        uint96 totalMintForOwners;
-        uint96 totalMintForReferral;
-        uint96 totalMintForContent;
-        // Iterate over each content
+
+        // Get the data we will need in this level
+        uint256 totalUser;
+        uint256 totalOwners;
+        uint256 totalReferral;
+        uint256 totalContent;
+
+        // Get all the paied fraktion types
+        uint8[] memory fraktionTypes = SybelMath.payableTokenTypes();
+
+        // Iterate over each content the user listened
         for (uint256 i; i < contentIds.length; ) {
-            // TODO : Do we need to ensure that the podcast exist ???
+            // TODO : Also ensure this podcast is minted
             // Ensure we don't exceed the max ccu / content
             if (listenCounts[i] > MAX_CCU_PER_CONTENT) revert TooMuchCcu();
-            // Find the balance of the listener for this content
-            (
-                ListenerBalanceOnContent[] memory balances,
-                bool hasAtLeastOneBalance,
-                bool hasOnePayedToken
-            ) = getListenerBalanceForContent(listener, contentIds[i]);
-            // If no balance mint a Standard NFT
-            if (!hasAtLeastOneBalance) {
-                sybelInternalTokens.mint(listener, SybelMath.buildFreeNftId(contentIds[i]), 1);
-                // And then recompute his balance
-                (balances, hasAtLeastOneBalance, hasOnePayedToken) = getListenerBalanceForContent(
-                    listener,
-                    contentIds[i]
-                );
-            }
-            // If he as at least one balance
-            if (hasAtLeastOneBalance) {
-                ComputeRewardParam memory computeRewardParam = ComputeRewardParam({
-                    listener: listener,
-                    contentId: contentIds[i],
-                    tpu: _tpu,
-                    listenCount: listenCounts[i],
-                    hasOnePayedToken: hasOnePayedToken,
-                    balances: balances
-                });
-                (
-                    uint96 userReward,
-                    uint96 ownerReward,
-                    uint96 referralPoolReward,
-                    uint96 contentPoolReward
-                ) = computeContentReward(computeRewardParam);
+            // Extract the content id
+            uint256 contentId = contentIds[i];
+
+            // Build the ids for eachs fraktion that can generate reward, and get the user balance for each one if this fraktions
+            uint256[] memory fraktionIds = SybelMath.buildSnftIds(contentIds[i], fraktionTypes);
+            uint256[] memory tokenBalances = sybelInternalTokens.balanceOfIdsBatch(listener, fraktionIds);
+
+            // Boolean used to know if the user have one paied fraktion
+            bool hasOnePaiedFraktion;
+
+            // The content earning factor of the user
+            uint256 earningFactor;
+
+            // Iterate over each balance to compute the earning factor
+            for (uint256 balanceIndex; balanceIndex < tokenBalances.length; ) {
+                uint256 balance = tokenBalances[balanceIndex];
+                // Check if that was a paid fraktion or not
+                hasOnePaiedFraktion =
+                    hasOnePaiedFraktion ||
+                    (SybelMath.isPayedTokenToken(fraktionTypes[balanceIndex]) && balance > 0);
+                // Increase the earning faktor
                 unchecked {
-                    totalMintForUser += userReward;
-                    totalMintForOwners += ownerReward;
-                    totalMintForReferral += referralPoolReward;
-                    totalMintForContent += contentPoolReward;
+                    earningFactor += balance * baseRewardForTokenType(fraktionTypes[balanceIndex]); // On 1e18 decimals
+                    ++balanceIndex;
                 }
             }
 
-            // Increase our index
+            // If the earning factor is at 0, just mint a free fraktion and increase it
+            if (earningFactor == 0) {
+                sybelInternalTokens.mint(listener, SybelMath.buildFreeNftId(contentId), 1);
+                earningFactor = baseRewardForTokenType(SybelMath.TOKEN_TYPE_FREE_MASK);
+            }
+
+            // Get the content badge
+            uint256 contentBadge = getContentBadge(contentId);
+            // TODO : Compare if the division is better placed here on before in the loop, probably here
+            uint256 totalReward = (earningFactor * contentBadge * listenCounts[i] * _tpu) / (1 ether * 1 ether); // Same here should use WaD multiplier
+            // Ensure the reward isn't too large
+            if (totalReward > SINGLE_REWARD_CAP) revert InvalidReward();
+
+            // Then split the payment for owner and user
+            uint256 userReward;
+            uint256 ownerReward;
+            uint256 contentPoolReward;
+            uint256 referralPoolReward;
             unchecked {
+                userReward = (totalReward * 35) / 100;
+                ownerReward = totalReward - userReward;
+            }
+
+            if (hasOnePaiedFraktion) {
+                // Compute the reward for the content pool and the referral
+                uint256 baseReferralReward;
+                unchecked {
+                    contentPoolReward = totalReward / 10;
+                    baseReferralReward = (totalReward * 3) / 50;
+                }
+                // Send the reward to the content ool and referral pool // TODO : Multicall possible here ? Even if distinct contract ??
+                contentPool.addReward(contentId, contentPoolReward);
+                referralPoolReward = referralPool.payAllReferer(contentId, listener, baseReferralReward);
+
+                // Decrease the owner reward by the pool amount used
+                unchecked {
+                    ownerReward -= contentPoolReward - referralPoolReward;
+                }
+            }
+            // Save the amount for the owner
+            address owner = sybelInternalTokens.ownerOf(contentId);
+            _addFoundsUnchecked(owner, ownerReward);
+
+            // Finally, increase all the amount to be minted
+            unchecked {
+                totalContent += contentPoolReward;
+                totalReferral += referralPoolReward;
+                totalUser += userReward;
+                totalOwners += ownerReward;
+
+                // And increase our content counter
                 ++i;
             }
         }
-        // If we don't find any reward for the user, exit directly
-        if (totalMintForUser == 0) return;
 
-        // Get the listener badge and recompute his reward
-        uint64 listenerBadge = getListenerBadge(listener);
+        // Then outside of our loop find the user badge
+        uint256 listenerBadge = getListenerBadge(listener);
 
         // Update the total mint for user with his listener badges
-        totalMintForUser = uint96((uint256(totalMintForUser) * listenerBadge) / 1 ether);
+        totalUser = wadMulDivDown(totalUser, listenerBadge);
 
         // Register the amount for listener
-        _addFoundsUnchecked(listener, totalMintForUser);
+        _addFoundsUnchecked(listener, totalUser);
 
         // Compute the total amount to mint, and ensure we don't exeed our cap
-        uint96 totalMint = totalMintForUser + totalMintForOwners + totalMintForContent + totalMintForReferral;
-        // Update the total mint for user with his listener badges
-        if (totalMint + totalFrakMinted > REWARD_MINT_CAP) revert InvalidReward();
-        // If good, update our total frak minted and emit the event
         unchecked {
+            uint256 totalMint = totalUser + totalOwners + totalContent + totalReferral;
+            if (totalMint + totalFrakMinted > REWARD_MINT_CAP) revert InvalidReward();
             totalFrakMinted += totalMint;
         }
-        emit UserRewarded(
-            listener,
-            contentIds,
-            listenCounts,
-            totalMintForUser,
-            totalMintForContent + totalMintForReferral
-        );
+        emit UserRewarded(listener, contentIds, listenCounts, totalUser, totalContent + totalReferral);
 
         // If we got reward for the pool, mint them
-        if (totalMintForContent > 0 || totalMintForReferral > 0) {
-            sybelToken.mint(address(this), totalMintForUser + totalMintForOwners);
-            sybelToken.mint(address(contentPool), totalMintForContent);
-            sybelToken.mint(address(referralPool), totalMintForReferral);
+        if (totalContent > 0 || totalReferral > 0) {
+            sybelToken.mint(address(this), totalUser + totalOwners);
+            sybelToken.mint(address(contentPool), totalContent);
+            sybelToken.mint(address(referralPool), totalReferral);
         } else {
             // Otherwise, only mint for this contract
-            sybelToken.mint(address(this), totalMintForUser + totalMintForOwners);
+            sybelToken.mint(address(this), totalUser + totalOwners);
         }
     }
 
-    /**
-     * @dev Find the balance of the given user on each tokens
-     */
-    function getListenerBalanceForContent(address listener, uint256 contentId)
-        private
-        view
-        returns (
-            ListenerBalanceOnContent[] memory,
-            bool hasAtLeastOneBalance,
-            bool hasOnePaiedFraktion
-        )
-    {
-        // The different types we will fetch
-        uint8[] memory types = SybelMath.payableTokenTypes();
-        // Build the ids for eachs types
-        uint256[] memory tokenIds = SybelMath.buildSnftIds(contentId, types);
-        // Build our initial balance map
-        ListenerBalanceOnContent[] memory balances = new ListenerBalanceOnContent[](types.length);
-        // Get the balance
-        uint256[] memory tokenBalances = sybelInternalTokens.balanceOfIdsBatch(listener, tokenIds);
-        // Iterate over each types to find the balances
-        for (uint8 i; i < types.length; ++i) {
-            // Get the balance and build our balance on content object
-            uint256 balance = tokenBalances[i];
-            balances[i] = ListenerBalanceOnContent(types[i], tokenBalances[i]);
-            // Update our has at least one balance object
-            hasAtLeastOneBalance = hasAtLeastOneBalance || balance > 0;
-            // Update our has one paid fraktion
-            hasOnePaiedFraktion = hasOnePaiedFraktion || (SybelMath.isPayedTokenToken(types[i]) && balance > 0);
+    function wadMulDivDown(uint256 x, uint256 y) internal pure returns (uint256 z) {
+        assembly {
+            // Divide x * y by the 1e18 (decimals).
+            z := div(mul(x, y), 1000000000000000000)
         }
-        return (balances, hasAtLeastOneBalance, hasOnePaiedFraktion);
-    }
-
-    /**
-     * Struct used to compute the content reward
-     */
-    struct ComputeRewardParam {
-        address listener;
-        uint256 contentId;
-        uint256 tpu;
-        uint16 listenCount;
-        bool hasOnePayedToken;
-        ListenerBalanceOnContent[] balances;
-    }
-
-    /**
-     * @dev Mint the reward for the given user, and take in account his balances for the given content
-     */
-    function computeContentReward(ComputeRewardParam memory param)
-        private
-        returns (
-            uint96 userReward,
-            uint96 ownerReward,
-            uint96 referralPoolReward,
-            uint96 contentPoolReward
-        )
-    {
-        // The user have a balance we can continue
-        uint256 contentBadge = getContentBadge(param.contentId);
-        // Mint each token for each fraction
-        uint256 earningFactor;
-        for (uint8 i; i < param.balances.length; ++i) {
-            unchecked {
-                earningFactor += param.balances[i].balance * baseRewardForTokenType(param.balances[i].tokenType); // On 1e18
-            }
-        }
-        // If no reward, directly exit
-        if (earningFactor == 0) {
-            return (0, 0, 0, 0);
-        }
-        // Compute our total reward (by applying the content badge, TPY, and number of listen performed)
-        // We got earning factor on 1e18, contentBadge on 1e18 and tokenGenerationFactor on 1e18, so dividing by 1e18 * 1e18 (So 1e36) to get a 1e18 amount to mint
-        uint96 totalReward = uint96(
-            (earningFactor * contentBadge * param.listenCount * param.tpu) / (1 ether * 1 ether)
-        );
-        // Ensure the reward isn't too large, and also ensure it fit inside a uint96
-        if (totalReward > SINGLE_REWARD_CAP) revert InvalidReward();
-
-        // Then split the payment for owner and user
-        unchecked {
-            userReward = (totalReward * 35) / 100;
-            ownerReward = totalReward - userReward;
-        }
-
-        // If the user has one payed token, send it to the different pools
-        if (param.hasOnePayedToken) {
-            // Add the reward to the content pool
-            unchecked {
-                contentPoolReward = totalReward / 10;
-            }
-            contentPool.addReward(param.contentId, contentPoolReward);
-
-            // Compute the reward for the referral
-            uint96 baseReferralReward;
-            unchecked {
-                baseReferralReward = (totalReward * 3) / 50;
-            }
-            referralPoolReward = referralPool.payAllReferer(param.contentId, param.listener, baseReferralReward);
-
-            // Decrease the owner reward by the pool amount used
-            unchecked {
-                ownerReward -= contentPoolReward - referralPoolReward;
-            }
-        }
-        // Save the amount for the owner
-        address owner = sybelInternalTokens.ownerOf(param.contentId);
-        _addFoundsUnchecked(owner, ownerReward);
-        // TODO : For each content
     }
 
     /**
@@ -319,7 +257,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
      * We use a pure function instead of a mapping to economise on storage read,
      * and since this reawrd shouldn't evolve really fast
      */
-    function baseRewardForTokenType(uint8 tokenType) private pure returns (uint96 reward) {
+    function baseRewardForTokenType(uint8 tokenType) private pure returns (uint256 reward) {
         if (tokenType == SybelMath.TOKEN_TYPE_FREE_MASK) {
             reward = 0.01 ether; // 0.01 SYBL
         } else if (tokenType == SybelMath.TOKEN_TYPE_COMMON_MASK) {
@@ -340,11 +278,6 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         tokenGenerationFactor = newTpu;
     }
 
-    struct ListenerBalanceOnContent {
-        uint8 tokenType;
-        uint256 balance;
-    }
-
     function withdrawFounds() external virtual override whenNotPaused {
         _withdraw(msg.sender);
     }
@@ -362,12 +295,16 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         _updateContentBadge(contentId, badge);
     }
 
-    function updateListenerBadge(address listener, uint64 badge)
+    function updateListenerBadge(address listener, uint256 badge)
         external
         override
         onlyRole(SybelRoles.BADGE_UPDATER)
         whenNotPaused
     {
         _updateListenerBadge(listener, badge);
+    }
+
+    function getTpu() external view returns(uint256) {
+        return tokenGenerationFactor;
     }
 }

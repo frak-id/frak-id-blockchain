@@ -45,6 +45,9 @@ import { minterRole, rewarderRole } from "../utils/roles";
     await referralPool.grantRole(rewarderRole, rewarder.address);
     await contentPool.grantRole(rewarderRole, rewarder.address);
 
+    // Grant the minting role to the minter contract
+    await internalToken.grantRole(minterRole, minter.address);
+
     // Build our deplyoed address object
     const addresses = {
       ...deployedAddresses,
