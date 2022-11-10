@@ -1,14 +1,14 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
+import { BUYABLE_TOKEN_TYPES, buildFractionId } from "../../scripts/utils/mathUtils";
 import { rewarderRole } from "../../scripts/utils/roles";
+import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { address0 } from "../utils/test-utils";
-import { BigNumber } from "ethers";
-import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
-import { buildFractionId, BUYABLE_TOKEN_TYPES } from "../../scripts/utils/mathUtils";
 
 // Testing our content pool contract
 describe("ContentPool", () => {

@@ -445,11 +445,10 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @param beneficiary Address to get it from.
      * @return vesting struct stored in the storage.
      */
-    function _getVestingForBeneficiary(uint24 vestingId, address beneficiary)
-        internal
-        view
-        returns (Vesting storage vesting)
-    {
+    function _getVestingForBeneficiary(
+        uint24 vestingId,
+        address beneficiary
+    ) internal view returns (Vesting storage vesting) {
         vesting = _getVesting(vestingId);
         if (vesting.beneficiary != beneficiary) revert NotAuthorized();
     }
@@ -471,7 +470,9 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     /**
      * @notice Revoke a vesting wallet
      */
-    function revoke(uint24 vestingId)
+    function revoke(
+        uint24 vestingId
+    )
         external
         whenNotPaused
         onlyRole(SybelRoles.ADMIN)

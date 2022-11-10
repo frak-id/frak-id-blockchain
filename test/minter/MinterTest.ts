@@ -4,8 +4,8 @@ import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
 import { minterRole, rewarderRole } from "../../scripts/utils/roles";
-import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { Minter } from "../../types/contracts/minter/Minter";
+import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 
 describe("Minter", () => {
   let sybelToken: SybelToken;

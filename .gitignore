@@ -24,3 +24,6 @@ abi/
 types/
 
 tools/**/*.log
+
+# build folder
+build/

@@ -1,0 +1,16 @@
+output: mythx-vesting.json
+format: json
+
+analyze:
+  mode: standard
+  async: true
+  create-group: true
+  group-name: Frak.io Vesting
+  solc: 0.8.17
+  remappings:
+    - "@openzeppelin/=node_modules/@openzeppelin/"
+  targets:
+    - contracts/tokens/SybelTokenL1.sol
+    - contracts/tokens/SybelTokenL2.sol
+    - contracts/wallets/VestingWalletFactory.sol
+    - contracts/wallets/MultiVestingWallets.sol

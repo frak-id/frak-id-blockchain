@@ -4,15 +4,15 @@ import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
+import { BUYABLE_TOKEN_TYPES, TOKEN_TYPE_GOLD, buildFractionId } from "../../scripts/utils/mathUtils";
 import { minterRole, rewarderRole } from "../../scripts/utils/roles";
+import { Rewarder } from "../../types/contracts/reward/Rewarder";
+import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
+import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
 import { ContentOwnerUpdatedEvent, SybelInternalTokens } from "../../types/contracts/tokens/SybelInternalTokens";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
-import { Rewarder } from "../../types/contracts/reward/Rewarder";
-import { buildFractionId, BUYABLE_TOKEN_TYPES, TOKEN_TYPE_GOLD } from "../../scripts/utils/mathUtils";
-import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
-import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
 
-describe("Rewarder", () => {
+describe.only("Rewarder", () => {
   let sybelToken: SybelToken;
   let internalToken: SybelInternalTokens;
   let referral: ReferralPool;
@@ -41,6 +41,7 @@ describe("Rewarder", () => {
       internalToken.address,
       contentPool.address,
       referral.address,
+      sybelToken.address,
     ]);
 
     // Grant the minter role on the rewarder contract for our nft and frak
@@ -236,6 +237,51 @@ Switch from require to revert error on the push pull reward contract (gain 0.135
  *  => https://github.com/foundry-rs/foundry
  *
  * Really faster but not ready for production yet
+ */
+
+/*
+
+Splitting method check : 
+|  Rewarder             ·  payUser              ·     115 596  ·     755 831  ·         430 644  ·            6  ·       0.04  │
+|  Rewarder             ·  payUser              ·     115 618  ·     755 853  ·         430666  ·            6  ·       0.02  │
+
+Adding fundation fees
+|  Rewarder             ·  payUser              ·     123 348  ·     789 510  ·         453 460  ·            6  ·       0.05  │
+
+Reducing number of var's
+|  Rewarder             ·  payUser              ·     123 244  ·     787 545  ·         452522  ·            6  ·       0.04  │
+|  Rewarder             ·  payUser              ·     123 260  ·     787 685  ·         452644  ·            6  ·       0.02  │
+|  Rewarder             ·  payUser              ·     123 207  ·     786 156  ·         451984  ·            6  ·       0.04  │
+|  Rewarder             ·  payUser              ·     123 107  ·     787 328  ·         452390  ·            6  ·       0.02  │
+
+|  Rewarder             ·  payUser              ·     123 237  ·     791 840  ·         454638  ·            6  ·       0.04  │
+
+// Reduce unchecked operation
+|  Rewarder             ·  payUser              ·     122925  ·     788235  ·         452128  ·            6  ·       0.03  │
+|  Rewarder             ·  payUser              ·     122928  ·     788295  ·         452157  ·            6  ·       0.03  │
+
+
+|  Rewarder             ·  payUser              ·     123 112  ·     788 880  ·         453374  ·            6  ·       0.03  │
+|  Rewarder             ·  payUser              ·     123 106  ·     788 700  ·         453307  ·            6  ·       0.03  │
+
+|  Rewarder             ·  payUser              ·     123 102  ·     789 920  ·         453486  ·            6  ·       0.60  │
+
+
+
+// Before assembly percent
+|  Rewarder             ·  payUser              ·     123 102  ·     789 920  ·         453486  ·            6  ·       0.24  │
+
+// With 0 reward check
+|  Rewarder             ·  payUser              ·     122695  ·     774506  ·         446323  ·            6  ·       0.49  │
+
+// Without auto free fraktion mnit
+
+
+
+
+
+
+
  */
 
 /*

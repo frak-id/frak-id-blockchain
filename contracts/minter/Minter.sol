@@ -42,7 +42,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
     /**
      * @dev Address of the foundation wallet
      */
-    address public foundationWallet;
+    address private foundationWallet;
 
     /**
      * @dev Event emitted when a new content is minted
@@ -82,12 +82,12 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
     function addContent(
         address contentOwnerAddress,
         uint256 commonSupply,
-        uint256 rareSupply,
-        uint256 epicSupply,
-        uint256 legendarySupply
+        uint256 premiumSupply,
+        uint256 goldSupply,
+        uint256 diamondSupply
     ) external override onlyRole(SybelRoles.MINTER) whenNotPaused returns (uint256 contentId) {
         if (contentOwnerAddress == address(0)) revert InvalidAddress();
-        if (commonSupply == 0 || commonSupply > 500 || rareSupply > 200 || epicSupply > 50 || legendarySupply > 5)
+        if (commonSupply == 0 || commonSupply > 500 || premiumSupply > 200 || goldSupply > 50 || diamondSupply > 5)
             revert InvalidSupply();
         // Try to mint the new content
         contentId = sybelInternalTokens.mintNewContent(contentOwnerAddress);
@@ -98,10 +98,10 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         ids[2] = SybelMath.buildGoldNftId(contentId);
         ids[3] = SybelMath.buildDiamondNftId(contentId);
         uint256[] memory supplies = new uint256[](4);
-        supplies[0] = commonSupply; // Common
-        supplies[1] = rareSupply; // Rare
-        supplies[2] = epicSupply; // Epic
-        supplies[3] = legendarySupply; // Legendary
+        supplies[0] = commonSupply;
+        supplies[1] = premiumSupply;
+        supplies[2] = goldSupply;
+        supplies[3] = diamondSupply;
         sybelInternalTokens.setSupplyBatch(ids, supplies);
         // Emit the event
         emit ContentMinted(contentId, contentOwnerAddress);
@@ -125,13 +125,8 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         if (totalCost > userBalance) revert NotEnoughBalance();
         // Mint his Fraction of NFT
         sybelInternalTokens.mint(to, id, amount);
-        uint256 amountForFundation = (totalCost * 2) / 10;
-        // Send 20% of sybl token to the foundation
-        sybelToken.mint(foundationWallet, amountForFundation);
-        // Send 80% to the owner
-        address owner = sybelInternalTokens.ownerOf(SybelMath.extractContentId(id));
-        uint256 amountForOwner = totalCost - amountForFundation;
-        sybelToken.safeTransferFrom(to, owner, amountForOwner);
+        // Transfer all the token to the fundation wallet
+        sybelToken.safeTransferFrom(to, foundationWallet, totalCost);
 
         // Emit the event
         emit FractionMinted(id, to, amount, totalCost);
@@ -149,12 +144,10 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         sybelInternalTokens.setSupplyBatch(SybelMath.asSingletonArray(id), SybelMath.asSingletonArray(newRealSupply));
     }
 
-    function updateCostBadge(uint256 fractionId, uint96 badge)
-        external
-        override
-        onlyRole(SybelRoles.BADGE_UPDATER)
-        whenNotPaused
-    {
+    function updateCostBadge(
+        uint256 fractionId,
+        uint96 badge
+    ) external override onlyRole(SybelRoles.BADGE_UPDATER) whenNotPaused {
         _updateCostBadge(fractionId, badge);
     }
 }

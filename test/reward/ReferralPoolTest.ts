@@ -1,14 +1,14 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { expect } from "chai";
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
 import { rewarderRole } from "../../scripts/utils/roles";
-import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
-import { expect } from "chai";
-import { address0 } from "../utils/test-utils";
-import { BigNumber } from "ethers";
 import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
+import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
+import { address0 } from "../utils/test-utils";
 
 // Build our initial reward
 const baseReward = BigNumber.from(10).pow(16); // So 0.001 frk
