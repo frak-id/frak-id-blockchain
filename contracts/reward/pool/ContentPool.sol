@@ -138,12 +138,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
     /**
      * Update the participants of a pool after fraktion transfer
      */
-    function updateParticipants(
-        address from,
-        address to,
-        uint256 fraktionId,
-        uint256 amountMoved
-    ) private {
+    function updateParticipants(address from, address to, uint256 fraktionId, uint256 amountMoved) private {
         // Extract content id and token type from this tx
         (uint256 contentId, uint8 tokenType) = SybelMath.extractContentIdAndTokenType(fraktionId);
         // Get the initial share value of this token
@@ -172,12 +167,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
     /**
      * Update participant and pool after fraktion transfer
      */
-    function updateParticipantAndPool(
-        address from,
-        address to,
-        uint256 fraktionId,
-        uint256 amountMoved
-    ) private {
+    function updateParticipantAndPool(address from, address to, uint256 fraktionId, uint256 amountMoved) private {
         // Extract content id and token type from this tx
         (uint256 contentId, uint8 tokenType) = SybelMath.extractContentIdAndTokenType(fraktionId);
         // Get the total shares moved
@@ -287,11 +277,9 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
     /**
      * Find the last reward state, with it's index for the given content
      */
-    function lastContentStateWithIndex(uint256 contentId)
-        internal
-        view
-        returns (RewardState storage state, uint256 rewardIndex)
-    {
+    function lastContentStateWithIndex(
+        uint256 contentId
+    ) internal view returns (RewardState storage state, uint256 rewardIndex) {
         rewardIndex = currentStateIndex[contentId];
         state = rewardStates[contentId][rewardIndex];
     }
@@ -366,11 +354,10 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
     /**
      * ComputonFraktionsTransferedward in the given state
      */
-    function computeUserReward(RewardState memory state, Participant memory participant)
-        internal
-        pure
-        returns (uint256 stateReward)
-    {
+    function computeUserReward(
+        RewardState memory state,
+        Participant memory participant
+    ) internal pure returns (uint256 stateReward) {
         // We can safely do an unchecked operation here since the pool reward, participant shares and total shares are all verified before being stored
         unchecked {
             stateReward = (state.currentPoolReward * participant.shares) / state.totalShares;
@@ -424,11 +411,10 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         }
     }
 
-
     /**
      * Compute all the reward for the given user
      */
-    function computeAllPoolsBalance(address user) external  onlyRole(SybelRoles.ADMIN) whenNotPaused {
+    function computeAllPoolsBalance(address user) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
         _computeAndSaveAllForUser(user);
     }
 

@@ -5,7 +5,6 @@ import "../../utils/SybelMath.sol";
 import "../../utils/SybelRoles.sol";
 import "../../utils/SybelAccessControlUpgradeable.sol";
 
-
 /**
  * @dev Handle the computation of our listener badges
  */

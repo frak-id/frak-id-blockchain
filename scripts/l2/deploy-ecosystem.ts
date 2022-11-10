@@ -3,9 +3,9 @@ import hre from "hardhat";
 
 import * as deployedAddresses from "../../addresses.json";
 import { Minter } from "../../types/contracts/minter/Minter";
+import { Rewarder } from "../../types/contracts/reward/Rewarder";
 import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
 import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
-import { Rewarder } from "../../types/contracts/reward/Rewarder";
 import { SybelInternalTokens } from "../../types/contracts/tokens/SybelInternalTokens";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { deployContract, findContract } from "../utils/deploy";

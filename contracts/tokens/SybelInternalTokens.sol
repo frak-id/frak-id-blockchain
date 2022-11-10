@@ -62,12 +62,9 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     /**
      * @dev Mint a new content, return the id of the built content
      */
-    function mintNewContent(address ownerAddress)
-        external
-        onlyRole(SybelRoles.MINTER)
-        whenNotPaused
-        returns (uint256 id)
-    {
+    function mintNewContent(
+        address ownerAddress
+    ) external onlyRole(SybelRoles.MINTER) whenNotPaused returns (uint256 id) {
         // Get the next content id and increment the current content token id
         id = ++_currentContentTokenId;
 
@@ -100,11 +97,10 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     /**
      * @dev Set the supply for each token ids
      */
-    function setSupplyBatch(uint256[] calldata ids, uint256[] calldata supplies)
-        external
-        onlyRole(SybelRoles.MINTER)
-        whenNotPaused
-    {
+    function setSupplyBatch(
+        uint256[] calldata ids,
+        uint256[] calldata supplies
+    ) external onlyRole(SybelRoles.MINTER) whenNotPaused {
         if (ids.length == 0 || ids.length != supplies.length) revert InvalidArray();
         // Iterate over each ids and increment their supplies
         for (uint256 i; i < ids.length; ) {
@@ -175,22 +171,14 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     /**
      * @dev Mint a new fraction of a nft
      */
-    function mint(
-        address to,
-        uint256 id,
-        uint256 amount
-    ) external onlyRole(SybelRoles.MINTER) whenNotPaused {
+    function mint(address to, uint256 id, uint256 amount) external onlyRole(SybelRoles.MINTER) whenNotPaused {
         _mint(to, id, amount, new bytes(0x0));
     }
 
     /**
      * @dev Burn a fraction of a nft
      */
-    function burn(
-        address from,
-        uint256 id,
-        uint256 amount
-    ) external onlyRole(SybelRoles.MINTER) whenNotPaused {
+    function burn(address from, uint256 id, uint256 amount) external onlyRole(SybelRoles.MINTER) whenNotPaused {
         _burn(from, id, amount);
     }
 

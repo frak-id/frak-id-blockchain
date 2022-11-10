@@ -12,7 +12,6 @@ import "../tokens/SybelInternalTokens.sol";
 import "../tokens/SybelTokenL2.sol";
 import "../utils/SybelAccessControlUpgradeable.sol";
 import "../utils/PushPullReward.sol";
-import "../utils/WadMath.sol";
 
 // Error throwned by this contract
 error TooMuchCcu();
@@ -64,6 +63,11 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     ContentPool private contentPool;
 
     /**
+     * @dev Address of the foundation wallet
+     */
+    address private foundationWallet;
+
+    /**
      * @dev Event emitted when a user is rewarded for his listen
      */
     event UserRewarded(
@@ -83,7 +87,8 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         address syblTokenAddr,
         address internalTokenAddr,
         address contentPoolAddr,
-        address referralAddr
+        address referralAddr,
+        address foundationAddr
     ) external initializer {
         // Only for v1 deployment
         __SybelAccessControlUpgradeable_init();
@@ -94,6 +99,8 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         contentPool = ContentPool(contentPoolAddr);
         referralPool = ReferralPool(referralAddr);
 
+        foundationWallet = foundationAddr;
+
         // Default TPU
         tokenGenerationFactor = 4.22489708885 ether;
 
@@ -102,11 +109,12 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         _grantRole(SybelRoles.BADGE_UPDATER, msg.sender);
     }
 
-    struct ToBeMinted {
+    struct TotalRewards {
         uint256 user;
         uint256 owners;
         uint256 referral;
         uint256 content;
+        uint256 foundation;
     }
 
     function payUser(
@@ -117,14 +125,12 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         // Ensure we got valid data
         if (contentIds.length != listenCounts.length || contentIds.length > MAX_BATCH_AMOUNT) revert InvalidArray();
 
-        // Load our current tpu in memory
-        uint256 _tpu = tokenGenerationFactor;
-
         // Get the data we will need in this level
         uint256 totalUser;
         uint256 totalOwners;
         uint256 totalReferral;
         uint256 totalContent;
+        uint256 totalFoundation;
 
         // Get all the paied fraktion types
         uint8[] memory fraktionTypes = SybelMath.payableTokenTypes();
@@ -170,7 +176,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
             // Get the content badge
             uint256 contentBadge = getContentBadge(contentId);
             // TODO : Compare if the division is better placed here on before in the loop, probably here
-            uint256 totalReward = (earningFactor * contentBadge * listenCounts[i] * _tpu) / (1 ether * 1 ether); // Same here should use WaD multiplier
+            uint256 totalReward = (earningFactor * contentBadge * listenCounts[i] * tokenGenerationFactor) / (1 ether * 1 ether); // Same here should use WaD multiplier
             // Ensure the reward isn't too large
             if (totalReward > SINGLE_REWARD_CAP) revert InvalidReward();
 
@@ -179,7 +185,10 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
             uint256 ownerReward;
             uint256 contentPoolReward;
             uint256 referralPoolReward;
+            uint256 foundationReward;
             unchecked {
+                totalFoundation += (totalReward * 2) / 100;
+                totalReward = (totalReward * 98) / 100;
                 userReward = (totalReward * 35) / 100;
                 ownerReward = totalReward - userReward;
             }
@@ -215,6 +224,8 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
                 ++i;
             }
         }
+
+        _addFoundsUnchecked(foundationWallet, totalFoundation);
 
         // Then outside of our loop find the user badge
         uint256 listenerBadge = getListenerBadge(listener);
@@ -285,25 +296,21 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         _withdraw(user);
     }
 
-    function updateContentBadge(uint256 contentId, uint256 badge)
-        external
-        override
-        onlyRole(SybelRoles.BADGE_UPDATER)
-        whenNotPaused
-    {
+    function updateContentBadge(
+        uint256 contentId,
+        uint256 badge
+    ) external override onlyRole(SybelRoles.BADGE_UPDATER) whenNotPaused {
         _updateContentBadge(contentId, badge);
     }
 
-    function updateListenerBadge(address listener, uint256 badge)
-        external
-        override
-        onlyRole(SybelRoles.BADGE_UPDATER)
-        whenNotPaused
-    {
+    function updateListenerBadge(
+        address listener,
+        uint256 badge
+    ) external override onlyRole(SybelRoles.BADGE_UPDATER) whenNotPaused {
         _updateListenerBadge(listener, badge);
     }
 
-    function getTpu() external view returns(uint256) {
+    function getTpu() external view returns (uint256) {
         return tokenGenerationFactor;
     }
 }
