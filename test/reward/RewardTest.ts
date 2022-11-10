@@ -254,7 +254,27 @@ Reducing number of var's
 |  Rewarder             ·  payUser              ·     123 207  ·     786 156  ·         451984  ·            6  ·       0.04  │
 |  Rewarder             ·  payUser              ·     123 107  ·     787 328  ·         452390  ·            6  ·       0.02  │
 
+|  Rewarder             ·  payUser              ·     123 237  ·     791 840  ·         454638  ·            6  ·       0.04  │
 
+// Reduce unchecked operation
+|  Rewarder             ·  payUser              ·     122925  ·     788235  ·         452128  ·            6  ·       0.03  │
+|  Rewarder             ·  payUser              ·     122928  ·     788295  ·         452157  ·            6  ·       0.03  │
+
+
+|  Rewarder             ·  payUser              ·     123 112  ·     788 880  ·         453374  ·            6  ·       0.03  │
+|  Rewarder             ·  payUser              ·     123 106  ·     788 700  ·         453307  ·            6  ·       0.03  │
+
+|  Rewarder             ·  payUser              ·     123 102  ·     789 920  ·         453486  ·            6  ·       0.60  │
+
+
+
+// Before assembly percent
+|  Rewarder             ·  payUser              ·     123 102  ·     789 920  ·         453486  ·            6  ·       0.24  │
+
+// With 0 reward check
+|  Rewarder             ·  payUser              ·     122695  ·     774506  ·         446323  ·            6  ·       0.49  │
+
+// Without auto free fraktion mnit
 
 
 
