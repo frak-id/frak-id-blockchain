@@ -79,26 +79,26 @@ describe.only("Rewarder", () => {
   describe("Base reward", () => {
     it("Single free reward account", async () => {
       // TODO : Add some check on each pool, on the amount minted etc
-      await rewarder.payUser(addr1.address, [contentIds[0]], [100]);
+      await rewarder.payUser(addr1.address, 1, [contentIds[0]], [100]);
       // Going throught it a second time to prevent fraktion mint
-      await rewarder.payUser(addr1.address, [contentIds[0]], [100]);
+      await rewarder.payUser(addr1.address, 1, [contentIds[0]], [100]);
     });
     it("Tone of free reward", async () => {
       // TODO : Add some check on each pool, on the amount minted etc
-      await rewarder.payUser(addr1.address, contentIds, ccus);
+      await rewarder.payUser(addr1.address, 1, contentIds, ccus);
 
       // Perform the run a second time so we don't go past the free fraktion mint
-      await rewarder.payUser(addr1.address, contentIds, ccus);
+      await rewarder.payUser(addr1.address, 1, contentIds, ccus);
     });
     it("Multiple free reward", async () => {
       // TODO : Add some check on each pool, on the amount minted etc
-      await rewarder.payUser(addr1.address, contentIds, ccus);
+      await rewarder.payUser(addr1.address, 1, contentIds, ccus);
     });
     it("Reward with payed account", async () => {
       // Mint token for each user
       await mintTokenForEachUser();
       // Rewarder with only one payed fraktion
-      await rewarder.payUser(addr1.address, contentIds, ccus);
+      await rewarder.payUser(addr1.address, 1, contentIds, ccus);
     });
   });
 
@@ -272,10 +272,21 @@ Reducing number of var's
 |  Rewarder             ·  payUser              ·     123 102  ·     789 920  ·         453486  ·            6  ·       0.24  │
 
 // With 0 reward check
-|  Rewarder             ·  payUser              ·     122695  ·     774506  ·         446323  ·            6  ·       0.49  │
+|  Rewarder             ·  payUser              ·     122 695  ·     774 506  ·         446323  ·            6  ·       0.49  │
 
-// Without auto free fraktion mnit
+// With the content type ratio
+|  Rewarder             ·  payUser              ·     122 935  ·     776 161  ·         447225  ·            6  ·       0.02  │
 
+// With wad div down everywhere for the reward
+|  Rewarder             ·  payUser              ·     122 831  ·     774 081  ·         446194  ·            6  ·       0.02  │
+
+// With multi wad div down test
+|  Rewarder             ·  payUser              ·     120 022  ·     773 901  ·         435226  ·            6  ·       0.01  │
+
+
+
+
+// With wad div down single line
 
 
 

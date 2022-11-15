@@ -32,6 +32,12 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     uint256 private constant MAX_BATCH_AMOUNT = 20;
     uint256 private constant MAX_CCU_PER_CONTENT = 300; // The mac ccu per content, currently maxed at 5hr
 
+    // Maximum data we can treat in a batch manner
+    uint256 private constant CONTENT_TYPE_VIDEO = 1;
+    uint256 private constant CONTENT_TYPE_PODCAST = 2;
+    uint256 private constant CONTENT_TYPE_MUSIC = 3;
+    uint256 private constant CONTENT_TYPE_STREAMING = 4;
+
     /**
      * @dev factor user to compute the number of token to generate (on 1e18 decimals)
      */
@@ -119,6 +125,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
 
     function payUser(
         address listener,
+        uint8 contentType,
         uint256[] calldata contentIds,
         uint16[] calldata listenCounts
     ) external onlyRole(SybelRoles.REWARDER) whenNotPaused {
@@ -130,10 +137,18 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
 
         // Get all the payed fraktion types
         uint8[] memory fraktionTypes = SybelMath.payableTokenTypes();
+        uint256 rewardForContentType = baseRewardForContentType(contentType);
 
         // Iterate over each content the user listened
         for (uint256 i; i < contentIds.length; ) {
-            computeRewardForContent(contentIds[i], listenCounts[i], listener, fraktionTypes, totalRewards);
+            computeRewardForContent(
+                contentIds[i],
+                listenCounts[i],
+                rewardForContentType,
+                listener,
+                fraktionTypes,
+                totalRewards
+            );
 
             // Finally, increase the counter
             unchecked {
@@ -184,6 +199,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     function computeRewardForContent(
         uint256 contentId,
         uint16 listenCount,
+        uint256 rewardForContentType,
         address listener,
         uint8[] memory fraktionTypes,
         TotalRewards memory totalRewards
@@ -211,7 +227,8 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
                 (SybelMath.isPayedTokenToken(fraktionTypes[balanceIndex]) && balance > 0);
             // Increase the earning factor
             unchecked {
-                earningFactor += balance * baseRewardForTokenType(fraktionTypes[balanceIndex]); // On 1e18 decimals
+                earningFactor += balance * baseRewardForTokenType(fraktionTypes[balanceIndex]);
+                // On 1e18 decimals
                 ++balanceIndex;
             }
         }
@@ -224,9 +241,11 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
 
         // Get the content badge
         uint256 contentBadge = getContentBadge(contentId);
-        // TODO : Compare if the division is better placed here on before in the loop, probably here
-        uint256 totalReward = (earningFactor * contentBadge * listenCount * tokenGenerationFactor) /
-            (1 ether * 1 ether); // Same here should use WaD multiplier
+        // Start our total reward with the earning factor, the listen count, and the TPU's
+        uint256 totalReward = multiWadMulDivDown(listenCount, earningFactor, tokenGenerationFactor);
+        // Then apply the content badge and then content type ratio
+        totalReward *= multiWadMulDivDown(totalReward, contentBadge, rewardForContentType);
+        // Same here should use WaD multiplier
         // Ensure the reward isn't too large
         if (totalReward > SINGLE_REWARD_CAP) revert InvalidReward();
         else if (totalReward == 0) return;
@@ -249,8 +268,10 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
                 totalRewards.foundation += foundationFees;
                 totalRewards.user += userReward;
 
-                contentPoolReward = totalReward / 10; // Content pool reward at 10%
-                baseReferralReward = (totalReward * 3) / 50; // Referral pool base at 6%
+                contentPoolReward = totalReward / 10;
+                // Content pool reward at 10%
+                baseReferralReward = (totalReward * 3) / 50;
+                // Referral pool base at 6%
             }
             // Send the reward to the content ool and referral pool
             contentPool.addReward(contentId, contentPoolReward);
@@ -293,6 +314,14 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         }
     }
 
+    /// Use multi wad div down for multi precision when multiple value of 1 eth
+    function multiWadMulDivDown(uint256 x, uint256 y, uint256 z) internal pure returns (uint256 r) {
+        assembly {
+            // Divide x * y by the 1e18 (decimals).
+            r := div(mul(mul(x, y), z), mul(1000000000000000000, 1000000000000000000))
+        }
+    }
+
     /**
      * @dev Get the base reward to the given token type
      * We use a pure function instead of a mapping to economise on storage read,
@@ -300,15 +329,39 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
      */
     function baseRewardForTokenType(uint8 tokenType) private pure returns (uint256 reward) {
         if (tokenType == SybelMath.TOKEN_TYPE_FREE_MASK) {
-            reward = 0.01 ether; // 0.01 SYBL
+            reward = 0.01 ether;
+            // 0.01 SYBL
         } else if (tokenType == SybelMath.TOKEN_TYPE_COMMON_MASK) {
-            reward = 0.1 ether; // 0.1 SYBL
+            reward = 0.1 ether;
+            // 0.1 SYBL
         } else if (tokenType == SybelMath.TOKEN_TYPE_PREMIUM_MASK) {
-            reward = 0.5 ether; // 0.5 SYBL
+            reward = 0.5 ether;
+            // 0.5 SYBL
         } else if (tokenType == SybelMath.TOKEN_TYPE_GOLD_MASK) {
-            reward = 1 ether; // 1 SYBL
+            reward = 1 ether;
+            // 1 SYBL
         } else if (tokenType == SybelMath.TOKEN_TYPE_DIAMOND_MASK) {
-            reward = 2 ether; // 2 SYBL
+            reward = 2 ether;
+            // 2 SYBL
+        } else {
+            reward = 0;
+        }
+    }
+
+    /**
+     * @dev Get the base reward to the given content type
+     */
+    function baseRewardForContentType(uint8 contentType) private pure returns (uint256 reward) {
+        if (contentType == CONTENT_TYPE_VIDEO) {
+            reward = 2 ether;
+        } else if (contentType == CONTENT_TYPE_PODCAST) {
+            reward = 1 ether;
+        } else if (contentType == CONTENT_TYPE_MUSIC) {
+            reward = 0.2 ether;
+        } else if (contentType == CONTENT_TYPE_STREAMING) {
+            reward = 1 ether;
+        } else {
+            reward = 0;
         }
     }
 
