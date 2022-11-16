@@ -38,3 +38,6 @@ lib/
 
 # Cache folder
 forge-cache/
+
+# Out folder
+out/
