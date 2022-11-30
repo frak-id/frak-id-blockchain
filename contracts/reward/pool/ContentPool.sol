@@ -115,7 +115,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         address to,
         uint256[] memory ids,
         uint256[] memory amount
-    ) external override {
+    ) external override onlyRole(SybelRoles.TOKEN_CONTRACT) {
         if (from != address(0) && to != address(0)) {
             // Handle share transfer between participant, with no update on the total pool rewards
             for (uint256 index; index < ids.length; ) {

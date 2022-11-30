@@ -9,7 +9,7 @@ import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
 import { SybelInternalTokens } from "../../types/contracts/tokens/SybelInternalTokens";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { deployContract, findContract } from "../utils/deploy";
-import { minterRole, rewarderRole } from "../utils/roles";
+import { minterRole, rewarderRole, tokenContractRole } from "../utils/roles";
 
 (async () => {
   try {
@@ -44,6 +44,9 @@ import { minterRole, rewarderRole } from "../utils/roles";
     // Allow the rewarder contract as rearder for pools
     await referralPool.grantRole(rewarderRole, rewarder.address);
     await contentPool.grantRole(rewarderRole, rewarder.address);
+
+    // Allow internal token to perform content related operation on the pool contract
+    await contentPool.grantRole(tokenContractRole, internalToken.address);
 
     // Grant the minting role to the minter contract
     await internalToken.grantRole(minterRole, minter.address);

@@ -283,6 +283,10 @@ Reducing number of var's
 // With multi wad div down test
 |  Rewarder             ·  payUser              ·     120 022  ·     773 901  ·         435226  ·            6  ·       0.01  │
 
+// Without direct foundation fees computation
+|  Rewarder             ·  payUser              ·     115 461  ·     748 429  ·         426928  ·            6  ·       0.03  │
+
+
 
 
 

@@ -29,7 +29,7 @@ abstract contract PushPullReward is Initializable {
     /**
      * @dev Event emitted when a user withdraw his pending reward
      */
-    event RewardWithdrawed(address indexed user, uint256 amount);
+    event RewardWithdrawed(address indexed user, uint256 amount, uint256 fees);
 
     /**
      * Init of this contract
@@ -73,9 +73,34 @@ abstract contract PushPullReward is Initializable {
         // Reset the user pending balance
         _pendingRewards[user] = 0;
         // Emit the withdraw event
-        emit RewardWithdrawed(user, pendingReward);
+        emit RewardWithdrawed(user, pendingReward, 0);
         // Perform the transfer of the founds
         token.safeTransfer(user, pendingReward);
+    }
+
+    /**
+     * Core logic of the withdraw method
+     */
+    function _withdrawWithFee(address user, uint256 feePercent, address feeRecipient) internal {
+        if (user == address(0) || feeRecipient == address(0)) revert InvalidAddress();
+        if (feePercent > 10) revert RewardTooLarge();
+        // The fees can't be more than 10% of the user reward
+        // Ensure the user have a pending reward
+        uint256 pendingReward = _pendingRewards[user];
+        if (pendingReward == 0) revert NoReward();
+        // Ensure we have enough founds on this contract to pay the user
+        uint256 contractBalance = token.balanceOf(address(this));
+        if (pendingReward > contractBalance) revert NotEnoughFound();
+        // Reset the user pending balance
+        _pendingRewards[user] = 0;
+        // Compute the amount of fees
+        uint256 feesAmount = (pendingReward * feePercent) / 100;
+        uint256 userReward = pendingReward - feesAmount;
+        // Emit the withdraw event
+        emit RewardWithdrawed(user, userReward, feesAmount);
+        // Perform the transfer of the founds
+        token.safeTransfer(user, userReward);
+        token.safeTransfer(feeRecipient, feesAmount);
     }
 
     /**

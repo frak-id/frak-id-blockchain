@@ -120,7 +120,6 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         uint256 owners;
         uint256 referral;
         uint256 content;
-        uint256 foundation;
     }
 
     function payUser(
@@ -133,7 +132,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         if (contentIds.length != listenCounts.length || contentIds.length > MAX_BATCH_AMOUNT) revert InvalidArray();
 
         // Get the data we will need in this level
-        TotalRewards memory totalRewards = TotalRewards(0, 0, 0, 0, 0);
+        TotalRewards memory totalRewards = TotalRewards(0, 0, 0, 0);
 
         // Get all the payed fraktion types
         uint8[] memory fraktionTypes = SybelMath.payableTokenTypes();
@@ -156,8 +155,6 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
             }
         }
 
-        _addFoundsUnchecked(foundationWallet, totalRewards.foundation);
-
         // Then outside of our loop find the user badge
         uint256 listenerBadge = getListenerBadge(listener);
 
@@ -169,11 +166,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
 
         // Compute the total amount to mint, and ensure we don't exceed our cap
         unchecked {
-            uint256 totalMint = totalRewards.user +
-                totalRewards.owners +
-                totalRewards.content +
-                totalRewards.referral +
-                totalRewards.foundation;
+            uint256 totalMint = totalRewards.user + totalRewards.owners + totalRewards.content + totalRewards.referral;
             if (totalMint + totalFrakMinted > REWARD_MINT_CAP) revert InvalidReward();
             totalFrakMinted += totalMint;
         }
@@ -187,12 +180,12 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
 
         // If we got reward for the pool, mint them
         if (totalRewards.content > 0 || totalRewards.referral > 0) {
-            sybelToken.mint(address(this), totalRewards.user + totalRewards.owners + totalRewards.foundation);
+            sybelToken.mint(address(this), totalRewards.user + totalRewards.owners);
             sybelToken.mint(address(contentPool), totalRewards.content);
             sybelToken.mint(address(referralPool), totalRewards.referral);
         } else {
             // Otherwise, only mint for this contract
-            sybelToken.mint(address(this), totalRewards.user + totalRewards.owners + totalRewards.foundation);
+            sybelToken.mint(address(this), totalRewards.user + totalRewards.owners);
         }
     }
 
@@ -250,7 +243,6 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         if (totalReward > SINGLE_REWARD_CAP) revert InvalidReward();
         else if (totalReward == 0) return;
 
-        uint256 foundationFees;
         uint256 userReward;
         uint256 ownerReward;
         if (hasOnePayedFraktion) {
@@ -258,14 +250,11 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
             uint256 contentPoolReward;
             uint256 baseReferralReward;
             unchecked {
-                // Get the foundation fee's (2%), and the user reward (35%) and decrease the total reward
-                foundationFees = totalReward / 50;
-                totalReward -= foundationFees;
+                // Compute the rewards
                 userReward = (totalReward * 35) / 100;
                 ownerReward = totalReward - userReward;
 
                 // Increment the two amount that won't change after
-                totalRewards.foundation += foundationFees;
                 totalRewards.user += userReward;
 
                 contentPoolReward = totalReward / 10;
@@ -290,14 +279,11 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         } else {
             // Increase the user and owners amount to be minted
             unchecked {
-                // Get the foundation fee's (2%), and the user reward (35%) and decrease the total reward
-                foundationFees = totalReward / 50;
-                totalReward -= foundationFees;
+                // Compute the rewards
                 userReward = (totalReward * 35) / 100;
                 ownerReward = totalReward - userReward;
 
                 // Increment the totals rewards
-                totalRewards.foundation += foundationFees;
                 totalRewards.user += userReward;
                 totalRewards.owners += ownerReward;
             }
@@ -377,7 +363,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     }
 
     function withdrawFounds(address user) external virtual override onlyRole(SybelRoles.ADMIN) whenNotPaused {
-        _withdraw(user);
+        _withdrawWithFee(user, 2, foundationWallet);
     }
 
     function updateContentBadge(
