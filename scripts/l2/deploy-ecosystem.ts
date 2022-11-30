@@ -26,16 +26,20 @@ import { minterRole, rewarderRole, tokenContractRole } from "../utils/roles";
     const referralPool = await deployContract<ReferralPool>("ReferralPool", [erc20TokenAddr]);
     const contentPool = await deployContract<ContentPool>("ContentPool", [erc20TokenAddr]);
 
+    // The foundation wallet addr
+    // TODO : Should be changed for production
+    const fondationWallet = "0x8Cb488e0E16e49F064e210969EE1c771a55BcD04";
+
     // Deploy the rewarder contract
     const rewarder = await deployContract<Rewarder>("Rewarder", [
       erc20TokenAddr,
       internalToken.address,
       referralPool.address,
       contentPool.address,
+      fondationWallet
     ]);
 
     // Deploy the minter contract
-    const fondationWallet = erc20TokenAddr;
     const minter = await deployContract<Minter>("Minter", [erc20TokenAddr, internalToken.address, fondationWallet]);
 
     // Allow the rewarder contract to mint frak token

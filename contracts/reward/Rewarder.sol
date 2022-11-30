@@ -122,6 +122,9 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         uint256 content;
     }
 
+    /**
+    * Compute the reward for a user, given the content and listens, and pay him and the owner
+    */
     function payUser(
         address listener,
         uint8 contentType,
