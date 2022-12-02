@@ -67,7 +67,7 @@ export default {
   },
   etherscan: {
     apiKey: {
-      polygonMumbai: process.env.ETHER_SCAN_API_KEY,
+      polygonMumbai: process.env.POLYGON_SCAN_API_KEY,
       goerli: process.env.ETHER_SCAN_API_KEY,
     },
   },

@@ -45,13 +45,13 @@ abstract contract FractionCostBadges {
      */
     function initialFractionCost(uint8 tokenType) public pure returns (uint96 initialCost) {
         if (tokenType == SybelMath.TOKEN_TYPE_COMMON_MASK) {
-            initialCost = 20 ether; // 20 SYBL
+            initialCost = 20 ether; // 20 FRK
         } else if (tokenType == SybelMath.TOKEN_TYPE_PREMIUM_MASK) {
-            initialCost = 100 ether; // 100 SYBL
+            initialCost = 100 ether; // 100 FRK
         } else if (tokenType == SybelMath.TOKEN_TYPE_GOLD_MASK) {
-            initialCost = 200 ether; // 200 SYBL
+            initialCost = 200 ether; // 200 FRK
         } else if (tokenType == SybelMath.TOKEN_TYPE_DIAMOND_MASK) {
-            initialCost = 400 ether; // 400 SYBL
+            initialCost = 400 ether; // 400 FRK
         } else {
             revert InvalidFraktionType();
         }

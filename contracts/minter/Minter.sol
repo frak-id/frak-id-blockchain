@@ -87,7 +87,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         uint256 diamondSupply
     ) external override onlyRole(SybelRoles.MINTER) whenNotPaused returns (uint256 contentId) {
         if (contentOwnerAddress == address(0)) revert InvalidAddress();
-        if (commonSupply == 0 || commonSupply > 500 || premiumSupply > 200 || goldSupply > 50 || diamondSupply > 5)
+        if (commonSupply == 0 || commonSupply > 500 || premiumSupply > 200 || goldSupply > 50 || diamondSupply > 20)
             revert InvalidSupply();
         // Try to mint the new content
         contentId = sybelInternalTokens.mintNewContent(contentOwnerAddress);

@@ -17,7 +17,7 @@ error InsuficiantGroupSupply();
 
 contract VestingWalletFactory is SybelAccessControlUpgradeable {
     // The cap of sybl token propose to vester
-    uint96 internal constant SYBL_VESTING_CAP = 1_500_000_000 ether;
+    uint96 internal constant FRK_VESTING_CAP = 1_500_000_000 ether;
 
     /**
      * @dev Represent the different vesting group
@@ -94,7 +94,7 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         bool revocable
     ) private whenNotPaused {
         if (rewardCap == 0) revert NoReward();
-        if (duration == 0 || initialDropPerthousand > 1000 || rewardCap + totalGroupCap > SYBL_VESTING_CAP)
+        if (duration == 0 || initialDropPerthousand > 1000 || rewardCap + totalGroupCap > FRK_VESTING_CAP)
             revert InvalidCreationParam();
         if (vestingGroup[id].rewardCap != 0) revert AlreadyUsedId();
         // Increase the total group supply

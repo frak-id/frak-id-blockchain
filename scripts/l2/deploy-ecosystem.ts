@@ -9,7 +9,7 @@ import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
 import { SybelInternalTokens } from "../../types/contracts/tokens/SybelInternalTokens";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { deployContract, findContract } from "../utils/deploy";
-import { minterRole, rewarderRole } from "../utils/roles";
+import { minterRole, rewarderRole, tokenContractRole } from "../utils/roles";
 
 (async () => {
   try {
@@ -26,16 +26,20 @@ import { minterRole, rewarderRole } from "../utils/roles";
     const referralPool = await deployContract<ReferralPool>("ReferralPool", [erc20TokenAddr]);
     const contentPool = await deployContract<ContentPool>("ContentPool", [erc20TokenAddr]);
 
+    // The foundation wallet addr
+    // TODO : Should be changed for production
+    const fondationWallet = "0x8Cb488e0E16e49F064e210969EE1c771a55BcD04";
+
     // Deploy the rewarder contract
     const rewarder = await deployContract<Rewarder>("Rewarder", [
       erc20TokenAddr,
       internalToken.address,
       referralPool.address,
       contentPool.address,
+      fondationWallet,
     ]);
 
     // Deploy the minter contract
-    const fondationWallet = erc20TokenAddr;
     const minter = await deployContract<Minter>("Minter", [erc20TokenAddr, internalToken.address, fondationWallet]);
 
     // Allow the rewarder contract to mint frak token
@@ -44,6 +48,9 @@ import { minterRole, rewarderRole } from "../utils/roles";
     // Allow the rewarder contract as rearder for pools
     await referralPool.grantRole(rewarderRole, rewarder.address);
     await contentPool.grantRole(rewarderRole, rewarder.address);
+
+    // Allow internal token to perform content related operation on the pool contract
+    await contentPool.grantRole(tokenContractRole, internalToken.address);
 
     // Grant the minting role to the minter contract
     await internalToken.grantRole(minterRole, minter.address);
