@@ -10,13 +10,13 @@ import "../utils/MintingAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 /// @dev Error emitted when the input supply is invalid
-error InvalidSupply();
+    error InvalidSupply();
 
 /// @dev Error emitted when the user havn't enought balance
-error NotEnoughBalance();
+    error NotEnoughBalance();
 
 /// @dev Error emitted when it remain some fraktion supply when wanting to increase it
-error RemainingSupply();
+    error RemainingSupply();
 
 /**
  * @dev Represent our minter contract
@@ -87,7 +87,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         uint256 diamondSupply
     ) external override onlyRole(SybelRoles.MINTER) whenNotPaused returns (uint256 contentId) {
         if (contentOwnerAddress == address(0)) revert InvalidAddress();
-        if (commonSupply == 0 || commonSupply > 500 || premiumSupply > 200 || goldSupply > 50 || diamondSupply > 5)
+        if (commonSupply == 0 || commonSupply > 500 || premiumSupply > 200 || goldSupply > 50 || diamondSupply > 20)
             revert InvalidSupply();
         // Try to mint the new content
         contentId = sybelInternalTokens.mintNewContent(contentOwnerAddress);

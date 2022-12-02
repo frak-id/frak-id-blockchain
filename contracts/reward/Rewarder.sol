@@ -25,7 +25,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     using SybelMath for uint256;
 
     // The cap of frak token we can mint for the reward
-    uint256 private constant REWARD_MINT_CAP = 1_500_000_000 ether;
+    uint256 public constant REWARD_MINT_CAP = 1_500_000_000 ether;
     uint256 private constant SINGLE_REWARD_CAP = 1_000_000 ether;
 
     // Maximum data we can treat in a batch manner
@@ -108,7 +108,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         foundationWallet = foundationAddr;
 
         // Default TPU
-        tokenGenerationFactor = 4.22489708885 ether;
+        tokenGenerationFactor = 1 ether;
 
         // Grant the rewarder role to the contract deployer
         _grantRole(SybelRoles.REWARDER, msg.sender);
@@ -318,20 +318,20 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
      */
     function baseRewardForTokenType(uint8 tokenType) private pure returns (uint256 reward) {
         if (tokenType == SybelMath.TOKEN_TYPE_FREE_MASK) {
+            // 0.01 FRK
             reward = 0.01 ether;
-            // 0.01 SYBL
         } else if (tokenType == SybelMath.TOKEN_TYPE_COMMON_MASK) {
+            // 0.1 FRK
             reward = 0.1 ether;
-            // 0.1 SYBL
         } else if (tokenType == SybelMath.TOKEN_TYPE_PREMIUM_MASK) {
+            // 0.5 FRK
             reward = 0.5 ether;
-            // 0.5 SYBL
         } else if (tokenType == SybelMath.TOKEN_TYPE_GOLD_MASK) {
+            // 1 FRK
             reward = 1 ether;
-            // 1 SYBL
         } else if (tokenType == SybelMath.TOKEN_TYPE_DIAMOND_MASK) {
+            // 2 FRK
             reward = 2 ether;
-            // 2 SYBL
         } else {
             reward = 0;
         }

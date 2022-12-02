@@ -107,7 +107,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @return the contract 'fake' token name.
      */
     function name() external pure returns (string memory) {
-        return "Vested SYBL Token";
+        return "Vested FRK Token";
     }
 
     /**
@@ -115,7 +115,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
      * @return the contract 'fake' token symbol.
      */
     function symbol() external pure returns (string memory) {
-        return "vSYBL";
+        return "vFRK";
     }
 
     /**
@@ -128,7 +128,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
 
     /**
      * @notice Get the available reserve.
-     * @return The number of SYBL that can be used to create another vesting.
+     * @return The number of FRK that can be used to create another vesting.
      */
     function availableReserve() public view returns (uint256) {
         return token.balanceOf(address(this)) - totalSupply;

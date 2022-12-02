@@ -41,7 +41,7 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
     }
 
     /**
-     * @dev Mint some SYBL
+     * @dev Mint some FRK
      */
     function mint(address to, uint256 amount) external onlyRole(SybelRoles.MINTER) whenNotPaused {
         if (totalSupply() + amount > _cap) revert CapExceed();
@@ -49,7 +49,7 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
     }
 
     /**
-     * @dev Burn some SYBL
+     * @dev Burn some FRK
      */
     function burn(uint256 amount) external whenNotPaused {
         _burn(_msgSender(), amount);
