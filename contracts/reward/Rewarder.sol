@@ -123,8 +123,25 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     }
 
     /**
-    * Compute the reward for a user, given the content and listens, and pay him and the owner
-    */
+     * @dev Directly pay a user (or an owner) for the given frk amount
+     */
+    function payUserDirectly(address listener, uint256 amount) external onlyRole(SybelRoles.REWARDER) whenNotPaused {
+        // Ensure the param are valid and not too much
+        if (listener == address(0)) revert InvalidAddress();
+        if (amount > SINGLE_REWARD_CAP || amount == 0 || amount + totalFrakMinted > REWARD_MINT_CAP)
+            revert InvalidReward();
+
+        // Increase our total frak minted
+        totalFrakMinted += amount;
+
+        // Mint ad save the reward for the user
+        _addFounds(listener, amount);
+        sybelToken.mint(address(this), amount);
+    }
+
+    /**
+     * @dev Compute the reward for a user, given the content and listens, and pay him and the owner
+     */
     function payUser(
         address listener,
         uint8 contentType,

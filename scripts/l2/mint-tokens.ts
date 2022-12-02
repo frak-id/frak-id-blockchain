@@ -1,8 +1,8 @@
 import { BigNumber } from "ethers";
 
 import * as deployedAddresses from "../../addresses.json";
-import { findContract } from "../utils/deploy";
 import { SybelToken } from "../../types";
+import { findContract } from "../utils/deploy";
 
 (async () => {
   try {
@@ -13,9 +13,12 @@ import { SybelToken } from "../../types";
     // Find the erc 20 contract
     const sybelToken = await findContract<SybelToken>("SybelToken", erc20TokenAddr);
 
-    const mintTx = await sybelToken.mint("0xC442bc81106704628B87AC71781D4CCAD4b00132", BigNumber.from(10).pow(18).mul(500))
+    const mintTx = await sybelToken.mint(
+      "0xC442bc81106704628B87AC71781D4CCAD4b00132",
+      BigNumber.from(10).pow(18).mul(500),
+    );
 
-    console.log("Minting token on the tx " + mintTx.hash)
+    console.log("Minting token on the tx " + mintTx.hash);
 
     console.log("Finished to update one of our contract");
   } catch (e: any) {

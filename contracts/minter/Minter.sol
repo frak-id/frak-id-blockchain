@@ -10,13 +10,13 @@ import "../utils/MintingAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 /// @dev Error emitted when the input supply is invalid
-    error InvalidSupply();
+error InvalidSupply();
 
 /// @dev Error emitted when the user havn't enought balance
-    error NotEnoughBalance();
+error NotEnoughBalance();
 
 /// @dev Error emitted when it remain some fraktion supply when wanting to increase it
-    error RemainingSupply();
+error RemainingSupply();
 
 /**
  * @dev Represent our minter contract

@@ -36,7 +36,7 @@ import { minterRole, rewarderRole, tokenContractRole } from "../utils/roles";
       internalToken.address,
       referralPool.address,
       contentPool.address,
-      fondationWallet
+      fondationWallet,
     ]);
 
     // Deploy the minter contract

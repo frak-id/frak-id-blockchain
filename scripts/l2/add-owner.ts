@@ -20,7 +20,7 @@ import { adminRole, badgeUpdaterRole, minterRole, rewarderRole, vestingManagerRo
     const fireblocksAddr = "0x9f6f0915dA5452786A5A5Dc08fE5412a2981D746";
 
     const sybelCorpWallet = (await hre.ethers.getSigners())[0].address;
-    console.log(sybelCorpWallet)
+    console.log(sybelCorpWallet);
 
     // Find our contracts
     const minter = await findContract<Minter>("Minter", deployedAddresses.l2.minter);
