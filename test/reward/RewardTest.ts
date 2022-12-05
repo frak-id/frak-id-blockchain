@@ -4,15 +4,15 @@ import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
-import { BUYABLE_TOKEN_TYPES, TOKEN_TYPE_GOLD, buildFractionId } from "../../scripts/utils/mathUtils";
-import { minterRole, rewarderRole } from "../../scripts/utils/roles";
+import { buildFractionId, BUYABLE_TOKEN_TYPES, TOKEN_TYPE_GOLD } from "../../scripts/utils/mathUtils";
+import { minterRole, rewarderRole, tokenContractRole } from "../../scripts/utils/roles";
 import { Rewarder } from "../../types/contracts/reward/Rewarder";
 import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
 import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
 import { ContentOwnerUpdatedEvent, SybelInternalTokens } from "../../types/contracts/tokens/SybelInternalTokens";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 
-describe.only("Rewarder", () => {
+describe("Rewarder", () => {
   let sybelToken: SybelToken;
   let internalToken: SybelInternalTokens;
   let referral: ReferralPool;
@@ -51,6 +51,9 @@ describe.only("Rewarder", () => {
     // Grant the rewarder role to the referral contract
     await referral.grantRole(rewarderRole, rewarder.address);
     await contentPool.grantRole(rewarderRole, rewarder.address);
+
+    // Grant the token contract role to the content pool
+    await contentPool.grantRole(tokenContractRole, internalToken.address);
 
     // Setup the callback on the internal tokens for our content pool
     await internalToken.registerNewCallback(contentPool.address);

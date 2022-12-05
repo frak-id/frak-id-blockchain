@@ -45,7 +45,7 @@ describe("MultipleVestingWallets", () => {
       const decimals = await multiVestingWallets.decimals();
 
       expect(name).not.to.be.null;
-      expect(symbol).to.equal("vSYBL");
+      expect(symbol).to.equal("vFRK");
       expect(decimals).to.equal(await sybelToken.decimals());
     });
   });

@@ -8,7 +8,7 @@ export const rewarderRole = utils.keccak256(utils.toUtf8Bytes("REWARDER_ROLE"));
 export const badgeUpdaterRole = utils.keccak256(utils.toUtf8Bytes("BADGE_UPDATER_ROLE"));
 export const vestingManagerRole = utils.keccak256(utils.toUtf8Bytes("VESTING_MANAGER"));
 export const vestingCreatorRole = utils.keccak256(utils.toUtf8Bytes("VESTING_CREATOR"));
-export const tokenContractRole = utils.keccak256(utils.toUtf8Bytes("TOKEN_CONTRACT"));
+export const tokenContractRole = utils.keccak256(utils.toUtf8Bytes("TOKEN_ROLE"));
 
 export const predicateRole = utils.keccak256(utils.toUtf8Bytes("PREDICATE_ROLE"));
 export const depositorRole = utils.keccak256(utils.toUtf8Bytes("DEPOSITOR_ROLE"));

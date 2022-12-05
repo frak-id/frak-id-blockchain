@@ -4,8 +4,8 @@ import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
-import { BUYABLE_TOKEN_TYPES, buildFractionId } from "../../scripts/utils/mathUtils";
-import { rewarderRole } from "../../scripts/utils/roles";
+import { buildFractionId, BUYABLE_TOKEN_TYPES } from "../../scripts/utils/mathUtils";
+import { rewarderRole, tokenContractRole } from "../../scripts/utils/roles";
 import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 import { address0 } from "../utils/test-utils";
@@ -30,6 +30,7 @@ describe("ContentPool", () => {
 
     // Grant the rewarder role to the referral contract
     await contentPool.grantRole(rewarderRole, owner.address);
+    await contentPool.grantRole(tokenContractRole, owner.address);
 
     // Mint some token to the pool
     await sybelToken.mint(contentPool.address, BigNumber.from(10).pow(24));
