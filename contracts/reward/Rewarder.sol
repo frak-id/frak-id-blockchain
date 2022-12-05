@@ -97,7 +97,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         address foundationAddr
     ) external initializer {
         if (
-            sybelTokenAddr == address(0) ||
+            syblTokenAddr == address(0) ||
             internalTokenAddr == address(0) ||
             contentPoolAddr == address(0) ||
             referralAddr == address(0) ||
