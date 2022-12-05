@@ -29,6 +29,8 @@ those who create, those who fund and those who consume content. By empowering al
 rewarded for the value they create, whether that be through work, investment or engagement, the Frak ecosystem believes
 that Web3 is the ideal way to make that happens.
 
+## Contracts
+
 ```ml
 minter
 ├─ Minter — "Mint new content, mint fraktions of content and increase fraktions supply"
