@@ -2,19 +2,24 @@ import * as fs from "fs";
 import hre from "hardhat";
 
 import * as deployedAddresses from "../../addresses.json";
-import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
-import { MultiVestingWallets } from "../../types/contracts/wallets/MultiVestingWallets";
-import { VestingWalletFactory } from "../../types/contracts/wallets/VestingWalletFactory";
+import { MultiVestingWallets, SybelToken, VestingWalletFactory } from "../../types";
 import { deployContract } from "../utils/deploy";
 import { vestingManagerRole } from "../utils/roles";
 
 (async () => {
   try {
     console.log("Starting to deploy the SybelToken and the VestingWallet");
+    const networkName = hre.hardhatArguments.network ?? "local";
+    // Get the right child manager proxy depending on the env
+    let childManagerProxy: string;
+    if (networkName == "mumbai") {
+      childManagerProxy = "0xb5505a6d998549090530911180f38aC5130101c6";
+    } else if (networkName == "polygon") {
+      childManagerProxy = "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa";
+    } else {
+      throw new Error("Invalid network");
+    }
     // Deploy our sybl token contract
-    const childManagerProxy = "0xb5505a6d998549090530911180f38aC5130101c6";
-    // mainnet proxy :
-    // const childManagerProxy = "0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa";
     const sybelToken = await deployContract<SybelToken>("SybelToken", [childManagerProxy]);
     console.log(`Sybel token L2 was deployed to ${sybelToken.address}`);
     // Deploy vesting wallet and vesting wallt factory
@@ -31,20 +36,18 @@ import { vestingManagerRole } from "../utils/roles";
     await multiVestingWallet.grantRole(vestingManagerRole, vestingWalletFactory.address);
     console.log("Vesting wallet has now the manager role on the muyltivesting wallet");
 
-    // Build our deplyoed address object
-    const addresses = {
-      ...deployedAddresses,
-      l2: {
-        sybelToken: sybelToken.address,
-        multiVestingWallet: multiVestingWallet.address,
-        vestingWalletFactory: vestingWalletFactory.address,
-      },
-      default: null,
-    };
+    // Build our deployed address object
+    const addressesMap: Map<string, any> = new Map(Object.entries(deployedAddresses));
+    addressesMap.delete("default");
+    addressesMap.set(networkName, {
+      ...addressesMap.get(networkName),
+      sybelToken: sybelToken.address,
+      multiVestingWallet: multiVestingWallet.address,
+      vestingWalletFactory: vestingWalletFactory.address,
+    });
     // Then wrote it into a file
-    const jsonAddresses = JSON.stringify(addresses);
+    const jsonAddresses = JSON.stringify(Object.fromEntries(addressesMap));
     fs.writeFileSync("addresses.json", jsonAddresses);
-    fs.writeFileSync(`addresses-${hre.hardhatArguments.network}.json`, jsonAddresses);
 
     console.log("Finished to deploy the SybelToken and the VestingWallet");
 
