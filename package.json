@@ -1,5 +1,5 @@
 {
-  "name": "@sybel-io-blockchain/contracts",
+  "name": "@frak-id-blockchain/contracts",
   "version": "1.0.0",
   "description": "All the smart contracts, with the associated tests, scripts and tasks",
   "license": "MIT",
