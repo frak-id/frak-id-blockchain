@@ -90,18 +90,26 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     }
 
     function initialize(
-        address syblTokenAddr,
+        address frkTokenAddr,
         address internalTokenAddr,
         address contentPoolAddr,
         address referralAddr,
         address foundationAddr
     ) external initializer {
+        if (
+            frkTokenAddr == address(0) ||
+            internalTokenAddr == address(0) ||
+            contentPoolAddr == address(0) ||
+            referralAddr == address(0) ||
+            foundationAddr == address(0)
+        ) revert InvalidAddress();
+
         // Only for v1 deployment
         __SybelAccessControlUpgradeable_init();
-        __PushPullReward_init(syblTokenAddr);
+        __PushPullReward_init(frkTokenAddr);
 
         sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
-        sybelToken = SybelToken(syblTokenAddr);
+        sybelToken = SybelToken(frkTokenAddr);
         contentPool = ContentPool(contentPoolAddr);
         referralPool = ReferralPool(referralAddr);
 

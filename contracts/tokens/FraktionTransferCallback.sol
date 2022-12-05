@@ -9,5 +9,5 @@ interface FraktionTransferCallback {
     /**
      * Function called when a fraktion is transfered between two person
      */
-    function onFraktionsTransfered(address from, address to, uint256[] memory ids, uint256[] memory amount) external;
+    function onFraktionsTransferred(address from, address to, uint256[] memory ids, uint256[] memory amount) external;
 }

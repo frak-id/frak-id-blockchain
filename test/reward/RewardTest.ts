@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
-import { buildFractionId, BUYABLE_TOKEN_TYPES, TOKEN_TYPE_GOLD } from "../../scripts/utils/mathUtils";
+import { BUYABLE_TOKEN_TYPES, TOKEN_TYPE_GOLD, buildFractionId } from "../../scripts/utils/mathUtils";
 import { minterRole, rewarderRole, tokenContractRole } from "../../scripts/utils/roles";
 import { Rewarder } from "../../types/contracts/reward/Rewarder";
 import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";

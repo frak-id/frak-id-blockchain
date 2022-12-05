@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
-import { buildFractionId, BUYABLE_TOKEN_TYPES } from "../../scripts/utils/mathUtils";
+import { BUYABLE_TOKEN_TYPES, buildFractionId } from "../../scripts/utils/mathUtils";
 import { rewarderRole, tokenContractRole } from "../../scripts/utils/roles";
 import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";

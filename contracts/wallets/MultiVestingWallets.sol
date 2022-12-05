@@ -93,6 +93,8 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
 
     /// Init our contract, with the sybel tokan and base role init
     function initialize(address tokenAddr) external initializer {
+        if (tokenAddr == address(0)) revert InvalidAddress();
+
         __SybelAccessControlUpgradeable_init();
 
         // Grand the vesting manager role to the owner
@@ -181,8 +183,8 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
 
         for (uint256 index; index < beneficiaries.length; ) {
             uint256 amount = amounts[index];
-            _createVesting(beneficiaries[index], amount, initialDrops[index], duration, startDate, revocable);
             if (amount > freeReserve) revert NotEnoughFounds();
+            _createVesting(beneficiaries[index], amount, initialDrops[index], duration, startDate, revocable);
             // Increment free reserve and counter
             unchecked {
                 freeReserve -= amount;
@@ -322,6 +324,9 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
             vesting.released += releasable;
             totalSupply -= releasable;
 
+            /// Emitted when a part of the vesting is released
+            emit VestingReleased(vesting.id, vesting.beneficiary, releasable);
+
             // Then perform the transfer
             token.safeTransfer(vesting.beneficiary, releasable);
         }
@@ -426,7 +431,8 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
             uint256 amountForVesting = ((vesting.amount - vesting.initialDrop) *
                 (block.timestamp - vesting.startDate)) / vesting.duration;
             uint256 linearAmountComputed = amountForVesting + vesting.initialDrop;
-            if (linearAmountComputed > REWARD_CAP) revert ComputationError(); // Ensure we are still on a uint96
+            if (linearAmountComputed > REWARD_CAP) revert ComputationError();
+            // Ensure we are still on a uint96
             return uint96(linearAmountComputed);
         }
     }
