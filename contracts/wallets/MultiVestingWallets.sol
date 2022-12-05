@@ -181,8 +181,8 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
 
         for (uint256 index; index < beneficiaries.length; ) {
             uint256 amount = amounts[index];
-            _createVesting(beneficiaries[index], amount, initialDrops[index], duration, startDate, revocable);
             if (amount > freeReserve) revert NotEnoughFounds();
+            _createVesting(beneficiaries[index], amount, initialDrops[index], duration, startDate, revocable);
             // Increment free reserve and counter
             unchecked {
                 freeReserve -= amount;
