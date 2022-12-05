@@ -322,6 +322,9 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
             vesting.released += releasable;
             totalSupply -= releasable;
 
+            /// Emitted when a part of the vesting is released
+            emit VestingReleased(vesting.id, vesting.beneficiary, releasable);
+
             // Then perform the transfer
             token.safeTransfer(vesting.beneficiary, releasable);
         }
