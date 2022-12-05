@@ -59,11 +59,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         _disableInitializers();
     }
 
-    function initialize(
-        address frkTokenAddr,
-        address internalTokenAddr,
-        address foundationAddr
-    ) external initializer {
+    function initialize(address frkTokenAddr, address internalTokenAddr, address foundationAddr) external initializer {
         if (frkTokenAddr == address(0) || internalTokenAddr == address(0) || foundationAddr == address(0))
             revert InvalidAddress();
 
