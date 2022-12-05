@@ -164,7 +164,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
 
         // Call our callback
         if (address(transferCallback) != address(0)) {
-            transferCallback.onFraktionsTransfered(from, to, ids, amounts);
+            transferCallback.onFractionsTransferred(from, to, ids, amounts);
         }
     }
 

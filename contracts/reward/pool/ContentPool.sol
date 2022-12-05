@@ -112,7 +112,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
     /**
      * @dev called when new fraktions are transfered
      */
-    function onFraktionsTransfered(
+    function onFraktionsTransferred(
         address from,
         address to,
         uint256[] memory ids,
