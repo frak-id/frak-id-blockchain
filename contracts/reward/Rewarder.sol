@@ -139,6 +139,33 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     }
 
     /**
+     * @dev Directly pay a user (or an owner) for the given frk amount
+     */
+    function payCreatorDirectlyBatch(
+        uint256[] calldata contentIds,
+        uint256[] calldata amounts
+    ) external onlyRole(SybelRoles.REWARDER) whenNotPaused {
+        // Ensure we got valid data
+        if (contentIds.length != amounts.length || contentIds.length > MAX_BATCH_AMOUNT) revert InvalidArray();
+
+        // Then, for each content contentIds
+        for (uint256 i; i < contentIds.length; ) {
+            // Ensure the reward is valid
+            if (amounts[i] > SINGLE_REWARD_CAP || amounts[i] == 0 || amounts[i] + totalFrakMinted > REWARD_MINT_CAP)
+                revert InvalidReward();
+            // Increase our total frak minted
+            totalFrakMinted += amounts[i];
+            // Get the creator address
+            address owner = sybelInternalTokens.ownerOf(contentIds[i]);
+            _addFoundsUnchecked(owner, amounts[i]);
+
+            unchecked {
+                i++;
+            }
+        }
+    }
+
+    /**
      * @dev Compute the reward for a user, given the content and listens, and pay him and the owner
      */
     function payUser(
