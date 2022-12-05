@@ -96,6 +96,14 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         address referralAddr,
         address foundationAddr
     ) external initializer {
+        if (
+            sybelTokenAddr == address(0) ||
+            internalTokenAddr == address(0) ||
+            contentPoolAddr == address(0) ||
+            referralAddr == address(0) ||
+            foundationAddr == address(0)
+        ) revert InvalidAddress();
+
         // Only for v1 deployment
         __SybelAccessControlUpgradeable_init();
         __PushPullReward_init(syblTokenAddr);

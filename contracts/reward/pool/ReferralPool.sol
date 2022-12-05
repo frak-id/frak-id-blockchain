@@ -44,6 +44,8 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
     }
 
     function initialize(address sybelTokenAddr) external initializer {
+        if (syblTokenAddr == address(0)) revert InvalidAddress();
+
         __SybelAccessControlUpgradeable_init();
         __PushPullReward_init(sybelTokenAddr);
     }
