@@ -1,6 +1,6 @@
-# Sybel.io
+# Frak.id
 
-The Sybel Ecosystem is build to align interests of Creators and their Community in order to reinvent the IP monetization market. Creators mint their Work as a NFT and can fractionalize it in different rarity tokens to offer their community the opportunity to buy some shares, in exchange for profits, rewards or even governance rights.
+The Frak Ecosystem is build to align interests of Creators and their Community in order to reinvent the IP monetization market. Creators mint their Work as a NFT and can fractionalize it in different rarity tokens to offer their community the opportunity to buy some shares, in exchange for profits, rewards or even governance rights.
 Then, when a User interact (listen, watch, read...) with content, on the platform of their choice, Creators earn tokens (TSE) that they share with Users. Several interactions can make Users reach the next level to get special NFT.Creators mint their Work as a NFT and fractionalize it to offer their community the opportunity to buy some shares, in exchange for profits, rewards or even governance rights (micro DAO).
 Creators’ and Users’ TSE earnings are stored in the in-app custodial Wallet created for them. Custodial Wallets have a built-in Swap function.
 
@@ -10,7 +10,7 @@ Creators’ and Users’ TSE earnings are stored in the in-app custodial Wallet 
 
 ## Our Vision
 
-Our vision is to give Creators the rightful place they deserve in society. The value has to be shared equally between those who create, those who fund and those who consume content. By empowering all these people to govern and to be rewarded for the value they create, whether that be through work, investment or engagement, the Sybel ecosystem believes that Web3 is the ideal way to make that happens.
+Our vision is to give Creators the rightful place they deserve in society. The value has to be shared equally between those who create, those who fund and those who consume content. By empowering all these people to govern and to be rewarded for the value they create, whether that be through work, investment or engagement, the Frak ecosystem believes that Web3 is the ideal way to make that happens.
 
 ## Pushing decentralization even further
 
