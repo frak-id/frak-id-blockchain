@@ -134,9 +134,8 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         // Increase our total frak minted
         totalFrakMinted += amount;
 
-        // Mint ad save the reward for the user
-        _addFounds(listener, amount);
-        sybelToken.mint(address(this), amount);
+        // Mint the reward for the user
+        sybelToken.mint(listener, amount);
     }
 
     /**
