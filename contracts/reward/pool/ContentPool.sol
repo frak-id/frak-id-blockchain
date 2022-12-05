@@ -88,12 +88,12 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         _disableInitializers();
     }
 
-    function initialize(address syblTokenAddr) external initializer {
-        if (syblTokenAddr == address(0)) revert InvalidAddress();
+    function initialize(address frkTokenAddr) external initializer {
+        if (frkTokenAddr == address(0)) revert InvalidAddress();
 
         // Only for v1 deployment
         __SybelAccessControlUpgradeable_init();
-        __PushPullReward_init(syblTokenAddr);
+        __PushPullReward_init(frkTokenAddr);
     }
 
     /**

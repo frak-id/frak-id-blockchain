@@ -60,18 +60,18 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
     }
 
     function initialize(
-        address sybelTokenAddr,
+        address frkTokenAddr,
         address internalTokenAddr,
         address foundationAddr
     ) external initializer {
-        if (sybelTokenAddr == address(0) || internalTokenAddr == address(0) || foundationAddr == address(0))
+        if (frkTokenAddr == address(0) || internalTokenAddr == address(0) || foundationAddr == address(0))
             revert InvalidAddress();
 
         // Only for v1 deployment
         __MintingAccessControlUpgradeable_init();
 
         sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
-        sybelToken = SybelToken(sybelTokenAddr);
+        sybelToken = SybelToken(frkTokenAddr);
 
         foundationWallet = foundationAddr;
 
