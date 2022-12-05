@@ -5,7 +5,7 @@ analyze:
   mode: standard
   async: true
   create-group: true
-  group-name: Frak.io Vesting
+  group-name: Frak.id erc20 and vesting
   solc: 0.8.17
   remappings:
     - "@openzeppelin/=node_modules/@openzeppelin/"

@@ -5,13 +5,12 @@ analyze:
   mode: standard
   async: true
   create-group: true
-  group-name: Frak.io Ecosystem
+  group-name: Frak.id erc1155 and ecosystem
   solc: 0.8.17
   remappings:
     - "@openzeppelin/=node_modules/@openzeppelin/"
   targets:
     - contracts/tokens/SybelInternalTokens.sol
-    - contracts/reward/Rewarder.sol
     - contracts/reward/pool/ContentPool.sol
     - contracts/reward/pool/ReferralPool.sol
     - contracts/minter/Minter.sol
