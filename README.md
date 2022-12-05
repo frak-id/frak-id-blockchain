@@ -1,16 +1,16 @@
 # <img src="logo.jpeg" alt="frak-logo" height="150"/>
 
-[![Project license](https://badgen.net/github/sybel-app/frak-id-blockchain)](https://github.com/sybel-app/frak-id-blockchain/LICENSE.txt)
+# Frak.id
 
-[![solidity - v0.8.117](https://img.shields.io/badge/solidity-v0.8.17-2ea44f?logo=solidity)](https://github.com/sybel-app/frak-id-blockchain)
+[![Project license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/frak-id/frak-id-blockchain/LICENSE.txt)
+
+[![solidity - v0.8.117](https://img.shields.io/badge/solidity-v0.8.17-2ea44f?logo=solidity)](https://github.com/frak-id/frak-id-blockchain)
 
 [![Test smart contracts](https://github.com/sybel-app/frak-id-blockchain/actions/workflows/test.yml/badge.svg)](https://github.com/sybel-app/frak-id-blockchain/actions/workflows/test.yml)
 
 [![SafetinErc20](https://badgen.net/badge/Safetin%20ecosystem/passed/green?icon=https://uploads-ssl.webflow.com/624b2fb0a98b08011e0bf1d0/624c870d20ffb8fcf547507c_icon-safetin.svg)](https://www.safetin.com/audit/frak)
 [![SafetinEcosystem](https://badgen.net/badge/Safetin%20erc20/passed/green?icon=https://uploads-ssl.webflow.com/624b2fb0a98b08011e0bf1d0/624c870d20ffb8fcf547507c_icon-safetin.svg)](https://www.safetin.com/audit/frak-2)
 [![MythXBadge](https://badgen.net/https/api.mythx.io/v1/projects/df0aab13-6b4e-4e67-ab53-d4472414264a/badge/data?cache=300&icon=https://raw.githubusercontent.com/ConsenSys/mythx-github-badge/main/logo_white.svg)](https://docs.mythx.io/dashboard/github-badges)
-
-# Frak.id
 
 The Frak Ecosystem is build to align interests of Creators and their Community in order to reinvent the IP monetization
 market. Creators mint their Work as a NFT and can fractionalize it in different rarity tokens to offer their community
@@ -19,7 +19,7 @@ Then, when a User interact (listen, watch, read...) with content, on the platfor
 tokens (TSE) that they share with Users. Several interactions can make Users reach the next level to get special
 NFT.Creators mint their Work as a NFT and fractionalize it to offer their community the opportunity to buy some shares,
 in exchange for profits, rewards or even governance rights (micro DAO).
-Creators’ and Users’ TSE earnings are stored in the in-app custodial Wallet created for them. Custodial Wallets have a
+Creators’ and Users’ FRK earnings are stored in the in-app custodial Wallet created for them. Custodial Wallets have a
 built-in Swap function.
 
 ## Our Vision
