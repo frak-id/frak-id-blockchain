@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
-import { BUYABLE_TOKEN_TYPES, buildFractionId } from "../../scripts/utils/mathUtils";
+import { buildFractionId, BUYABLE_TOKEN_TYPES } from "../../scripts/utils/mathUtils";
 import { rewarderRole, tokenContractRole } from "../../scripts/utils/roles";
 import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
@@ -58,7 +58,7 @@ describe("ContentPool", () => {
       for (const addr of addrs) {
         for (const tokenType of BUYABLE_TOKEN_TYPES) {
           // Update the share, and add some reward for this content
-          await contentPool.onFraktionsTransfered(address0, addr.address, [buildFractionId(index, tokenType)], [5]);
+          await contentPool.onFraktionsTransferred(address0, addr.address, [buildFractionId(index, tokenType)], [5]);
           await contentPool.addReward(index, BigNumber.from(10).pow(18).mul(10));
         }
       }

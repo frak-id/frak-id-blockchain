@@ -29,33 +29,67 @@ those who create, those who fund and those who consume content. By empowering al
 rewarded for the value they create, whether that be through work, investment or engagement, the Frak ecosystem believes
 that Web3 is the ideal way to make that happens.
 
-## Contributing
+```ml
+minter
+├─ Minter — "Mint new content, mint fraktions of content and increase fraktions supply"
+├─ badges
+│  ├─ FractionCostBadges — "Small contract that store the cost badges of each fraktions"
+reward
+├─ Rewarder — "Reward the user content consumption, from contentIds and CCU's"
+├─ badges
+│  ├─ ContentBadges — "Small contract storing the badges for each content's"
+│  ├─ ListenerBadges — "Small contract storing the badges for each listener's"
+├─ pool
+│  ├─ ContentPool — "Pool that split reward gain for each content between each investor's"
+│  ├─ ReferralPool — "Pool that split reward gain by each listener to each one of his referrer"
+tokens
+├─ FraktionTransferCallback — "Callback interface for the transfer of content fraktions"
+├─ SybelInternalTokens — "ERC1155 storing all of our fraktions"
+├─ SybelTokenL1 — "FrkToken on the ETH chain (for bridge purpose only)"
+├─ SybelTokenL2 — "FrkToken on the Polygon chain"
+wallets
+├─ MultiVestingWallets — "Contract that handle the vestings of multiple user's"
+├─ VestingWalletFactory — "Helping us with the creation of vestings following some defined criteria (initial drop, cliff etc)"
+utils
+├─ SybelRoles — "All the roles we use in our contracts"
+├─ SybelMath — "Some math utils, to create fraktionId, or extract contentId from fraktionId."
+├─ SybelAccessControlUpgradeable — "Base access control contract used by every contract"
+├─ MintingAccessControlUpgradeable — "Reviewed access control contract, with more options for the minting part (so for token's and minter)"
+├─ PushPullReward — "Abtract contract that implement basic Push/Pull reward (we store reward amount, then the user withdraw it), helping us gain some gas"
+```
 
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any
-contributions you make are **greatly appreciated**.
+## Installation
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+To install and build with [**Hardhat**](https://github.com/nomiclabs/hardhat) :
 
-## Setup EC2 for testing
-
-````shell
-sudo yum update -y
-sudo yum install docker -y
-curl --silent --location https://rpm.nodesource.com/setup_16.x | sudo bash -
-sudo yum install -y nodejs
-sudo service docker start
-sudo usermod -a -G docker ec2-user
-sudo yum install git
-mkdir sybel
-cd sybel/
-git clone https://**PersonalGitAccessToken**@github.com/sybel-app/frak-id-blockchain.git
+```sh
+# Install
+git clone https://github.com/sybel-app/frak-id-blockchain.git
 cd frak-id-blockchain/
-git status
-git pull
 npm i
-nohup sh tools/run-all-nohup.sh
-````
+# Build
+npm run build
+# Test
+npm run test
+```
+
+To install with [**Foundry**](https://github.com/gakonst/foundry):
+
+```sh
+# Install
+git clone https://github.com/sybel-app/frak-id-blockchain.git
+cd frak-id-blockchain/
+# Build
+forge build
+```
+
+## Keep in touch
+
+[![Home page](https://badgen.net/badge/icon/website?icon=https://frak.id/images/logos/frak_logo_01.svg&label)](https://frak.id/)
+
+[![FAQ page](https://badgen.net/badge/icon/white%20paper?icon=https://frak.id/images/logos/frak_logo_01.svg&label)](https://help.frak.id/)
+
+[![Medium Badge](https://badgen.net/badge/icon/medium?icon=medium&label)](https://medium.com/frak-defi)
+
+[![Twitter Badge](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/frak_defi)
+
