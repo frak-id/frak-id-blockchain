@@ -2,19 +2,14 @@ import * as fs from "fs";
 import hre from "hardhat";
 
 import * as deployedAddresses from "../../addresses.json";
-import { Minter } from "../../types/contracts/minter/Minter";
-import { Rewarder } from "../../types/contracts/reward/Rewarder";
-import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
-import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
-import { SybelInternalTokens } from "../../types/contracts/tokens/SybelInternalTokens";
-import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
+import { ContentPool, Minter, ReferralPool, Rewarder, SybelInternalTokens, SybelToken } from "../../types";
 import { deployContract, findContract } from "../utils/deploy";
 import { minterRole, rewarderRole, tokenContractRole } from "../utils/roles";
 
 (async () => {
   try {
     console.log("Starting to deploy the eco system contracts");
-    const erc20TokenAddr = deployedAddresses.l2.sybelToken;
+    const erc20TokenAddr = deployedAddresses.mumbai.sybelToken;
 
     // Find the erc 20 contract
     const sybelToken = await findContract<SybelToken>("SybelToken", erc20TokenAddr);
@@ -55,24 +50,21 @@ import { minterRole, rewarderRole, tokenContractRole } from "../utils/roles";
     // Grant the minting role to the minter contract
     await internalToken.grantRole(minterRole, minter.address);
 
-    // Build our deplyoed address object
-    const addresses = {
-      ...deployedAddresses,
-      l2: {
-        ...deployedAddresses.l2,
-        internalToken: internalToken.address,
-        referralPool: referralPool.address,
-        contentPool: contentPool.address,
-        rewarder: rewarder.address,
-        minter: minter.address,
-        default: null,
-      },
-      default: null,
-    };
+    // Build our deployed address object
+    const networkName = hre.hardhatArguments.network ?? "local";
+    const addressesMap: Map<string, any> = new Map(Object.entries(deployedAddresses));
+    addressesMap.delete("default");
+    addressesMap.set(networkName, {
+      ...addressesMap.get(networkName),
+      internalToken: internalToken.address,
+      referralPool: referralPool.address,
+      contentPool: contentPool.address,
+      rewarder: rewarder.address,
+      minter: minter.address,
+    });
     // Then wrote it into a file
-    const jsonAddresses = JSON.stringify(addresses);
+    const jsonAddresses = JSON.stringify(Object.fromEntries(addressesMap));
     fs.writeFileSync("addresses.json", jsonAddresses);
-    fs.writeFileSync(`addresses-${hre.hardhatArguments.network}.json`, jsonAddresses);
 
     console.log("Finished to deploy the eco system contracts");
 

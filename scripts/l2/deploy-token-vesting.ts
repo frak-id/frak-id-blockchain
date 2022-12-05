@@ -31,20 +31,19 @@ import { vestingManagerRole } from "../utils/roles";
     await multiVestingWallet.grantRole(vestingManagerRole, vestingWalletFactory.address);
     console.log("Vesting wallet has now the manager role on the muyltivesting wallet");
 
-    // Build our deplyoed address object
-    const addresses = {
-      ...deployedAddresses,
-      l2: {
-        sybelToken: sybelToken.address,
-        multiVestingWallet: multiVestingWallet.address,
-        vestingWalletFactory: vestingWalletFactory.address,
-      },
-      default: null,
-    };
+    // Build our deployed address object
+    const networkName = hre.hardhatArguments.network ?? "local";
+    const addressesMap: Map<string, any> = new Map(Object.entries(deployedAddresses));
+    addressesMap.delete("default");
+    addressesMap.set(networkName, {
+      ...addressesMap.get(networkName),
+      sybelToken: sybelToken.address,
+      multiVestingWallet: multiVestingWallet.address,
+      vestingWalletFactory: vestingWalletFactory.address,
+    });
     // Then wrote it into a file
-    const jsonAddresses = JSON.stringify(addresses);
+    const jsonAddresses = JSON.stringify(Object.fromEntries(addressesMap));
     fs.writeFileSync("addresses.json", jsonAddresses);
-    fs.writeFileSync(`addresses-${hre.hardhatArguments.network}.json`, jsonAddresses);
 
     console.log("Finished to deploy the SybelToken and the VestingWallet");
 

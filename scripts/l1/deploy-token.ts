@@ -1,4 +1,4 @@
-import * as fs from "fs";
+import fs from "fs";
 import hre from "hardhat";
 
 import * as deployedAddresses from "../../addresses.json";
@@ -20,18 +20,17 @@ import { predicateRole } from "../utils/roles";
 
     await sybelToken.grantRole(predicateRole, predicateProxyAddr);
 
-    // Build our deplyoed address object
-    const addresses = {
-      ...deployedAddresses,
-      l1: {
-        sybelToken: sybelToken.address,
-      },
-      default: null,
-    };
+    // Build our deployed address object
+    const networkName = hre.hardhatArguments.network ?? "local";
+    const addressesMap: Map<string, any> = new Map(Object.entries(deployedAddresses));
+    addressesMap.delete("default");
+    addressesMap.set(networkName, {
+      ...addressesMap.get(networkName),
+      sybelToken: sybelToken.address,
+    });
     // Then wrote it into a file
-    const jsonAddresses = JSON.stringify(addresses);
+    const jsonAddresses = JSON.stringify(Object.fromEntries(addressesMap));
     fs.writeFileSync("addresses.json", jsonAddresses);
-    fs.writeFileSync(`addresses-${hre.hardhatArguments.network}.json`, jsonAddresses);
   } catch (e: any) {
     console.log(e.message);
   }

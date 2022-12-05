@@ -10,7 +10,7 @@ npm run test
 
 ## Setup EC2 for tools testing
 
-````shell
+```shell
 sudo yum update -y
 sudo yum install docker -y
 curl --silent --location https://rpm.nodesource.com/setup_16.x | sudo bash -
@@ -26,4 +26,4 @@ git status
 git pull
 npm i
 nohup sh tools/run-all-nohup.sh
-````
+```
