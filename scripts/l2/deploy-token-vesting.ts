@@ -27,7 +27,6 @@ import { vestingManagerRole } from "../utils/roles";
     console.log(`Multi vesting wallet was deployed to ${multiVestingWallet.address}`);
 
     const vestingWalletFactory = await deployContract<VestingWalletFactory>("VestingWalletFactory", [
-      sybelToken.address,
       multiVestingWallet.address,
     ]);
     console.log("Vesting wallet was deployed to " + vestingWalletFactory.address);

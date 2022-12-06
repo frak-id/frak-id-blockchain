@@ -8,7 +8,7 @@ import { findContract } from "../utils/deploy";
   try {
     console.log("Start to mint some tokens");
 
-    const erc20TokenAddr = deployedAddresses.l2.sybelToken;
+    const erc20TokenAddr = deployedAddresses.mumbai.sybelToken;
 
     // Find the erc 20 contract
     const sybelToken = await findContract<SybelToken>("SybelToken", erc20TokenAddr);

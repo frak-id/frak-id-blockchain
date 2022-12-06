@@ -35,11 +35,6 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
     uint256 internal totalGroupCap;
 
     /**
-     * @dev Access our sybel token
-     */
-    SybelToken private sybelToken;
-
-    /**
      * @dev Access our multi vesting wallets
      */
     MultiVestingWallets private multiVestingWallets;
@@ -59,8 +54,8 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
     event GroupSupplyTransfer(uint8 indexed initialId, uint8 indexed targetId, uint96 amount);
     event GroupUserAdded(uint8 indexed id, address benefiary, uint96 reward);
 
-    function initialize(address frkTokenAddr, address multiVestingWalletAddr) external initializer {
-        if (frkTokenAddr == address(0) || multiVestingWalletAddr == address(0)) revert InvalidAddress();
+    function initialize(address multiVestingWalletAddr) external initializer {
+        if (multiVestingWalletAddr == address(0)) revert InvalidAddress();
 
         __SybelAccessControlUpgradeable_init();
 
@@ -68,7 +63,6 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         _grantRole(SybelRoles.VESTING_CREATOR, msg.sender);
 
         // Init our sybel token and multi vesting wallet
-        sybelToken = SybelToken(frkTokenAddr);
         multiVestingWallets = MultiVestingWallets(multiVestingWalletAddr);
     }
 

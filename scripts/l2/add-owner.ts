@@ -23,13 +23,13 @@ import { adminRole, badgeUpdaterRole, minterRole, rewarderRole, vestingManagerRo
     console.log(sybelCorpWallet);
 
     // Find our contracts
-    const minter = await findContract<Minter>("Minter", deployedAddresses.l2.minter);
-    const rewarder = await findContract<Rewarder>("Rewarder", deployedAddresses.l2.rewarder);
-    const contentPool = await findContract<ContentPool>("ContentPool", deployedAddresses.l2.contentPool);
-    const referralPool = await findContract<ReferralPool>("ReferralPool", deployedAddresses.l2.referralPool);
+    const minter = await findContract<Minter>("Minter", deployedAddresses.mumbai.minter);
+    const rewarder = await findContract<Rewarder>("Rewarder", deployedAddresses.mumbai.rewarder);
+    const contentPool = await findContract<ContentPool>("ContentPool", deployedAddresses.mumbai.contentPool);
+    const referralPool = await findContract<ReferralPool>("ReferralPool", deployedAddresses.mumbai.referralPool);
     const vestingWallets = await findContract<MultiVestingWallets>(
       "MultiVestingWallets",
-      deployedAddresses.l2.referralPool,
+      deployedAddresses.mumbai.referralPool,
     );
 
     // Add the right roles
