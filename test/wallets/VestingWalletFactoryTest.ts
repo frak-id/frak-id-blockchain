@@ -39,10 +39,7 @@ describe("VestingWalletFactory", () => {
     // Deploy our sybel token and vesting wallets
     sybelToken = await deployContract("SybelToken", [addr2.address]);
     multiVestingWallets = await deployContract("MultiVestingWallets", [sybelToken.address]);
-    vestingWalletFactory = await deployContract("VestingWalletFactory", [
-      sybelToken.address,
-      multiVestingWallets.address,
-    ]);
+    vestingWalletFactory = await deployContract("VestingWalletFactory", [multiVestingWallets.address]);
 
     // Grant the vesting manager role to the vesting factory
     await multiVestingWallets.grantRole(vestingManagerRole, vestingWalletFactory.address);
