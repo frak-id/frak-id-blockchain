@@ -165,6 +165,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
             totalFrakMinted += amounts[i];
             // Get the creator address
             address owner = sybelInternalTokens.ownerOf(contentIds[i]);
+            if (owner == address(0)) revert InvalidAddress();
             _addFoundsUnchecked(owner, amounts[i]);
 
             unchecked {
@@ -344,6 +345,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         }
         // Save the amount for the owner
         address owner = sybelInternalTokens.ownerOf(contentId);
+        if (owner == address(0)) revert InvalidAddress();
         _addFoundsUnchecked(owner, ownerReward);
     }
 
