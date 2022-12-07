@@ -157,6 +157,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         if (contentIds.length != amounts.length || contentIds.length > MAX_BATCH_AMOUNT) revert InvalidArray();
 
         // Then, for each content contentIds
+        uint256 totalAmountsToBeMinted = 0;
         for (uint256 i; i < contentIds.length; ) {
             // Ensure the reward is valid
             if (amounts[i] > SINGLE_REWARD_CAP || amounts[i] == 0 || amounts[i] + totalFrakMinted > REWARD_MINT_CAP)
@@ -166,12 +167,16 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
             // Get the creator address
             address owner = sybelInternalTokens.ownerOf(contentIds[i]);
             if (owner == address(0)) revert InvalidAddress();
+            // Add this founds
             _addFoundsUnchecked(owner, amounts[i]);
 
             unchecked {
+                totalAmountsToBeMinted += amounts[i];
                 i++;
             }
         }
+        // And mint the tokens for this contracts
+        sybelToken.mint(address(this), totalAmountsToBeMinted);
     }
 
     /**

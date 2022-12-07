@@ -3297,18 +3297,8 @@
       "kind": "uups"
     },
     {
-      "address": "0x99bbA657f2BbC93c02D617f8bA121cB8Fc104Acf",
-      "txHash": "0x3d4c7f585aca5b63b38f07bf8952013bff8bf876774252a6272a63947eff1716",
-      "kind": "uups"
-    },
-    {
       "address": "0xf4B146FbA71F41E0592668ffbF264F1D186b2Ca8",
       "txHash": "0x3b8813226021428e8a1346101807fc12b89f49ec8f77e70df08461151c210d7b",
-      "kind": "uups"
-    },
-    {
-      "address": "0x172076E0166D1F9Cc711C77Adf8488051744980C",
-      "txHash": "0xce40eb0edbe42449117e48ec1d690f2ecc8be8ad19012aaa3a452f777e170264",
       "kind": "uups"
     },
     {
@@ -3349,11 +3339,6 @@
     {
       "address": "0x3347B4d90ebe72BeFb30444C9966B2B990aE9FcB",
       "txHash": "0xff38c21c129b5581fad5a01e43c5b6732dca4286043ee6fa941988c7f6bddbe1",
-      "kind": "uups"
-    },
-    {
-      "address": "0x3155755b79aA083bd953911C92705B7aA82a18F9",
-      "txHash": "0x6a937c09af1454e51e01240cd57ab04e6943e1256c3d007b5dc2e880f0a63fdd",
       "kind": "uups"
     },
     {
@@ -5362,6 +5347,21 @@
       "kind": "uups"
     },
     {
+      "address": "0x99bbA657f2BbC93c02D617f8bA121cB8Fc104Acf",
+      "txHash": "0x5828dfb82ce14a10c7ce53979bb916606730d3db03ce7915a7a0a6fec2e7b7ce",
+      "kind": "uups"
+    },
+    {
+      "address": "0x172076E0166D1F9Cc711C77Adf8488051744980C",
+      "txHash": "0xee888da9c09e6aa8e21f635cd7fa2f2ec925dc019fe2d88d933d03f366d346d3",
+      "kind": "uups"
+    },
+    {
+      "address": "0x3155755b79aA083bd953911C92705B7aA82a18F9",
+      "txHash": "0x3a33e2b2d9ccc880aa0331c07fc05b5f0f13123335495c7216e690dcc3969354",
+      "kind": "uups"
+    },
+    {
       "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
       "txHash": "0xadbf4e6b1aa3e69eab85794c830cbdea624b293f20efcf6314ba5839d61b1a00",
       "kind": "uups"
@@ -5383,57 +5383,57 @@
     },
     {
       "address": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
-      "txHash": "0x2b5efb30aa8b7cd41738787b87660863a3420ba941dfe5ff20011c4bd743d7a1",
+      "txHash": "0xe540fc12fe2907529618f484a90c7254301b89e995f930e53ffbf3f3b983da8c",
       "kind": "uups"
     },
     {
       "address": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF",
-      "txHash": "0xb7145dd284558956ce98d8dc3635ce3aea0b5aaa60cb1fea93c1b67fa31a56e0",
+      "txHash": "0x99a830b19eaef1cc53f1fdf338f6e2f1baf6701c3cf9ac74510a34e84bc3f54f",
       "kind": "uups"
     },
     {
       "address": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf",
-      "txHash": "0xfb0d94c18981b65ef1420688f4dab926d37ba03ab03bff544015ff10bde7afc2",
+      "txHash": "0x1abfce9f47cd87580b52bc1bcf1ce3dd590e7e9daa1e8bcd802c679cdf80fd76",
       "kind": "uups"
     },
     {
       "address": "0x9d4454B023096f34B160D6B654540c56A1F81688",
-      "txHash": "0xcc64f2480d07f1016b7d529d42a427e9ae0e014ccc87e864aa80a0c826067237",
+      "txHash": "0x7a6c90f58a1dc5512e498e24738fca12386c0e1674d594ee5afafcf7f8ae8c5a",
       "kind": "uups"
     },
     {
       "address": "0x5eb3Bc0a489C5A8288765d2336659EbCA68FCd00",
-      "txHash": "0xac4e5dbe8734f274cba333ed2f6a95f600ddbbfc96f27a7141f1340949d4a096",
+      "txHash": "0x32dd68af73d2106209493795d2cd84014738e3e37a486ef82ef26c95af0dcfc9",
       "kind": "uups"
     },
     {
       "address": "0x36C02dA8a0983159322a80FFE9F24b1acfF8B570",
-      "txHash": "0xe046badff5eaee7cc481d48ec494ddcddbd6559ce2642b2f17934159448dd333",
+      "txHash": "0xe637d914c1bd00ca5daec052ccb0020554ff05c22d465d544d52e734e1a5e813",
       "kind": "uups"
     },
     {
       "address": "0x4EE6eCAD1c2Dae9f525404De8555724e3c35d07B",
-      "txHash": "0x3d64af2427981aeb04e753ea2eb21cb496ec0f96a6015f67c0eb5635ab677640",
+      "txHash": "0xee1cdbc79fcf7137429e7f5a48574226788b3dac338dd51cce8c748e513ad15d",
       "kind": "uups"
     },
     {
       "address": "0xBEc49fA140aCaA83533fB00A2BB19bDdd0290f25",
-      "txHash": "0x33b6373c8a1f4eb7c55328023b39538cf159e82219bf74bbfd3246cfaae3383a",
+      "txHash": "0xf9e4b5dae45af86799ac60095e5d070e5498ef82e4cdc431a2dce5f4064b94c6",
       "kind": "uups"
     },
     {
       "address": "0xD84379CEae14AA33C123Af12424A37803F885889",
-      "txHash": "0xd1f8a1afa043f0ebac92a907bfbece7f398f407ca52b8d98dfcba6a8574ebda2",
+      "txHash": "0x5037815975a994f62a7afdf695121c037f8e84199d6d2dd4cec7b4e8efbce59d",
       "kind": "uups"
     },
     {
       "address": "0x2B0d36FACD61B71CC05ab8F3D2355ec3631C0dd5",
-      "txHash": "0xc8e130f733a8cca883b35a5d05220b8289dfa4c6e39e628241e5e7b80adf3667",
+      "txHash": "0x9d7eb7df4a24031307ba7b5221f99b07c9ce1d9a06b4a6509cfaafeea66ff34e",
       "kind": "uups"
     },
     {
       "address": "0xfbC22278A96299D91d41C453234d97b4F5Eb9B2d",
-      "txHash": "0xfca17af743ff01de46cf68b1f08e4f9092fa16d0c810c162fa626fc6443a31ae",
+      "txHash": "0x03a789968a21174b9b30a7bb4be2cae902e4aa3c7a5ffd1c8d22a27846fcd143",
       "kind": "uups"
     },
     {
@@ -10303,222 +10303,6 @@
         }
       }
     },
-    "bfac98d6ac45d10d616893b440a1e0f84c2ce3ce141615e57680bcc672343779": {
-      "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
-      "txHash": "0xeb2068a86ceae32faa900174388432679b566e178eea94c331a8a54cce49c9a1",
-      "layout": {
-        "solcVersion": "0.8.17",
-        "storage": [
-          {
-            "label": "_initialized",
-            "offset": 0,
-            "slot": "0",
-            "type": "t_uint8",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
-            "retypedFrom": "bool"
-          },
-          {
-            "label": "_initializing",
-            "offset": 1,
-            "slot": "0",
-            "type": "t_bool",
-            "contract": "Initializable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ContextUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "51",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "ERC1967UpgradeUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:211"
-          },
-          {
-            "label": "__gap",
-            "offset": 0,
-            "slot": "101",
-            "type": "t_array(t_uint256)50_storage",
-            "contract": "UUPSUpgradeable",
-            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
-          },
-          {
-            "label": "_paused",
-            "offset": 0,
-            "slot": "151",
-            "type": "t_bool",
-            "contract": "SybelAccessControlUpgradeable",
-            "src": "contracts/utils/SybelAccessControlUpgradeable.sol:37"
-          },
-          {
-            "label": "_roles",
-            "offset": 0,
-            "slot": "152",
-            "type": "t_mapping(t_bytes32,t_mapping(t_address,t_bool))",
-            "contract": "SybelAccessControlUpgradeable",
-            "src": "contracts/utils/SybelAccessControlUpgradeable.sol:40"
-          },
-          {
-            "label": "_contentBadges",
-            "offset": 0,
-            "slot": "153",
-            "type": "t_mapping(t_uint256,t_uint256)",
-            "contract": "ContentBadges",
-            "src": "contracts/reward/badges/ContentBadges.sol:16"
-          },
-          {
-            "label": "_listenerBadges",
-            "offset": 0,
-            "slot": "154",
-            "type": "t_mapping(t_address,t_uint256)",
-            "contract": "ListenerBadges",
-            "src": "contracts/reward/badges/ListenerBadges.sol:16"
-          },
-          {
-            "label": "token",
-            "offset": 0,
-            "slot": "155",
-            "type": "t_contract(IERC20Upgradeable)2806",
-            "contract": "PushPullReward",
-            "src": "contracts/utils/PushPullReward.sol:22"
-          },
-          {
-            "label": "_pendingRewards",
-            "offset": 0,
-            "slot": "156",
-            "type": "t_mapping(t_address,t_uint256)",
-            "contract": "PushPullReward",
-            "src": "contracts/utils/PushPullReward.sol:27"
-          },
-          {
-            "label": "tokenGenerationFactor",
-            "offset": 0,
-            "slot": "157",
-            "type": "t_uint256",
-            "contract": "Rewarder",
-            "src": "contracts/reward/Rewarder.sol:44"
-          },
-          {
-            "label": "totalFrakMinted",
-            "offset": 0,
-            "slot": "158",
-            "type": "t_uint256",
-            "contract": "Rewarder",
-            "src": "contracts/reward/Rewarder.sol:49"
-          },
-          {
-            "label": "sybelInternalTokens",
-            "offset": 0,
-            "slot": "159",
-            "type": "t_contract(SybelInternalTokens)7346",
-            "contract": "Rewarder",
-            "src": "contracts/reward/Rewarder.sol:54"
-          },
-          {
-            "label": "sybelToken",
-            "offset": 0,
-            "slot": "160",
-            "type": "t_contract(SybelToken)7526",
-            "contract": "Rewarder",
-            "src": "contracts/reward/Rewarder.sol:59"
-          },
-          {
-            "label": "referralPool",
-            "offset": 0,
-            "slot": "161",
-            "type": "t_contract(ReferralPool)6854",
-            "contract": "Rewarder",
-            "src": "contracts/reward/Rewarder.sol:64"
-          },
-          {
-            "label": "contentPool",
-            "offset": 0,
-            "slot": "162",
-            "type": "t_contract(ContentPool)6532",
-            "contract": "Rewarder",
-            "src": "contracts/reward/Rewarder.sol:69"
-          },
-          {
-            "label": "foundationWallet",
-            "offset": 0,
-            "slot": "163",
-            "type": "t_address",
-            "contract": "Rewarder",
-            "src": "contracts/reward/Rewarder.sol:74"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address",
-            "numberOfBytes": "20"
-          },
-          "t_array(t_uint256)50_storage": {
-            "label": "uint256[50]",
-            "numberOfBytes": "1600"
-          },
-          "t_bool": {
-            "label": "bool",
-            "numberOfBytes": "1"
-          },
-          "t_bytes32": {
-            "label": "bytes32",
-            "numberOfBytes": "32"
-          },
-          "t_contract(ContentPool)6532": {
-            "label": "contract ContentPool",
-            "numberOfBytes": "20"
-          },
-          "t_contract(IERC20Upgradeable)2806": {
-            "label": "contract IERC20Upgradeable",
-            "numberOfBytes": "20"
-          },
-          "t_contract(ReferralPool)6854": {
-            "label": "contract ReferralPool",
-            "numberOfBytes": "20"
-          },
-          "t_contract(SybelInternalTokens)7346": {
-            "label": "contract SybelInternalTokens",
-            "numberOfBytes": "20"
-          },
-          "t_contract(SybelToken)7526": {
-            "label": "contract SybelToken",
-            "numberOfBytes": "20"
-          },
-          "t_mapping(t_address,t_bool)": {
-            "label": "mapping(address => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_uint256)": {
-            "label": "mapping(address => uint256)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_bytes32,t_mapping(t_address,t_bool))": {
-            "label": "mapping(bytes32 => mapping(address => bool))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_uint256)": {
-            "label": "mapping(uint256 => uint256)",
-            "numberOfBytes": "32"
-          },
-          "t_uint256": {
-            "label": "uint256",
-            "numberOfBytes": "32"
-          },
-          "t_uint8": {
-            "label": "uint8",
-            "numberOfBytes": "1"
-          }
-        }
-      }
-    },
     "95ba1cacbdda66eeb0b39e1ccd3c68312de163915e506517621048552fb1f224": {
       "address": "0x4fF1E057f891060Ff6837567C65AA8364D11EaBd",
       "txHash": "0xb1a1ae8d85ae03879793c9ff2a47054b44a2957eebdf077222a51a8d5245749b",
@@ -11092,7 +10876,7 @@
             "label": "transferCallback",
             "offset": 0,
             "slot": "254",
-            "type": "t_contract(FraktionTransferCallback)4207",
+            "type": "t_contract(FraktionTransferCallback)6912",
             "contract": "SybelInternalTokens",
             "src": "contracts/tokens/SybelInternalTokens.sol:22"
           },
@@ -11142,7 +10926,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(FraktionTransferCallback)4207": {
+          "t_contract(FraktionTransferCallback)6912": {
             "label": "contract FraktionTransferCallback",
             "numberOfBytes": "20"
           },
@@ -11284,7 +11068,7 @@
             "label": "rewardStates",
             "offset": 0,
             "slot": "156",
-            "type": "t_mapping(t_uint256,t_array(t_struct(RewardState)5515_storage)dyn_storage)",
+            "type": "t_mapping(t_uint256,t_array(t_struct(RewardState)5555_storage)dyn_storage)",
             "contract": "ContentPool",
             "src": "contracts/reward/pool/ContentPool.sol:59"
           },
@@ -11292,7 +11076,7 @@
             "label": "participants",
             "offset": 0,
             "slot": "157",
-            "type": "t_mapping(t_uint256,t_mapping(t_address,t_struct(Participant)5522_storage))",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_struct(Participant)5562_storage))",
             "contract": "ContentPool",
             "src": "contracts/reward/pool/ContentPool.sol:64"
           },
@@ -11314,7 +11098,7 @@
             "label": "bytes32[]",
             "numberOfBytes": "32"
           },
-          "t_array(t_struct(RewardState)5515_storage)dyn_storage": {
+          "t_array(t_struct(RewardState)5555_storage)dyn_storage": {
             "label": "struct ContentPool.RewardState[]",
             "numberOfBytes": "32"
           },
@@ -11338,7 +11122,7 @@
             "label": "mapping(address => bool)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(Participant)5522_storage)": {
+          "t_mapping(t_address,t_struct(Participant)5562_storage)": {
             "label": "mapping(address => struct ContentPool.Participant)",
             "numberOfBytes": "32"
           },
@@ -11358,11 +11142,11 @@
             "label": "mapping(bytes32 => uint256)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_array(t_struct(RewardState)5515_storage)dyn_storage)": {
+          "t_mapping(t_uint256,t_array(t_struct(RewardState)5555_storage)dyn_storage)": {
             "label": "mapping(uint256 => struct ContentPool.RewardState[])",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_mapping(t_address,t_struct(Participant)5522_storage))": {
+          "t_mapping(t_uint256,t_mapping(t_address,t_struct(Participant)5562_storage))": {
             "label": "mapping(uint256 => mapping(address => struct ContentPool.Participant))",
             "numberOfBytes": "32"
           },
@@ -11370,7 +11154,7 @@
             "label": "mapping(uint256 => uint256)",
             "numberOfBytes": "32"
           },
-          "t_struct(Participant)5522_storage": {
+          "t_struct(Participant)5562_storage": {
             "label": "struct ContentPool.Participant",
             "members": [
               {
@@ -11394,7 +11178,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(RewardState)5515_storage": {
+          "t_struct(RewardState)5555_storage": {
             "label": "struct ContentPool.RewardState",
             "members": [
               {
@@ -11467,6 +11251,222 @@
           "t_uint96": {
             "label": "uint96",
             "numberOfBytes": "12"
+          }
+        }
+      }
+    },
+    "0611a932b3818bfa6f935c1664a513267a6c9e8602ad1229791451ab0abb0b8c": {
+      "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+      "txHash": "0xb38fb581128531c97c046164d7d3d1db936e32d3ebf85ced754adbd7b35d56c3",
+      "layout": {
+        "solcVersion": "0.8.17",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:211"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
+          },
+          {
+            "label": "_paused",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_bool",
+            "contract": "SybelAccessControlUpgradeable",
+            "src": "contracts/utils/SybelAccessControlUpgradeable.sol:37"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_mapping(t_bytes32,t_mapping(t_address,t_bool))",
+            "contract": "SybelAccessControlUpgradeable",
+            "src": "contracts/utils/SybelAccessControlUpgradeable.sol:40"
+          },
+          {
+            "label": "_contentBadges",
+            "offset": 0,
+            "slot": "153",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "contract": "ContentBadges",
+            "src": "contracts/reward/badges/ContentBadges.sol:16"
+          },
+          {
+            "label": "_listenerBadges",
+            "offset": 0,
+            "slot": "154",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "ListenerBadges",
+            "src": "contracts/reward/badges/ListenerBadges.sol:16"
+          },
+          {
+            "label": "token",
+            "offset": 0,
+            "slot": "155",
+            "type": "t_contract(IERC20Upgradeable)2806",
+            "contract": "PushPullReward",
+            "src": "contracts/utils/PushPullReward.sol:22"
+          },
+          {
+            "label": "_pendingRewards",
+            "offset": 0,
+            "slot": "156",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "PushPullReward",
+            "src": "contracts/utils/PushPullReward.sol:27"
+          },
+          {
+            "label": "tokenGenerationFactor",
+            "offset": 0,
+            "slot": "157",
+            "type": "t_uint256",
+            "contract": "Rewarder",
+            "src": "contracts/reward/Rewarder.sol:44"
+          },
+          {
+            "label": "totalFrakMinted",
+            "offset": 0,
+            "slot": "158",
+            "type": "t_uint256",
+            "contract": "Rewarder",
+            "src": "contracts/reward/Rewarder.sol:49"
+          },
+          {
+            "label": "sybelInternalTokens",
+            "offset": 0,
+            "slot": "159",
+            "type": "t_contract(SybelInternalTokens)7386",
+            "contract": "Rewarder",
+            "src": "contracts/reward/Rewarder.sol:54"
+          },
+          {
+            "label": "sybelToken",
+            "offset": 0,
+            "slot": "160",
+            "type": "t_contract(SybelToken)7566",
+            "contract": "Rewarder",
+            "src": "contracts/reward/Rewarder.sol:59"
+          },
+          {
+            "label": "referralPool",
+            "offset": 0,
+            "slot": "161",
+            "type": "t_contract(ReferralPool)6894",
+            "contract": "Rewarder",
+            "src": "contracts/reward/Rewarder.sol:64"
+          },
+          {
+            "label": "contentPool",
+            "offset": 0,
+            "slot": "162",
+            "type": "t_contract(ContentPool)6572",
+            "contract": "Rewarder",
+            "src": "contracts/reward/Rewarder.sol:69"
+          },
+          {
+            "label": "foundationWallet",
+            "offset": 0,
+            "slot": "163",
+            "type": "t_address",
+            "contract": "Rewarder",
+            "src": "contracts/reward/Rewarder.sol:74"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ContentPool)6572": {
+            "label": "contract ContentPool",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IERC20Upgradeable)2806": {
+            "label": "contract IERC20Upgradeable",
+            "numberOfBytes": "20"
+          },
+          "t_contract(ReferralPool)6894": {
+            "label": "contract ReferralPool",
+            "numberOfBytes": "20"
+          },
+          "t_contract(SybelInternalTokens)7386": {
+            "label": "contract SybelInternalTokens",
+            "numberOfBytes": "20"
+          },
+          "t_contract(SybelToken)7566": {
+            "label": "contract SybelToken",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_mapping(t_address,t_bool))": {
+            "label": "mapping(bytes32 => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
           }
         }
       }
