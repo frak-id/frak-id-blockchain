@@ -8,15 +8,16 @@ import "../tokens/SybelInternalTokens.sol";
 import "../tokens/SybelTokenL2.sol";
 import "../utils/MintingAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "hardhat/console.sol";
 
 /// @dev Error emitted when the input supply is invalid
-error InvalidSupply();
+    error InvalidSupply();
 
 /// @dev Error emitted when the user havn't enought balance
-error NotEnoughBalance();
+    error NotEnoughBalance();
 
 /// @dev Error emitted when it remain some fraktion supply when wanting to increase it
-error RemainingSupply();
+    error RemainingSupply();
 
 /**
  * @dev Represent our minter contract
@@ -111,45 +112,19 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
     /**
      * @dev Mint a new s nft
      */
-    function mintFraction(
+    function mintFractionForUser(
         uint256 id,
         address to,
         uint256 amount
     ) external override onlyRole(SybelRoles.MINTER) whenNotPaused {
-        _mintFraction(id, to, amount);
-    }
-
-    /**
-     * @dev Mint a new s nft for a user directly
-     */
-    function mintFraction(
-        uint256 id,
-        uint256 amount
-    ) external override whenNotPaused {
-        _mintFraction(id, msg.sender, amount);
-    }
-
-    /**
-     * @dev Mint a new s nft
-     */
-    function _mintFraction(
-        uint256 id,
-        address to,
-        uint256 amount
-    ) private {
         // Get the cost of the fraction
-        uint256 fractionCost = getCostBadge(id);
-        uint256 totalCost = fractionCost * amount;
-        // Check if the user have enough the balance
-        uint256 userBalance = sybelToken.balanceOf(to);
-        if (totalCost > userBalance) revert NotEnoughBalance();
-        // Mint his Fraction of NFT
-        sybelInternalTokens.mint(to, id, amount);
-        // Transfer all the token to the fundation wallet
-        sybelToken.safeTransferFrom(to, foundationWallet, totalCost);
-
+        uint256 totalCost = getCostBadge(id) * amount;
         // Emit the event
         emit FractionMinted(id, to, amount, totalCost);
+        // Transfer the tokens
+        sybelToken.safeTransferFrom(to, foundationWallet, totalCost);
+        // Mint his Fraction of NFT
+        sybelInternalTokens.mint(to, id, amount);
     }
 
     /**
