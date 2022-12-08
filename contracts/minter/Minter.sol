@@ -116,6 +116,27 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         address to,
         uint256 amount
     ) external override onlyRole(SybelRoles.MINTER) whenNotPaused {
+        _mintFraction(id, to, amount);
+    }
+
+    /**
+     * @dev Mint a new s nft for a user directly
+     */
+    function mintFraction(
+        uint256 id,
+        uint256 amount
+    ) external override whenNotPaused {
+        _mintFraction(id, msg.sender, amount);
+    }
+
+    /**
+     * @dev Mint a new s nft
+     */
+    function _mintFraction(
+        uint256 id,
+        address to,
+        uint256 amount
+    ) private {
         // Get the cost of the fraction
         uint256 fractionCost = getCostBadge(id);
         uint256 totalCost = fractionCost * amount;
