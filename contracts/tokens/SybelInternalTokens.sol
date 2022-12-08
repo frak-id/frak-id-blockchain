@@ -81,16 +81,15 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     /**
      * @dev Batch balance of for single address
      */
-    function balanceOfIdsBatch(address account, uint256[] memory ids) public view virtual returns (uint256[] memory) {
+    function balanceOfIdsBatch(address account, uint256[] calldata ids) public view virtual returns (uint256[] memory) {
         uint256[] memory batchBalances = new uint256[](ids.length);
-
         for (uint256 i; i < ids.length; ) {
-            batchBalances[i] = balanceOf(account, ids[i]);
             unchecked {
+                // TODO : Find a way to directly check _balances var without the require check
+                batchBalances[i] = balanceOf(account, ids[i]);
                 ++i;
             }
         }
-
         return batchBalances;
     }
 

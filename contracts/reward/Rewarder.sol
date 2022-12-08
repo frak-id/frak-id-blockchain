@@ -193,7 +193,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         TotalRewards memory totalRewards = TotalRewards(0, 0, 0, 0);
 
         // Get all the payed fraktion types
-        uint8[] memory fraktionTypes = SybelMath.payableTokenTypes();
+        uint256[] memory fraktionTypes = SybelMath.payableTokenTypes();
         uint256 rewardForContentType = baseRewardForContentType(contentType);
 
         // Iterate over each content the user listened
@@ -245,6 +245,14 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         }
     }
 
+    event EarningFactorTest(uint256 earningFactor, bool hasPayedFraktion);
+
+    function earningFactorTest(address listener, uint256 contentId) external {
+        uint256[] memory fraktionTypes = SybelMath.payableTokenTypes();
+        (uint256 earningFactor, bool hasOnePaidFraktion) = earningFactorForListener(fraktionTypes, listener, contentId);
+        emit EarningFactorTest(earningFactor, hasOnePaidFraktion);
+    }
+
     /**
      * @dev Compute the reward for a user, given the content and listens, and pay him and the owner
      */
@@ -258,14 +266,14 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         totalRewards = TotalRewards(0, 0, 0, 0);
 
         // Get all the payed fraktion types
-        uint8[] memory fraktionTypes = SybelMath.payableTokenTypes();
+        uint256[] memory fraktionTypes = SybelMath.payableTokenTypes();
         uint256 rewardForContentType = baseRewardForContentType(contentType);
 
         // Iterate over each content the user listened
         computeRewardForContent(contentId, listenCount, rewardForContentType, listener, fraktionTypes, totalRewards);
 
         // Then outside of our loop find the user badge
-        uint256 listenerBadge = getListenerBadge(listener);
+        /*uint256 listenerBadge = getListenerBadge(listener);
 
         // Update the total mint for user with his listener badges
         totalRewards.user = wadMulDivDown(totalRewards.user, listenerBadge);
@@ -286,7 +294,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         }
         if (totalRewards.referral > 0) {
             sybelToken.safeTransfer(address(referralPool), totalRewards.referral);
-        }
+        }*/
     }
 
     /**
@@ -297,7 +305,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         uint16 listenCount,
         uint256 rewardForContentType,
         address listener,
-        uint8[] memory fraktionTypes,
+        uint256[] memory fraktionTypes,
         TotalRewards memory totalRewards
     ) private {
         // Boolean used to know if the user have one paied fraktion
@@ -364,7 +372,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
      * @dev Compute the earning factor for a listener on a given content
      */
     function earningFactorForListener(
-        uint8[] memory fraktionTypes,
+        uint256[] memory fraktionTypes,
         address listener,
         uint256 contentId
     ) private returns (uint256 earningFactor, bool hasOnePaidFraktion) {
@@ -418,7 +426,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
      * We use a pure function instead of a mapping to economise on storage read,
      * and since this reawrd shouldn't evolve really fast
      */
-    function baseRewardForTokenType(uint8 tokenType) private pure returns (uint256 reward) {
+    function baseRewardForTokenType(uint256 tokenType) private pure returns (uint256 reward) {
         if (tokenType == SybelMath.TOKEN_TYPE_FREE_MASK) {
             // 0.01 FRK
             reward = 0.01 ether;

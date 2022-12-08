@@ -17,7 +17,7 @@ library SybelMath {
     /**
      * @dev Build the id for a S FNT
      */
-    function buildSnftId(uint256 id, uint8 tokenType) internal pure returns (uint256 tokenId) {
+    function buildSnftId(uint256 id, uint256 tokenType) internal pure returns (uint256 tokenId) {
         unchecked {
             tokenId = (id << ID_OFFSET) | tokenType;
         }
@@ -26,11 +26,11 @@ library SybelMath {
     /**
      * @dev Build the id for a S FNT
      */
-    function buildSnftIds(uint256 id, uint8[] memory types) internal pure returns (uint256[] memory) {
+    function buildSnftIds(uint256 id, uint256[] memory types) internal pure returns (uint256[] memory) {
         uint256[] memory tokenIds = new uint256[](types.length);
-        for (uint8 i; i < types.length; ) {
-            tokenIds[i] = buildSnftId(id, types[i]);
+        for (uint256 i; i < types.length; ) {
             unchecked {
+                tokenIds[i] = buildSnftId(id, types[i]);
                 ++i;
             }
         }
@@ -82,8 +82,8 @@ library SybelMath {
     /**
      * @dev Build a list of all the payable token types
      */
-    function payableTokenTypes() internal pure returns (uint8[] memory) {
-        uint8[] memory types = new uint8[](5);
+    function payableTokenTypes() internal pure returns (uint256[] memory) {
+        uint256[] memory types = new uint256[](5);
         types[0] = SybelMath.TOKEN_TYPE_FREE_MASK;
         types[1] = SybelMath.TOKEN_TYPE_COMMON_MASK;
         types[2] = SybelMath.TOKEN_TYPE_PREMIUM_MASK;
@@ -132,7 +132,7 @@ library SybelMath {
     /**
      * @dev Check if the token is payed or not
      */
-    function isPayedTokenToken(uint8 tokenType) internal pure returns (bool) {
+    function isPayedTokenToken(uint256 tokenType) internal pure returns (bool) {
         return tokenType > TOKEN_TYPE_COMMON_MASK && tokenType <= TOKEN_TYPE_DIAMOND_MASK;
     }
 

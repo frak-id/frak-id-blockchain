@@ -44,6 +44,9 @@ describe("Rewarder", () => {
       sybelToken.address,
     ]);
 
+    // Mint the initial supply
+    await sybelToken.mint(rewarder.address, BigNumber.from(10).pow(18).mul(1_000_000_000));
+
     // Grant the minter role on the rewarder contract for our nft and frak
     await internalToken.grantRole(minterRole, rewarder.address);
     await sybelToken.grantRole(minterRole, rewarder.address);
@@ -289,12 +292,37 @@ Reducing number of var's
 // Without direct foundation fees computation
 |  Rewarder             ·  payUser              ·     115 461  ·     748 429  ·         426928  ·            6  ·       0.03  │
 
+// With content pool delay
+|  Rewarder             ·  payUser              ·     115936  ·     675963  ·         418316  ·            6  ·       0.01  │
 
+// Without content pool at all
+|  Rewarder             ·  payUser              ·     115903  ·     625665  ·         392328  ·            6  ·       0.01  │
 
+// With content pool back but no referral
+|  Rewarder             ·  payUser              ·     115939  ·     694843  ·         421481  ·            6  ·       0.01  │
 
+// Without earning factor
+|  Rewarder             ·  payUser              ·      96042  ·     282261  ·         197855  ·            6  ·       0.01  │
 
-// With wad div down single line
+// With OZ up to date
+|  Rewarder             ·  payUser              ·      96042  ·     282261  ·         197855  ·            6  ·       0.03  │
 
+// With balanceOf in unchecked block
+|  Rewarder             ·  payUser              ·     115330  ·     682663  ·         415696  ·            6  ·       0.06  │
+
+// without mint only transfer (and initial mint of the 1.5b tokens)
+|  Rewarder             ·  payUser              ·      88124  ·     627050  ·         366703  ·            6  ·       0.05  │
+
+// A few more optimisations
+|  Rewarder             ·  payUser              ·      87826  ·     621570  ·         363959  ·            6  ·       0.01  │
+
+// Without earning factor from internal tokens
+|  Rewarder             ·  payUser              ·      68897  ·     221524  ·         148182  ·            6  ·       0.01  │
+
+// Switch to large uint
+|  Rewarder             ·  payUser              ·      87565  ·     616350  ·         361480  ·            6  ·       0.01  │
+
+//
 
 
 
