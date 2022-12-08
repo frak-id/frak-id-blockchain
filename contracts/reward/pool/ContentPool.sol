@@ -272,7 +272,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
     /**
      * Find only the last reward state for the given content
      */
-    function lastContentState(uint256 contentId) internal view returns (RewardState storage state) {
+    function lastContentState(uint256 contentId) internal returns (RewardState storage state) {
         (state, ) = lastContentStateWithIndex(contentId);
     }
 
@@ -281,9 +281,17 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
      */
     function lastContentStateWithIndex(
         uint256 contentId
-    ) internal view returns (RewardState storage state, uint256 rewardIndex) {
+    ) internal returns (RewardState storage state, uint256 rewardIndex) {
         rewardIndex = currentStateIndex[contentId];
-        state = rewardStates[contentId][rewardIndex];
+        // Ensure we got a state, otherwise create the first one
+        RewardState[] storage contentRewardStates = rewardStates[contentId];
+        if (contentRewardStates.length == 0) {
+            state = contentRewardStates.push();
+            // In the case of direct creation, mark it as open
+            state.open = true;
+        } else {
+            state = contentRewardStates[rewardIndex];
+        }
     }
 
     /**

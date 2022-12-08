@@ -245,58 +245,6 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         }
     }
 
-    event EarningFactorTest(uint256 earningFactor, bool hasPayedFraktion);
-
-    function earningFactorTest(address listener, uint256 contentId) external {
-        uint256[] memory fraktionTypes = SybelMath.payableTokenTypes();
-        (uint256 earningFactor, bool hasOnePaidFraktion) = earningFactorForListener(fraktionTypes, listener, contentId);
-        emit EarningFactorTest(earningFactor, hasOnePaidFraktion);
-    }
-
-    /**
-     * @dev Compute the reward for a user, given the content and listens, and pay him and the owner
-     */
-    function payUserTest(
-        address listener,
-        uint8 contentType,
-        uint256 contentId,
-        uint16 listenCount
-    ) external onlyRole(SybelRoles.REWARDER) whenNotPaused returns (TotalRewards memory totalRewards) {
-        // Get the data we will need in this level
-        totalRewards = TotalRewards(0, 0, 0, 0);
-
-        // Get all the payed fraktion types
-        uint256[] memory fraktionTypes = SybelMath.payableTokenTypes();
-        uint256 rewardForContentType = baseRewardForContentType(contentType);
-
-        // Iterate over each content the user listened
-        computeRewardForContent(contentId, listenCount, rewardForContentType, listener, fraktionTypes, totalRewards);
-
-        // Then outside of our loop find the user badge
-        /*uint256 listenerBadge = getListenerBadge(listener);
-
-        // Update the total mint for user with his listener badges
-        totalRewards.user = wadMulDivDown(totalRewards.user, listenerBadge);
-
-        // Register the amount for listener
-        _addFoundsUnchecked(listener, totalRewards.user);
-
-        // Compute the total amount to mint, and ensure we don't exceed our cap
-        unchecked {
-            uint256 totalMint = totalRewards.user + totalRewards.owners + totalRewards.content + totalRewards.referral;
-            if (totalMint + totalFrakMinted > REWARD_MINT_CAP) revert InvalidReward();
-            totalFrakMinted += totalMint;
-        }
-
-        // If we got reward for the pool, mint them
-        if (totalRewards.content > 0) {
-            sybelToken.safeTransfer(address(contentPool), totalRewards.content);
-        }
-        if (totalRewards.referral > 0) {
-            sybelToken.safeTransfer(address(referralPool), totalRewards.referral);
-        }*/
-    }
-
     /**
      * @dev Compute the user and owner reward for the given content
      */
