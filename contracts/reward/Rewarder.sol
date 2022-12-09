@@ -270,7 +270,6 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         uint256 totalReward = wadMulDivDown(listenCount * earningFactor, tokenGenerationFactor);
         // Then apply the content badge and then content type ratio
         totalReward = multiWadMulDivDown(totalReward, contentBadge, rewardForContentType);
-        // Same here should use WaD multiplier
         // Ensure the reward isn't too large
         if (totalReward > SINGLE_REWARD_CAP) revert InvalidReward();
         else if (totalReward == 0) return;
@@ -332,13 +331,13 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         uint256[] memory fraktionTypes,
         address listener,
         uint256 contentId
-    ) private returns (uint256 earningFactor, bool hasOnePaidFraktion) {
+    ) private view returns (uint256 earningFactor, bool hasOnePaidFraktion) {
         // Build the ids for eachs fraktion that can generate reward, and get the user balance for each one if this fraktions
         uint256[] memory fraktionIds = SybelMath.buildSnftIds(contentId, fraktionTypes);
         uint256[] memory tokenBalances = sybelInternalTokens.balanceOfIdsBatch(listener, fraktionIds);
 
-        // default value (surely useless but keep it like that for test purpose)
-        earningFactor = 0;
+        // default value to free fraktion
+        earningFactor = baseRewardForTokenType(SybelMath.TOKEN_TYPE_FREE_MASK);
         hasOnePaidFraktion = false;
 
         // Iterate over each balance to compute the earning factor
@@ -354,12 +353,6 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
                 earningFactor += balance * baseRewardForTokenType(fraktionTypes[balanceIndex]);
                 ++balanceIndex;
             }
-        }
-
-        // If the earning factor is at 0, just mint a free fraktion and increase it
-        if (earningFactor == 0) {
-            sybelInternalTokens.mint(listener, SybelMath.buildFreeNftId(contentId), 1);
-            earningFactor = baseRewardForTokenType(SybelMath.TOKEN_TYPE_FREE_MASK);
         }
     }
 

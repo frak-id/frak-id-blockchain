@@ -324,13 +324,23 @@ Reducing number of var's
 
 //
 
+// ViaIR compilation
+|  MultiVestingWallets   ·  createVestBatch           ·     177394  ·     451170  ·         314282  ·            2  ·       0.02  │
+|  MultiVestingWallets   ·  createVestBatch           ·     177394  ·     451170  ·         314282  ·            2  ·       0.02  │
+|  ReferralPool          ·  payAllReferer             ·      33645  ·     294720  ·         125846  ·            8  ·       0.01  │
+|  Rewarder              ·  payUser                   ·      89133  ·     653243  ·         377893  ·            6  ·       0.03  │
+|  Rewarder              ·  withdrawFounds            ·     193088  ·    1075125  ·         633824  ·           17  ·       0.05  │
+
+
+// No IR compilation
+|  ReferralPool          ·  payAllReferer             ·      33896  ·     295309  ·         126355  ·            8  ·       0.01  │
+|  Rewarder              ·  payUser                   ·      89314  ·     646874  ·         376342  ·            6  ·       0.02  │
+|  Rewarder              ·  withdrawFounds            ·     193840  ·    1043560  ·         618418  ·           17  ·       0.04  │
+
+// Without auto mint
+|  Rewarder             ·  payUser              ·      85616  ·     612210  ·         290748  ·            6  ·       0.02  │
 
 
 
 
  */
-
-/*
-Unknown error : cannot estimate gas; transaction may fail or may require manual gas limit [ See: https://links.ethers.org/v5-errors-UNPREDICTABLE_GAS_LIMIT ] (error={"reason":"execution reverted: SYB: invalid legendary supply","code":"UNPREDICTABLE_GAS_LIMIT","method":"estimateGas","transaction":{"from":"0x7caF754C934710D7C73bc453654552BEcA38223F","maxPriorityFeePerGas":{"type":"BigNumber","hex":"0x59682f00"},"maxFeePerGas":{"type":"BigNumber","hex":"0x59682f1a"},"to":"0x85ea8469220E53A5C28B9fAb4328Adf034F3d791","data":"0x9bf4e09b00000000000000000000000006eedba3ff70f6ce55f1233a3c6139aae75973c90000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000005","type":2,"accessList":null},"error":{"reason":"processing response error","code":"SERVER_ERROR","body":"{\"jsonrpc\":\"2.0\",\"id\":45,\"error\":{\"code\":3,\"message\":\"execution reverted: SYB: invalid legendary supply\",\"data\":\"0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001d5359423a20696e76616c6964206c6567656e6461727920737570706c79000000\"}}","error":{"code":3,"data":"0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001d5359423a20696e76616c6964206c6567656e6461727920737570706c79000000"},"requestBody":"{\"method\":\"eth_estimateGas\",\"params\":[{\"type\":\"0x2\",\"maxFeePerGas\":\"0x59682f1a\",\"maxPriorityFeePerGas\":\"0x59682f00\",\"from\":\"0x7caf754c934710d7c73bc453654552beca38223f\",\"to\":\"0x85ea8469220e53a5c28b9fab4328adf034f3d791\",\"data\":\"0x9bf4e09b00000000000000000000000006eedba3ff70f6ce55f1233a3c6139aae75973c90000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000005\"}],\"id\":45,\"jsonrpc\":\"2.0\"}","requestMethod":"POST","url":"https://polygon-mumbai.g.alchemy.com/v2/VaqoMOGWaRkWfVW1WHrK21bTx77MnCXj"}}, tx={"data":"0x9bf4e09b00000000000000000000000006eedba3ff70f6ce55f1233a3c6139aae75973c90000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000005","to":{},"from":"0x7caF754C934710D7C73bc453654552BEcA38223F","type":2,"maxFeePerGas":{"type":"BigNumber","hex":"0x59682f1a"},"maxPriorityFeePerGas":{"type":"BigNumber","hex":"0x59682f00"},"nonce":{},"gasLimit":{},"chainId":{}}, code=UNPREDICTABLE_GAS_LIMIT, version=abstract-signer/5.7.0)
-
-*/

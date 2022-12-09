@@ -83,12 +83,11 @@ library SybelMath {
      * @dev Build a list of all the payable token types
      */
     function payableTokenTypes() internal pure returns (uint256[] memory) {
-        uint256[] memory types = new uint256[](5);
-        types[0] = SybelMath.TOKEN_TYPE_FREE_MASK;
-        types[1] = SybelMath.TOKEN_TYPE_COMMON_MASK;
-        types[2] = SybelMath.TOKEN_TYPE_PREMIUM_MASK;
-        types[3] = SybelMath.TOKEN_TYPE_GOLD_MASK;
-        types[4] = SybelMath.TOKEN_TYPE_DIAMOND_MASK;
+        uint256[] memory types = new uint256[](4);
+        types[0] = SybelMath.TOKEN_TYPE_COMMON_MASK;
+        types[1] = SybelMath.TOKEN_TYPE_PREMIUM_MASK;
+        types[2] = SybelMath.TOKEN_TYPE_GOLD_MASK;
+        types[3] = SybelMath.TOKEN_TYPE_DIAMOND_MASK;
         return types;
     }
 
