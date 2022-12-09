@@ -1,7 +1,7 @@
 import hre from "hardhat";
 
 import * as deployedAddresses from "../../addresses.json";
-import { ContentPool, Minter, MultiVestingWallets, ReferralPool, Rewarder, } from "../../types";
+import { ContentPool, Minter, MultiVestingWallets, ReferralPool, Rewarder } from "../../types";
 import { findContract } from "../utils/deploy";
 import { adminRole, badgeUpdaterRole, minterRole, rewarderRole, vestingManagerRole } from "../utils/roles";
 

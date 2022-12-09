@@ -86,6 +86,11 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         uint256 poolRewards
     );
 
+    /**
+     * @dev Event emitted when a user is rewarded for his listen
+     */
+    event RewardOnContent(address indexed user, uint256 contentId, uint256 baseUserReward);
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -311,6 +316,9 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
             }
         }
 
+        // Emit the user reward event, to compute the total amount earned for the given content
+        emit RewardOnContent(listener, contentId, userReward);
+
         // Save the amount for the owner
         address owner = sybelInternalTokens.ownerOf(contentId);
         if (owner == address(0)) revert InvalidAddress();
@@ -421,7 +429,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     }
 
     function withdrawFounds() external virtual override whenNotPaused {
-        _withdraw(msg.sender);
+        _withdrawWithFee(msg.sender, 2, foundationWallet);
     }
 
     function withdrawFounds(address user) external virtual override onlyRole(SybelRoles.ADMIN) whenNotPaused {

@@ -67,9 +67,6 @@ abstract contract PushPullReward is Initializable {
         // Ensure the user have a pending reward
         uint256 pendingReward = _pendingRewards[user];
         if (pendingReward == 0) revert NoReward();
-        // Ensure we have enough founds on this contract to pay the user
-        uint256 contractBalance = token.balanceOf(address(this));
-        if (pendingReward > contractBalance) revert NotEnoughFound();
         // Reset the user pending balance
         _pendingRewards[user] = 0;
         // Emit the withdraw event
@@ -88,14 +85,15 @@ abstract contract PushPullReward is Initializable {
         // Ensure the user have a pending reward
         uint256 pendingReward = _pendingRewards[user];
         if (pendingReward == 0) revert NoReward();
-        // Ensure we have enough founds on this contract to pay the user
-        uint256 contractBalance = token.balanceOf(address(this));
-        if (pendingReward > contractBalance) revert NotEnoughFound();
         // Reset the user pending balance
         _pendingRewards[user] = 0;
         // Compute the amount of fees
-        uint256 feesAmount = (pendingReward * feePercent) / 100;
-        uint256 userReward = pendingReward - feesAmount;
+        uint256 feesAmount;
+        uint256 userReward;
+        unchecked {
+            feesAmount = (pendingReward * feePercent) / 100;
+            userReward = pendingReward - feesAmount;
+        }
         // Emit the withdraw event
         emit RewardWithdrawed(user, userReward, feesAmount);
         // Perform the transfer of the founds
