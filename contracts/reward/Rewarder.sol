@@ -310,6 +310,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
                 totalRewards.owners += ownerReward;
             }
         }
+
         // Save the amount for the owner
         address owner = sybelInternalTokens.ownerOf(contentId);
         if (owner == address(0)) revert InvalidAddress();
