@@ -12,9 +12,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 /// @dev Error emitted when the input supply is invalid
 error InvalidSupply();
 
-/// @dev Error emitted when the user havn't enought balance
-error NotEnoughBalance();
-
 /// @dev Error emitted when it remain some fraktion supply when wanting to increase it
 error RemainingSupply();
 
@@ -111,24 +108,19 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
     /**
      * @dev Mint a new s nft
      */
-    function mintFraction(
+    function mintFractionForUser(
         uint256 id,
         address to,
         uint256 amount
     ) external override onlyRole(SybelRoles.MINTER) whenNotPaused {
         // Get the cost of the fraction
-        uint256 fractionCost = getCostBadge(id);
-        uint256 totalCost = fractionCost * amount;
-        // Check if the user have enough the balance
-        uint256 userBalance = sybelToken.balanceOf(to);
-        if (totalCost > userBalance) revert NotEnoughBalance();
-        // Mint his Fraction of NFT
-        sybelInternalTokens.mint(to, id, amount);
-        // Transfer all the token to the fundation wallet
-        sybelToken.safeTransferFrom(to, foundationWallet, totalCost);
-
+        uint256 totalCost = getCostBadge(id) * amount;
         // Emit the event
         emit FractionMinted(id, to, amount, totalCost);
+        // Transfer the tokens
+        sybelToken.safeTransferFrom(to, foundationWallet, totalCost);
+        // Mint his Fraction of NFT
+        sybelInternalTokens.mint(to, id, amount);
     }
 
     /**

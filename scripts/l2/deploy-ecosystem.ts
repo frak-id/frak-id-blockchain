@@ -38,8 +38,8 @@ import { minterRole, rewarderRole, tokenContractRole } from "../utils/roles";
     const rewarder = await deployContract<Rewarder>("Rewarder", [
       erc20TokenAddr,
       internalToken.address,
-      referralPool.address,
       contentPool.address,
+      referralPool.address,
       foundationWallet,
     ]);
 

@@ -3,9 +3,10 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
-import { minterRole, rewarderRole } from "../../scripts/utils/roles";
+import { minterRole } from "../../scripts/utils/roles";
 import { Minter } from "../../types/contracts/minter/Minter";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
+import { SybelInternalTokens } from "../../types";
 
 describe("Minter", () => {
   let sybelToken: SybelToken;
