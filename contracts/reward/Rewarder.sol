@@ -333,7 +333,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         uint256 contentId
     ) private view returns (uint256 earningFactor, bool hasOnePaidFraktion) {
         // Build the ids for eachs fraktion that can generate reward, and get the user balance for each one if this fraktions
-        uint256[] memory fraktionIds = SybelMath.buildSnftIds(contentId, fraktionTypes);
+        uint256[] memory fraktionIds = contentId.buildSnftIds(fraktionTypes);
         uint256[] memory tokenBalances = sybelInternalTokens.balanceOfIdsBatch(listener, fraktionIds);
 
         // default value to free fraktion
@@ -346,7 +346,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
             // Check if that was a paid fraktion or not
             hasOnePaidFraktion =
                 hasOnePaidFraktion ||
-                (SybelMath.isPayedTokenToken(fraktionTypes[balanceIndex]) && balance > 0);
+                (fraktionTypes[balanceIndex].isPayedTokenToken() && balance > 0);
             // Increase the earning factor
             unchecked {
                 // On 1e18 decimals

@@ -13599,7 +13599,7 @@
             "label": "token",
             "offset": 0,
             "slot": "155",
-            "type": "t_contract(IERC20Upgradeable)3306",
+            "type": "t_contract(IERC20Upgradeable)2806",
             "contract": "PushPullReward",
             "src": "contracts/utils/PushPullReward.sol:22"
           },
@@ -13631,7 +13631,7 @@
             "label": "sybelInternalTokens",
             "offset": 0,
             "slot": "159",
-            "type": "t_contract(SybelInternalTokens)8430",
+            "type": "t_contract(SybelInternalTokens)7350",
             "contract": "Rewarder",
             "src": "contracts/reward/Rewarder.sol:56"
           },
@@ -13639,7 +13639,7 @@
             "label": "sybelToken",
             "offset": 0,
             "slot": "160",
-            "type": "t_contract(SybelToken)8610",
+            "type": "t_contract(SybelToken)7530",
             "contract": "Rewarder",
             "src": "contracts/reward/Rewarder.sol:61"
           },
@@ -13647,7 +13647,7 @@
             "label": "referralPool",
             "offset": 0,
             "slot": "161",
-            "type": "t_contract(ReferralPool)7938",
+            "type": "t_contract(ReferralPool)6858",
             "contract": "Rewarder",
             "src": "contracts/reward/Rewarder.sol:66"
           },
@@ -13655,7 +13655,7 @@
             "label": "contentPool",
             "offset": 0,
             "slot": "162",
-            "type": "t_contract(ContentPool)7616",
+            "type": "t_contract(ContentPool)6536",
             "contract": "Rewarder",
             "src": "contracts/reward/Rewarder.sol:71"
           },
@@ -13685,23 +13685,23 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(ContentPool)7616": {
+          "t_contract(ContentPool)6536": {
             "label": "contract ContentPool",
             "numberOfBytes": "20"
           },
-          "t_contract(IERC20Upgradeable)3306": {
+          "t_contract(IERC20Upgradeable)2806": {
             "label": "contract IERC20Upgradeable",
             "numberOfBytes": "20"
           },
-          "t_contract(ReferralPool)7938": {
+          "t_contract(ReferralPool)6858": {
             "label": "contract ReferralPool",
             "numberOfBytes": "20"
           },
-          "t_contract(SybelInternalTokens)8430": {
+          "t_contract(SybelInternalTokens)7350": {
             "label": "contract SybelInternalTokens",
             "numberOfBytes": "20"
           },
-          "t_contract(SybelToken)8610": {
+          "t_contract(SybelToken)7530": {
             "label": "contract SybelToken",
             "numberOfBytes": "20"
           },
