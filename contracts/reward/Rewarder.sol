@@ -344,9 +344,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         for (uint256 balanceIndex; balanceIndex < tokenBalances.length; ) {
             uint256 balance = tokenBalances[balanceIndex];
             // Check if that was a paid fraktion or not
-            hasOnePaidFraktion =
-                hasOnePaidFraktion ||
-                (fraktionTypes[balanceIndex].isPayedTokenToken() && balance > 0);
+            hasOnePaidFraktion = hasOnePaidFraktion || (fraktionTypes[balanceIndex].isPayedTokenToken() && balance > 0);
             // Increase the earning factor
             unchecked {
                 // On 1e18 decimals
