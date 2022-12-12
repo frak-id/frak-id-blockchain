@@ -44,12 +44,12 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
     /**
      * @dev Event emitted when a new content is minted
      */
-    event ContentMinted(uint256 baseId, address owner);
+    event ContentMinted(uint256 baseId, address indexed owner);
 
     /**
      * @dev Event emitted when a new fraction of content is minted
      */
-    event FractionMinted(uint256 fractionId, address user, uint256 amount, uint256 cost);
+    event FractionMinted(uint256 indexed fractionId, address indexed user, uint256 amount, uint256 cost);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
