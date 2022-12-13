@@ -34,16 +34,16 @@ const monthAsSecond = 2628002.88;
       monthToSecond(24),
       false,
     );
-    await vestingWalletFactory.addVestingGroup(publicSaleGroupId, decimals.mul(70_000_000), 0, monthToSecond(3), false);
-    await vestingWalletFactory.addVestingGroup(teamGroupId, decimals.mul(250_000_000), 10, monthToSecond(36), true);
+    await vestingWalletFactory.addVestingGroup(publicSaleGroupId, decimals.mul(70_000_000), 0, monthToSecond(24), false);
+    await vestingWalletFactory.addVestingGroup(teamGroupId, decimals.mul(250_000_000), 25, monthToSecond(36), true);
     await vestingWalletFactory.addVestingGroup(
       techAndDevGroupId,
       decimals.mul(150_000_000),
-      0,
+      25,
       monthToSecond(36),
       true,
     );
-    await vestingWalletFactory.addVestingGroup(marketGroupId, decimals.mul(230_000_000), 10, monthToSecond(12), true);
+    /*await vestingWalletFactory.addVestingGroup(marketGroupId, decimals.mul(230_000_000), 10, monthToSecond(12), true);
     await vestingWalletFactory.addVestingGroup(
       creatorGrantsGroupId,
       decimals.mul(60_000_000),
@@ -57,7 +57,7 @@ const monthAsSecond = 2628002.88;
       0,
       monthToSecond(1),
       false,
-    );
+    );*/
 
     console.log("Finished to init our vesting groups");
   } catch (e: any) {
