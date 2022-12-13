@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/finance/PaymentSplitterUpgradeable.s
 import "../utils/FrakMath.sol";
 import "../utils/FrakRoles.sol";
 import "../tokens/FraktionTokens.sol";
-import "../tokens/SybelTokenL2.sol";
+import "../tokens/FrakTokenL2.sol";
 import "../utils/FrakAccessControlUpgradeable.sol";
 
 /**

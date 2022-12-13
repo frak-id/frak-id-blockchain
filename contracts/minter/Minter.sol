@@ -5,7 +5,7 @@ import "./IMinter.sol";
 import "./badges/FractionCostBadges.sol";
 import "../utils/FrakMath.sol";
 import "../tokens/FraktionTokens.sol";
-import "../tokens/SybelTokenL2.sol";
+import "../tokens/FrakTokenL2.sol";
 import "../utils/MintingAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
@@ -23,7 +23,7 @@ error RemainingSupply();
  */
 /// @custom:security-contact crypto-support@sybel.co
 contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges {
-    using SafeERC20Upgradeable for SybelToken;
+    using SafeERC20Upgradeable for FrakToken;
 
     /**
      * @dev Access our internal tokens
@@ -34,7 +34,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
      * @dev Access our governance token
      */
     /// @custom:oz-renamed-from tokenSybelEcosystem
-    SybelToken private sybelToken;
+    FrakToken private frakToken;
 
     /**
      * @dev Address of the foundation wallet
@@ -64,7 +64,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         __MintingAccessControlUpgradeable_init();
 
         fraktionTokens = FraktionTokens(internalTokenAddr);
-        sybelToken = SybelToken(frkTokenAddr);
+        frakToken = FrakToken(frkTokenAddr);
 
         foundationWallet = foundationAddr;
 
@@ -118,7 +118,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         // Emit the event
         emit FractionMinted(id, to, amount, totalCost);
         // Transfer the tokens
-        sybelToken.safeTransferFrom(to, foundationWallet, totalCost);
+        frakToken.safeTransferFrom(to, foundationWallet, totalCost);
         // Mint his Fraction of NFT
         fraktionTokens.mint(to, id, amount);
     }

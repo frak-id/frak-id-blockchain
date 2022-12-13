@@ -24,4 +24,4 @@ analyse_contract contracts/wallets/VestingWalletFactory.sol
 
 echo ""
 echo "<----- Checking SybelTokenL2.sol ----->"
-analyse_contract contracts/tokens/SybelTokenL2.sol
+analyse_contract contracts/tokens/FrakTokenL2.sol

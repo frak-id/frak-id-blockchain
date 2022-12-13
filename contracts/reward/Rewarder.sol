@@ -9,7 +9,7 @@ import "./pool/ReferralPool.sol";
 import "../utils/FrakMath.sol";
 import "../utils/FrakRoles.sol";
 import "../tokens/FraktionTokens.sol";
-import "../tokens/SybelTokenL2.sol";
+import "../tokens/FrakTokenL2.sol";
 import "../utils/FrakAccessControlUpgradeable.sol";
 import "../utils/PushPullReward.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -23,7 +23,7 @@ error InvalidReward();
  */
 /// @custom:security-contact crypto-support@sybel.co
 contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, ListenerBadges, PushPullReward {
-    using SafeERC20Upgradeable for SybelToken;
+    using SafeERC20Upgradeable for FrakToken;
     using FrakMath for uint256;
 
     // The cap of frak token we can mint for the reward
@@ -58,7 +58,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /**
      * @dev Access our token
      */
-    SybelToken private sybelToken;
+    FrakToken private frakToken;
 
     /**
      * @dev Access our referral system
@@ -116,7 +116,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         __PushPullReward_init(frkTokenAddr);
 
         fraktionTokens = FraktionTokens(internalTokenAddr);
-        sybelToken = SybelToken(frkTokenAddr);
+        frakToken = FrakToken(frkTokenAddr);
         contentPool = ContentPool(contentPoolAddr);
         referralPool = ReferralPool(referralAddr);
 
@@ -150,7 +150,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         totalFrakMinted += amount;
 
         // Mint the reward for the user
-        sybelToken.safeTransfer(listener, amount);
+        frakToken.safeTransfer(listener, amount);
     }
 
     /**
@@ -243,10 +243,10 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
 
         // If we got reward for the pool, transfer them
         if (totalRewards.content > 0) {
-            sybelToken.safeTransfer(address(contentPool), totalRewards.content);
+            frakToken.safeTransfer(address(contentPool), totalRewards.content);
         }
         if (totalRewards.referral > 0) {
-            sybelToken.safeTransfer(address(referralPool), totalRewards.referral);
+            frakToken.safeTransfer(address(referralPool), totalRewards.referral);
         }
     }
 

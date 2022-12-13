@@ -10,7 +10,7 @@ analyze:
   remappings:
     - "@openzeppelin/=node_modules/@openzeppelin/"
   targets:
-    - contracts/tokens/SybelTokenL1.sol
-    - contracts/tokens/SybelTokenL2.sol
+    - contracts/tokens/FrakTokenL1.sol
+    - contracts/tokens/FrakTokenL2.sol
     - contracts/wallets/VestingWalletFactory.sol
     - contracts/wallets/MultiVestingWallets.sol

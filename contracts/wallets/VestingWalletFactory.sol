@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "./MultiVestingWallets.sol";
-import "../tokens/SybelTokenL2.sol";
+import "../tokens/FrakTokenL2.sol";
 import "../utils/FrakAccessControlUpgradeable.sol";
 import "../utils/FrakRoles.sol";
 

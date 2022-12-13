@@ -2,9 +2,9 @@
 pragma solidity 0.8.17;
 
 import "../CryticInterface.sol";
-import "../../../contracts/tokens/SybelTokenL2.sol";
+import "../../../contracts/tokens/FrakTokenL2.sol";
 
-contract PropertiesSybelTokenTransferable is CryticInterface, SybelToken {
+contract PropertiesSybelTokenTransferable is CryticInterface, FrakToken {
     function crytic_zero_always_empty_ERC20Properties() public returns (bool) {
         return this.balanceOf(address(0x0)) == 0;
     }

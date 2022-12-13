@@ -15,7 +15,7 @@ error CapExceed();
  * Sybel token on the ethereum mainnet, simpler
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract SybelTokenL1 is ERC20Upgradeable, FrakAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
+contract FrakTokenL1 is ERC20Upgradeable, FrakAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
     bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
 
     uint256 private constant _cap = 3_000_000_000 ether; // 3 billion FRK
