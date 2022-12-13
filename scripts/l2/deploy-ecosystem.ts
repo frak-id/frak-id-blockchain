@@ -21,7 +21,7 @@ import { minterRole, rewarderRole, tokenContractRole } from "../utils/roles";
       metadataUrl = "https://metadata-dev.frak.id/json/{id.json}";
     } else if (networkName == "polygon") {
       erc20TokenAddr = deployedAddresses.mumbai.frakToken; // TODO : Should be updated to polygon once deployed
-      foundationWallet = "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0";
+      foundationWallet = "0x517ecFa01E2F9A6955d8DD04867613E41309213d";
       metadataUrl = "https://metadata.frak.id/json/{id.json}";
     } else {
       throw new Error("Invalid network");

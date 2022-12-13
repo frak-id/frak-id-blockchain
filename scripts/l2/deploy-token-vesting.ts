@@ -33,7 +33,7 @@ import { vestingManagerRole } from "../utils/roles";
 
     // Grant the vesting manager role to the vesting factory
     await multiVestingWallet.grantRole(vestingManagerRole, vestingWalletFactory.address);
-    console.log("Vesting wallet has now the manager role on the muyltivesting wallet");
+    console.log("Vesting wallet has now the manager role on the multi-vesting wallet");
 
     // Build our deployed address object
     const addressesMap: Map<string, any> = new Map(Object.entries(deployedAddresses));
