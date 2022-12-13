@@ -19,7 +19,7 @@ import { vestingManagerRole } from "../utils/roles";
     } else {
       throw new Error("Invalid network");
     }
-    // Deploy our sybl token contract
+    // Deploy our frk token contract
     const frakToken = await deployContract<FrakToken>("FrakToken", [childManagerProxy]);
     console.log(`Frak token L2 was deployed to ${frakToken.address}`);
     // Deploy vesting wallet and vesting wallt factory

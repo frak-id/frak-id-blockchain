@@ -16,7 +16,7 @@ error PoolStateAlreadyClaimed();
 
 /**
  * @dev Represent our content pool contract
- * @dev TODO : Optimize uint sizes (since max supply of sybl is 3 billion e18,
+ * @dev TODO : Optimize uint sizes (since max supply of frk is 3 billion e18,
  * what's the max uint we can use for the price ?, What the max array size ? So what max uint for indexes ?)
  */
 /// @custom:security-contact contact@frak.id

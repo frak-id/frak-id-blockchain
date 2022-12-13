@@ -21,7 +21,7 @@ import { predicateRole } from "../utils/roles";
       throw new Error("Invalid network");
     }
 
-    // Deploy our sybl token contract
+    // Deploy our frk token contract
     const frakTokenL1 = await deployContract<FrakTokenL1>("FrakTokenL1");
     console.log(`Frak token L1 was deployed to ${frakTokenL1.address}`);
 
