@@ -10,7 +10,7 @@ analyze:
   remappings:
     - "@openzeppelin/=node_modules/@openzeppelin/"
   targets:
-    - contracts/tokens/SybelInternalTokens.sol
+    - contracts/tokens/FraktionTokens.sol
     - contracts/reward/pool/ContentPool.sol
     - contracts/reward/pool/ReferralPool.sol
     - contracts/minter/Minter.sol

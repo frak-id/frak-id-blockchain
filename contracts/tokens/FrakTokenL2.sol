@@ -2,7 +2,7 @@
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "../utils/SybelRoles.sol";
+import "../utils/FrakRoles.sol";
 import "../utils/MintingAccessControlUpgradeable.sol";
 import "../utils/ContextMixin.sol";
 import "../utils/NativeMetaTransaction.sol";
@@ -12,10 +12,10 @@ import "../utils/NativeMetaTransaction.sol";
 error CapExceed();
 
 /**
- * Sybel token used on polygon L2
+ * Frak token used on polygon L2
  */
-/// @custom:security-contact crypto-support@sybel.co
-contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
+/// @custom:security-contact contact@frak.id
+contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
     bytes32 internal constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
 
     uint256 private constant _cap = 3_000_000_000 ether; // 3 billion FRK
@@ -43,7 +43,7 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
     /**
      * @dev Mint some FRK
      */
-    function mint(address to, uint256 amount) external onlyRole(SybelRoles.MINTER) whenNotPaused {
+    function mint(address to, uint256 amount) external onlyRole(FrakRoles.MINTER) whenNotPaused {
         if (totalSupply() + amount > _cap) revert CapExceed();
         _mint(to, amount);
     }

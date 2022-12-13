@@ -1,15 +1,15 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 
-import { SybelAccessControlUpgradeable } from "../../types/contracts/utils/SybelAccessControlUpgradeable";
+import { FrakAccessControlUpgradeable } from "../../types";
 
 // Check the Roles managment
 export const testPauses = (
-  contractAccessor: () => SybelAccessControlUpgradeable,
+  contractAccessor: () => FrakAccessControlUpgradeable,
   addr1Accessor: () => SignerWithAddress,
   unpausedRequiredFunctions: (() => Promise<void>)[],
 ) => {
-  let contract: SybelAccessControlUpgradeable;
+  let contract: FrakAccessControlUpgradeable;
   let addr1: SignerWithAddress;
   beforeEach(async () => {
     contract = contractAccessor();

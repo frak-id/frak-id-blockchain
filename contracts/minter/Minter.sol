@@ -3,9 +3,9 @@ pragma solidity 0.8.17;
 
 import "./IMinter.sol";
 import "./badges/FractionCostBadges.sol";
-import "../utils/SybelMath.sol";
-import "../tokens/SybelInternalTokens.sol";
-import "../tokens/SybelTokenL2.sol";
+import "../utils/FrakMath.sol";
+import "../tokens/FraktionTokens.sol";
+import "../tokens/FrakTokenL2.sol";
 import "../utils/MintingAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
@@ -21,20 +21,19 @@ error RemainingSupply();
  *   - New supply increase system (each week, only if all fractions are sold)
  *   - Add allowance to the user when he mint a fraction (web2)
  */
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges {
-    using SafeERC20Upgradeable for SybelToken;
+    using SafeERC20Upgradeable for FrakToken;
 
     /**
      * @dev Access our internal tokens
      */
-    SybelInternalTokens private sybelInternalTokens;
+    FraktionTokens private fraktionTokens;
 
     /**
      * @dev Access our governance token
      */
-    /// @custom:oz-renamed-from tokenSybelEcosystem
-    SybelToken private sybelToken;
+    FrakToken private frakToken;
 
     /**
      * @dev Address of the foundation wallet
@@ -63,13 +62,13 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         // Only for v1 deployment
         __MintingAccessControlUpgradeable_init();
 
-        sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
-        sybelToken = SybelToken(frkTokenAddr);
+        fraktionTokens = FraktionTokens(internalTokenAddr);
+        frakToken = FrakToken(frkTokenAddr);
 
         foundationWallet = foundationAddr;
 
         // Grant the badge updater role to the sender
-        _grantRole(SybelRoles.BADGE_UPDATER, msg.sender);
+        _grantRole(FrakRoles.BADGE_UPDATER, msg.sender);
     }
 
     /**
@@ -81,24 +80,24 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         uint256 premiumSupply,
         uint256 goldSupply,
         uint256 diamondSupply
-    ) external override onlyRole(SybelRoles.MINTER) whenNotPaused returns (uint256 contentId) {
+    ) external override onlyRole(FrakRoles.MINTER) whenNotPaused returns (uint256 contentId) {
         if (contentOwnerAddress == address(0)) revert InvalidAddress();
         if (commonSupply == 0 || commonSupply > 500 || premiumSupply > 200 || goldSupply > 50 || diamondSupply > 20)
             revert InvalidSupply();
         // Try to mint the new content
-        contentId = sybelInternalTokens.mintNewContent(contentOwnerAddress);
+        contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
         // Then set the supply for each token types
         uint256[] memory ids = new uint256[](4);
-        ids[0] = SybelMath.buildCommonNftId(contentId);
-        ids[1] = SybelMath.buildPremiumNftId(contentId);
-        ids[2] = SybelMath.buildGoldNftId(contentId);
-        ids[3] = SybelMath.buildDiamondNftId(contentId);
+        ids[0] = FrakMath.buildCommonNftId(contentId);
+        ids[1] = FrakMath.buildPremiumNftId(contentId);
+        ids[2] = FrakMath.buildGoldNftId(contentId);
+        ids[3] = FrakMath.buildDiamondNftId(contentId);
         uint256[] memory supplies = new uint256[](4);
         supplies[0] = commonSupply;
         supplies[1] = premiumSupply;
         supplies[2] = goldSupply;
         supplies[3] = diamondSupply;
-        sybelInternalTokens.setSupplyBatch(ids, supplies);
+        fraktionTokens.setSupplyBatch(ids, supplies);
         // Emit the event
         emit ContentMinted(contentId, contentOwnerAddress);
         // Return the minted content id
@@ -112,33 +111,33 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         uint256 id,
         address to,
         uint256 amount
-    ) external override onlyRole(SybelRoles.MINTER) whenNotPaused {
+    ) external override onlyRole(FrakRoles.MINTER) whenNotPaused {
         // Get the cost of the fraction
         uint256 totalCost = getCostBadge(id) * amount;
         // Emit the event
         emit FractionMinted(id, to, amount, totalCost);
         // Transfer the tokens
-        sybelToken.safeTransferFrom(to, foundationWallet, totalCost);
+        frakToken.safeTransferFrom(to, foundationWallet, totalCost);
         // Mint his Fraction of NFT
-        sybelInternalTokens.mint(to, id, amount);
+        fraktionTokens.mint(to, id, amount);
     }
 
     /**
      * @dev Increase the supply for a content fraction
      */
-    function increaseSupply(uint256 id, uint256 newSupply) external onlyRole(SybelRoles.MINTER) whenNotPaused {
-        uint256 currentSupply = sybelInternalTokens.supplyOf(id);
+    function increaseSupply(uint256 id, uint256 newSupply) external onlyRole(FrakRoles.MINTER) whenNotPaused {
+        uint256 currentSupply = fraktionTokens.supplyOf(id);
         if (currentSupply > 0) revert RemainingSupply();
         // Compute the supply difference
         uint256 newRealSupply = currentSupply + newSupply;
         // Mint his Fraction of NFT
-        sybelInternalTokens.setSupplyBatch(SybelMath.asSingletonArray(id), SybelMath.asSingletonArray(newRealSupply));
+        fraktionTokens.setSupplyBatch(FrakMath.asSingletonArray(id), FrakMath.asSingletonArray(newRealSupply));
     }
 
     function updateCostBadge(
         uint256 fractionId,
         uint96 badge
-    ) external override onlyRole(SybelRoles.BADGE_UPDATER) whenNotPaused {
+    ) external override onlyRole(FrakRoles.BADGE_UPDATER) whenNotPaused {
         _updateCostBadge(fractionId, badge);
     }
 }

@@ -58,11 +58,11 @@ export default {
   networks: {
     mumbai: {
       url: process.env.MUMBAI_PROVIDER,
-      accounts: [process.env.SYBEL_DEPLOY_PRIV_KEY],
+      accounts: [process.env.FRAK_DEPLOY_PRIV_KEY],
     },
     goerli: {
       url: process.env.GOERLI_PROVIDER,
-      accounts: [process.env.SYBEL_DEPLOY_PRIV_KEY],
+      accounts: [process.env.FRAK_DEPLOY_PRIV_KEY],
     },
   },
   etherscan: {

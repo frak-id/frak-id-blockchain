@@ -18,9 +18,9 @@ sudo yum install -y nodejs
 sudo service docker start
 sudo usermod -a -G docker ec2-user
 sudo yum install git
-mkdir sybel
-cd sybel/
-git clone https://**PersonalGitAccessToken**@github.com/sybel-app/frak-id-blockchain.git
+mkdir frak
+cd frak/
+git clone https://**PersonalGitAccessToken**@github.com/frak-id/frak-id-blockchain.git
 cd frak-id-blockchain/
 git status
 git pull

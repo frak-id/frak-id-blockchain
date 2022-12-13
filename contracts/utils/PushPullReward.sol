@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "./SybelAccessControlUpgradeable.sol";
+import "./FrakAccessControlUpgradeable.sol";
 
 /// @dev Error throwned when the contract havn't enough founds for the withdraw
 error NotEnoughFound();
@@ -12,7 +12,7 @@ error NotEnoughFound();
 /**
  * @dev Abstraction for contract that give a push / pull reward, address based
  */
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 abstract contract PushPullReward is Initializable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 

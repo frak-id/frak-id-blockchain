@@ -12,7 +12,7 @@ function analyse_contract {
 }
 
 echo "<----- Checking SybelMath.sol ----->"
-analyse_contract contracts/utils/SybelMath.sol
+analyse_contract contracts/utils/FrakMath.sol
 
 echo ""
 echo "<----- Checking MultiVestingWallets.sol ----->"
@@ -24,4 +24,4 @@ analyse_contract contracts/wallets/VestingWalletFactory.sol
 
 echo ""
 echo "<----- Checking SybelTokenL2.sol ----->"
-analyse_contract contracts/tokens/SybelTokenL2.sol
+analyse_contract contracts/tokens/FrakTokenL2.sol

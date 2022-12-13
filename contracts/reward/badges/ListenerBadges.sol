@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "../../utils/SybelMath.sol";
-import "../../utils/SybelRoles.sol";
-import "../../utils/SybelAccessControlUpgradeable.sol";
+import "../../utils/FrakMath.sol";
+import "../../utils/FrakRoles.sol";
+import "../../utils/FrakAccessControlUpgradeable.sol";
 
 /**
  * @dev Handle the computation of our listener badges
  */
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 abstract contract ListenerBadges {
     uint256 private constant MAX_LISTENER_BADGE = 1_000 ether; // Max badge possible for the listener
 

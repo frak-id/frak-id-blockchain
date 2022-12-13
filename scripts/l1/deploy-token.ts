@@ -2,13 +2,13 @@ import fs from "fs";
 import hre from "hardhat";
 
 import * as deployedAddresses from "../../addresses.json";
-import { SybelTokenL1 } from "../../types";
+import { FrakTokenL1 } from "../../types";
 import { deployContract } from "../utils/deploy";
 import { predicateRole } from "../utils/roles";
 
 (async () => {
   try {
-    console.log("Deploying the SybelToken");
+    console.log("Deploying the FrakToken");
     const networkName = hre.hardhatArguments.network ?? "local";
 
     // Get the right child predicate depending on the env
@@ -22,18 +22,18 @@ import { predicateRole } from "../utils/roles";
     }
 
     // Deploy our sybl token contract
-    const sybelToken = await deployContract<SybelTokenL1>("SybelTokenL1");
-    console.log(`Sybel token L1 was deployed to ${sybelToken.address}`);
+    const frakTokenL1 = await deployContract<FrakTokenL1>("FrakTokenL1");
+    console.log(`Frak token L1 was deployed to ${frakTokenL1.address}`);
 
     // Grant the role to the predicate proxy
-    await sybelToken.grantRole(predicateRole, predicateProxyAddr);
+    await frakTokenL1.grantRole(predicateRole, predicateProxyAddr);
 
     // Build our deployed address object
     const addressesMap: Map<string, any> = new Map(Object.entries(deployedAddresses));
     addressesMap.delete("default");
     addressesMap.set(networkName, {
       ...addressesMap.get(networkName),
-      sybelToken: sybelToken.address,
+      frakToken: frakTokenL1.address,
     });
     // Then wrote it into a file
     const jsonAddresses = JSON.stringify(Object.fromEntries(addressesMap));

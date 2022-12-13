@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "../../utils/SybelMath.sol";
-import "../../utils/SybelRoles.sol";
-import "../../utils/SybelAccessControlUpgradeable.sol";
+import "../../utils/FrakMath.sol";
+import "../../utils/FrakRoles.sol";
+import "../../utils/FrakAccessControlUpgradeable.sol";
 
 /**
  * @dev Handle the computation of our listener badges
  */
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 abstract contract FractionCostBadges {
     event FractionCostBadgeUpdated(uint256 id, uint96 badge);
 
@@ -32,7 +32,7 @@ abstract contract FractionCostBadges {
         fractionBadge = fractionBadges[fractionId];
         if (fractionBadge == 0) {
             // If the badge of this fraction isn't set yet, set it to default
-            uint8 tokenType = SybelMath.extractTokenType(fractionId);
+            uint8 tokenType = FrakMath.extractTokenType(fractionId);
             fractionBadge = initialFractionCost(tokenType);
         }
         return fractionBadge;
@@ -44,13 +44,13 @@ abstract contract FractionCostBadges {
      * and since this reawrd shouldn't evolve really fast
      */
     function initialFractionCost(uint8 tokenType) public pure returns (uint96 initialCost) {
-        if (tokenType == SybelMath.TOKEN_TYPE_COMMON_MASK) {
+        if (tokenType == FrakMath.TOKEN_TYPE_COMMON_MASK) {
             initialCost = 20 ether; // 20 FRK
-        } else if (tokenType == SybelMath.TOKEN_TYPE_PREMIUM_MASK) {
+        } else if (tokenType == FrakMath.TOKEN_TYPE_PREMIUM_MASK) {
             initialCost = 100 ether; // 100 FRK
-        } else if (tokenType == SybelMath.TOKEN_TYPE_GOLD_MASK) {
+        } else if (tokenType == FrakMath.TOKEN_TYPE_GOLD_MASK) {
             initialCost = 200 ether; // 200 FRK
-        } else if (tokenType == SybelMath.TOKEN_TYPE_DIAMOND_MASK) {
+        } else if (tokenType == FrakMath.TOKEN_TYPE_DIAMOND_MASK) {
             initialCost = 400 ether; // 400 FRK
         } else {
             revert InvalidFraktionType();

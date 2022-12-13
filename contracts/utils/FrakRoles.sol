@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-library SybelRoles {
+library FrakRoles {
     // Administrator role of a contra
     bytes32 internal constant ADMIN = 0x00;
 
