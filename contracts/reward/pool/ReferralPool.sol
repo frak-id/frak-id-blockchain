@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "../../utils/SybelMath.sol";
-import "../../utils/SybelRoles.sol";
+import "../../utils/FrakMath.sol";
+import "../../utils/FrakRoles.sol";
 import "../../tokens/SybelInternalTokens.sol";
 import "../../utils/PushPullReward.sol";
-import "../../utils/SybelAccessControlUpgradeable.sol";
+import "../../utils/FrakAccessControlUpgradeable.sol";
 
 /// @dev Exception throwned when the user already got a referer
 error AlreadyGotAReferer();
@@ -16,7 +16,7 @@ error AlreadyInRefererChain();
  * @dev Represent our referral contract
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
+contract ReferralPool is FrakAccessControlUpgradeable, PushPullReward {
     // The minimum reward is 1 mwei, to prevent iteration on really small amount
     uint24 internal constant MINIMUM_REWARD = 1_000_000;
 
@@ -46,7 +46,7 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
     function initialize(address frkTokenAddr) external initializer {
         if (frkTokenAddr == address(0)) revert InvalidAddress();
 
-        __SybelAccessControlUpgradeable_init();
+        __FrakAccessControlUpgradeable_init();
         __PushPullReward_init(frkTokenAddr);
     }
 
@@ -57,7 +57,7 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
         uint256 contentId,
         address user,
         address referer
-    ) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
+    ) external onlyRole(FrakRoles.ADMIN) whenNotPaused {
         if (user == address(0) || referer == address(0) || user == referer) revert InvalidAddress();
         // Get our content referer chain (to prevent multi kecack hash each time we access it)
         mapping(address => address) storage contentRefererChain = contentIdToRefereeToReferer[contentId];
@@ -85,7 +85,7 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
         uint256 contentId,
         address user,
         uint256 amount
-    ) public onlyRole(SybelRoles.REWARDER) whenNotPaused returns (uint256 totalAmount) {
+    ) public onlyRole(FrakRoles.REWARDER) whenNotPaused returns (uint256 totalAmount) {
         if (user == address(0)) revert InvalidAddress();
         if (amount == 0) revert NoReward();
         // Get our content referer chain (to prevent multi kecack hash each time we access it)
@@ -118,7 +118,7 @@ contract ReferralPool is SybelAccessControlUpgradeable, PushPullReward {
         _withdraw(msg.sender);
     }
 
-    function withdrawFounds(address user) external virtual override onlyRole(SybelRoles.ADMIN) whenNotPaused {
+    function withdrawFounds(address user) external virtual override onlyRole(FrakRoles.ADMIN) whenNotPaused {
         _withdraw(user);
     }
 }

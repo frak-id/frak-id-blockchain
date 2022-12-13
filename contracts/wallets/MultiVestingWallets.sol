@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "../tokens/SybelTokenL2.sol";
-import "../utils/SybelAccessControlUpgradeable.sol";
-import "../utils/SybelRoles.sol";
+import "../utils/FrakAccessControlUpgradeable.sol";
+import "../utils/FrakRoles.sol";
 
 /// @dev error emitted when the contract doesn't have enough founds
 error NotEnoughFounds();
@@ -25,7 +25,7 @@ error ComputationError();
 error VestingUnrevocable();
 error VestingRevokedError();
 
-contract MultiVestingWallets is SybelAccessControlUpgradeable {
+contract MultiVestingWallets is FrakAccessControlUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     // Add the library methods
@@ -95,10 +95,10 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     function initialize(address tokenAddr) external initializer {
         if (tokenAddr == address(0)) revert InvalidAddress();
 
-        __SybelAccessControlUpgradeable_init();
+        __FrakAccessControlUpgradeable_init();
 
         // Grand the vesting manager role to the owner
-        _grantRole(SybelRoles.VESTING_MANAGER, msg.sender);
+        _grantRole(FrakRoles.VESTING_MANAGER, msg.sender);
 
         // Init our sybel token
         token = IERC20Upgradeable(tokenAddr);
@@ -139,7 +139,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     /**
      * @notice Free the reserve up
      */
-    function transferAvailableReserve(address receiver) external whenNotPaused onlyRole(SybelRoles.ADMIN) {
+    function transferAvailableReserve(address receiver) external whenNotPaused onlyRole(FrakRoles.ADMIN) {
         uint256 available = availableReserve();
         if (available == 0) revert NoReward();
         token.safeTransfer(receiver, available);
@@ -155,7 +155,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         uint32 duration,
         uint48 startDate,
         bool revocable
-    ) external whenNotPaused onlyRole(SybelRoles.VESTING_MANAGER) {
+    ) external whenNotPaused onlyRole(FrakRoles.VESTING_MANAGER) {
         _requireVestInputs(duration, startDate);
         if (amount > availableReserve()) revert NotEnoughFounds();
         _createVesting(beneficiary, amount, initialDrop, duration, startDate, revocable);
@@ -171,7 +171,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
         uint32 duration,
         uint48 startDate,
         bool revocable
-    ) external whenNotPaused onlyRole(SybelRoles.VESTING_MANAGER) {
+    ) external whenNotPaused onlyRole(FrakRoles.VESTING_MANAGER) {
         if (
             beneficiaries.length == 0 ||
             beneficiaries.length != amounts.length ||
@@ -281,7 +281,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     /**
      * @notice Release the tokens of a all of beneficiary's vesting.
      */
-    function releaseAllFor(address beneficiary) external onlyRole(SybelRoles.VESTING_MANAGER) returns (uint256) {
+    function releaseAllFor(address beneficiary) external onlyRole(FrakRoles.VESTING_MANAGER) returns (uint256) {
         return _releaseAll(beneficiary);
     }
 
@@ -481,7 +481,7 @@ contract MultiVestingWallets is SybelAccessControlUpgradeable {
     )
         external
         whenNotPaused
-        onlyRole(SybelRoles.ADMIN)
+        onlyRole(FrakRoles.ADMIN)
         onlyIfNotRevoked(vestingId)
         returns (uint96 vestAmountRemaining)
     {

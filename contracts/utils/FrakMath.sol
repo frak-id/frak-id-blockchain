@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-library SybelMath {
+library FrakMath {
     // The offset of the id and the mask we use to store the token type
     uint8 internal constant ID_OFFSET = 4;
     uint8 internal constant TYPE_MASK = 0xF;
@@ -84,10 +84,10 @@ library SybelMath {
      */
     function payableTokenTypes() internal pure returns (uint256[] memory) {
         uint256[] memory types = new uint256[](4);
-        types[0] = SybelMath.TOKEN_TYPE_COMMON_MASK;
-        types[1] = SybelMath.TOKEN_TYPE_PREMIUM_MASK;
-        types[2] = SybelMath.TOKEN_TYPE_GOLD_MASK;
-        types[3] = SybelMath.TOKEN_TYPE_DIAMOND_MASK;
+        types[0] = FrakMath.TOKEN_TYPE_COMMON_MASK;
+        types[1] = FrakMath.TOKEN_TYPE_PREMIUM_MASK;
+        types[2] = FrakMath.TOKEN_TYPE_GOLD_MASK;
+        types[3] = FrakMath.TOKEN_TYPE_DIAMOND_MASK;
         return types;
     }
 

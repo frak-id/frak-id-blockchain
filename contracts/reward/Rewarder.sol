@@ -6,11 +6,11 @@ import "./badges/ContentBadges.sol";
 import "./badges/ListenerBadges.sol";
 import "./pool/ContentPool.sol";
 import "./pool/ReferralPool.sol";
-import "../utils/SybelMath.sol";
-import "../utils/SybelRoles.sol";
+import "../utils/FrakMath.sol";
+import "../utils/FrakRoles.sol";
 import "../tokens/SybelInternalTokens.sol";
 import "../tokens/SybelTokenL2.sol";
-import "../utils/SybelAccessControlUpgradeable.sol";
+import "../utils/FrakAccessControlUpgradeable.sol";
 import "../utils/PushPullReward.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
@@ -22,9 +22,9 @@ error InvalidReward();
  * @dev Represent our rewarder contract
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, ListenerBadges, PushPullReward {
+contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, ListenerBadges, PushPullReward {
     using SafeERC20Upgradeable for SybelToken;
-    using SybelMath for uint256;
+    using FrakMath for uint256;
 
     // The cap of frak token we can mint for the reward
     uint256 public constant REWARD_MINT_CAP = 1_500_000_000 ether;
@@ -112,7 +112,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         ) revert InvalidAddress();
 
         // Only for v1 deployment
-        __SybelAccessControlUpgradeable_init();
+        __FrakAccessControlUpgradeable_init();
         __PushPullReward_init(frkTokenAddr);
 
         sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
@@ -126,8 +126,8 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         tokenGenerationFactor = 1 ether;
 
         // Grant the rewarder role to the contract deployer
-        _grantRole(SybelRoles.REWARDER, msg.sender);
-        _grantRole(SybelRoles.BADGE_UPDATER, msg.sender);
+        _grantRole(FrakRoles.REWARDER, msg.sender);
+        _grantRole(FrakRoles.BADGE_UPDATER, msg.sender);
     }
 
     struct TotalRewards {
@@ -140,7 +140,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     /**
      * @dev Directly pay a user (or an owner) for the given frk amount
      */
-    function payUserDirectly(address listener, uint256 amount) external onlyRole(SybelRoles.REWARDER) whenNotPaused {
+    function payUserDirectly(address listener, uint256 amount) external onlyRole(FrakRoles.REWARDER) whenNotPaused {
         // Ensure the param are valid and not too much
         if (listener == address(0)) revert InvalidAddress();
         if (amount > SINGLE_REWARD_CAP || amount == 0 || amount + totalFrakMinted > REWARD_MINT_CAP)
@@ -159,7 +159,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     function payCreatorDirectlyBatch(
         uint256[] calldata contentIds,
         uint256[] calldata amounts
-    ) external onlyRole(SybelRoles.REWARDER) whenNotPaused {
+    ) external onlyRole(FrakRoles.REWARDER) whenNotPaused {
         // Ensure we got valid data
         if (contentIds.length != amounts.length || contentIds.length > MAX_BATCH_AMOUNT) revert InvalidArray();
 
@@ -190,7 +190,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         uint8 contentType,
         uint256[] calldata contentIds,
         uint16[] calldata listenCounts
-    ) external onlyRole(SybelRoles.REWARDER) whenNotPaused {
+    ) external onlyRole(FrakRoles.REWARDER) whenNotPaused {
         // Ensure we got valid data
         if (contentIds.length != listenCounts.length || contentIds.length > MAX_BATCH_AMOUNT) revert InvalidArray();
 
@@ -198,7 +198,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         TotalRewards memory totalRewards = TotalRewards(0, 0, 0, 0);
 
         // Get all the payed fraktion types
-        uint256[] memory fraktionTypes = SybelMath.payableTokenTypes();
+        uint256[] memory fraktionTypes = FrakMath.payableTokenTypes();
         uint256 rewardForContentType = baseRewardForContentType(contentType);
 
         // Iterate over each content the user listened
@@ -337,7 +337,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         uint256[] memory tokenBalances = sybelInternalTokens.balanceOfIdsBatch(listener, fraktionIds);
 
         // default value to free fraktion
-        earningFactor = baseRewardForTokenType(SybelMath.TOKEN_TYPE_FREE_MASK);
+        earningFactor = baseRewardForTokenType(FrakMath.TOKEN_TYPE_FREE_MASK);
         hasOnePaidFraktion = false;
 
         // Iterate over each balance to compute the earning factor
@@ -375,19 +375,19 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
      * and since this reawrd shouldn't evolve really fast
      */
     function baseRewardForTokenType(uint256 tokenType) private pure returns (uint256 reward) {
-        if (tokenType == SybelMath.TOKEN_TYPE_FREE_MASK) {
+        if (tokenType == FrakMath.TOKEN_TYPE_FREE_MASK) {
             // 0.01 FRK
             reward = 0.01 ether;
-        } else if (tokenType == SybelMath.TOKEN_TYPE_COMMON_MASK) {
+        } else if (tokenType == FrakMath.TOKEN_TYPE_COMMON_MASK) {
             // 0.1 FRK
             reward = 0.1 ether;
-        } else if (tokenType == SybelMath.TOKEN_TYPE_PREMIUM_MASK) {
+        } else if (tokenType == FrakMath.TOKEN_TYPE_PREMIUM_MASK) {
             // 0.5 FRK
             reward = 0.5 ether;
-        } else if (tokenType == SybelMath.TOKEN_TYPE_GOLD_MASK) {
+        } else if (tokenType == FrakMath.TOKEN_TYPE_GOLD_MASK) {
             // 1 FRK
             reward = 1 ether;
-        } else if (tokenType == SybelMath.TOKEN_TYPE_DIAMOND_MASK) {
+        } else if (tokenType == FrakMath.TOKEN_TYPE_DIAMOND_MASK) {
             // 2 FRK
             reward = 2 ether;
         } else {
@@ -415,7 +415,7 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
     /**
      * @dev Update the token generation factor
      */
-    function updateTpu(uint256 newTpu) external onlyRole(SybelRoles.ADMIN) {
+    function updateTpu(uint256 newTpu) external onlyRole(FrakRoles.ADMIN) {
         tokenGenerationFactor = newTpu;
     }
 
@@ -423,21 +423,21 @@ contract Rewarder is IRewarder, SybelAccessControlUpgradeable, ContentBadges, Li
         _withdrawWithFee(msg.sender, 2, foundationWallet);
     }
 
-    function withdrawFounds(address user) external virtual override onlyRole(SybelRoles.ADMIN) whenNotPaused {
+    function withdrawFounds(address user) external virtual override onlyRole(FrakRoles.ADMIN) whenNotPaused {
         _withdrawWithFee(user, 2, foundationWallet);
     }
 
     function updateContentBadge(
         uint256 contentId,
         uint256 badge
-    ) external override onlyRole(SybelRoles.BADGE_UPDATER) whenNotPaused {
+    ) external override onlyRole(FrakRoles.BADGE_UPDATER) whenNotPaused {
         _updateContentBadge(contentId, badge);
     }
 
     function updateListenerBadge(
         address listener,
         uint256 badge
-    ) external override onlyRole(SybelRoles.BADGE_UPDATER) whenNotPaused {
+    ) external override onlyRole(FrakRoles.BADGE_UPDATER) whenNotPaused {
         _updateListenerBadge(listener, badge);
     }
 }

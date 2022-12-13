@@ -4,8 +4,8 @@ pragma solidity 0.8.17;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "./MultiVestingWallets.sol";
 import "../tokens/SybelTokenL2.sol";
-import "../utils/SybelAccessControlUpgradeable.sol";
-import "../utils/SybelRoles.sol";
+import "../utils/FrakAccessControlUpgradeable.sol";
+import "../utils/FrakRoles.sol";
 
 /// @dev error throwned when the creation param are invalid
 error InvalidCreationParam();
@@ -15,7 +15,7 @@ error InexistantGroup();
 /// @dev error when the supply of the group is not sufficiant
 error InsuficiantGroupSupply();
 
-contract VestingWalletFactory is SybelAccessControlUpgradeable {
+contract VestingWalletFactory is FrakAccessControlUpgradeable {
     // The cap of sybl token propose to vester
     uint96 internal constant FRK_VESTING_CAP = 1_500_000_000 ether;
 
@@ -57,10 +57,10 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
     function initialize(address multiVestingWalletAddr) external initializer {
         if (multiVestingWalletAddr == address(0)) revert InvalidAddress();
 
-        __SybelAccessControlUpgradeable_init();
+        __FrakAccessControlUpgradeable_init();
 
         // Grand the vesting creator role to the owner
-        _grantRole(SybelRoles.VESTING_CREATOR, msg.sender);
+        _grantRole(FrakRoles.VESTING_CREATOR, msg.sender);
 
         // Init our sybel token and multi vesting wallet
         multiVestingWallets = MultiVestingWallets(multiVestingWalletAddr);
@@ -75,7 +75,7 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         uint16 initialDropPerthousand,
         uint32 duration,
         bool revocable
-    ) external onlyRole(SybelRoles.ADMIN) {
+    ) external onlyRole(FrakRoles.ADMIN) {
         _addVestingGroup(id, rewardCap, initialDropPerthousand, duration, revocable);
     }
 
@@ -114,7 +114,7 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         uint8 initialId,
         uint8 targetId,
         uint96 amount
-    ) external whenNotPaused onlyRole(SybelRoles.ADMIN) {
+    ) external whenNotPaused onlyRole(FrakRoles.ADMIN) {
         // Ensure the group as enough supply
         VestingGroup storage initialGroup = _getSafeVestingGroup(initialId);
         if (initialGroup.supply > initialGroup.rewardCap - amount) revert InsuficiantGroupSupply();
@@ -150,7 +150,7 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         uint256 reward,
         uint8 groupId,
         uint48 startDate
-    ) external onlyRole(SybelRoles.VESTING_CREATOR) whenNotPaused {
+    ) external onlyRole(FrakRoles.VESTING_CREATOR) whenNotPaused {
         // Ensure all the param are correct
         if (reward == 0) revert NoReward();
         if (beneficiary == address(0)) revert InvalidAddress();
@@ -183,7 +183,7 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
         uint256[] calldata rewards,
         uint8 groupId,
         uint48 startDate
-    ) external onlyRole(SybelRoles.VESTING_CREATOR) whenNotPaused {
+    ) external onlyRole(FrakRoles.VESTING_CREATOR) whenNotPaused {
         // Ensure all the param are correct
         if (beneficiaries.length == 0 || beneficiaries.length != rewards.length) revert InvalidArray();
 
@@ -236,7 +236,7 @@ contract VestingWalletFactory is SybelAccessControlUpgradeable {
     /**
      * @notice Revoke a user vest wallet, and so reduce the group supply by the amount unlocked
      */
-    function revokeUserVest(uint8 groupId, uint24 vestId) external onlyRole(SybelRoles.VESTING_CREATOR) whenNotPaused {
+    function revokeUserVest(uint8 groupId, uint24 vestId) external onlyRole(FrakRoles.VESTING_CREATOR) whenNotPaused {
         // Get our group and the previous sybl balance of the contract
         VestingGroup storage group = _getSafeVestingGroup(groupId);
 

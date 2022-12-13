@@ -2,7 +2,7 @@
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "../utils/SybelRoles.sol";
+import "../utils/FrakRoles.sol";
 import "../utils/MintingAccessControlUpgradeable.sol";
 import "../utils/ContextMixin.sol";
 import "../utils/NativeMetaTransaction.sol";
@@ -43,7 +43,7 @@ contract SybelToken is ERC20Upgradeable, MintingAccessControlUpgradeable, Native
     /**
      * @dev Mint some FRK
      */
-    function mint(address to, uint256 amount) external onlyRole(SybelRoles.MINTER) whenNotPaused {
+    function mint(address to, uint256 amount) external onlyRole(FrakRoles.MINTER) whenNotPaused {
         if (totalSupply() + amount > _cap) revert CapExceed();
         _mint(to, amount);
     }

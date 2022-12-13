@@ -3,9 +3,9 @@ pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "../utils/ContextMixin.sol";
-import "../utils/SybelAccessControlUpgradeable.sol";
+import "../utils/FrakAccessControlUpgradeable.sol";
 import "../utils/NativeMetaTransaction.sol";
-import "../utils/SybelRoles.sol";
+import "../utils/FrakRoles.sol";
 
 // Error
 /// @dev error throwned when the contract cap is exceeded
@@ -15,7 +15,7 @@ error CapExceed();
  * Sybel token on the ethereum mainnet, simpler
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract SybelTokenL1 is ERC20Upgradeable, SybelAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
+contract SybelTokenL1 is ERC20Upgradeable, FrakAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
     bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
 
     uint256 private constant _cap = 3_000_000_000 ether; // 3 billion FRK
@@ -29,7 +29,7 @@ contract SybelTokenL1 is ERC20Upgradeable, SybelAccessControlUpgradeable, Native
         string memory name = "Frak";
         __ERC20_init(name, "FRK");
         _initializeEIP712(name);
-        __SybelAccessControlUpgradeable_init();
+        __FrakAccessControlUpgradeable_init();
 
         _grantRole(PREDICATE_ROLE, _msgSender());
     }

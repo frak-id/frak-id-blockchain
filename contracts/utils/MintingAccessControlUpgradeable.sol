@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "./SybelAccessControlUpgradeable.sol";
-import "../utils/SybelRoles.sol";
+import "./FrakAccessControlUpgradeable.sol";
+import "../utils/FrakRoles.sol";
 
 /// @custom:security-contact crypto-support@sybel.co
-abstract contract MintingAccessControlUpgradeable is SybelAccessControlUpgradeable {
+abstract contract MintingAccessControlUpgradeable is FrakAccessControlUpgradeable {
     function __MintingAccessControlUpgradeable_init() internal onlyInitializing {
-        __SybelAccessControlUpgradeable_init();
+        __FrakAccessControlUpgradeable_init();
 
-        _grantRole(SybelRoles.MINTER, _msgSender());
+        _grantRole(FrakRoles.MINTER, _msgSender());
     }
 }

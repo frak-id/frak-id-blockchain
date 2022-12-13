@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "../../utils/SybelMath.sol";
-import "../../utils/SybelRoles.sol";
+import "../../utils/FrakMath.sol";
+import "../../utils/FrakRoles.sol";
 import "../../tokens/SybelInternalTokens.sol";
-import "../../utils/SybelAccessControlUpgradeable.sol";
+import "../../utils/FrakAccessControlUpgradeable.sol";
 import "../../tokens/FraktionTransferCallback.sol";
 import "../../utils/PushPullReward.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -20,7 +20,7 @@ error PoolStateAlreadyClaimed();
  * what's the max uint we can use for the price ?, What the max array size ? So what max uint for indexes ?)
  */
 /// @custom:security-contact crypto-support@sybel.co
-contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionTransferCallback {
+contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTransferCallback {
     // Add the library methods
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -92,14 +92,14 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         if (frkTokenAddr == address(0)) revert InvalidAddress();
 
         // Only for v1 deployment
-        __SybelAccessControlUpgradeable_init();
+        __FrakAccessControlUpgradeable_init();
         __PushPullReward_init(frkTokenAddr);
     }
 
     /**
      * Add a reward inside a content pool
      */
-    function addReward(uint256 contentId, uint256 rewardAmount) external onlyRole(SybelRoles.REWARDER) whenNotPaused {
+    function addReward(uint256 contentId, uint256 rewardAmount) external onlyRole(FrakRoles.REWARDER) whenNotPaused {
         if (rewardAmount == 0 || rewardAmount > MAX_REWARD) revert NoReward();
         RewardState storage currentState = lastContentState(contentId);
         if (!currentState.open) revert PoolStateClosed();
@@ -117,7 +117,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         address to,
         uint256[] memory ids,
         uint256[] memory amount
-    ) external override onlyRole(SybelRoles.TOKEN_CONTRACT) {
+    ) external override onlyRole(FrakRoles.TOKEN_CONTRACT) {
         if (from != address(0) && to != address(0)) {
             // Handle share transfer between participant, with no update on the total pool rewards
             for (uint256 index; index < ids.length; ) {
@@ -142,7 +142,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
      */
     function updateParticipants(address from, address to, uint256 fraktionId, uint256 amountMoved) private {
         // Extract content id and token type from this tx
-        (uint256 contentId, uint8 tokenType) = SybelMath.extractContentIdAndTokenType(fraktionId);
+        (uint256 contentId, uint8 tokenType) = FrakMath.extractContentIdAndTokenType(fraktionId);
         // Get the initial share value of this token
         uint256 sharesValue = getSharesForTokenType(tokenType);
         if (sharesValue == 0) return; // Jump this iteration if this fraktions doesn't count for any shares
@@ -171,7 +171,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
      */
     function updateParticipantAndPool(address from, address to, uint256 fraktionId, uint256 amountMoved) private {
         // Extract content id and token type from this tx
-        (uint256 contentId, uint8 tokenType) = SybelMath.extractContentIdAndTokenType(fraktionId);
+        (uint256 contentId, uint8 tokenType) = FrakMath.extractContentIdAndTokenType(fraktionId);
         // Get the total shares moved
         uint120 sharesMoved = uint120(getSharesForTokenType(tokenType) * amountMoved);
         if (sharesMoved == 0) return; // Jump this iteration if this fraktions doesn't count for any shares
@@ -424,7 +424,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
     /**
      * Compute all the reward for the given user
      */
-    function computeAllPoolsBalance(address user) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
+    function computeAllPoolsBalance(address user) external onlyRole(FrakRoles.ADMIN) whenNotPaused {
         _computeAndSaveAllForUser(user);
     }
 
@@ -433,7 +433,7 @@ contract ContentPool is SybelAccessControlUpgradeable, PushPullReward, FraktionT
         _withdraw(msg.sender);
     }
 
-    function withdrawFounds(address user) external virtual override onlyRole(SybelRoles.ADMIN) whenNotPaused {
+    function withdrawFounds(address user) external virtual override onlyRole(FrakRoles.ADMIN) whenNotPaused {
         if (user == address(0)) revert InvalidAddress();
         _computeAndSaveAllForUser(user);
         _withdraw(user);

@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./FraktionTransferCallback.sol";
-import "../utils/SybelMath.sol";
+import "../utils/FrakMath.sol";
 import "../utils/MintingAccessControlUpgradeable.sol";
 
 // Error
@@ -13,7 +13,7 @@ error InsuficiantSupply();
 /// @custom:security-contact crypto-support@sybel.co
 /// @custom:oz-upgrades-unsafe-allow external-library-linking
 contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
-    using SybelMath for uint256;
+    using FrakMath for uint256;
 
     // The current content token id
     uint256 private _currentContentTokenId;
@@ -55,7 +55,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     /**
      * Register a new transaction callback
      */
-    function registerNewCallback(address callbackAddr) external onlyRole(SybelRoles.ADMIN) whenNotPaused {
+    function registerNewCallback(address callbackAddr) external onlyRole(FrakRoles.ADMIN) whenNotPaused {
         transferCallback = FraktionTransferCallback(callbackAddr);
     }
 
@@ -64,7 +64,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
      */
     function mintNewContent(
         address ownerAddress
-    ) external onlyRole(SybelRoles.MINTER) whenNotPaused returns (uint256 id) {
+    ) external onlyRole(FrakRoles.MINTER) whenNotPaused returns (uint256 id) {
         // Get the next content id and increment the current content token id
         id = ++_currentContentTokenId;
 
@@ -99,7 +99,7 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     function setSupplyBatch(
         uint256[] calldata ids,
         uint256[] calldata supplies
-    ) external onlyRole(SybelRoles.MINTER) whenNotPaused {
+    ) external onlyRole(FrakRoles.MINTER) whenNotPaused {
         if (ids.length == 0 || ids.length != supplies.length) revert InvalidArray();
         // Iterate over each ids and increment their supplies
         for (uint256 i; i < ids.length; ) {
@@ -170,14 +170,14 @@ contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradea
     /**
      * @dev Mint a new fraction of a nft
      */
-    function mint(address to, uint256 id, uint256 amount) external onlyRole(SybelRoles.MINTER) whenNotPaused {
+    function mint(address to, uint256 id, uint256 amount) external onlyRole(FrakRoles.MINTER) whenNotPaused {
         _mint(to, id, amount, new bytes(0x0));
     }
 
     /**
      * @dev Burn a fraction of a nft
      */
-    function burn(address from, uint256 id, uint256 amount) external onlyRole(SybelRoles.MINTER) whenNotPaused {
+    function burn(address from, uint256 id, uint256 amount) external onlyRole(FrakRoles.MINTER) whenNotPaused {
         _burn(from, id, amount);
     }
 
