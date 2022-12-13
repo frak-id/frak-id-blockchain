@@ -12,7 +12,7 @@ error InsuficiantSupply();
 
 /// @custom:security-contact crypto-support@sybel.co
 /// @custom:oz-upgrades-unsafe-allow external-library-linking
-contract SybelInternalTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
+contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     using FrakMath for uint256;
 
     // The current content token id

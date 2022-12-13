@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import "./IMinter.sol";
 import "./badges/FractionCostBadges.sol";
 import "../utils/FrakMath.sol";
-import "../tokens/SybelInternalTokens.sol";
+import "../tokens/FraktionTokens.sol";
 import "../tokens/SybelTokenL2.sol";
 import "../utils/MintingAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -28,7 +28,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
     /**
      * @dev Access our internal tokens
      */
-    SybelInternalTokens private sybelInternalTokens;
+    FraktionTokens private fraktionTokens;
 
     /**
      * @dev Access our governance token
@@ -63,7 +63,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         // Only for v1 deployment
         __MintingAccessControlUpgradeable_init();
 
-        sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
+        fraktionTokens = FraktionTokens(internalTokenAddr);
         sybelToken = SybelToken(frkTokenAddr);
 
         foundationWallet = foundationAddr;
@@ -86,7 +86,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         if (commonSupply == 0 || commonSupply > 500 || premiumSupply > 200 || goldSupply > 50 || diamondSupply > 20)
             revert InvalidSupply();
         // Try to mint the new content
-        contentId = sybelInternalTokens.mintNewContent(contentOwnerAddress);
+        contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
         // Then set the supply for each token types
         uint256[] memory ids = new uint256[](4);
         ids[0] = FrakMath.buildCommonNftId(contentId);
@@ -98,7 +98,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         supplies[1] = premiumSupply;
         supplies[2] = goldSupply;
         supplies[3] = diamondSupply;
-        sybelInternalTokens.setSupplyBatch(ids, supplies);
+        fraktionTokens.setSupplyBatch(ids, supplies);
         // Emit the event
         emit ContentMinted(contentId, contentOwnerAddress);
         // Return the minted content id
@@ -120,19 +120,19 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         // Transfer the tokens
         sybelToken.safeTransferFrom(to, foundationWallet, totalCost);
         // Mint his Fraction of NFT
-        sybelInternalTokens.mint(to, id, amount);
+        fraktionTokens.mint(to, id, amount);
     }
 
     /**
      * @dev Increase the supply for a content fraction
      */
     function increaseSupply(uint256 id, uint256 newSupply) external onlyRole(FrakRoles.MINTER) whenNotPaused {
-        uint256 currentSupply = sybelInternalTokens.supplyOf(id);
+        uint256 currentSupply = fraktionTokens.supplyOf(id);
         if (currentSupply > 0) revert RemainingSupply();
         // Compute the supply difference
         uint256 newRealSupply = currentSupply + newSupply;
         // Mint his Fraction of NFT
-        sybelInternalTokens.setSupplyBatch(FrakMath.asSingletonArray(id), FrakMath.asSingletonArray(newRealSupply));
+        fraktionTokens.setSupplyBatch(FrakMath.asSingletonArray(id), FrakMath.asSingletonArray(newRealSupply));
     }
 
     function updateCostBadge(

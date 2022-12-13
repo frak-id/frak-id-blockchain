@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import "@openzeppelin/contracts-upgradeable/finance/PaymentSplitterUpgradeable.sol";
 import "../utils/FrakMath.sol";
 import "../utils/FrakRoles.sol";
-import "../tokens/SybelInternalTokens.sol";
+import "../tokens/FraktionTokens.sol";
 import "../tokens/SybelTokenL2.sol";
 import "../utils/FrakAccessControlUpgradeable.sol";
 

@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 import "../../utils/FrakMath.sol";
 import "../../utils/FrakRoles.sol";
-import "../../tokens/SybelInternalTokens.sol";
+import "../../tokens/FraktionTokens.sol";
 import "../../utils/PushPullReward.sol";
 import "../../utils/FrakAccessControlUpgradeable.sol";
 

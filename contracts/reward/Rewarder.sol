@@ -8,7 +8,7 @@ import "./pool/ContentPool.sol";
 import "./pool/ReferralPool.sol";
 import "../utils/FrakMath.sol";
 import "../utils/FrakRoles.sol";
-import "../tokens/SybelInternalTokens.sol";
+import "../tokens/FraktionTokens.sol";
 import "../tokens/SybelTokenL2.sol";
 import "../utils/FrakAccessControlUpgradeable.sol";
 import "../utils/PushPullReward.sol";
@@ -53,7 +53,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /**
      * @dev Access our internal tokens
      */
-    SybelInternalTokens private sybelInternalTokens;
+    FraktionTokens private fraktionTokens;
 
     /**
      * @dev Access our token
@@ -115,7 +115,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         __FrakAccessControlUpgradeable_init();
         __PushPullReward_init(frkTokenAddr);
 
-        sybelInternalTokens = SybelInternalTokens(internalTokenAddr);
+        fraktionTokens = FraktionTokens(internalTokenAddr);
         sybelToken = SybelToken(frkTokenAddr);
         contentPool = ContentPool(contentPoolAddr);
         referralPool = ReferralPool(referralAddr);
@@ -171,7 +171,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
             // Increase our total frak minted
             totalFrakMinted += amounts[i];
             // Get the creator address
-            address owner = sybelInternalTokens.ownerOf(contentIds[i]);
+            address owner = fraktionTokens.ownerOf(contentIds[i]);
             if (owner == address(0)) revert InvalidAddress();
             // Add this founds
             _addFoundsUnchecked(owner, amounts[i]);
@@ -319,7 +319,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         emit RewardOnContent(listener, contentId, userReward);
 
         // Save the amount for the owner
-        address owner = sybelInternalTokens.ownerOf(contentId);
+        address owner = fraktionTokens.ownerOf(contentId);
         if (owner == address(0)) revert InvalidAddress();
         _addFoundsUnchecked(owner, ownerReward);
     }
@@ -334,7 +334,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     ) private view returns (uint256 earningFactor, bool hasOnePaidFraktion) {
         // Build the ids for eachs fraktion that can generate reward, and get the user balance for each one if this fraktions
         uint256[] memory fraktionIds = contentId.buildSnftIds(fraktionTypes);
-        uint256[] memory tokenBalances = sybelInternalTokens.balanceOfIdsBatch(listener, fraktionIds);
+        uint256[] memory tokenBalances = fraktionTokens.balanceOfIdsBatch(listener, fraktionIds);
 
         // default value to free fraktion
         earningFactor = baseRewardForTokenType(FrakMath.TOKEN_TYPE_FREE_MASK);
