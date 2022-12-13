@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
 import { adminRole, minterRole, pauserRole, vestingManagerRole } from "../../scripts/utils/roles";
-import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
+import { FrakToken } from "../../types";
 import { MultiVestingWallets, VestingCreatedEvent } from "../../types/contracts/wallets/MultiVestingWallets";
 import { testRoles } from "../utils/test-roles";
 import { address0, getTimestampInAFewMoment, updatToGivenTimestamp } from "../utils/test-utils";
@@ -15,7 +15,7 @@ const initialMintSupply = BigNumber.from(10).pow(18).mul(500_000_000);
 
 describe("MultipleVestingWallets", () => {
   let multiVestingWallets: MultiVestingWallets;
-  let sybelToken: SybelToken;
+  let frakToken: FrakToken;
 
   let _owner: SignerWithAddress;
   let addr1: SignerWithAddress;
@@ -27,14 +27,14 @@ describe("MultipleVestingWallets", () => {
     [_owner, addr1, addr2, ..._addrs] = await ethers.getSigners();
 
     // Deploy our sybel token and vesting wallets
-    sybelToken = await deployContract("SybelToken", [addr2.address]);
-    multiVestingWallets = await deployContract("MultiVestingWallets", [sybelToken.address]);
+    frakToken = await deployContract("FrakToken", [addr2.address]);
+    multiVestingWallets = await deployContract("MultiVestingWallets", [frakToken.address]);
 
     // Grant the minter role to the vesting wallets
-    await sybelToken.grantRole(minterRole, multiVestingWallets.address);
+    await frakToken.grantRole(minterRole, multiVestingWallets.address);
 
     // Add some initial supply to our vesting group
-    await sybelToken.mint(multiVestingWallets.address, initialMintSupply);
+    await frakToken.mint(multiVestingWallets.address, initialMintSupply);
   });
 
   describe("Faking ERC20", () => {
@@ -46,7 +46,7 @@ describe("MultipleVestingWallets", () => {
 
       expect(name).not.to.be.null;
       expect(symbol).to.equal("vFRK");
-      expect(decimals).to.equal(await sybelToken.decimals());
+      expect(decimals).to.equal(await frakToken.decimals());
     });
   });
 
@@ -54,7 +54,7 @@ describe("MultipleVestingWallets", () => {
   describe("Vesting creation", () => {
     it("Can add a new vesting wallet, user release itself his founds, and balance update", async () => {
       // Get the original balance of an investor
-      const oldAddr1Balance = await sybelToken.balanceOf(addr1.address);
+      const oldAddr1Balance = await frakToken.balanceOf(addr1.address);
       // Get the current blockchain timestamp
       const startTimestamp = await getTimestampInAFewMoment();
       // Create the vest
@@ -70,17 +70,17 @@ describe("MultipleVestingWallets", () => {
       // Ensure the user can release his amount, and ensure his balance was updated
       await multiVestingWallets.connect(addr1).releaseAll();
       // Ensure the initial drop of the investor is unlockable
-      let newAddr1Balance = await sybelToken.balanceOf(addr1.address);
+      let newAddr1Balance = await frakToken.balanceOf(addr1.address);
       expect(newAddr1Balance).to.equal(oldAddr1Balance.add(50));
       // Wait for end of the cliff, and ensure the remaining amount can be unlocked
       await updatToGivenTimestamp(startTimestamp + 100);
       await multiVestingWallets.connect(addr1).releaseAll();
-      newAddr1Balance = await sybelToken.balanceOf(addr1.address);
+      newAddr1Balance = await frakToken.balanceOf(addr1.address);
       expect(newAddr1Balance).to.equal(oldAddr1Balance.add(100));
     });
     it("Can add multiple vesting wallets, owner release user founds, and balance update", async () => {
       // Get the original balance of an investor
-      const oldAddr1Balance = await sybelToken.balanceOf(addr1.address);
+      const oldAddr1Balance = await frakToken.balanceOf(addr1.address);
       // Create the vest
       const startTimestamp = await getTimestampInAFewMoment();
       await multiVestingWallets.createVestBatch(
@@ -105,7 +105,7 @@ describe("MultipleVestingWallets", () => {
       // Ensure the user can release his amount, and ensure his balance was updated
       await multiVestingWallets.releaseAllFor(addr1.address);
       // Get the original balance of an investor
-      const newAddr1Balance = await sybelToken.balanceOf(addr1.address);
+      const newAddr1Balance = await frakToken.balanceOf(addr1.address);
       expect(newAddr1Balance).to.equal(oldAddr1Balance.add(200));
     });
     it("Can't create if past date", async () => {
@@ -196,7 +196,7 @@ describe("MultipleVestingWallets", () => {
   describe("Vesting transer", () => {
     it("Can transfer and unlock a vesting", async () => {
       // Get the original balance of an investor
-      const oldAddr2Balance = await sybelToken.balanceOf(addr2.address);
+      const oldAddr2Balance = await frakToken.balanceOf(addr2.address);
       // Get the current blockchain timestamp
       const startTimestamp = await getTimestampInAFewMoment();
       // Create the vest
@@ -210,7 +210,7 @@ describe("MultipleVestingWallets", () => {
       await updatToGivenTimestamp(startTimestamp + 100);
       // Ensure addr2 can release funds, and his balance is updated
       await multiVestingWallets.connect(addr2).release(vestId);
-      const newAddr2Balance = await sybelToken.balanceOf(addr2.address);
+      const newAddr2Balance = await frakToken.balanceOf(addr2.address);
       expect(newAddr2Balance).to.equal(oldAddr2Balance.add(100));
     });
     it("Can't transfer 0 address ", async () => {
@@ -265,7 +265,7 @@ describe("MultipleVestingWallets", () => {
       await expect(multiVestingWallets.releasableAmount(vestId)).to.be.reverted;
     });
     it("Revoked vesting always refund user", async () => {
-      const oldAddr1Balance = await sybelToken.balanceOf(addr1.address);
+      const oldAddr1Balance = await frakToken.balanceOf(addr1.address);
       // Ensure we can revoke wallet
       const startTime = await getTimestampInAFewMoment();
       const createTx = await multiVestingWallets.createVest(addr1.address, 10, 0, 100, startTime, true);
@@ -276,7 +276,7 @@ describe("MultipleVestingWallets", () => {
       // Revoke the vesting
       await multiVestingWallets.revoke(vestId);
       // Ensurethe balance was updated
-      const newAddr1Balance = await sybelToken.balanceOf(addr1.address);
+      const newAddr1Balance = await frakToken.balanceOf(addr1.address);
       expect(newAddr1Balance).to.be.equal(oldAddr1Balance.add(10));
     });
     it("Can't revoke an un revockable vesting", async () => {
@@ -333,12 +333,12 @@ describe("MultipleVestingWallets", () => {
       [
         async () => {
           // ensure we can transfer available reserve
-          await sybelToken.mint(multiVestingWallets.address, 10);
+          await frakToken.mint(multiVestingWallets.address, 10);
           await multiVestingWallets.connect(addr1).transferAvailableReserve(addr2.address);
         },
         async () => {
           // ensure we can revoke wallet
-          await sybelToken.mint(multiVestingWallets.address, 10);
+          await frakToken.mint(multiVestingWallets.address, 10);
           const createTx = await multiVestingWallets.createVest(
             addr1.address,
             10,

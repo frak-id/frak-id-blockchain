@@ -6,12 +6,12 @@ import { ethers } from "hardhat";
 import { deployContract } from "../../scripts/utils/deploy";
 import { BUYABLE_TOKEN_TYPES, TOKEN_TYPE_GOLD, buildFractionId } from "../../scripts/utils/mathUtils";
 import { minterRole, rewarderRole, tokenContractRole } from "../../scripts/utils/roles";
-import { ContentPool, ReferralPool, Rewarder, SybelToken } from "../../types";
-import { ContentOwnerUpdatedEvent, SybelInternalTokens } from "../../types/contracts/tokens/SybelInternalTokens";
+import { ContentPool, FrakToken, FraktionTokens, ReferralPool, Rewarder } from "../../types";
+import { ContentOwnerUpdatedEvent } from "../../types/contracts/tokens/FraktionTokens";
 
 describe("Rewarder", () => {
-  let sybelToken: SybelToken;
-  let internalToken: SybelInternalTokens;
+  let frakToken: FrakToken;
+  let fraktionTokens: FraktionTokens;
   let referral: ReferralPool;
   let contentPool: ContentPool;
   let rewarder: Rewarder;
@@ -24,43 +24,43 @@ describe("Rewarder", () => {
   let addr2: SignerWithAddress;
   let addrs: SignerWithAddress[];
 
-  // Deploy our sybel contract
+  // Deploy our frak contract
   beforeEach(async function () {
     [_owner, addr1, addr2, ...addrs] = await ethers.getSigners();
 
     // Deploy all the necessary contract for our rewarder
-    sybelToken = await deployContract("SybelToken", [addr2.address]);
-    internalToken = await deployContract("SybelInternalTokens");
-    referral = await deployContract("ReferralPool", [sybelToken.address]);
-    contentPool = await deployContract("ContentPool", [sybelToken.address]);
+    frakToken = await deployContract("FrakToken", [addr2.address]);
+    fraktionTokens = await deployContract("FraktionTokens");
+    referral = await deployContract("ReferralPool", [frakToken.address]);
+    contentPool = await deployContract("ContentPool", [frakToken.address]);
     rewarder = await deployContract("Rewarder", [
-      sybelToken.address,
-      internalToken.address,
+      frakToken.address,
+      fraktionTokens.address,
       contentPool.address,
       referral.address,
-      sybelToken.address,
+      frakToken.address,
     ]);
 
     // Mint the initial supply
-    await sybelToken.mint(rewarder.address, BigNumber.from(10).pow(18).mul(1_000_000_000));
+    await frakToken.mint(rewarder.address, BigNumber.from(10).pow(18).mul(1_000_000_000));
 
     // Grant the minter role on the rewarder contract for our nft and frak
-    await internalToken.grantRole(minterRole, rewarder.address);
-    await sybelToken.grantRole(minterRole, rewarder.address);
+    await fraktionTokens.grantRole(minterRole, rewarder.address);
+    await frakToken.grantRole(minterRole, rewarder.address);
 
     // Grant the rewarder role to the referral contract
     await referral.grantRole(rewarderRole, rewarder.address);
     await contentPool.grantRole(rewarderRole, rewarder.address);
 
     // Grant the token contract role to the content pool
-    await contentPool.grantRole(tokenContractRole, internalToken.address);
+    await contentPool.grantRole(tokenContractRole, fraktionTokens.address);
 
     // Setup the callback on the internal tokens for our content pool
-    await internalToken.registerNewCallback(contentPool.address);
+    await fraktionTokens.registerNewCallback(contentPool.address);
 
     for (let index = 0; index < 5; index++) {
       // Perform a mint and we will use this one as content id reference
-      const mintEventTxReceipt = await internalToken.mintNewContent(addr1.address);
+      const mintEventTxReceipt = await fraktionTokens.mintNewContent(addr1.address);
 
       // Extract the content id from mint tx
       const mintReceipt = await mintEventTxReceipt.wait();
@@ -74,7 +74,7 @@ describe("Rewarder", () => {
 
       // Set the supply for each tokens
       for (const tokenType of BUYABLE_TOKEN_TYPES) {
-        await internalToken.setSupplyBatch([buildFractionId(mintedTokenId, tokenType)], [100000]);
+        await fraktionTokens.setSupplyBatch([buildFractionId(mintedTokenId, tokenType)], [100000]);
       }
     }
   });
@@ -113,231 +113,16 @@ describe("Rewarder", () => {
     for (const contentId of contentIds) {
       for (const addr of addrs) {
         // Update the share, and add some reward for this content
-        await internalToken.mint(addr.address, buildFractionId(contentId, TOKEN_TYPE_GOLD), 5);
+        await fraktionTokens.mint(addr.address, buildFractionId(contentId, TOKEN_TYPE_GOLD), 5);
       }
     }
 
     for (const contentId of contentIds) {
       for (const tokenType of BUYABLE_TOKEN_TYPES) {
         // Update the share, and add some reward for this content
-        await internalToken.mint(addr1.address, buildFractionId(contentId, tokenType), 10);
-        await internalToken.mint(addr2.address, buildFractionId(contentId, tokenType), 10);
+        await fraktionTokens.mint(addr1.address, buildFractionId(contentId, tokenType), 10);
+        await fraktionTokens.mint(addr2.address, buildFractionId(contentId, tokenType), 10);
       }
     }
   };
 });
-
-/*
-Base with lot of states : 
-|  Rewarder             ·  payUser              ·     256 733  ·     621 326  ·      439 030  ·            2  ·       0.04  │
-
-// With a few unchecked option mores
-|  Rewarder             ·  payUser              ·     25 5948  ·     614 169  ·      435 059  ·            2  ·       0.04  │
-
-// Increasing optimizer to 1 billions runs
-|  Rewarder             ·  payUser              ·     25 5186  ·     610 317  ·         432752  ·            2  ·       0.06  │
-
-// Switching from revert(xx) to revert error on base contract
-|  Rewarder             ·  payUser              ·     255 071  ·     609 747  ·         432409  ·            2  ·       0.03  │
-
-// Switching to error on all the rewarder contract (gaining 0.4kb on contract size)
-|  Rewarder             ·  payUser              ·     255 233  ·     609 855  ·         432544  ·            2  ·       0.03  │
-
-// Adding missing mint logic
-|  Rewarder             ·  payUser              ·     255 547  ·     642 096  ·         448822  ·            2  ·       0.03  │ // With batching -> solution to adopt, with dynamic sized array
-|  Rewarder             ·  payUser              ·     255 568  ·     643 796  ·         449682  ·            2  ·       0.03  │ // Without batching
-
-// Switching to assembly for token type fetching
-|  Rewarder             ·  payUser              ·     255 639  ·     643 836  ·         449738  ·            2  ·       0.05  │
-
-// Back to simple if cascade
-|  Rewarder             ·  payUser              ·     255 568  ·     643 796  ·         449682  ·            2  ·       0.05  │
-
-// Optimising access of storage in loop
-|  Rewarder             ·  payUser              ·     255 487  ·     632 106  ·         443797  ·            2  ·       0.05  │
-
-// Otpimising int init, cachibng tpu for the complete loop
-|  Rewarder             ·  payUser              ·     255 538  ·     621 526  ·         438532  ·            2  ·       0.66  │
-
-// Same config as before, but with multi free token mint (and post mint call, here the lower cost)
-|  Rewarder             ·  payUser              ·     124 903  ·     904 101  ·         529902  ·            6  ·       0.40  │
-
-// Without fraktion mint (only 7k gain, potential gain of batched content id fetching is minimal)
-|  Rewarder             ·  payUser              ·      69 519  ·     898 095  ·         312880  ·            6  ·       0.10  │
-
-// Only free account with fraktion mint
- |  Rewarder             ·  payUser              ·     12 5111  ·     813 596  ·         455585  ·            5  ·       0.09  │
-
- // Some erc1155 error opti (gaining 1.2kb on size but loosing 600 gas)
-  |  Rewarder             ·  payUser              ·     125 136  ·     814 051  ·         455805  ·            5  ·       0.07  │
-
-// Merging check role and not paused into the same modifier (no impact, so useless)
-|  Rewarder             ·  payUser              ·     125 136  ·     814 051  ·         455805  ·            5  ·       0.05  │
-
-
-// Base : 
-|  Rewarder             ·  payUser              ·     122 977  ·     902 974  ·         528 534  ·            6  ·       0.08  │
-|  SybelInternalTokens  ·  mint                 ·      84851  ·     222573  ·         102802  ·          500  ·       0.02  │
-
-Switch from require to revert error on the push pull reward contract (gain 0.135 size per contract)
-|  Rewarder             ·  payUser              ·     122 977  ·     902 974  ·         528 534  ·            6  ·       0.02  │
-|  SybelInternalTokens  ·  mint                 ·      84 851  ·     222 573  ·         102 802  ·          500  ·       0.00  │
-
-// Base : 
-|  Rewarder             ·  payUser              ·     122 977  ·     902 134  ·         528394  ·            6  ·       0.04  │
-|  SybelInternalTokens  ·  mint                 ·      84 795  ·     222 517  ·         102746  ·          500  ·       0.01  │
-
-// Just moving it some vars : 
-|  Rewarder             ·  payUser              ·     120 900  ·     881 294  ·         514116  ·            6  ·       0.02  │
-|  SybelInternalTokens  ·  mint                 ·      84 795  ·     222 517  ·         102746  ·          500  ·       0.00  │
-
-// Trying to switch listen var to uint256
-|  Rewarder             ·  payUser              ·     120 894  ·     881 174  ·         514059  ·            6  ·       0.03  │
-
-// After content pool and referral opti check
-|  Rewarder             ·  payUser              ·     120 817  ·     879 299  ·         513550  ·            6  ·       0.04  │
-
-// Switch listener badge to uint256
-|  Rewarder             ·  payUser              ·     120 783  ·     879 265  ·         513516  ·            6  ·       0.06  │
-
-// Big refacto from scratch of the payUser function
-|  Rewarder             ·  payUser              ·     116 127  ·     758 419  ·         432194  ·            6  ·       0.03  │
-
-// Testing gain without memory struct to store var (gaining 2k gas)
-|  Rewarder             ·  payUser              ·     115 883  ·     756 416  ·         431153  ·            6  ·       0.02  │
-
-// Testing gain with unsafe wad mul div down on single op
-|  Rewarder             ·  payUser              ·     115 805  ·     756 338  ·         431075  ·            6  ·       0.03  │
-
-// Adding WaD in the earning factor computation
-|  Rewarder             ·  payUser              ·     115 805  ·     756 338  ·         431075  ·            6  ·       0.03  │
-
-// Removing last trace of uint96
-|  Rewarder             ·  payUser              ·     115 790  ·     756 038  ·         430933  ·            6  ·       0.03  │
-
-// Performing total mints cost in unchecked block (since we havn't overflow during the previous computation, we are good)
-|  Rewarder             ·  payUser              ·     115 588  ·     755 836  ·         430731  ·            6  ·       0.03  │
-
-// Test without content and referral pool call (potential gain = 120k gas)
-|  Rewarder             ·  payUser              ·     115 981  ·     630073  ·         401735  ·            6  ·       0.03  │
-
-// Without external calls mint and content / referral pool (gain approx 200k max) :
-|  Rewarder             ·  payUser              ·      88 745  ·     568 483  ·         345450  ·            6  ·       0.02  │
-
-// New refactored base : 
-|  Rewarder             ·  payUser              ·     115 563  ·     755 336  ·         430493  ·            6  ·       0.03  │
-
-*/
-
-/**
- * TODO : Solmate / UDS contract lookup
- *
- *  => https://github.com/transmissions11/solmate
- *  => https://github.com/0xPhaze/UDS -> Other upgradeable pattern, prevent memory clash,
- *
- * TODO : Foundry, is it really better ? Deploy and test transpilation ??
- *
- *  => https://github.com/foundry-rs/foundry
- *
- * Really faster but not ready for production yet
- */
-
-/*
-
-Splitting method check : 
-|  Rewarder             ·  payUser              ·     115 596  ·     755 831  ·         430 644  ·            6  ·       0.04  │
-|  Rewarder             ·  payUser              ·     115 618  ·     755 853  ·         430666  ·            6  ·       0.02  │
-
-Adding fundation fees
-|  Rewarder             ·  payUser              ·     123 348  ·     789 510  ·         453 460  ·            6  ·       0.05  │
-
-Reducing number of var's
-|  Rewarder             ·  payUser              ·     123 244  ·     787 545  ·         452522  ·            6  ·       0.04  │
-|  Rewarder             ·  payUser              ·     123 260  ·     787 685  ·         452644  ·            6  ·       0.02  │
-|  Rewarder             ·  payUser              ·     123 207  ·     786 156  ·         451984  ·            6  ·       0.04  │
-|  Rewarder             ·  payUser              ·     123 107  ·     787 328  ·         452390  ·            6  ·       0.02  │
-
-|  Rewarder             ·  payUser              ·     123 237  ·     791 840  ·         454638  ·            6  ·       0.04  │
-
-// Reduce unchecked operation
-|  Rewarder             ·  payUser              ·     122925  ·     788235  ·         452128  ·            6  ·       0.03  │
-|  Rewarder             ·  payUser              ·     122928  ·     788295  ·         452157  ·            6  ·       0.03  │
-
-
-|  Rewarder             ·  payUser              ·     123 112  ·     788 880  ·         453374  ·            6  ·       0.03  │
-|  Rewarder             ·  payUser              ·     123 106  ·     788 700  ·         453307  ·            6  ·       0.03  │
-
-|  Rewarder             ·  payUser              ·     123 102  ·     789 920  ·         453486  ·            6  ·       0.60  │
-
-
-
-// Before assembly percent
-|  Rewarder             ·  payUser              ·     123 102  ·     789 920  ·         453486  ·            6  ·       0.24  │
-
-// With 0 reward check
-|  Rewarder             ·  payUser              ·     122 695  ·     774 506  ·         446323  ·            6  ·       0.49  │
-
-// With the content type ratio
-|  Rewarder             ·  payUser              ·     122 935  ·     776 161  ·         447225  ·            6  ·       0.02  │
-
-// With wad div down everywhere for the reward
-|  Rewarder             ·  payUser              ·     122 831  ·     774 081  ·         446194  ·            6  ·       0.02  │
-
-// With multi wad div down test
-|  Rewarder             ·  payUser              ·     120 022  ·     773 901  ·         435226  ·            6  ·       0.01  │
-
-// Without direct foundation fees computation
-|  Rewarder             ·  payUser              ·     115 461  ·     748 429  ·         426928  ·            6  ·       0.03  │
-
-// With content pool delay
-|  Rewarder             ·  payUser              ·     115936  ·     675963  ·         418316  ·            6  ·       0.01  │
-
-// Without content pool at all
-|  Rewarder             ·  payUser              ·     115903  ·     625665  ·         392328  ·            6  ·       0.01  │
-
-// With content pool back but no referral
-|  Rewarder             ·  payUser              ·     115939  ·     694843  ·         421481  ·            6  ·       0.01  │
-
-// Without earning factor
-|  Rewarder             ·  payUser              ·      96042  ·     282261  ·         197855  ·            6  ·       0.01  │
-
-// With OZ up to date
-|  Rewarder             ·  payUser              ·      96042  ·     282261  ·         197855  ·            6  ·       0.03  │
-
-// With balanceOf in unchecked block
-|  Rewarder             ·  payUser              ·     115330  ·     682663  ·         415696  ·            6  ·       0.06  │
-
-// without mint only transfer (and initial mint of the 1.5b tokens)
-|  Rewarder             ·  payUser              ·      88124  ·     627050  ·         366703  ·            6  ·       0.05  │
-
-// A few more optimisations
-|  Rewarder             ·  payUser              ·      87826  ·     621570  ·         363959  ·            6  ·       0.01  │
-
-// Without earning factor from internal tokens
-|  Rewarder             ·  payUser              ·      68897  ·     221524  ·         148182  ·            6  ·       0.01  │
-
-// Switch to large uint
-|  Rewarder             ·  payUser              ·      87565  ·     616350  ·         361480  ·            6  ·       0.01  │
-
-//
-
-// ViaIR compilation
-|  MultiVestingWallets   ·  createVestBatch           ·     177394  ·     451170  ·         314282  ·            2  ·       0.02  │
-|  MultiVestingWallets   ·  createVestBatch           ·     177394  ·     451170  ·         314282  ·            2  ·       0.02  │
-|  ReferralPool          ·  payAllReferer             ·      33645  ·     294720  ·         125846  ·            8  ·       0.01  │
-|  Rewarder              ·  payUser                   ·      89133  ·     653243  ·         377893  ·            6  ·       0.03  │
-|  Rewarder              ·  withdrawFounds            ·     193088  ·    1075125  ·         633824  ·           17  ·       0.05  │
-
-
-// No IR compilation
-|  ReferralPool          ·  payAllReferer             ·      33896  ·     295309  ·         126355  ·            8  ·       0.01  │
-|  Rewarder              ·  payUser                   ·      89314  ·     646874  ·         376342  ·            6  ·       0.02  │
-|  Rewarder              ·  withdrawFounds            ·     193840  ·    1043560  ·         618418  ·           17  ·       0.04  │
-
-// Without auto mint
-|  Rewarder             ·  payUser              ·      85616  ·     612210  ·         290748  ·            6  ·       0.02  │
-
-
-
-
- */

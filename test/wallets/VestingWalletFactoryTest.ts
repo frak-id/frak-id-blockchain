@@ -6,9 +6,7 @@ import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
 import { adminRole, minterRole, vestingCreatorRole, vestingManagerRole } from "../../scripts/utils/roles";
-import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
-import { MultiVestingWallets } from "../../types/contracts/wallets/MultiVestingWallets";
-import { VestingWalletFactory } from "../../types/contracts/wallets/VestingWalletFactory";
+import { FrakToken, MultiVestingWallets, VestingWalletFactory } from "../../types";
 import { testPauses } from "../utils/test-pauses";
 import { testRoles } from "../utils/test-roles";
 import { address0, getTimestampInAFewMoment } from "../utils/test-utils";
@@ -25,7 +23,7 @@ const GROUP_CAP = BigNumber.from(10).pow(10);
 describe("VestingWalletFactory", () => {
   let vestingWalletFactory: VestingWalletFactory;
   let multiVestingWallets: MultiVestingWallets;
-  let sybelToken: SybelToken;
+  let frakToken: FrakToken;
 
   let _owner: SignerWithAddress;
   let addr1: SignerWithAddress;
@@ -37,18 +35,18 @@ describe("VestingWalletFactory", () => {
     [_owner, addr1, addr2, ..._addrs] = await ethers.getSigners();
 
     // Deploy our sybel token and vesting wallets
-    sybelToken = await deployContract("SybelToken", [addr2.address]);
-    multiVestingWallets = await deployContract("MultiVestingWallets", [sybelToken.address]);
+    frakToken = await deployContract("FrakToken", [addr2.address]);
+    multiVestingWallets = await deployContract("MultiVestingWallets", [frakToken.address]);
     vestingWalletFactory = await deployContract("VestingWalletFactory", [multiVestingWallets.address]);
 
     // Grant the vesting manager role to the vesting factory
     await multiVestingWallets.grantRole(vestingManagerRole, vestingWalletFactory.address);
 
     // Grant the minter role to the vesting wallet factory
-    await sybelToken.grantRole(minterRole, vestingWalletFactory.address);
+    await frakToken.grantRole(minterRole, vestingWalletFactory.address);
 
     // Add some initial supply to our vesting group
-    await sybelToken.mint(multiVestingWallets.address, BigNumber.from(10).pow(20));
+    await frakToken.mint(multiVestingWallets.address, BigNumber.from(10).pow(20));
 
     // Create an initial vesting groups
     await vestingWalletFactory.addVestingGroup(REVOCABLE_GROUP, GROUP_CAP, 0, 10, true);

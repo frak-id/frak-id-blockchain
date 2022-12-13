@@ -6,15 +6,14 @@ import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
 import { rewarderRole } from "../../scripts/utils/roles";
-import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
-import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
+import { FrakToken, ReferralPool } from "../../types";
 import { address0 } from "../utils/test-utils";
 
 // Build our initial reward
 const baseReward = BigNumber.from(10).pow(16); // So 0.001 frk
 
 describe("Referral Pool", () => {
-  let sybelToken: SybelToken;
+  let frakToken: FrakToken;
   let referral: ReferralPool;
 
   let owner: SignerWithAddress;
@@ -22,13 +21,12 @@ describe("Referral Pool", () => {
   let addr2: SignerWithAddress;
   let addrs: SignerWithAddress[];
 
-  // Deploy our sybel contract
   beforeEach(async function () {
     [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
 
     // Deploy all the necessary contract for our rewarder
-    sybelToken = await deployContract("SybelToken", [addr2.address]);
-    referral = await deployContract("ReferralPool", [sybelToken.address]);
+    frakToken = await deployContract("FrakToken", [addr2.address]);
+    referral = await deployContract("ReferralPool", [frakToken.address]);
 
     // Grant the rewarder role to the referral contract
     await referral.grantRole(rewarderRole, owner.address);
@@ -117,66 +115,3 @@ describe("Referral Pool", () => {
     }
   };
 });
-
-// Base (with already a few opti) :
-// |  ReferralPool  ·  payAllReferer  ·      34026  ·     521 556  ·      205568  ·            3  ·       0.03  │
-// Base (with unchecked require on the user) :
-// |  ReferralPool  ·  payAllReferer  ·      34026  ·     520 926  ·      205347  ·            3  ·       0.04  │
-// With uncheck on the user address, and on the founds adding
-// |  ReferralPool  ·  payAllReferer  ·      34026  ·     515 454  ·      203421  ·            3  ·       0.06  │
-// With uncheck inside the pool iteration
-// |  ReferralPool  ·  payAllReferer  ·      33990  ·     509 244  ·      201213  ·            3  ·       0.06  │
-// Adding min amount check
-// |  ReferralPool  ·  payAllReferer  ·      33990  ·     509 280  ·      201237  ·            3  ·       0.04  │
-// With IR and CSE compilation
-// |  ReferralPool  ·  payAllReferer  ·      33754  ·     507 442  ·      200437  ·            3  ·       0.04  │
-// With IR and without CSE compilation
-// |  ReferralPool  ·  payAllReferer  ·      33754  ·     507 442  ·      200437  ·            3  ·       0.09  │
-// Without index on event
-// |  ReferralPool  ·  payAllReferer  ·      33769  ·     503 773  ·      199158  ·            3  ·       2.30  │
-// Without calling addFunds, all in the same unchecked block
-// |  ReferralPool  ·  payAllReferer  ·      33760  ·     503 548  ·      199073  ·            3  ·       0.42  │
-// Calling addFunds inside the unchecked block
-// |  ReferralPool  ·  payAllReferer  ·      33752  ·     504 206  ·      199299  ·            3  ·       0.18  │
-// Without copying the storage array
-// |  ReferralPool  ·  payAllReferer  ·      33757  ·     504 895  ·      199545  ·            3  ·       0.12  │
-// Reputting addfunds unchecked block
-// |  ReferralPool  ·  payAllReferer  ·      33769  ·     503 773  ·      199158  ·            3  ·       0.20  │
-// With 15 max depth
-// |  ReferralPool  ·  payAllReferer  ·      33792  ·     426 532  ·      173449  ·            3  ·       0.08  │
-// With 10 max depth
-// |  ReferralPool  ·  payAllReferer  ·      33792  ·     295 652  ·      129822  ·            3  ·       0.05  │
-// With 10 max depth, and 5000 optimizer run
-// |  ReferralPool  ·  payAllReferer  ·      33768  ·     295 598  ·      129 787  ·            3  ·       0.05  │
-// With 10 max depth, 5000runs, and some reward already existing (some important is the moy)
-// |  ReferralPool  ·  payAllReferer  ·      33 768  ·     295 598  ·      126 544  ·            8  ·       0.04  │
-// |  ReferralPool  ·  userReferred   ·      58 490  ·      96 961  ·       59 512  ·           38  ·       0.02  │
-// With 10 max depth, 1000runs
-// |  ReferralPool  ·  payAllReferer  ·      33 792  ·     295 652  ·      126 591  ·            8  ·       0.02  │
-// |  ReferralPool  ·  userReferred   ·      58 517  ·      96 988  ·       59 539  ·           38  ·       0.01  │
-// With 10 max depth, 1000runs, with optimizer default settings, and without IR
-// |  ReferralPool  ·  payAllReferer  ·      34 027  ·     296 573  ·      127 349  ·            8  ·       0.02  │
-// |  ReferralPool  ·  userReferred   ·      58 731  ·      98 239  ·       59 780  ·           38  ·       0.01  │
-// With 10 max depth, 1000runs, with optimizercustom config and without IR
-// |  ReferralPool  ·  payAllReferer  ·      34 432  ·     301 572  ·      131 257  ·            8  ·       0.03  │
-// |  ReferralPool  ·  userReferred   ·      59 343  ·     100 415  ·       60 433  ·           38  ·       0.01  │
-// With 10 max depth, 1000runs, with optimizer custom config, without literal and deduplicate) and without IR
-// |  ReferralPool  ·  payAllReferer  ·      34 432  ·     301 572  ·      131 257  ·            8  ·       0.03  │
-// |  ReferralPool  ·  userReferred   ·      59 343  ·     100 415  ·       60 433  ·           38  ·       0.01  │
-// With 10 max depth, 1000runs, with all optimizer settings, and with IR
-// |  ReferralPool  ·  payAllReferer  ·      33 792  ·     295 652  ·      126 591  ·            8  ·       0.01  │
-// |  ReferralPool  ·  userReferred   ·      58 452  ·      96 923  ·       59 474  ·           38  ·       0.01  │
-// With 10 max depth, 10k runs, with all optimizer settings, and with IR
-// |  ReferralPool  ·  payAllReferer  ·      33 768  ·     295 598  ·       126 544  ·            8  ·       0.02  │
-// |  ReferralPool  ·  userReferred   ·      58 425  ·      96 896  ·        59 447  ·           38  ·       0.01  │
-// With 10 max depth, switching while condition, 10k runs, with all optimizer settings, and with IR
-// |  ReferralPool     payAllReferer  ·      33 768  ·     295 569  ·       126 522  ·            8  ·       0.02  │
-
-// Switching to uint256
-// |  ReferralPool  ·  payAllReferer  ·      33645  ·     294720  ·         125846  ·            8  ·       0.01  │
-// |  ReferralPool  ·  userReferred   ·      58360  ·      96831  ·          59382  ·           38  ·       0.00  │
-
-// Without event emission (gaining 30K GAS !!!)
-// |  ReferralPool  ·  payAllReferer  ·      33734  ·     474 788  ·      188935  ·            3  ·       0.10  │
-// Without event and founds add (useless but to check what cost the more)
-// |  ReferralPool  ·  payAllReferer  ·      33744  ·      75 378  ·       48408  ·            3  ·       0.44  │
