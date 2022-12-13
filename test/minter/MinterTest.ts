@@ -23,7 +23,7 @@ describe("Minter", () => {
 
     // Deploy all the necessary contract for our rewarder
     frakToken = await deployContract("FrakToken", [addr2.address]);
-    fraktionTokens = await deployContract("FraktionTokens");
+    fraktionTokens = await deployContract("FraktionTokens", ["url"]);
     minter = await deployContract("Minter", [frakToken.address, fraktionTokens.address, owner.address]);
 
     // Grant the minting role to the minter contract

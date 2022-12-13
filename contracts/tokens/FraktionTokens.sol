@@ -45,8 +45,8 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         _disableInitializers();
     }
 
-    function initialize() external initializer {
-        __ERC1155_init("https://s3.eu-west-1.amazonaws.com/metadata.sybel.io/json/{id}.json");
+    function initialize(string calldata metadatalUrl) external initializer {
+        __ERC1155_init(metadatalUrl);
         __MintingAccessControlUpgradeable_init();
         // Set the initial content id
         _currentContentTokenId = 1;

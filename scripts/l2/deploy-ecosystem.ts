@@ -14,12 +14,15 @@ import { minterRole, rewarderRole, tokenContractRole } from "../utils/roles";
     const networkName = hre.hardhatArguments.network ?? "local";
     let erc20TokenAddr: string;
     let foundationWallet: string;
+    let metadataUrl: string;
     if (networkName == "mumbai") {
       erc20TokenAddr = deployedAddresses.mumbai.frakToken;
       foundationWallet = "0x8Cb488e0E16e49F064e210969EE1c771a55BcD04";
+      metadataUrl = "https://metadata-dev.frak.id/json/{id.json}";
     } else if (networkName == "polygon") {
       erc20TokenAddr = deployedAddresses.mumbai.frakToken; // TODO : Should be updated to polygon once deployed
       foundationWallet = "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0";
+      metadataUrl = "https://metadata.frak.id/json/{id.json}";
     } else {
       throw new Error("Invalid network");
     }
@@ -28,7 +31,7 @@ import { minterRole, rewarderRole, tokenContractRole } from "../utils/roles";
     const frakToken = await findContract<FrakToken>(FrakToken, erc20TokenAddr);
 
     // Deploy Internal tokens
-    const fraktionTokens = await deployContract<FraktionTokens>("FraktionTokens");
+    const fraktionTokens = await deployContract<FraktionTokens>("FraktionTokens", [metadataUrl]);
 
     // Deploy the reward pools
     const referralPool = await deployContract<ReferralPool>("ReferralPool", [erc20TokenAddr]);

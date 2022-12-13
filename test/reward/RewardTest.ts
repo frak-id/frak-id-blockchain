@@ -30,7 +30,7 @@ describe("Rewarder", () => {
 
     // Deploy all the necessary contract for our rewarder
     frakToken = await deployContract("FrakToken", [addr2.address]);
-    fraktionTokens = await deployContract("FraktionTokens");
+    fraktionTokens = await deployContract("FraktionTokens", ["url"]);
     referral = await deployContract("ReferralPool", [frakToken.address]);
     contentPool = await deployContract("ContentPool", [frakToken.address]);
     rewarder = await deployContract("Rewarder", [
