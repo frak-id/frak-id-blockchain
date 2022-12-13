@@ -1,5 +1,3 @@
-import hre from "hardhat";
-
 import * as deployedAddresses from "../../addresses.json";
 import { ContentPool, Minter, MultiVestingWallets, ReferralPool, Rewarder } from "../../types";
 import { findContract } from "../utils/deploy";
@@ -9,9 +7,6 @@ import { adminRole, badgeUpdaterRole, minterRole, rewarderRole, vestingManagerRo
   try {
     console.log("Starting to add our fireblocks as manager of our actions");
     const fireblocksAddr = "0x9f6f0915dA5452786A5A5Dc08fE5412a2981D746";
-
-    const sybelCorpWallet = (await hre.ethers.getSigners())[0].address;
-    console.log(sybelCorpWallet);
 
     // Find our contracts
     const minter = await findContract<Minter>("Minter", deployedAddresses.mumbai.minter);

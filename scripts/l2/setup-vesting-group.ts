@@ -34,7 +34,13 @@ const monthAsSecond = 2628002.88;
       monthToSecond(24),
       false,
     );
-    await vestingWalletFactory.addVestingGroup(publicSaleGroupId, decimals.mul(70_000_000), 0, monthToSecond(24), false);
+    await vestingWalletFactory.addVestingGroup(
+      publicSaleGroupId,
+      decimals.mul(70_000_000),
+      0,
+      monthToSecond(24),
+      false,
+    );
     await vestingWalletFactory.addVestingGroup(teamGroupId, decimals.mul(250_000_000), 25, monthToSecond(36), true);
     await vestingWalletFactory.addVestingGroup(
       techAndDevGroupId,
