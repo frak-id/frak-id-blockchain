@@ -2,8 +2,8 @@ import * as fs from "fs";
 import hre from "hardhat";
 
 import * as deployedAddresses from "../../addresses.json";
-import { ContentPool, FrakToken, FraktionTokens, Minter, ReferralPool, Rewarder } from "../../types";
-import { deployContract, findContract } from "../utils/deploy";
+import { ContentPool, FraktionTokens, Minter, ReferralPool, Rewarder } from "../../types";
+import { deployContract } from "../utils/deploy";
 import { minterRole, rewarderRole, tokenContractRole } from "../utils/roles";
 
 (async () => {
@@ -20,22 +20,22 @@ import { minterRole, rewarderRole, tokenContractRole } from "../utils/roles";
       foundationWallet = "0x8Cb488e0E16e49F064e210969EE1c771a55BcD04";
       metadataUrl = "https://metadata-dev.frak.id/json/{id.json}";
     } else if (networkName == "polygon") {
-      erc20TokenAddr = deployedAddresses.mumbai.frakToken; // TODO : Should be updated to polygon once deployed
+      erc20TokenAddr = deployedAddresses.polygon.frakToken;
       foundationWallet = "0x517ecFa01E2F9A6955d8DD04867613E41309213d";
       metadataUrl = "https://metadata.frak.id/json/{id.json}";
     } else {
       throw new Error("Invalid network");
     }
 
-    // Find the erc 20 contract
-    const frakToken = await findContract<FrakToken>(FrakToken, erc20TokenAddr);
-
     // Deploy Internal tokens
     const fraktionTokens = await deployContract<FraktionTokens>("FraktionTokens", [metadataUrl]);
+    console.log(`Fraktion tokens deployed to ${fraktionTokens.address}`);
 
     // Deploy the reward pools
     const referralPool = await deployContract<ReferralPool>("ReferralPool", [erc20TokenAddr]);
+    console.log(`Referral pool deployed to ${referralPool.address}`);
     const contentPool = await deployContract<ContentPool>("ContentPool", [erc20TokenAddr]);
+    console.log(`Content pool deployed to ${contentPool.address}`);
 
     // Deploy the rewarder contract
     const rewarder = await deployContract<Rewarder>("Rewarder", [
@@ -45,12 +45,11 @@ import { minterRole, rewarderRole, tokenContractRole } from "../utils/roles";
       referralPool.address,
       foundationWallet,
     ]);
+    console.log(`Rewarder deployed to ${rewarder.address}`);
 
     // Deploy the minter contract
     const minter = await deployContract<Minter>("Minter", [erc20TokenAddr, fraktionTokens.address, foundationWallet]);
-
-    // Allow the rewarder contract to mint frak token
-    await frakToken.grantRole(minterRole, rewarder.address);
+    console.log(`Minter deployed to ${minter.address}`);
 
     // Allow the rewarder contract as rearder for pools
     await referralPool.grantRole(rewarderRole, rewarder.address);

@@ -24,7 +24,12 @@
   },
   "polygon": {
     "frakToken": "0x6261E4a478C98419EaFa6289509C49058D21Df8c",
+    "fraktionTokens": "0x4B1611803687Ab821E1b670fE94CB93303D94F8a",
     "multiVestingWallet": "0xCD550f3eFF6d2bA94d8A106bE3c0fE46D5D38bDe",
-    "vestingWalletFactory": "0xb8D79C7Bca3994dd5B4A80AD1c088CEBCd01f7F6"
+    "vestingWalletFactory": "0xb8D79C7Bca3994dd5B4A80AD1c088CEBCd01f7F6",
+    "referralPool": "0x166d8CFEe1919bC2e8c7AdBB34F1613194e9C599",
+    "contentPool": "0xDCB34659B83C4F8708fd7AcAA3755547BF8BBcA0",
+    "rewarder": "0x8D9fa601DA1416b087E9db6B6EaD63D4920A4528",
+    "minter": "0x1adc8CAaA35551730eCd82e0eEA683Aa90dB6cf0"
   }
 }
