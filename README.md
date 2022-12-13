@@ -6,7 +6,7 @@
 
 [![solidity - v0.8.117](https://img.shields.io/badge/solidity-v0.8.17-2ea44f?logo=solidity)](https://github.com/frak-id/frak-id-blockchain)
 
-[![Test smart contracts](https://github.com/sybel-app/frak-id-blockchain/actions/workflows/test.yml/badge.svg)](https://github.com/sybel-app/frak-id-blockchain/actions/workflows/test.yml)
+[![Test smart contracts](https://github.com/frak-id/frak-id-blockchain/actions/workflows/test.yml/badge.svg)](https://github.com/frak-id/frak-id-blockchain/actions/workflows/test.yml)
 
 [![SafetinErc20](https://badgen.net/badge/Safetin%20ecosystem/passed/green?icon=https://uploads-ssl.webflow.com/624b2fb0a98b08011e0bf1d0/624c870d20ffb8fcf547507c_icon-safetin.svg)](https://www.safetin.com/audit/frak)
 [![SafetinEcosystem](https://badgen.net/badge/Safetin%20erc20/passed/green?icon=https://uploads-ssl.webflow.com/624b2fb0a98b08011e0bf1d0/624c870d20ffb8fcf547507c_icon-safetin.svg)](https://www.safetin.com/audit/frak-2)
@@ -46,16 +46,16 @@ reward
 │  ├─ ReferralPool — "Pool that split reward gain by each listener to each one of his referrer"
 tokens
 ├─ FraktionTransferCallback — "Callback interface for the transfer of content fraktions"
-├─ SybelInternalTokens — "ERC1155 storing all of our fraktions"
-├─ SybelTokenL1 — "FrkToken on the ETH chain (for bridge purpose only)"
-├─ SybelTokenL2 — "FrkToken on the Polygon chain"
+├─ FraktionTokens — "ERC1155 storing all of our fraktions"
+├─ FrakTokenL1 — "FrkToken on the ETH chain (for bridge purpose only)"
+├─ FrakTokenL2 — "FrkToken on the Polygon chain"
 wallets
 ├─ MultiVestingWallets — "Contract that handle the vestings of multiple user's"
 ├─ VestingWalletFactory — "Helping us with the creation of vestings following some defined criteria (initial drop, cliff etc)"
 utils
-├─ SybelRoles — "All the roles we use in our contracts"
-├─ SybelMath — "Some math utils, to create fraktionId, or extract contentId from fraktionId."
-├─ SybelAccessControlUpgradeable — "Base access control contract used by every contract"
+├─ FrakRoles — "All the roles we use in our contracts"
+├─ FrakMath — "Some math utils, to create fraktionId, or extract contentId from fraktionId."
+├─ FrakAccessControlUpgradeable — "Base access control contract used by every contract"
 ├─ MintingAccessControlUpgradeable — "Reviewed access control contract, with more options for the minting part (so for token's and minter)"
 ├─ PushPullReward — "Abtract contract that implement basic Push/Pull reward (we store reward amount, then the user withdraw it), helping us gain some gas"
 ```
@@ -66,7 +66,7 @@ To install and build with [**Hardhat**](https://github.com/nomiclabs/hardhat) :
 
 ```sh
 # Install
-git clone https://github.com/sybel-app/frak-id-blockchain.git
+git clone https://github.com/frak-id/frak-id-blockchain.git
 cd frak-id-blockchain/
 npm i
 # Build
@@ -79,7 +79,7 @@ To install with [**Foundry**](https://github.com/gakonst/foundry):
 
 ```sh
 # Install
-git clone https://github.com/sybel-app/frak-id-blockchain.git
+git clone https://github.com/frak-id/frak-id-blockchain.git
 cd frak-id-blockchain/
 # Build
 forge build

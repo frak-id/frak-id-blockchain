@@ -34,7 +34,7 @@ describe("VestingWalletFactory", () => {
   beforeEach(async function () {
     [_owner, addr1, addr2, ..._addrs] = await ethers.getSigners();
 
-    // Deploy our sybel token and vesting wallets
+    // Deploy our frak token and vesting wallets
     frakToken = await deployContract("FrakToken", [addr2.address]);
     multiVestingWallets = await deployContract("MultiVestingWallets", [frakToken.address]);
     vestingWalletFactory = await deployContract("VestingWalletFactory", [multiVestingWallets.address]);

@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sybel-app/sybel-io-blockchain"
+    "url": "https://github.com/frak-id/frak-id-blockchain"
   },
   "scripts": {
     "clean": "hardhat clean",
