@@ -6,11 +6,8 @@ import { ethers } from "hardhat";
 import { deployContract } from "../../scripts/utils/deploy";
 import { BUYABLE_TOKEN_TYPES, TOKEN_TYPE_GOLD, buildFractionId } from "../../scripts/utils/mathUtils";
 import { minterRole, rewarderRole, tokenContractRole } from "../../scripts/utils/roles";
-import { Rewarder } from "../../types/contracts/reward/Rewarder";
-import { ContentPool } from "../../types/contracts/reward/pool/ContentPool";
-import { ReferralPool } from "../../types/contracts/reward/pool/ReferralPool";
+import { ContentPool, ReferralPool, Rewarder, SybelToken } from "../../types";
 import { ContentOwnerUpdatedEvent, SybelInternalTokens } from "../../types/contracts/tokens/SybelInternalTokens";
-import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
 
 describe("Rewarder", () => {
   let sybelToken: SybelToken;

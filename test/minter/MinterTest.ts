@@ -1,12 +1,14 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { BigNumber, BigNumberish } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
 import { minterRole } from "../../scripts/utils/roles";
-import { Minter } from "../../types/contracts/minter/Minter";
+import { Minter, SybelInternalTokens } from "../../types";
+import { ContentMintedEvent } from "../../types/contracts/minter/Minter";
+import { ContentOwnerUpdatedEvent } from "../../types/contracts/tokens/SybelInternalTokens";
 import { SybelToken } from "../../types/contracts/tokens/SybelTokenL2.sol/SybelToken";
-import { SybelInternalTokens } from "../../types";
 
 describe("Minter", () => {
   let sybelToken: SybelToken;
@@ -48,7 +50,42 @@ describe("Minter", () => {
       }
     });
   });
+
+  describe("User buy fraktion", () => {
+    it("Single fraktion buy", async () => {
+      // Mint a content and get it's id
+      const mintEventTxReceipt = await minter.addContent(addr1.address, 10, 10, 10, 5);
+      const mintReceipt = await mintEventTxReceipt.wait();
+      const ownerUpdateEvent = mintReceipt.events?.filter(contractEvent => {
+        return contractEvent.event == "ContentMinted";
+      })[0] as ContentMintedEvent;
+      if (!ownerUpdateEvent || !ownerUpdateEvent.args) throw new Error("Unable to find creation event");
+      const mintedTokenId = ownerUpdateEvent.args.baseId;
+
+      // Build the fraktion id
+      const fraktionId = buildFractionId(mintedTokenId, 4);
+
+      // Get the cost of the given fraktion
+      const cost = await minter.getCostBadge(fraktionId);
+      console.log(`Fraktion cost ${cost}`);
+
+      // Mint the token required for our user
+      await sybelToken.mint(addr2.address, cost);
+
+      // Allow the minter contract to perform the frk token transfer
+      await sybelToken.connect(addr2).approve(minter.address, cost);
+      console.log("Transfer approved");
+
+      // Perform the transfer
+      await minter.mintFractionForUser(fraktionId, addr2.address, 1);
+      console.log("Fraktion minted");
+    });
+  });
 });
+
+export function buildFractionId(contentId: BigNumberish, tokenType: number): BigNumber {
+  return BigNumber.from(contentId).shl(4).or(BigNumber.from(tokenType));
+}
 
 /*
 Base : 

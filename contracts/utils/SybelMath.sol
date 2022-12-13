@@ -132,7 +132,7 @@ library SybelMath {
      * @dev Check if the token is payed or not
      */
     function isPayedTokenToken(uint256 tokenType) internal pure returns (bool) {
-        return tokenType > TOKEN_TYPE_COMMON_MASK && tokenType <= TOKEN_TYPE_DIAMOND_MASK;
+        return tokenType > TOKEN_TYPE_FREE_MASK && tokenType <= TOKEN_TYPE_DIAMOND_MASK;
     }
 
     /**
