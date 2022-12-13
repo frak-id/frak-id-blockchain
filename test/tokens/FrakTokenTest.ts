@@ -17,11 +17,11 @@ describe("FrakToken", () => {
   let addr2: SignerWithAddress;
   let _addrs: SignerWithAddress[];
 
-  // Deploy our sybel contract
+  // Deploy our frak contract
   beforeEach(async function () {
     [owner, addr1, addr2, ..._addrs] = await ethers.getSigners();
 
-    // Deploy our sybel token
+    // Deploy our frak token
     frakToken = await deployContract("FrakToken", [addr2.address]);
 
     // Mint a fiew sybl to the owner and first addr

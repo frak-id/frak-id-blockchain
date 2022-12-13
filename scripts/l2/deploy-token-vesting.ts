@@ -8,7 +8,7 @@ import { vestingManagerRole } from "../utils/roles";
 
 (async () => {
   try {
-    console.log("Starting to deploy the SybelToken and the VestingWallet");
+    console.log("Starting to deploy the FrakToken and the VestingWallet");
     const networkName = hre.hardhatArguments.network ?? "local";
     // Get the right child manager proxy depending on the env
     let childManagerProxy: string;

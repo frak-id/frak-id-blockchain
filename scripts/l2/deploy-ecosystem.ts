@@ -2,7 +2,7 @@ import * as fs from "fs";
 import hre from "hardhat";
 
 import * as deployedAddresses from "../../addresses.json";
-import { ContentPool, FraktionTokens, FrakToken, Minter, ReferralPool, Rewarder } from "../../types";
+import { ContentPool, FrakToken, FraktionTokens, Minter, ReferralPool, Rewarder } from "../../types";
 import { deployContract, findContract } from "../utils/deploy";
 import { minterRole, rewarderRole, tokenContractRole } from "../utils/roles";
 

@@ -30,7 +30,7 @@ describe("VestingWalletFactory", () => {
   let addr2: SignerWithAddress;
   let _addrs: SignerWithAddress[];
 
-  // Deploy our sybel contract
+  // Deploy our frak contract
   beforeEach(async function () {
     [_owner, addr1, addr2, ..._addrs] = await ethers.getSigners();
 
