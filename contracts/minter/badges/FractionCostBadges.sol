@@ -8,7 +8,7 @@ import "../../utils/FrakAccessControlUpgradeable.sol";
 /**
  * @dev Handle the computation of our listener badges
  */
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 abstract contract FractionCostBadges {
     event FractionCostBadgeUpdated(uint256 id, uint96 badge);
 

@@ -31,7 +31,7 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
         bool isRevocable;
     }
 
-    // The total amount of sybel minted for the investor's
+    // The total amount of frak minted for the investor's
     uint256 internal totalGroupCap;
 
     /**
@@ -62,7 +62,7 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
         // Grand the vesting creator role to the owner
         _grantRole(FrakRoles.VESTING_CREATOR, msg.sender);
 
-        // Init our sybel token and multi vesting wallet
+        // Init our multi vesting wallet
         multiVestingWallets = MultiVestingWallets(multiVestingWalletAddr);
     }
 

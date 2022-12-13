@@ -12,9 +12,9 @@ import "../utils/FrakRoles.sol";
 error CapExceed();
 
 /**
- * Sybel token on the ethereum mainnet, simpler
+ * Frak token on the ethereum mainnet, simpler
  */
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 contract FrakTokenL1 is ERC20Upgradeable, FrakAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
     bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
 

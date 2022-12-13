@@ -4,7 +4,7 @@ pragma solidity 0.8.17;
 import "./FrakAccessControlUpgradeable.sol";
 import "../utils/FrakRoles.sol";
 
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 abstract contract MintingAccessControlUpgradeable is FrakAccessControlUpgradeable {
     function __MintingAccessControlUpgradeable_init() internal onlyInitializing {
         __FrakAccessControlUpgradeable_init();

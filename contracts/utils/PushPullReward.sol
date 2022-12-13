@@ -12,7 +12,7 @@ error NotEnoughFound();
 /**
  * @dev Abstraction for contract that give a push / pull reward, address based
  */
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 abstract contract PushPullReward is Initializable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 

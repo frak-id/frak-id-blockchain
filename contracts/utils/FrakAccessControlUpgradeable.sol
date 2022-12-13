@@ -23,7 +23,7 @@ error RewardTooLarge();
 error BadgeTooLarge();
 error InvalidFraktionType();
 
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradeable, IPausable, UUPSUpgradeable {
     /// Event emitted when contract is paused or unpaused
     event Paused();

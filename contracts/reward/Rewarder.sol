@@ -21,7 +21,7 @@ error InvalidReward();
 /**
  * @dev Represent our rewarder contract
  */
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, ListenerBadges, PushPullReward {
     using SafeERC20Upgradeable for FrakToken;
     using FrakMath for uint256;

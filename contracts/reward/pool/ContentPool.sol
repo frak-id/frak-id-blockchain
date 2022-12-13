@@ -19,7 +19,7 @@ error PoolStateAlreadyClaimed();
  * @dev TODO : Optimize uint sizes (since max supply of sybl is 3 billion e18,
  * what's the max uint we can use for the price ?, What the max array size ? So what max uint for indexes ?)
  */
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTransferCallback {
     // Add the library methods
     using EnumerableSet for EnumerableSet.UintSet;

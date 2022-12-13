@@ -8,7 +8,7 @@ import "../../utils/FrakAccessControlUpgradeable.sol";
 /**
  * @dev Handle the computation of our content badges
  */
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 abstract contract ContentBadges {
     uint256 private constant MAX_CONTENT_BADGE = 1_000 ether; // Max badge possible for the content
 

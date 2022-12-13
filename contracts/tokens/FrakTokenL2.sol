@@ -12,9 +12,9 @@ import "../utils/NativeMetaTransaction.sol";
 error CapExceed();
 
 /**
- * Sybel token used on polygon L2
+ * Frak token used on polygon L2
  */
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
     bytes32 internal constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
 

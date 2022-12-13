@@ -21,7 +21,7 @@ error RemainingSupply();
  *   - New supply increase system (each week, only if all fractions are sold)
  *   - Add allowance to the user when he mint a fraction (web2)
  */
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges {
     using SafeERC20Upgradeable for FrakToken;
 
@@ -33,7 +33,6 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
     /**
      * @dev Access our governance token
      */
-    /// @custom:oz-renamed-from tokenSybelEcosystem
     FrakToken private frakToken;
 
     /**

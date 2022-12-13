@@ -74,7 +74,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     /// Currently locked tokens that are being used by all of the vestings
     uint96 public totalSupply;
 
-    /// Access to the sybel token
+    /// Access to the frak token
     IERC20Upgradeable private token;
 
     /// Current id of vesting
@@ -91,7 +91,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
         _disableInitializers();
     }
 
-    /// Init our contract, with the sybel tokan and base role init
+    /// Init our contract, with the frak tokan and base role init
     function initialize(address tokenAddr) external initializer {
         if (tokenAddr == address(0)) revert InvalidAddress();
 
@@ -100,7 +100,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
         // Grand the vesting manager role to the owner
         _grantRole(FrakRoles.VESTING_MANAGER, msg.sender);
 
-        // Init our sybel token
+        // Init our frak token
         token = IERC20Upgradeable(tokenAddr);
     }
 

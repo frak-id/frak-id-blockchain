@@ -10,7 +10,7 @@ import "../utils/MintingAccessControlUpgradeable.sol";
 // Error
 error InsuficiantSupply();
 
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 /// @custom:oz-upgrades-unsafe-allow external-library-linking
 contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     using FrakMath for uint256;

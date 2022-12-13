@@ -15,7 +15,7 @@ error AlreadyInRefererChain();
 /**
  * @dev Represent our referral contract
  */
-/// @custom:security-contact crypto-support@sybel.co
+/// @custom:security-contact contact@frak.id
 contract ReferralPool is FrakAccessControlUpgradeable, PushPullReward {
     // The minimum reward is 1 mwei, to prevent iteration on really small amount
     uint24 internal constant MINIMUM_REWARD = 1_000_000;
