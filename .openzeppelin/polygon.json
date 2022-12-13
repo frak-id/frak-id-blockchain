@@ -289,7 +289,7 @@
             "label": "vestings",
             "offset": 0,
             "slot": "155",
-            "type": "t_mapping(t_uint256,t_struct(Vesting)9074_storage)",
+            "type": "t_mapping(t_uint256,t_struct(Vesting)9755_storage)",
             "contract": "MultiVestingWallets",
             "src": "contracts/wallets/MultiVestingWallets.sol:73"
           },
@@ -343,7 +343,7 @@
             "label": "mapping(bytes32 => uint256)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(Vesting)9074_storage)": {
+          "t_mapping(t_uint256,t_struct(Vesting)9755_storage)": {
             "label": "mapping(uint256 => struct MultiVestingWallets.Vesting)",
             "numberOfBytes": "32"
           },
@@ -377,7 +377,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Vesting)9074_storage": {
+          "t_struct(Vesting)9755_storage": {
             "label": "struct MultiVestingWallets.Vesting",
             "members": [
               {
@@ -521,7 +521,7 @@
             "label": "multiVestingWallets",
             "offset": 0,
             "slot": "154",
-            "type": "t_contract(MultiVestingWallets)10011",
+            "type": "t_contract(MultiVestingWallets)10692",
             "contract": "VestingWalletFactory",
             "src": "contracts/wallets/VestingWalletFactory.sol:38"
           },
@@ -529,7 +529,7 @@
             "label": "vestingGroup",
             "offset": 0,
             "slot": "155",
-            "type": "t_mapping(t_uint8,t_struct(VestingGroup)10041_storage)",
+            "type": "t_mapping(t_uint8,t_struct(VestingGroup)10722_storage)",
             "contract": "VestingWalletFactory",
             "src": "contracts/wallets/VestingWalletFactory.sol:43"
           }
@@ -551,7 +551,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(MultiVestingWallets)10011": {
+          "t_contract(MultiVestingWallets)10692": {
             "label": "contract MultiVestingWallets",
             "numberOfBytes": "20"
           },
@@ -563,11 +563,11 @@
             "label": "mapping(bytes32 => mapping(address => bool))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint8,t_struct(VestingGroup)10041_storage)": {
+          "t_mapping(t_uint8,t_struct(VestingGroup)10722_storage)": {
             "label": "mapping(uint8 => struct VestingWalletFactory.VestingGroup)",
             "numberOfBytes": "32"
           },
-          "t_struct(VestingGroup)10041_storage": {
+          "t_struct(VestingGroup)10722_storage": {
             "label": "struct VestingWalletFactory.VestingGroup",
             "members": [
               {

@@ -1,4 +1,4 @@
-import { ethers, upgrades } from "hardhat";
+import hre, { ethers, upgrades } from "hardhat";
 
 import * as deployedAddresses from "../../addresses.json";
 
@@ -6,10 +6,21 @@ import * as deployedAddresses from "../../addresses.json";
   try {
     console.log("Start to update one of our contract");
 
+    const nameToAddresses = [
+      { name: "FrakToken", address: deployedAddresses.polygon.frakToken },
+      { name: "MultiVestingWallets", address: deployedAddresses.polygon.multiVestingWallet },
+      { name: "VestingWalletFactory", address: deployedAddresses.polygon.vestingWalletFactory },
+    ]
+
     // Get our contract factory and update it
-    const contractFactory = await ethers.getContractFactory("Minter");
-    const contract = await upgrades.upgradeProxy(deployedAddresses.mumbai.minter, contractFactory);
-    await contract.deployed();
+    for (let nameToAddress of nameToAddresses) {
+      console.log(`Handling ${nameToAddress.name} updates`)
+      const contractFactory = await ethers.getContractFactory(nameToAddress.name);
+      const contract = await upgrades.upgradeProxy(nameToAddress.address, contractFactory);
+      await contract.deployed();
+
+      await hre.run("verify:verify", { address: contract.address });
+    }
 
     console.log("Finished to update one of our contract");
   } catch (e: any) {
