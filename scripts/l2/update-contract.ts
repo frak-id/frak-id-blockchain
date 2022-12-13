@@ -10,11 +10,11 @@ import * as deployedAddresses from "../../addresses.json";
       { name: "FrakToken", address: deployedAddresses.polygon.frakToken },
       { name: "MultiVestingWallets", address: deployedAddresses.polygon.multiVestingWallet },
       { name: "VestingWalletFactory", address: deployedAddresses.polygon.vestingWalletFactory },
-    ]
+    ];
 
     // Get our contract factory and update it
     for (let nameToAddress of nameToAddresses) {
-      console.log(`Handling ${nameToAddress.name} updates`)
+      console.log(`Handling ${nameToAddress.name} updates`);
       const contractFactory = await ethers.getContractFactory(nameToAddress.name);
       const contract = await upgrades.upgradeProxy(nameToAddress.address, contractFactory);
       await contract.deployed();

@@ -98,14 +98,14 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
 
     function initialize(
         address frkTokenAddr,
-        address internalTokenAddr,
+        address fraktionTokensAddr,
         address contentPoolAddr,
         address referralAddr,
         address foundationAddr
     ) external initializer {
         if (
             frkTokenAddr == address(0) ||
-            internalTokenAddr == address(0) ||
+            fraktionTokensAddr == address(0) ||
             contentPoolAddr == address(0) ||
             referralAddr == address(0) ||
             foundationAddr == address(0)
@@ -115,7 +115,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         __FrakAccessControlUpgradeable_init();
         __PushPullReward_init(frkTokenAddr);
 
-        fraktionTokens = FraktionTokens(internalTokenAddr);
+        fraktionTokens = FraktionTokens(fraktionTokensAddr);
         frakToken = FrakToken(frkTokenAddr);
         contentPool = ContentPool(contentPoolAddr);
         referralPool = ReferralPool(referralAddr);
