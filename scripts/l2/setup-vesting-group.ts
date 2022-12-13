@@ -21,34 +21,16 @@ const monthAsSecond = 2628002.88;
     // Get our contract
     const vestingWalletFactory = await findContract<VestingWalletFactory>(
       "VestingWalletFactory",
-      deployedAddresses.l2.vestingWalletFactory,
+      deployedAddresses.mumbai.vestingWalletFactory,
     );
 
     const decimals = BigNumber.from(10).pow(18);
 
     // Create the groups
-    await vestingWalletFactory.addVestingGroup(
-      privateSaleGroupId,
-      decimals.mul(350_000_000),
-      0,
-      monthToSecond(24),
-      false,
-    );
-    await vestingWalletFactory.addVestingGroup(
-      publicSaleGroupId,
-      decimals.mul(70_000_000),
-      0,
-      monthToSecond(24),
-      false,
-    );
-    await vestingWalletFactory.addVestingGroup(teamGroupId, decimals.mul(250_000_000), 25, monthToSecond(36), true);
-    await vestingWalletFactory.addVestingGroup(
-      techAndDevGroupId,
-      decimals.mul(150_000_000),
-      25,
-      monthToSecond(36),
-      true,
-    );
+    await vestingWalletFactory.addVestingGroup(privateSaleGroupId, decimals.mul(350_000_000), 0, monthToSecond(24));
+    await vestingWalletFactory.addVestingGroup(publicSaleGroupId, decimals.mul(70_000_000), 0, monthToSecond(24));
+    await vestingWalletFactory.addVestingGroup(teamGroupId, decimals.mul(250_000_000), 25, monthToSecond(36));
+    await vestingWalletFactory.addVestingGroup(techAndDevGroupId, decimals.mul(150_000_000), 25, monthToSecond(36));
     /*await vestingWalletFactory.addVestingGroup(marketGroupId, decimals.mul(230_000_000), 10, monthToSecond(12), true);
     await vestingWalletFactory.addVestingGroup(
       creatorGrantsGroupId,

@@ -49,9 +49,9 @@ describe("VestingWalletFactory", () => {
     await frakToken.mint(multiVestingWallets.address, BigNumber.from(10).pow(20));
 
     // Create an initial vesting groups
-    await vestingWalletFactory.addVestingGroup(REVOCABLE_GROUP, GROUP_CAP, 0, 10, true);
-    await vestingWalletFactory.addVestingGroup(NON_REVOCABLE_GROUP, GROUP_CAP, 0, 10, false);
-    await vestingWalletFactory.addVestingGroup(INITIAL_DROP_GROUP, GROUP_CAP, 100, 10, false);
+    await vestingWalletFactory.addVestingGroup(REVOCABLE_GROUP, GROUP_CAP, 10);
+    await vestingWalletFactory.addVestingGroup(NON_REVOCABLE_GROUP, GROUP_CAP, 10);
+    await vestingWalletFactory.addVestingGroup(INITIAL_DROP_GROUP, GROUP_CAP, 10);
   });
 
   describe("Vesting group creation", () => {
@@ -68,26 +68,17 @@ describe("VestingWalletFactory", () => {
       await expect(vestingWalletFactory.getVestingGroup(INEXISTANT_GROUP)).to.be.reverted;
     });
     it("Can't create a group for an existing id", async () => {
-      await expect(vestingWalletFactory.addVestingGroup(NON_REVOCABLE_GROUP, GROUP_CAP, 0, 10, false)).to.be.reverted;
+      await expect(vestingWalletFactory.addVestingGroup(NON_REVOCABLE_GROUP, GROUP_CAP, 10)).to.be.reverted;
     });
     it("Can't create a group with 0 reward", async () => {
-      await expect(vestingWalletFactory.addVestingGroup(INEXISTANT_GROUP, 0, 0, 10, false)).to.be.reverted;
+      await expect(vestingWalletFactory.addVestingGroup(INEXISTANT_GROUP, 0, 10)).to.be.reverted;
     });
     it("Can't create a group with 0 duration", async () => {
-      await expect(vestingWalletFactory.addVestingGroup(INEXISTANT_GROUP, 10, 0, 0, false)).to.be.reverted;
-    });
-    it("Can't create a group with drop per thousand too large", async () => {
-      await expect(vestingWalletFactory.addVestingGroup(INEXISTANT_GROUP, 10, 1001, 10, false)).to.be.reverted;
+      await expect(vestingWalletFactory.addVestingGroup(INEXISTANT_GROUP, 10, 0)).to.be.reverted;
     });
     it("Can't exceed reward cap", async () => {
       await expect(
-        vestingWalletFactory.addVestingGroup(
-          INEXISTANT_GROUP,
-          BigNumber.from(10).pow(18).mul(1_500_000_000),
-          1000,
-          10,
-          false,
-        ),
+        vestingWalletFactory.addVestingGroup(INEXISTANT_GROUP, BigNumber.from(10).pow(18).mul(1_500_000_000), 1000),
       ).to.be.reverted;
     });
     it("Can transfer founds between two group", async () => {
@@ -273,7 +264,7 @@ describe("VestingWalletFactory", () => {
       [
         async () => {
           // Can't add vesting groyp if paused
-          await vestingWalletFactory.connect(addr1).addVestingGroup(INEXISTANT_GROUP, 10, 10, 10, false);
+          await vestingWalletFactory.connect(addr1).addVestingGroup(INEXISTANT_GROUP, 10, 10);
         },
       ],
     );
@@ -300,7 +291,7 @@ describe("VestingWalletFactory", () => {
         },
         async () => {
           // Can't add vesting groyp if paused
-          await vestingWalletFactory.addVestingGroup(INEXISTANT_GROUP, 10, 10, 10, false);
+          await vestingWalletFactory.addVestingGroup(INEXISTANT_GROUP, 10, 10);
         },
         async () => {
           // Can't transfer if paused
@@ -310,28 +301,3 @@ describe("VestingWalletFactory", () => {
     );
   });
 });
-
-/*
-
-Base with a few opti :
-
-|  VestingWalletFactory  ·  addVestingGroup        ·      61 966  ·      79 102  ·          67 573  ·           92  ·       0.01  │
-|  VestingWalletFactory  ·  addVestingWallet       ·     212 076  ·     212 204  ·         212 111  ·            5  ·       0.02  │
-|  VestingWalletFactory  ·  addVestingWalletBatch  ·     201 027  ·     215 327  ·         205 879  ·            6  ·       0.02  │
-|  VestingWalletFactory  ·  transferGroupReserve   ·          -  ·          -  ·          43 845  ·            2  ·       0.00  │
-
-|  MultiVestingWallets                             ·          -  ·          -  ·        3183612  ·       10.6 %  ·       0.26  │
-|  VestingWalletFactory                            ·          -  ·          -  ·        2394550  ·          8 %  ·       0.19  │
-
-With revert instead of require every where
-|  VestingWalletFactory  ·  addVestingGroup        ·      62 093  ·      79 229  ·          67 700  ·           92  ·       0.00  │
-|  VestingWalletFactory  ·  addVestingWallet       ·     212 076  ·     212 204  ·         212 111  ·            5  ·       0.02  │
-|  VestingWalletFactory  ·  addVestingWalletBatch  ·     201 364  ·     215 664  ·         206 212  ·            6  ·       0.02  │
-|  VestingWalletFactory  ·  transferGroupReserve   ·          -  ·          -  ·          43 842  ·            2  ·       0.00  │
-
-|  VestingWalletFactory                            ·          -  ·          -  ·        2269535  ·        7.6 %  ·       0.17  │
-|  VestingWalletFactory  ·  addVestingGroup        ·      62093  ·      79229  ·          67700  ·           92  ·       0.01  │
-|  VestingWalletFactory  ·  addVestingWallet       ·     212076  ·     212124  ·         212093  ·            5  ·       0.02  │
-|  VestingWalletFactory  ·  addVestingWalletBatch  ·     200848  ·     215148  ·         205672  ·            6  ·       0.02  │
-
-*/
