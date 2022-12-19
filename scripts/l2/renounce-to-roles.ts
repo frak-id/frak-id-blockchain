@@ -18,6 +18,7 @@ import {
   minterRole,
   pauserRole,
   rewarderRole,
+  upgraderRole,
   vestingCreatorRole,
   vestingManagerRole,
 } from "../utils/roles";
@@ -29,13 +30,10 @@ import {
     const networkName = hre.hardhatArguments.network ?? "local";
 
     let addresses;
-    let fireblocksAddr;
     if (networkName == "mumbai") {
       addresses = deployedAddresses.mumbai;
-      fireblocksAddr = "0x9f6f0915dA5452786A5A5Dc08fE5412a2981D746";
     } else if (networkName == "polygon") {
       addresses = deployedAddresses.polygon;
-      fireblocksAddr = "0x97Ce46bBC97aa20D22Cf98b4E37775A55ff70cAC";
     } else {
       throw new Error("Invalid network");
     }
@@ -74,7 +72,7 @@ import {
       const adminRoleTx = await contract.renounceRole(adminRole, selfAddress);
       adminTxHashes.push(adminRoleTx.hash)
       await contract.renounceRole(pauserRole, selfAddress);
-      // await contract.renounceRole(upgraderRole, selfAddress);
+      await contract.renounceRole(upgraderRole, selfAddress);
     }
 
     console.log(`All the admin role tx's ${adminTxHashes}`)
