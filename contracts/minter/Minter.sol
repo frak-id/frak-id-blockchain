@@ -55,14 +55,14 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         _disableInitializers();
     }
 
-    function initialize(address frkTokenAddr, address internalTokenAddr, address foundationAddr) external initializer {
-        if (frkTokenAddr == address(0) || internalTokenAddr == address(0) || foundationAddr == address(0))
+    function initialize(address frkTokenAddr, address fraktionTokensAddr, address foundationAddr) external initializer {
+        if (frkTokenAddr == address(0) || fraktionTokensAddr == address(0) || foundationAddr == address(0))
             revert InvalidAddress();
 
         // Only for v1 deployment
         __MintingAccessControlUpgradeable_init();
 
-        fraktionTokens = FraktionTokens(internalTokenAddr);
+        fraktionTokens = FraktionTokens(fraktionTokensAddr);
         frakToken = FrakToken(frkTokenAddr);
 
         foundationWallet = foundationAddr;

@@ -60,6 +60,10 @@ export default {
       url: process.env.MUMBAI_PROVIDER,
       accounts: [process.env.FRAK_DEPLOY_PRIV_KEY],
     },
+    polygon: {
+      url: process.env.POLYGON_PROVIDER,
+      accounts: [process.env.FRAK_DEPLOY_PRIV_KEY],
+    },
     goerli: {
       url: process.env.GOERLI_PROVIDER,
       accounts: [process.env.FRAK_DEPLOY_PRIV_KEY],
@@ -68,6 +72,7 @@ export default {
   etherscan: {
     apiKey: {
       polygonMumbai: process.env.POLYGON_SCAN_API_KEY,
+      polygon: process.env.POLYGON_SCAN_API_KEY,
       goerli: process.env.ETHER_SCAN_API_KEY,
     },
   },

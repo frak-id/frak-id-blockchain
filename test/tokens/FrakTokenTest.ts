@@ -24,7 +24,7 @@ describe("FrakToken", () => {
     // Deploy our frak token
     frakToken = await deployContract("FrakToken", [addr2.address]);
 
-    // Mint a fiew sybl to the owner and first addr
+    // Mint a fiew frk to the owner and first addr
     const frkToMint = BigNumber.from(10).pow(18).mul(50);
     await frakToken.mint(owner.address, frkToMint);
     await frakToken.mint(addr1.address, frkToMint);
@@ -33,7 +33,7 @@ describe("FrakToken", () => {
   // Check the transactions
   describe("Transactions", () => {
     it("Should transfer tokens between owner and accounts", async () => {
-      // Perform the transfer of 50 sybl
+      // Perform the transfer of 50 frk
       const previousOwnerBalance = await frakToken.balanceOf(owner.address);
       const previousAddr2Balance = await frakToken.balanceOf(addr2.address);
       await frakToken.transfer(addr2.address, 50);
@@ -46,7 +46,7 @@ describe("FrakToken", () => {
     });
 
     it("Should transfer tokens between regular accounts", async () => {
-      // Perform the transfer of 50 sybl
+      // Perform the transfer of 50 frk
       const previousAddr1Balance = await frakToken.balanceOf(addr1.address);
       const previousAddr2Balance = await frakToken.balanceOf(addr2.address);
       await frakToken.connect(addr1).transfer(addr2.address, 50);
@@ -58,7 +58,7 @@ describe("FrakToken", () => {
       expect(newAddr2Balance).to.equal(previousAddr2Balance.add(50));
     });
     it("Can approove another wallet to perform a transfer", async () => {
-      // Perform the transfer of 50 sybl
+      // Perform the transfer of 50 frk
       const previousOwnerBalance = await frakToken.balanceOf(owner.address);
       const previousAddr1Balance = await frakToken.balanceOf(addr1.address);
       // Approove the addr2 to spend tokens
@@ -82,7 +82,7 @@ describe("FrakToken", () => {
     });
 
     it("User can burn token", async () => {
-      // Perform the transfer of 50 sybl
+      // Perform the transfer of 50 frk
       const previousAddr1Balance = await frakToken.balanceOf(addr1.address);
       await frakToken.connect(addr1).burn(50);
 
@@ -92,7 +92,7 @@ describe("FrakToken", () => {
     });
 
     it("Can't transfer tokens between two accounts without approval for user", async () => {
-      // Perform the transfer of 50 sybl
+      // Perform the transfer of 50 frk
       const previousAddr1Balance = await frakToken.balanceOf(addr1.address);
       const previousAddr2Balance = await frakToken.balanceOf(addr2.address);
 
@@ -110,7 +110,7 @@ describe("FrakToken", () => {
   // Check the transactions
   describe("Mint", () => {
     it("Owner can perform token mint", async () => {
-      // Perform the transfer of 50 sybl
+      // Perform the transfer of 50 frk
       const previousAddr2Balance = await frakToken.balanceOf(addr2.address);
       await frakToken.mint(addr2.address, 50);
 
@@ -123,7 +123,7 @@ describe("FrakToken", () => {
       await expect(frakToken.mint(addr2.address, BigNumber.from(10).pow(18).mul(3000000000).add(50))).to.be.reverted;
     });
     it("User can't perform token mint", async () => {
-      // Perform the transfer of 50 sybl
+      // Perform the transfer of 50 frk
       const previousAddr2Balance = await frakToken.balanceOf(addr2.address);
 
       await expect(frakToken.connect(addr1).mint(addr2.address, 50)).to.be.reverted;

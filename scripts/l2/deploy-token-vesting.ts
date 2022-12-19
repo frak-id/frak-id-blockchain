@@ -19,7 +19,7 @@ import { vestingManagerRole } from "../utils/roles";
     } else {
       throw new Error("Invalid network");
     }
-    // Deploy our sybl token contract
+    // Deploy our frk token contract
     const frakToken = await deployContract<FrakToken>("FrakToken", [childManagerProxy]);
     console.log(`Frak token L2 was deployed to ${frakToken.address}`);
     // Deploy vesting wallet and vesting wallt factory
@@ -33,7 +33,7 @@ import { vestingManagerRole } from "../utils/roles";
 
     // Grant the vesting manager role to the vesting factory
     await multiVestingWallet.grantRole(vestingManagerRole, vestingWalletFactory.address);
-    console.log("Vesting wallet has now the manager role on the muyltivesting wallet");
+    console.log("Vesting wallet has now the manager role on the multi-vesting wallet");
 
     // Build our deployed address object
     const addressesMap: Map<string, any> = new Map(Object.entries(deployedAddresses));

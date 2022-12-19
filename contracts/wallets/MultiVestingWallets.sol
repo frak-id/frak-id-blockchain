@@ -57,7 +57,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
         address beneficiary; // beneficiary wallet of this vesting
     }
 
-    /// Hard reward cap, of 200 million sybl
+    /// Hard reward cap, of 200 million frk
     uint96 private constant REWARD_CAP = 200_000_000 ether;
 
     /// Currently locked tokens that are being used by all of the vestings
@@ -111,7 +111,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
 
     /**
      * @notice Fake an ERC20-like contract allowing it to be displayed from wallets.
-     * @return the sybl's decimals value.
+     * @return the frk's decimals value.
      */
     function decimals() external pure returns (uint8) {
         return 18;

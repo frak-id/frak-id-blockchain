@@ -16,7 +16,7 @@ error InexistantGroup();
 error InsuficiantGroupSupply();
 
 contract VestingWalletFactory is FrakAccessControlUpgradeable {
-    // The cap of sybl token propose to vester
+    // The cap of frk token propose to vester
     uint96 internal constant FRK_VESTING_CAP = 1_500_000_000 ether;
 
     /**

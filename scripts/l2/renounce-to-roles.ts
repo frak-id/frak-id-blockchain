@@ -25,18 +25,15 @@ import {
 
 (async () => {
   try {
-    console.log("Starting to add our fireblocks as manager of our actions");
+    console.log("Starting to renounce to all of our deployer roles");
 
     const networkName = hre.hardhatArguments.network ?? "local";
 
     let addresses;
-    let fireblocksAddr;
     if (networkName == "mumbai") {
       addresses = deployedAddresses.mumbai;
-      fireblocksAddr = "0x9f6f0915dA5452786A5A5Dc08fE5412a2981D746";
     } else if (networkName == "polygon") {
       addresses = deployedAddresses.polygon;
-      fireblocksAddr = "0x97Ce46bBC97aa20D22Cf98b4E37775A55ff70cAC";
     } else {
       throw new Error("Invalid network");
     }
@@ -54,6 +51,8 @@ import {
       addresses.vestingWalletFactory,
     );
 
+    const selfAddress = await frkToken.signer.getAddress()
+
     // Get the array of all the contracts
     const allContracts = [
       frkToken,
@@ -67,34 +66,34 @@ import {
     ];
 
     // Grant the admin role on all the contract (for the transaction executor)
-    console.log(`Granting all the admin, pauser and upgrader roles`);
+    console.log(`Renounce to all the admin, pauser and upgrader roles`);
     const adminTxHashes: string[] = []
     for (const contract of allContracts) {
-      const adminRoleTx = await contract.grantRole(adminRole, fireblocksAddr);
+      const adminRoleTx = await contract.renounceRole(adminRole, selfAddress);
       adminTxHashes.push(adminRoleTx.hash)
-      await contract.grantRole(pauserRole, fireblocksAddr);
-      await contract.grantRole(upgraderRole, fireblocksAddr);
+      await contract.renounceRole(pauserRole, selfAddress);
+      await contract.renounceRole(upgraderRole, selfAddress);
     }
 
     console.log(`All the admin role tx's ${adminTxHashes}`)
 
     // Handle rewarder specific role
-    await rewarder.grantRole(rewarderRole, fireblocksAddr);
-    await rewarder.grantRole(badgeUpdaterRole, fireblocksAddr);
+    await rewarder.renounceRole(rewarderRole, selfAddress);
+    await rewarder.renounceRole(badgeUpdaterRole, selfAddress);
 
     // Handle minter specific role
-    await minter.grantRole(minterRole, fireblocksAddr);
-    await minter.grantRole(badgeUpdaterRole, fireblocksAddr);
+    await minter.renounceRole(minterRole, selfAddress);
+    await minter.renounceRole(badgeUpdaterRole, selfAddress);
 
     // Handle fraktion tokens specific role
-    await minter.grantRole(minterRole, fireblocksAddr);
+    await minter.renounceRole(minterRole, selfAddress);
 
     // Handle frk token specific role
-    await frkToken.grantRole(minterRole, fireblocksAddr);
+    await frkToken.renounceRole(minterRole, selfAddress);
 
     // Handle vesting specific roles
-    await vestingFactory.grantRole(vestingCreatorRole, fireblocksAddr);
-    await vestingWallets.grantRole(vestingManagerRole, fireblocksAddr);
+    await vestingFactory.renounceRole(vestingCreatorRole, selfAddress);
+    await vestingWallets.renounceRole(vestingManagerRole, selfAddress);
   } catch (e: any) {
     console.log(e.message);
   }
