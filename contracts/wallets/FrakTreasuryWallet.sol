@@ -10,7 +10,7 @@ import "../utils/MintingAccessControlUpgradeable.sol";
 import "../utils/FrakRoles.sol";
 
 /// Error thrown when the contract havn't enough found to perform the withdraw
-error NotEnoughFounds();
+    error NotEnoughTreasury();
 
 contract FrakTreasuryWallet is MintingAccessControlUpgradeable {
     using SafeERC20Upgradeable for FrakToken;
@@ -35,13 +35,23 @@ contract FrakTreasuryWallet is MintingAccessControlUpgradeable {
      */
     FrakToken private frakToken;
 
+    /**
+     * @dev Event emitted when the treasury is filled with a few frk token
+     */
+    event TreasuryFilled(uint256 mintedAmount);
+
+    /**
+     * @dev Event emitted when the treasury transfer some token
+     */
+    event TreasuryTransfer(address indexed target, uint256 amount);
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    function initialize(address frkToken) external initializer {
-        if (frkToken == address(0)) revert InvalidAddress();
+    function initialize(address frkTokenAddr) external initializer {
+        if (frkTokenAddr == address(0)) revert InvalidAddress();
 
         __MintingAccessControlUpgradeable_init();
 
@@ -53,26 +63,25 @@ contract FrakTreasuryWallet is MintingAccessControlUpgradeable {
      */
     function transfer(address target, uint256 amount) external whenNotPaused onlyRole(FrakRoles.MINTER) {
         // Ensure param are valid
-        if (frkToken == address(0)) revert InvalidAddress();
+        if (target == address(0)) revert InvalidAddress();
         if (amount > FRK_MAX_TRANSFER) revert RewardTooLarge();
 
         // Ensure we got enough founds, and if not, try to mint more and ensure we minted enough
         uint256 currentBalance = frakToken.balanceOf(address(this));
         if (amount > currentBalance) {
             uint256 mintedAmount = _mintNewToken();
-            if(amount > currentBalance + mintedAmount) revert NotEnoughFounds();
+            if (amount > currentBalance + mintedAmount) revert NotEnoughTreasury();
         }
 
         // Once we are good, move the token to the given address
+        emit TreasuryTransfer(target, amount);
         frakToken.safeTransfer(target, amount);
-
-        // TODO : Send an event ?
     }
 
     /**
      * @dev Mint some fresh token to this contract, and return the number of token minted
      */
-    function _mintNewToken(uint256 minAmount) private returns(uint256 amountToMint) {
+    function _mintNewToken() private returns (uint256 amountToMint) {
         if (totalFrakMinted + FRK_MINTING_AMOUNT < FRK_MINTING_CAP) {
             // In the case we have enough room, mint 1m token directly
             amountToMint = FRK_MINTING_AMOUNT;
@@ -84,6 +93,7 @@ contract FrakTreasuryWallet is MintingAccessControlUpgradeable {
         // If we got something to mint, increase our frak minted and mint the frk tokens
         if (amountToMint > 0) {
             totalFrakMinted += amountToMint;
+            emit TreasuryFilled(amountToMint);
             frakToken.mint(address(this), amountToMint);
         }
     }
