@@ -10,7 +10,7 @@ import "../utils/MintingAccessControlUpgradeable.sol";
 import "../utils/FrakRoles.sol";
 
 /// Error thrown when the contract havn't enough found to perform the withdraw
-    error NotEnoughTreasury();
+error NotEnoughTreasury();
 
 contract FrakTreasuryWallet is MintingAccessControlUpgradeable {
     using SafeERC20Upgradeable for FrakToken;

@@ -4,6 +4,7 @@ import * as deployedAddresses from "../../addresses.json";
 import {
   ContentPool,
   FrakToken,
+  FrakTreasuryWallet,
   FraktionTokens,
   Minter,
   MultiVestingWallets,
@@ -50,6 +51,10 @@ import {
       "VestingWalletFactory",
       addresses.vestingWalletFactory,
     );
+    const treasuryWallet = await findContract<FrakTreasuryWallet>(
+      "FrakTreasuryWallet",
+      addresses.vestingWalletFactory, // TODO : To be replaced post deployment
+    );
 
     const selfAddress = await frkToken.signer.getAddress();
 
@@ -63,6 +68,7 @@ import {
       referralPool,
       vestingWallets,
       vestingFactory,
+      treasuryWallet,
     ];
 
     // Grant the admin role on all the contract (for the transaction executor)
@@ -94,6 +100,9 @@ import {
     // Handle vesting specific roles
     await vestingFactory.renounceRole(vestingCreatorRole, selfAddress);
     await vestingWallets.renounceRole(vestingManagerRole, selfAddress);
+
+    // Handle treasury specific role
+    await treasuryWallet.renounceRole(minterRole, selfAddress);
   } catch (e: any) {
     console.log(e.message);
   }
