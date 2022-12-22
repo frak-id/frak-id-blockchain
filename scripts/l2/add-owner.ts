@@ -3,8 +3,8 @@ import hre from "hardhat";
 import * as deployedAddresses from "../../addresses.json";
 import {
   ContentPool,
-  FraktionTokens,
   FrakToken,
+  FraktionTokens,
   Minter,
   MultiVestingWallets,
   ReferralPool,
@@ -68,15 +68,15 @@ import {
 
     // Grant the admin role on all the contract (for the transaction executor)
     console.log(`Granting all the admin, pauser and upgrader roles`);
-    const adminTxHashes: string[] = []
+    const adminTxHashes: string[] = [];
     for (const contract of allContracts) {
       const adminRoleTx = await contract.grantRole(adminRole, fireblocksAddr);
-      adminTxHashes.push(adminRoleTx.hash)
+      adminTxHashes.push(adminRoleTx.hash);
       await contract.grantRole(pauserRole, fireblocksAddr);
       await contract.grantRole(upgraderRole, fireblocksAddr);
     }
 
-    console.log(`All the admin role tx's ${adminTxHashes}`)
+    console.log(`All the admin role tx's ${adminTxHashes}`);
 
     // Handle rewarder specific role
     await rewarder.grantRole(rewarderRole, fireblocksAddr);

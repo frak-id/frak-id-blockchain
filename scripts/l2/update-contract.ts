@@ -7,7 +7,6 @@ import * as deployedAddresses from "../../addresses.json";
     console.log("Start to update one of our contract");
 
     const nameToAddresses = [
-      { name: "FrakToken", address: deployedAddresses.polygon.frakToken },
       { name: "MultiVestingWallets", address: deployedAddresses.polygon.multiVestingWallet },
       { name: "VestingWalletFactory", address: deployedAddresses.polygon.vestingWalletFactory },
     ];
