@@ -30,6 +30,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     // The cap of frak token we can mint for the reward
     uint256 public constant REWARD_MINT_CAP = 1_500_000_000 ether;
     uint256 private constant SINGLE_REWARD_CAP = 1_000_000 ether;
+    uint256 private constant DIRECT_REWARD_CAP = 53 ether;
 
     // Maximum data we can treat in a batch manner
     uint256 private constant MAX_BATCH_AMOUNT = 20;
@@ -144,7 +145,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     function payUserDirectly(address listener, uint256 amount) external onlyRole(FrakRoles.REWARDER) whenNotPaused {
         // Ensure the param are valid and not too much
         if (listener == address(0)) revert InvalidAddress();
-        if (amount > SINGLE_REWARD_CAP || amount == 0 || amount + totalFrakMinted > REWARD_MINT_CAP)
+        if (amount > DIRECT_REWARD_CAP || amount == 0 || amount + totalFrakMinted > REWARD_MINT_CAP)
             revert InvalidReward();
 
         // Increase our total frak minted
@@ -167,7 +168,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         // Then, for each content contentIds
         for (uint256 i; i < contentIds.length; ) {
             // Ensure the reward is valid
-            if (amounts[i] > SINGLE_REWARD_CAP || amounts[i] == 0 || amounts[i] + totalFrakMinted > REWARD_MINT_CAP)
+            if (amounts[i] > DIRECT_REWARD_CAP || amounts[i] == 0 || amounts[i] + totalFrakMinted > REWARD_MINT_CAP)
                 revert InvalidReward();
             // Increase our total frak minted
             totalFrakMinted += amounts[i];
