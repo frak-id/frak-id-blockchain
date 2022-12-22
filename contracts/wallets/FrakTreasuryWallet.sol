@@ -1,0 +1,90 @@
+// SPDX-License-Identifier: GNU GPLv3
+pragma solidity 0.8.17;
+
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "./MultiVestingWallets.sol";
+import "../tokens/FrakTokenL2.sol";
+import "../utils/FrakAccessControlUpgradeable.sol";
+import "../utils/MintingAccessControlUpgradeable.sol";
+import "../utils/FrakRoles.sol";
+
+/// Error thrown when the contract havn't enough found to perform the withdraw
+error NotEnoughFounds();
+
+contract FrakTreasuryWallet is MintingAccessControlUpgradeable {
+    using SafeERC20Upgradeable for FrakToken;
+
+    // The cap of frk token for the treasury
+    uint256 internal constant FRK_MINTING_CAP = 330_000_000 ether;
+
+    /// The cap at which we will re-mint some token to this contract
+    uint256 internal constant FRK_MAX_TRANSFER = 500_000 ether;
+
+    /// The cap at which we will re-mint some token to this contract
+    uint256 internal constant FRK_REMITTING_CAP = 5_000 ether;
+
+    /// The number of token we will mint when the cap is reached
+    uint256 internal constant FRK_MINTING_AMOUNT = 1_000_000 ether;
+
+    // The total amount of frak minted for the treasury
+    uint256 public totalFrakMinted;
+
+    /**
+     * @dev Access our token
+     */
+    FrakToken private frakToken;
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address frkToken) external initializer {
+        if (frkToken == address(0)) revert InvalidAddress();
+
+        __MintingAccessControlUpgradeable_init();
+
+        frakToken = FrakToken(frkTokenAddr);
+    }
+
+    /**
+     * @dev Transfer the given number of token to the user
+     */
+    function transfer(address target, uint256 amount) external whenNotPaused onlyRole(FrakRoles.MINTER) {
+        // Ensure param are valid
+        if (frkToken == address(0)) revert InvalidAddress();
+        if (amount > FRK_MAX_TRANSFER) revert RewardTooLarge();
+
+        // Ensure we got enough founds, and if not, try to mint more and ensure we minted enough
+        uint256 currentBalance = frakToken.balanceOf(address(this));
+        if (amount > currentBalance) {
+            uint256 mintedAmount = _mintNewToken();
+            if(amount > currentBalance + mintedAmount) revert NotEnoughFounds();
+        }
+
+        // Once we are good, move the token to the given address
+        frakToken.safeTransfer(target, amount);
+
+        // TODO : Send an event ?
+    }
+
+    /**
+     * @dev Mint some fresh token to this contract, and return the number of token minted
+     */
+    function _mintNewToken(uint256 minAmount) private returns(uint256 amountToMint) {
+        if (totalFrakMinted + FRK_MINTING_AMOUNT < FRK_MINTING_CAP) {
+            // In the case we have enough room, mint 1m token directly
+            amountToMint = FRK_MINTING_AMOUNT;
+        } else {
+            // Otherwise, check the minting room we got, and mint that amount if needed
+            amountToMint = FRK_MINTING_CAP - totalFrakMinted;
+        }
+
+        // If we got something to mint, increase our frak minted and mint the frk tokens
+        if (amountToMint > 0) {
+            totalFrakMinted += amountToMint;
+            frakToken.mint(address(this), amountToMint);
+        }
+    }
+}
