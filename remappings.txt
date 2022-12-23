@@ -1,2 +1,3 @@
+@frak/=contracts/
 @prb/test/=lib/prb-test/src/
 @foundry-upgrades/=lib/foundry-upgrades/src/
