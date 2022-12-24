@@ -134,6 +134,56 @@ contract FrkTokenL2Test is PRBTest {
     }
 
     /*
+     * ===== TEST : approve(address spender, uint256 amount) =====
+     * ===== TEST : allowance(address owner, address spender) =====
+     * ===== TEST : addedValue(address owner, uint256 addedValue) =====
+     * ===== TEST : decreaseAllowance(address owner, uint256 subtractedValue) =====
+     */
+    function testApproveOkIncreaseOkDecreaseOk() public {
+        uint256 allowance = frakToken.allowance(address(this), address(1));
+        assertEq(allowance, 0);
+
+        frakToken.approve(address(1), 100);
+        allowance = frakToken.allowance(address(this), address(1));
+        assertEq(allowance, 100);
+
+        frakToken.increaseAllowance(address(1), 50);
+        allowance = frakToken.allowance(address(this), address(1));
+        assertEq(allowance, 150);
+
+        frakToken.decreaseAllowance(address(1), 50);
+        allowance = frakToken.allowance(address(this), address(1));
+        assertEq(allowance, 100);
+    }
+
+    function testFailApproveInvalidAddress() public {
+        frakToken.approve(address(0), 100);
+    }
+
+    function testFailIncreaseAllowanceInvalidAddress() public {
+        frakToken.increaseAllowance(address(0), 100);
+    }
+
+    function testFailDecreaseAllowanceInvalidAddress() public {
+        frakToken.decreaseAllowance(address(0), 100);
+    }
+
+    /*
+     * ===== TEST : transferFrom(address from, address to, uint256 amount) =====
+     */
+    function testTransferFromOk(uint256 amount) public {
+        vm.assume(amount < 3_000_000_000 ether);
+        frakToken.mint(address(1), amount);
+
+        vm.prank(address(1));
+        frakToken.approve(address(2), amount);
+
+        vm.prank(address(2));
+        frakToken.transferFrom(address(1), address(3), amount);
+        assertEq(frakToken.balanceOf(address(3)), amount);
+    }
+
+    /*
      * ===== TEST : mint(address to, uint256 amount) =====
      */
     function testFailMintAddr0() public {
