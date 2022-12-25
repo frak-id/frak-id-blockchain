@@ -9,11 +9,9 @@ import { UUPSTestHelper } from "../UUPSTestHelper.sol";
 
 /// Testing the frak l2 token
 contract FrkTokenL2Test is UUPSTestHelper {
-
     FrakToken frakToken;
 
     function setUp() public {
-
         // Deploy our contract via proxy and set the proxy address
         address proxyAddress = deployContract(address(new FrakToken()));
         frakToken = FrakToken(proxyAddress);

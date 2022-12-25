@@ -8,7 +8,6 @@ import { PRBTest } from "@prb/test/PRBTest.sol";
 
 /// Testing the frak l2 token
 contract UUPSTestHelper is PRBTest {
-
     ProxyTester internal proxy;
     address internal proxyAdmin;
     address internal deployer;
@@ -17,7 +16,7 @@ contract UUPSTestHelper is PRBTest {
      * @dev Setup our proxy if needed
      */
     function _setupProxy() private {
-        if(address(proxy) == address(0)) {
+        if (address(proxy) == address(0)) {
             proxy = new ProxyTester();
             proxy.setType("uups");
 
@@ -38,7 +37,7 @@ contract UUPSTestHelper is PRBTest {
      * @dev Deploy the given contract in an uups proxy
      * @return The deployed proxy address
      */
-    function deployContract(address initialContract) internal withProxy returns(address) {
+    function deployContract(address initialContract) internal withProxy returns (address) {
         vm.prank(deployer);
         return proxy.deploy(initialContract, proxyAdmin);
     }
@@ -58,5 +57,4 @@ contract UUPSTestHelper is PRBTest {
     function prankDeployer() internal {
         vm.prank(deployer);
     }
-    
 }
