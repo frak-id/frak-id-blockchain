@@ -5,24 +5,19 @@ import "@frak/tokens/FrakTokenL2.sol";
 import "forge-std/console.sol";
 import { ProxyTester } from "@foundry-upgrades/ProxyTester.sol";
 import { PRBTest } from "@prb/test/PRBTest.sol";
+import { UUPSTestHelper } from "../UUPSTestHelper.sol";
 
 /// Testing the frak l2 token
-contract FrkTokenL2Test is PRBTest {
-    ProxyTester proxy;
+contract FrkTokenL2Test is UUPSTestHelper {
 
     FrakToken frakToken;
 
-    address admin;
-
     function setUp() public {
-        // Setup our proxy
-        proxy = new ProxyTester();
-        proxy.setType("uups");
-        admin = vm.addr(69);
 
         // Deploy our contract via proxy and set the proxy address
-        address proxyAddress = proxy.deploy(address(new FrakToken()), admin);
+        address proxyAddress = deployContract(address(new FrakToken()));
         frakToken = FrakToken(proxyAddress);
+        prankDeployer();
         frakToken.initialize(address(this));
     }
 
@@ -59,8 +54,12 @@ contract FrkTokenL2Test is PRBTest {
      */
     function testTotalSupply() public {
         assertEq(frakToken.totalSupply(), 0);
-        frakToken.mint(address(this), 1);
+
+        prankDeployer();
+        frakToken.mint(address(1), 1);
         assertEq(frakToken.totalSupply(), 1);
+
+        vm.prank(address(1));
         frakToken.burn(1);
         assertEq(frakToken.totalSupply(), 0);
     }
@@ -70,8 +69,12 @@ contract FrkTokenL2Test is PRBTest {
      */
     function testBalanceOf() public {
         assertEq(frakToken.balanceOf(address(1)), 0);
+
+        prankDeployer();
         frakToken.mint(address(1), 1);
+
         assertEq(frakToken.balanceOf(address(1)), 1);
+
         vm.prank(address(1));
         frakToken.burn(1);
         assertEq(frakToken.balanceOf(address(1)), 0);
@@ -81,6 +84,7 @@ contract FrkTokenL2Test is PRBTest {
      * ===== TEST : transfer(address to, uint256 amount) =====
      */
     function testTransferOk() public {
+        prankDeployer();
         frakToken.mint(address(1), 10);
 
         vm.prank(address(1));
@@ -98,6 +102,7 @@ contract FrkTokenL2Test is PRBTest {
         vm.assume(target != address(0));
         vm.assume(amount < 3_000_000_000 ether);
 
+        prankDeployer();
         frakToken.mint(address(1), amount);
 
         vm.prank(address(1));
@@ -107,6 +112,7 @@ contract FrkTokenL2Test is PRBTest {
     }
 
     function testFailTransferNotEnoughBalance() public {
+        prankDeployer();
         frakToken.mint(address(1), 10);
 
         vm.prank(address(1));
@@ -114,6 +120,7 @@ contract FrkTokenL2Test is PRBTest {
     }
 
     function testFailTransferInvalidAddress() public {
+        prankDeployer();
         frakToken.mint(address(1), 10);
 
         vm.prank(address(1));
@@ -160,6 +167,7 @@ contract FrkTokenL2Test is PRBTest {
      */
     function testTransferFromOk(uint256 amount) public {
         vm.assume(amount < 3_000_000_000 ether);
+        prankDeployer();
         frakToken.mint(address(1), amount);
 
         vm.prank(address(1));
@@ -173,20 +181,19 @@ contract FrkTokenL2Test is PRBTest {
     /*
      * ===== TEST : mint(address to, uint256 amount) =====
      */
-    function testFailMintAddr0() public {
+    function testFailMintNotMinter() public {
+        frakToken.mint(address(1), 1 ether);
+    }
+
+    function testFailMintAddr0() public prankExecAsDeployer {
         frakToken.mint(address(0), 1 ether);
     }
 
-    function testFailMintTooLarge() public {
+    function testFailMintTooLarge() public prankExecAsDeployer {
         frakToken.mint(address(1), 3_000_000_001 ether);
     }
 
-    function testFailMintNotOwner() public {
-        vm.prank(address(1));
-        frakToken.mint(address(1), 3_000 ether);
-    }
-
-    function testMintOkForOwnerFuzz(uint256 mintAmount) public {
+    function testMintOkForOwnerFuzz(uint256 mintAmount) public prankExecAsDeployer {
         vm.assume(mintAmount < 3_000_000_000 ether);
         frakToken.mint(address(1), mintAmount);
         assertEq(frakToken.balanceOf(address(1)), mintAmount);

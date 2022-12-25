@@ -6,30 +6,25 @@ import "@frak/wallets/MultiVestingWallets.sol";
 import "forge-std/console.sol";
 import { ProxyTester } from "@foundry-upgrades/ProxyTester.sol";
 import { PRBTest } from "@prb/test/PRBTest.sol";
+import { UUPSTestHelper } from "../UUPSTestHelper.sol";
 
 /// Testing the frak l2 token
-contract MultiVestingWalletsTest is PRBTest {
-    ProxyTester proxy;
+contract MultiVestingWalletsTest is UUPSTestHelper {
 
     FrakToken frakToken;
     MultiVestingWallets vestingWallets;
 
-    address admin;
-
     function setUp() public {
-        // Setup our proxy
-        proxy = new ProxyTester();
-        proxy.setType("uups");
-        admin = vm.addr(69);
-
         // Deploy frak token
-        address frkProxyAddr = proxy.deploy(address(new FrakToken()), admin);
+        address frkProxyAddr = deployContract(address(new FrakToken()));
         frakToken = FrakToken(frkProxyAddr);
+        prankDeployer();
         frakToken.initialize(address(this));
 
         // Deploy our multi vesting wallets
-        address multiVestingAddr = proxy.deploy(address(new MultiVestingWallets()), admin);
+        address multiVestingAddr = deployContract(address(new MultiVestingWallets()));
         vestingWallets = MultiVestingWallets(multiVestingAddr);
+        prankDeployer();
         vestingWallets.initialize(address(frakToken));
     }
 
@@ -66,6 +61,7 @@ contract MultiVestingWalletsTest is PRBTest {
      */
     function testAvailableReserve() public {
         assertEq(vestingWallets.availableReserve(), 0);
+        prankDeployer();
         frakToken.mint(address(vestingWallets), 1);
         assertEq(vestingWallets.availableReserve(), 1);
     }
