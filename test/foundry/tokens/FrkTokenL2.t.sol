@@ -8,35 +8,22 @@ import { PRBTest } from "@prb/test/PRBTest.sol";
 
 /// Testing the frak l2 token
 contract FrkTokenL2Test is PRBTest {
-
     ProxyTester proxy;
 
-    FrakToken initialImpl;
     FrakToken frakToken;
 
     address admin;
 
     function setUp() public {
-        // Deploy initial token
-        initialImpl = new FrakToken();
-
-        // Deploy our proxy
+        // Setup our proxy
         proxy = new ProxyTester();
         proxy.setType("uups");
         admin = vm.addr(69);
 
         // Deploy our contract via proxy and set the proxy address
-        address proxyAddress = proxy.deploy(address(initialImpl), admin);
+        address proxyAddress = proxy.deploy(address(new FrakToken()), admin);
         frakToken = FrakToken(proxyAddress);
         frakToken.initialize(address(this));
-    }
-
-    function testProxyIsSameAddr() public {
-        // Assert proxy address is a valid addr
-        assertEq(address(frakToken), proxy.proxyAddress());
-        assertEq(address(frakToken), address(proxy.uups()));
-        // And ensure it's not the same as the frak tken
-        assertNotEq(address(frakToken), address(initialImpl));
     }
 
     /*
