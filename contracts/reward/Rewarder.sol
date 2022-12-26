@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "./IRewarder.sol";
-import "./badges/ContentBadges.sol";
-import "./badges/ListenerBadges.sol";
-import "./pool/ContentPool.sol";
-import "./pool/ReferralPool.sol";
-import "../utils/FrakMath.sol";
-import "../utils/FrakRoles.sol";
-import "../tokens/FraktionTokens.sol";
-import "../tokens/FrakTokenL2.sol";
-import "../utils/FrakAccessControlUpgradeable.sol";
-import "../utils/PushPullReward.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import { IRewarder } from "./IRewarder.sol";
+import { ContentBadges } from "./badges/ContentBadges.sol";
+import { ListenerBadges } from "./badges/ListenerBadges.sol";
+import { ContentPool } from "./pool/ContentPool.sol";
+import { ReferralPool } from "./pool/ReferralPool.sol";
+import { FrakMath } from "../utils/FrakMath.sol";
+import { FrakRoles } from "../utils/FrakRoles.sol";
+import { FraktionTokens } from "../tokens/FraktionTokens.sol";
+import { FrakToken } from "../tokens/FrakTokenL2.sol";
+import { FrakAccessControlUpgradeable, InvalidAddress, InvalidArray } from "../utils/FrakAccessControlUpgradeable.sol";
+import { PushPullReward } from "../utils/PushPullReward.sol";
+import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 // Error throwned by this contract
 error TooMuchCcu();

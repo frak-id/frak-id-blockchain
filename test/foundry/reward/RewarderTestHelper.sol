@@ -72,12 +72,11 @@ contract RewarderTestHelper is FrkTokenTestHelper {
         fraktionTokens.registerNewCallback(address(contentPool));
     }
 
-
     /*
      * ===== UTILS=====
      */
 
-    function mintAContent() public returns(uint256) {
+    function mintAContent() public returns (uint256) {
         prankDeployer();
         return fraktionTokens.mintNewContent(contentOwnerAddress);
     }

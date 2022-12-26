@@ -17,7 +17,6 @@ import { RewarderTestHelper } from "./RewarderTestHelper.sol";
 
 /// Testing the frak l2 token
 contract RewarderTest is RewarderTestHelper {
-    
     function setUp() public {
         _baseSetUp();
     }

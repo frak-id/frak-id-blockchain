@@ -37,7 +37,7 @@ contract RewarderPayTest is RewarderTestHelper {
         vm.assume(listenCounts.length < 21);
 
         uint256[] memory contentIds = new uint256[](listenCounts.length);
-        for (uint256 i; i < contentIds.length;) {
+        for (uint256 i; i < contentIds.length; ) {
             unchecked {
                 contentIds[i] = contentId;
                 listenCounts[i] = 10;
