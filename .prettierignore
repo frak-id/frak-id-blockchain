@@ -11,7 +11,10 @@
 **/node_modules
 **/types
 **/tools
+
+# Forge
 lib/
+out/
 
 # files
 *.env

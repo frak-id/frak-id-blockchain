@@ -19,16 +19,14 @@ contract MultiVestingWalletsTest is UUPSTestHelper {
 
     function setUp() public {
         // Deploy frak token
-        address frkProxyAddr = deployContract(address(new FrakToken()));
+        bytes memory initData = abi.encodeCall(FrakToken.initialize, (address(this)));
+        address frkProxyAddr = deployContract(address(new FrakToken()), initData);
         frakToken = FrakToken(frkProxyAddr);
-        prankDeployer();
-        frakToken.initialize(address(this));
 
         // Deploy our multi vesting wallets
-        address multiVestingAddr = deployContract(address(new MultiVestingWallets()));
+        initData = abi.encodeCall(MultiVestingWallets.initialize, (address(frakToken)));
+        address multiVestingAddr = deployContract(address(new MultiVestingWallets()), initData);
         vestingWallets = MultiVestingWallets(multiVestingAddr);
-        prankDeployer();
-        vestingWallets.initialize(address(frakToken));
     }
 
     /*

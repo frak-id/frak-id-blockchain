@@ -13,10 +13,9 @@ contract FrkTokenL2Test is UUPSTestHelper {
 
     function setUp() public {
         // Deploy our contract via proxy and set the proxy address
-        address proxyAddress = deployContract(address(new FrakToken()));
+        bytes memory initData = abi.encodeCall(FrakToken.initialize, (address(this)));
+        address proxyAddress = deployContract(address(new FrakToken()), initData);
         frakToken = FrakToken(proxyAddress);
-        prankDeployer();
-        frakToken.initialize(address(this));
     }
 
     /*
