@@ -54,6 +54,10 @@ contract RewarderTestHelper is FrkTokenTestHelper {
         rewarderAddr = deployContract(address(new Rewarder()), initData);
         rewarder = Rewarder(rewarderAddr);
 
+        // Link our content pool to the fraktion token
+        prankDeployer();
+        fraktionTokens.registerNewCallback(contentPoolProxyAddr);
+
         // Grant the right roles
         _grantSetupRoles();
     }

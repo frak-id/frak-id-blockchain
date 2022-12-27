@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 import { InvalidReward } from "@frak/reward/Rewarder.sol";
 import { RewarderTestHelper } from "./RewarderTestHelper.sol";
-import { NotAuthorized, InvalidAddress, ContractPaused } from "@frak/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge } from "@frak/utils/FrakErrors.sol";
 
 /// Testing the frak l2 token
 contract RewarderTest is RewarderTestHelper {
@@ -26,51 +26,77 @@ contract RewarderTest is RewarderTestHelper {
     }
 
     /*
-     * ===== TEST : payUserDirectly(address listener, uint256 amount) =====
+     * ===== TEST : updateTpu(uint256 newTpu) =====
      */
-    function test_payUserDirectly() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        rewarder.payUserDirectly(address(1), 10);
+    function test_updateTpu() public prankExecAsDeployer {
+        rewarder.updateTpu(1 ether);
+        assertEq(rewarder.tokenGenerationFactor(), 1 ether);
     }
 
-    function test_fail_payUserDirectly_ContractPaused() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        rewarder.pause();
-        vm.expectRevert(ContractPaused.selector);
-        rewarder.payUserDirectly(address(1), 10);
-    }
-
-    function test_fail_payUserDirectly_InvalidRole() public withFrkToken(rewarderAddr) {
+    function test_fail_updateTpu_NotAuthorized() public {
         vm.expectRevert(NotAuthorized.selector);
-        rewarder.payUserDirectly(address(1), 10);
-    }
-
-    function test_fail_payUserDirectly_InvalidAddress() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        vm.expectRevert(InvalidAddress.selector);
-        rewarder.payUserDirectly(address(0), 10);
-    }
-
-    function test_fail_payUserDirectly_InvalidReward() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        vm.expectRevert(InvalidReward.selector);
-        rewarder.payUserDirectly(address(1), 0);
-    }
-
-    function test_fail_payUserDirectly_TooLargeReward() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        vm.expectRevert(InvalidReward.selector);
-        rewarder.payUserDirectly(address(1), 1_000_001 ether);
-    }
-
-    function test_fail_payUserDirectly_NotEnoughBalance() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        vm.expectRevert("ERC20: transfer amount exceeds balance");
-        rewarder.payUserDirectly(address(1), 11);
+        rewarder.updateTpu(1 ether);
     }
 
     /*
-     * ===== TEST : payCreatorDirectlyBatch(
-        uint256[] calldata contentIds,
-        uint256[] calldata amounts
+     * ===== TEST : updateContentBadge(
+        uint256 contentId,
+        uint256 badge
     ) =====
      */
-    function test_payCreatorDirectly() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        fraktionTokens.mintNewContent(contentOwnerAddress);
-        rewarder.payUserDirectly(contentOwnerAddress, 10);
+    function test_updateContentBadge() public prankExecAsDeployer {
+        uint256 contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
+        rewarder.updateContentBadge(contentId, 2 ether);
+        assertEq(rewarder.getContentBadge(contentId), 2 ether);
+    }
+
+    function test_fail_updateContentBadge_ContractPaused() public prankExecAsDeployer {
+        uint256 contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
+        rewarder.pause();
+
+        vm.expectRevert(ContractPaused.selector);
+        rewarder.updateContentBadge(contentId, 2 ether);
+    }
+
+    function test_fail_updateContentBadge_NotAuthorized() public {
+        prankDeployer();
+        uint256 contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
+
+        vm.expectRevert(NotAuthorized.selector);
+        rewarder.updateContentBadge(contentId, 2 ether);
+    }
+
+    function test_fail_updateContentBadge_BadgeCapReached() public prankExecAsDeployer {
+        uint256 contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
+
+        vm.expectRevert(BadgeTooLarge.selector);
+        rewarder.updateContentBadge(contentId, 1001 ether);
+    }
+
+    /*
+     * ===== TEST : updateListenerBadge(
+        address listener,
+        uint256 badge
+    ) =====
+     */
+    function test_updateListenerBadge() public prankExecAsDeployer {
+        rewarder.updateListenerBadge(address(1), 2 ether);
+        assertEq(rewarder.getListenerBadge(address(1)), 2 ether);
+    }
+
+    function test_fail_updateListenerBadge_ContractPaused() public prankExecAsDeployer {
+        rewarder.pause();
+        vm.expectRevert(ContractPaused.selector);
+        rewarder.updateListenerBadge(address(1), 2 ether);
+    }
+
+    function test_fail_updateListenerBadge_NotAuthorized() public {
+        vm.expectRevert(NotAuthorized.selector);
+        rewarder.updateListenerBadge(address(1), 2 ether);
+    }
+
+    function test_fail_updateListenerBadge_BadgeCapReached() public prankExecAsDeployer {
+        vm.expectRevert(BadgeTooLarge.selector);
+        rewarder.updateListenerBadge(address(1), 1001 ether);
     }
 }
