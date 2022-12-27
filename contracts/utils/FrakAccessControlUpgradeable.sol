@@ -6,14 +6,7 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import { IPausable } from "./IPausable.sol";
 import { FrakRoles } from "./FrakRoles.sol";
-import { NotAuthorized } from "./FrakErrors.sol";
-
-// Pause error (Throwned when contract is or isn't paused and shouldn't be)
-error ContractPaused();
-error ContractNotPaused();
-
-// Access control error (when accessing unauthorized method, or renouncing role that he havn't go)
-error RenounceForCallerOnly();
+import { NotAuthorized, ContractPaused, ContractNotPaused, RenounceForCallerOnly } from "./FrakErrors.sol";
 
 /// @custom:security-contact contact@frak.id
 abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradeable, IPausable, UUPSUpgradeable {

@@ -1,14 +1,26 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "@frak/tokens/FrakTokenL2.sol";
-import "@frak/utils/FrakMath.sol";
-import "@frak/wallets/MultiVestingWallets.sol";
-import "forge-std/console.sol";
+import { FrakToken } from "@frak/tokens/FrakTokenL2.sol";
+import { FrakMath } from "@frak/utils/FrakMath.sol";
+import {
+    MultiVestingWallets,
+    NotEnoughFounds,
+    InvalidDuration,
+    InvalidDate
+} from "@frak/wallets/MultiVestingWallets.sol";
 import { ProxyTester } from "@foundry-upgrades/ProxyTester.sol";
 import { PRBTest } from "@prb/test/PRBTest.sol";
 import { UUPSTestHelper } from "../UUPSTestHelper.sol";
 import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
+import {
+    NotAuthorized,
+    InvalidArray,
+    InvalidAddress,
+    NoReward,
+    ContractPaused,
+    RewardTooLarge
+} from "@frak/utils/FrakErrors.sol";
 
 /// Testing the frak l2 token
 contract MultiVestingWalletsTest is FrkTokenTestHelper {
@@ -30,35 +42,36 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
     /*
      * ===== TEST : initialize(address tokenAddr) =====
      */
-    function testFailInitTwice() public {
+    function test_fail_initialize_CantInitTwice() public {
+        vm.expectRevert("Initializable: contract is already initialized");
         vestingWallets.initialize(address(0));
     }
 
     /*
      * ===== TEST : name() =====
      */
-    function testName() public {
+    function test_name() public {
         assertEq(vestingWallets.name(), "Vested FRK Token");
     }
 
     /*
      * ===== TEST : decimals() =====
      */
-    function testDecimals() public {
+    function test_decimals() public {
         assertEq(vestingWallets.decimals(), 18);
     }
 
     /*
      * ===== TEST : symbol() =====
      */
-    function testSymbol() public {
+    function test_symbol() public {
         assertEq(vestingWallets.symbol(), "vFRK");
     }
 
     /*
      * ===== TEST : availableReserve() =====
      */
-    function testAvailableReserve() public {
+    function test_availableReserve() public {
         assertEq(vestingWallets.availableReserve(), 0);
         prankDeployer();
         frakToken.mint(multiVestingAddr, 1);
@@ -69,7 +82,7 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
     /*
      * ===== TEST : transferAvailableReserve(address receiver) =====
      */
-    function testTransferAvailableReserve() public withFrkToken(multiVestingAddr) {
+    function test_transferAvailableReserve() public withFrkToken(multiVestingAddr) {
         // Ask to transfer the available reserve
         prankDeployer();
         vestingWallets.transferAvailableReserve(address(1));
@@ -77,21 +90,24 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
         assertEq(frakToken.balanceOf(address(1)), 10);
     }
 
-    function testFailTransferAvailableReserveNotAdmin() public withFrkToken(multiVestingAddr) {
+    function test_fail_transferAvailableReserve_NotAdmin() public withFrkToken(multiVestingAddr) {
         // Ask to transfer the available reserve
+        vm.expectRevert(NotAuthorized.selector);
         vestingWallets.transferAvailableReserve(address(1));
     }
 
-    function testFailTransferAvailableReserveContractPaused() public withFrkToken(multiVestingAddr) {
+    function test_fail_transferAvailableReserve_ContractPaused() public withFrkToken(multiVestingAddr) {
         prankDeployer();
         vestingWallets.pause();
 
         // Ask to transfer the available reserve
+        vm.expectRevert(ContractPaused.selector);
         vestingWallets.transferAvailableReserve(address(1));
     }
 
-    function testFailTransferAvailableReserveNoReserve() public {
+    function test_fail_TransferAvailableReserve_NoReserve() public {
         // Ask to transfer the available reserve
+        vm.expectRevert(NoReward.selector);
         prankDeployer();
         vestingWallets.transferAvailableReserve(address(1));
     }
@@ -104,43 +120,51 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
         uint48 startDate
     ) =====
      */
-    function testCreateVest() public withFrkToken(multiVestingAddr) {
+    function test_createVest() public withFrkToken(multiVestingAddr) {
         // Ask to transfer the available reserve
         prankDeployer();
         vestingWallets.createVest(address(1), 10, 10, uint48(block.timestamp + 1));
         assertEq(vestingWallets.balanceOf(address(1)), 10);
     }
 
-    function testFailCreateVestNotManager() public withFrkToken(multiVestingAddr) {
+    function test_fail_createVest_NotManager() public withFrkToken(multiVestingAddr) {
+        vm.expectRevert(NotAuthorized.selector);
         vestingWallets.createVest(address(1), 10, 10, uint48(block.timestamp + 1));
     }
 
-    function testFailCreateVestPaused() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
+    function test_fail_createVest_ContractPaused() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
         vestingWallets.pause();
+        vm.expectRevert(ContractPaused.selector);
         vestingWallets.createVest(address(1), 10, 10, uint48(block.timestamp + 1));
     }
 
-    function testFailCreateVestInvalidDuration() public withFrkToken(multiVestingAddr) {
+    function test_fail_createVest_InvalidDuration() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
+        vm.expectRevert(InvalidDuration.selector);
         vestingWallets.createVest(address(1), 10, 0, uint48(block.timestamp + 1));
     }
 
-    function testFailCreateVestInvalidStartDate() public withFrkToken(multiVestingAddr) {
-        vestingWallets.createVest(address(1), 10, 10, uint48(block.timestamp));
+    function test_fail_createVest_InvalidStartDate() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
+        vm.expectRevert(InvalidDate.selector);
+        vestingWallets.createVest(address(1), 10, 10, uint48(block.timestamp - 1));
     }
 
-    function testFailCreateVestNotEnoughReserve() public withFrkToken(multiVestingAddr) {
+    function test_fail_createVest_NotEnoughReserve() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
+        vm.expectRevert(NotEnoughFounds.selector);
         vestingWallets.createVest(address(1), 11, 10, uint48(block.timestamp + 1));
     }
 
-    function testFailCreateVestInvalidAddress() public withFrkToken(multiVestingAddr) {
+    function test_fail_createVest_InvalidAddress() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
+        vm.expectRevert(InvalidAddress.selector);
         vestingWallets.createVest(address(0), 10, 10, uint48(block.timestamp + 1));
     }
 
-    function testFailCreateVestInvalidReward() public withFrkToken(multiVestingAddr) {
+    function test_fail_createVest_InvalidReward() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
+        vm.expectRevert(NoReward.selector);
         vestingWallets.createVest(address(10), 0, 10, uint48(block.timestamp + 1));
     }
 
-    function testFailCreateVestTooLargeReward() public withLotFrkToken(multiVestingAddr) {
+    function test_fail_createVest_TooLargeReward() public withLotFrkToken(multiVestingAddr) prankExecAsDeployer {
+        vm.expectRevert(RewardTooLarge.selector);
         vestingWallets.createVest(address(10), 200_000_001 ether, 10, uint48(block.timestamp + 1));
     }
 
@@ -152,7 +176,7 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
         uint48 startDate
     ) =====
      */
-    function testCreateVestBatch() public withFrkToken(multiVestingAddr) {
+    function test_createVestBatch() public withFrkToken(multiVestingAddr) {
         // Ask to transfer the available reserve
         prankDeployer();
         vestingWallets.createVestBatch(
@@ -164,7 +188,8 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
         assertEq(vestingWallets.balanceOf(address(1)), 10);
     }
 
-    function testFailCreateVestBatchNotManager() public withFrkToken(multiVestingAddr) {
+    function test_fail_createVestBatch_NotManager() public withFrkToken(multiVestingAddr) {
+        vm.expectRevert(NotAuthorized.selector);
         vestingWallets.createVestBatch(
             address(1).asSingletonArray(),
             uint256(10).asSingletonArray(),
@@ -173,8 +198,10 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
         );
     }
 
-    function testFailCreateVestBatchPaused() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
+    function test_fail_createVestBatch_ContractPaused() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
         vestingWallets.pause();
+
+        vm.expectRevert(ContractPaused.selector);
         vestingWallets.createVestBatch(
             address(1).asSingletonArray(),
             uint256(10).asSingletonArray(),
@@ -183,7 +210,8 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
         );
     }
 
-    function testFailCreateVestBatchNotEnoughReserve() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
+    function test_fail_createVestBatch_NotEnoughReserve() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
+        vm.expectRevert(NotEnoughFounds.selector);
         vestingWallets.createVestBatch(
             address(1).asSingletonArray(),
             uint256(11).asSingletonArray(),
@@ -192,16 +220,20 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
         );
     }
 
-    function testFailCreateVestBatchEmptyArray() public withFrkToken(multiVestingAddr) {
+    function test_fail_createVestBatch_EmptyArray() public withFrkToken(multiVestingAddr) {
         address[] memory addresses = new address[](0);
         uint256[] memory amounts = new uint256[](0);
         prankDeployer();
+
+        vm.expectRevert(InvalidArray.selector);
         vestingWallets.createVestBatch(addresses, amounts, 10, uint48(block.timestamp + 1));
     }
 
-    function testFailCreateVestBatchArrayInvalidLength() public withFrkToken(multiVestingAddr) {
+    function test_fail_createVestBatch_ArrayInvalidLength() public withFrkToken(multiVestingAddr) {
         address[] memory addresses = new address[](0);
         prankDeployer();
+
+        vm.expectRevert(InvalidArray.selector);
         vestingWallets.createVestBatch(addresses, uint256(10).asSingletonArray(), 10, uint48(block.timestamp + 1));
     }
 }

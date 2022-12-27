@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "@frak/tokens/FrakTokenL2.sol";
-import "forge-std/console.sol";
 import { ERC1967Proxy } from "@oz/proxy/ERC1967/ERC1967Proxy.sol";
 import { PRBTest } from "@prb/test/PRBTest.sol";
 

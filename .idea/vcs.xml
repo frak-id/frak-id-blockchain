@@ -4,6 +4,11 @@
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/forge-std" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/forge-std/lib/ds-test" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/foundry-upgrades" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/foundry-upgrades/lib/ds-test" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/foundry-upgrades/lib/forge-std" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/foundry-upgrades/lib/forge-std/lib/ds-test" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/foundry-upgrades/lib/openzeppelin-contracts" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/prb-test" vcs="Git" />
   </component>
 </project>
