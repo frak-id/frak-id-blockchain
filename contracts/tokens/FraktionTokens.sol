@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "./FraktionTransferCallback.sol";
-import "../utils/FrakMath.sol";
-import "../utils/MintingAccessControlUpgradeable.sol";
+import { ERC1155Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import { FraktionTransferCallback } from "./FraktionTransferCallback.sol";
+import { FrakMath } from "../utils/FrakMath.sol";
+import { FrakRoles } from "../utils/FrakRoles.sol";
+import { MintingAccessControlUpgradeable, InvalidArray } from "../utils/MintingAccessControlUpgradeable.sol";
 
 // Error
 error InsuficiantSupply();

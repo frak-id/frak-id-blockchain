@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "./IMinter.sol";
-import "./badges/FractionCostBadges.sol";
-import "../utils/FrakMath.sol";
-import "../tokens/FraktionTokens.sol";
-import "../tokens/FrakTokenL2.sol";
-import "../utils/MintingAccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import { IMinter } from "./IMinter.sol";
+import { FractionCostBadges } from "./badges/FractionCostBadges.sol";
+import { FrakMath } from "../utils/FrakMath.sol";
+import { FrakRoles } from "../utils/FrakRoles.sol";
+import { FraktionTokens } from "../tokens/FraktionTokens.sol";
+import { FrakToken } from "../tokens/FrakTokenL2.sol";
+import { MintingAccessControlUpgradeable, InvalidAddress } from "../utils/MintingAccessControlUpgradeable.sol";
+import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 /// @dev Error emitted when the input supply is invalid
 error InvalidSupply();
