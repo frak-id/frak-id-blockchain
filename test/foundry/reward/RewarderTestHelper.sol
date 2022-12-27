@@ -10,7 +10,6 @@ import { FraktionTokens } from "@frak/tokens/FraktionTokens.sol";
 import { FrakMath } from "@frak/utils/FrakMath.sol";
 import { FrakRoles } from "@frak/utils/FrakRoles.sol";
 import { MultiVestingWallets } from "@frak/wallets/MultiVestingWallets.sol";
-import { ProxyTester } from "@foundry-upgrades/ProxyTester.sol";
 import { PRBTest } from "@prb/test/PRBTest.sol";
 import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
 

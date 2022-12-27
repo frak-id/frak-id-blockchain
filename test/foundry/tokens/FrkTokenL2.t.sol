@@ -4,7 +4,6 @@ pragma solidity 0.8.17;
 import { PRBTest } from "@prb/test/PRBTest.sol";
 import { FrakToken, CapExceed } from "@frak/tokens/FrakTokenL2.sol";
 import { NotAuthorized } from "@frak/utils/FrakErrors.sol";
-import { ProxyTester } from "@foundry-upgrades/ProxyTester.sol";
 import { UUPSTestHelper } from "../UUPSTestHelper.sol";
 
 /// Testing the frak l2 token

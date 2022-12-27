@@ -4,6 +4,3 @@
 [submodule "lib/prb-test"]
 	path = lib/prb-test
 	url = https://github.com/paulrberg/prb-test
-[submodule "lib/foundry-upgrades"]
-	path = lib/foundry-upgrades
-	url = https://github.com/odyslam/foundry-upgrades
