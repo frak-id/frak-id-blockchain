@@ -6,7 +6,8 @@ import { FrakRoles } from "../../utils/FrakRoles.sol";
 import { FraktionTokens } from "../../tokens/FraktionTokens.sol";
 import { FraktionTransferCallback } from "../../tokens/FraktionTransferCallback.sol";
 import { PushPullReward } from "../../utils/PushPullReward.sol";
-import { FrakAccessControlUpgradeable, InvalidAddress, NoReward } from "../../utils/FrakAccessControlUpgradeable.sol";
+import { FrakAccessControlUpgradeable } from "../../utils/FrakAccessControlUpgradeable.sol";
+import { InvalidAddress, NoReward } from "../../utils/FrakErrors.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /// @dev The pool state is closed

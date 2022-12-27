@@ -5,7 +5,8 @@ import { ERC1155Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ER
 import { FraktionTransferCallback } from "./FraktionTransferCallback.sol";
 import { FrakMath } from "../utils/FrakMath.sol";
 import { FrakRoles } from "../utils/FrakRoles.sol";
-import { MintingAccessControlUpgradeable, InvalidArray } from "../utils/MintingAccessControlUpgradeable.sol";
+import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
+import { InvalidArray } from "../utils/FrakErrors.sol";
 
 // Error
 error InsuficiantSupply();

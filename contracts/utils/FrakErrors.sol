@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: GNU GPLv3
+pragma solidity 0.8.17;
+
+error NotAuthorized();
+
+// Generic error used for all the contract
+error InvalidArray();
+error InvalidAddress();
+error NoReward();
+error RewardTooLarge();
+error BadgeTooLarge();
+error InvalidFraktionType();

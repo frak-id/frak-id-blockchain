@@ -10,7 +10,8 @@ import { FrakMath } from "../utils/FrakMath.sol";
 import { FrakRoles } from "../utils/FrakRoles.sol";
 import { FraktionTokens } from "../tokens/FraktionTokens.sol";
 import { FrakToken } from "../tokens/FrakTokenL2.sol";
-import { FrakAccessControlUpgradeable, InvalidAddress, InvalidArray } from "../utils/FrakAccessControlUpgradeable.sol";
+import { FrakAccessControlUpgradeable } from "../utils/FrakAccessControlUpgradeable.sol";
+import { InvalidAddress, InvalidArray } from "../utils/FrakErrors.sol";
 import { PushPullReward } from "../utils/PushPullReward.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 

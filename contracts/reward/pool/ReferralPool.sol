@@ -5,7 +5,8 @@ import { FrakMath } from "../../utils/FrakMath.sol";
 import { FrakRoles } from "../../utils/FrakRoles.sol";
 import { FraktionTokens } from "../../tokens/FraktionTokens.sol";
 import { PushPullReward } from "../../utils/PushPullReward.sol";
-import { FrakAccessControlUpgradeable, InvalidAddress, NoReward } from "../../utils/FrakAccessControlUpgradeable.sol";
+import { FrakAccessControlUpgradeable } from "../../utils/FrakAccessControlUpgradeable.sol";
+import { InvalidAddress, NoReward } from "../../utils/FrakErrors.sol";
 
 /// @dev Exception throwned when the user already got a referer
 error AlreadyGotAReferer();

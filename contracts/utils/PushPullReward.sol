@@ -4,12 +4,8 @@ pragma solidity 0.8.17;
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import {
-    FrakAccessControlUpgradeable,
-    NoReward,
-    InvalidAddress,
-    RewardTooLarge
-} from "./FrakAccessControlUpgradeable.sol";
+import { FrakAccessControlUpgradeable } from "./FrakAccessControlUpgradeable.sol";
+import { NoReward, InvalidAddress, RewardTooLarge } from "./FrakErrors.sol";
 
 /// @dev Error throwned when the contract havn't enough founds for the withdraw
 error NotEnoughFound();

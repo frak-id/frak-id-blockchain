@@ -7,7 +7,8 @@ import { FrakMath } from "../utils/FrakMath.sol";
 import { FrakRoles } from "../utils/FrakRoles.sol";
 import { FraktionTokens } from "../tokens/FraktionTokens.sol";
 import { FrakToken } from "../tokens/FrakTokenL2.sol";
-import { MintingAccessControlUpgradeable, InvalidAddress } from "../utils/MintingAccessControlUpgradeable.sol";
+import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
+import { InvalidAddress } from "../utils/FrakErrors.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 /// @dev Error emitted when the input supply is invalid

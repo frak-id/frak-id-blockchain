@@ -3,7 +3,7 @@ pragma solidity 0.8.17;
 
 import { FrakMath } from "../../utils/FrakMath.sol";
 import { FrakRoles } from "../../utils/FrakRoles.sol";
-import { InvalidFraktionType } from "../../utils/FrakAccessControlUpgradeable.sol";
+import { InvalidFraktionType } from "../../utils/FrakErrors.sol";
 
 /**
  * @dev Handle the computation of our listener badges
