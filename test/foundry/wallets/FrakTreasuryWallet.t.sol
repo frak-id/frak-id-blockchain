@@ -4,20 +4,9 @@ pragma solidity 0.8.17;
 import { FrakToken } from "@frak/tokens/FrakTokenL2.sol";
 import { FrakMath } from "@frak/utils/FrakMath.sol";
 import { FrakRoles } from "@frak/utils/FrakRoles.sol";
-import {
-    FrakTreasuryWallet,
-    NotEnoughTreasury
-} from "@frak/wallets/FrakTreasuryWallet.sol";
-import { PRBTest } from "@prb/test/PRBTest.sol";
-import { UUPSTestHelper } from "../UUPSTestHelper.sol";
+import { FrakTreasuryWallet, NotEnoughTreasury } from "@frak/wallets/FrakTreasuryWallet.sol";
 import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
-import {
-    NotAuthorized,
-    InvalidAddress,
-    NoReward,
-    ContractPaused,
-    RewardTooLarge
-} from "@frak/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidAddress, NoReward, ContractPaused, RewardTooLarge } from "@frak/utils/FrakErrors.sol";
 
 /// Testing the frak l2 token
 contract FrakTreasuryWalletTest is FrkTokenTestHelper {
@@ -61,7 +50,7 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper {
 
     function testFuzz_transfer(address target, uint256 amount) public {
         vm.assume(amount > 0 && amount < 500_000 ether && target != address(0));
-                
+
         prankDeployer();
         treasuryWallet.transfer(target, amount);
 
@@ -102,7 +91,7 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper {
         do {
             treasuryWallet.transfer(address(1), iteration);
             totalToTransfer -= iteration;
-        } while(totalToTransfer > 0);
+        } while (totalToTransfer > 0);
 
         vm.expectRevert(NotEnoughTreasury.selector);
         treasuryWallet.transfer(address(1), iteration);
