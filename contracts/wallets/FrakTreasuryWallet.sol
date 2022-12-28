@@ -5,7 +5,7 @@ import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/
 import { FrakToken } from "../tokens/FrakTokenL2.sol";
 import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
 import { FrakRoles } from "../utils/FrakRoles.sol";
-import { InvalidAddress, RewardTooLarge } from "../utils/FrakErrors.sol";
+import { InvalidAddress, RewardTooLarge, NoReward } from "../utils/FrakErrors.sol";
 
 /// Error thrown when the contract havn't enough found to perform the withdraw
 error NotEnoughTreasury();
@@ -18,9 +18,6 @@ contract FrakTreasuryWallet is MintingAccessControlUpgradeable {
 
     /// The cap at which we will re-mint some token to this contract
     uint256 internal constant FRK_MAX_TRANSFER = 500_000 ether;
-
-    /// The cap at which we will re-mint some token to this contract
-    uint256 internal constant FRK_REMITTING_CAP = 5_000 ether;
 
     /// The number of token we will mint when the cap is reached
     uint256 internal constant FRK_MINTING_AMOUNT = 1_000_000 ether;
@@ -63,6 +60,7 @@ contract FrakTreasuryWallet is MintingAccessControlUpgradeable {
         // Ensure param are valid
         if (target == address(0)) revert InvalidAddress();
         if (amount > FRK_MAX_TRANSFER) revert RewardTooLarge();
+        if (amount == 0) revert NoReward();
 
         // Ensure we got enough founds, and if not, try to mint more and ensure we minted enough
         uint256 currentBalance = frakToken.balanceOf(address(this));
