@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "./MultiVestingWallets.sol";
-import "../tokens/FrakTokenL2.sol";
-import "../utils/FrakAccessControlUpgradeable.sol";
-import "../utils/MintingAccessControlUpgradeable.sol";
-import "../utils/FrakRoles.sol";
+import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import { FrakToken } from "../tokens/FrakTokenL2.sol";
+import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
+import { FrakRoles } from "../utils/FrakRoles.sol";
+import { InvalidAddress, RewardTooLarge } from "../utils/FrakErrors.sol";
 
 /// Error thrown when the contract havn't enough found to perform the withdraw
 error NotEnoughTreasury();
