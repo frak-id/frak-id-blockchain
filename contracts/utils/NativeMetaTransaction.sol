@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "./EIP712Base.sol";
+import { EIP712Base } from "./EIP712Base.sol";
 
 /// @dev error throwned when the signer is invalid
 error InvalidSigner();

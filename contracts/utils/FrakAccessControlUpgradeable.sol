@@ -1,27 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "./IPausable.sol";
-import "../utils/FrakRoles.sol";
-
-// Pause error (Throwned when contract is or isn't paused and shouldn't be)
-error ContractPaused();
-error ContractNotPaused();
-
-// Access control error (when accessing unauthorized method, or renouncing role that he havn't go)
-error NotAuthorized();
-error RenounceForCallerOnly();
-
-// Generic error used for all the contract
-error InvalidArray();
-error InvalidAddress();
-error NoReward();
-error RewardTooLarge();
-error BadgeTooLarge();
-error InvalidFraktionType();
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import { IPausable } from "./IPausable.sol";
+import { FrakRoles } from "./FrakRoles.sol";
+import { NotAuthorized, ContractPaused, ContractNotPaused, RenounceForCallerOnly } from "./FrakErrors.sol";
 
 /// @custom:security-contact contact@frak.id
 abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradeable, IPausable, UUPSUpgradeable {

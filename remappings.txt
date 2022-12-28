@@ -1,0 +1,6 @@
+@frak/=contracts/
+
+@prb/test/=lib/prb-test/src/
+
+@oz/=node_modules/@openzeppelin/contracts/
+@oz-upgrades/=node_modules/@openzeppelin/contracts-upgradeable/

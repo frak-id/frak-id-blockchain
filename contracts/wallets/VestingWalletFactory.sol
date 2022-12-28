@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "./MultiVestingWallets.sol";
-import "../tokens/FrakTokenL2.sol";
-import "../utils/FrakAccessControlUpgradeable.sol";
-import "../utils/FrakRoles.sol";
+import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import { MultiVestingWallets } from "./MultiVestingWallets.sol";
+import { FrakAccessControlUpgradeable } from "../utils/FrakAccessControlUpgradeable.sol";
+import { FrakRoles } from "../utils/FrakRoles.sol";
+import { InvalidArray, InvalidAddress, NoReward, RewardTooLarge } from "../utils/FrakErrors.sol";
 
 /// @dev error throwned when the creation param are invalid
 error InvalidCreationParam();

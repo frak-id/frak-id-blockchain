@@ -12,6 +12,10 @@
 **/types
 **/tools
 
+# Forge
+lib/
+out/
+
 # files
 *.env
 *.log

@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "../../utils/FrakMath.sol";
-import "../../utils/FrakRoles.sol";
-import "../../tokens/FraktionTokens.sol";
-import "../../utils/FrakAccessControlUpgradeable.sol";
-import "../../tokens/FraktionTransferCallback.sol";
-import "../../utils/PushPullReward.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { FrakMath } from "../../utils/FrakMath.sol";
+import { FrakRoles } from "../../utils/FrakRoles.sol";
+import { FraktionTokens } from "../../tokens/FraktionTokens.sol";
+import { FraktionTransferCallback } from "../../tokens/FraktionTransferCallback.sol";
+import { PushPullReward } from "../../utils/PushPullReward.sol";
+import { FrakAccessControlUpgradeable } from "../../utils/FrakAccessControlUpgradeable.sol";
+import { InvalidAddress, NoReward } from "../../utils/FrakErrors.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /// @dev The pool state is closed
 error PoolStateClosed();

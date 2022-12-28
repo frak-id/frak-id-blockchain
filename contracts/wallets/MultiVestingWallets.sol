@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "../tokens/FrakTokenL2.sol";
-import "../utils/FrakAccessControlUpgradeable.sol";
-import "../utils/FrakRoles.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import { FrakAccessControlUpgradeable } from "../utils/FrakAccessControlUpgradeable.sol";
+import { FrakRoles } from "../utils/FrakRoles.sol";
+import { NotAuthorized, InvalidArray, InvalidAddress, NoReward, RewardTooLarge } from "../utils/FrakErrors.sol";
 
 /// @dev error emitted when the contract doesn't have enough founds
 error NotEnoughFounds();
