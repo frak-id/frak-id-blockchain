@@ -2,7 +2,7 @@
 pragma solidity 0.8.17;
 
 import { FrakMath } from "@frak/utils/FrakMath.sol";
-import { ContractPaused, NotAuthorized, InvalidArray, InvalidAddress } from "@frak/utils/FrakErrors.sol";
+import { ContractPaused, NotAuthorized, InvalidArray, InvalidAddress, RewardTooLarge } from "@frak/utils/FrakErrors.sol";
 import { RewarderTestHelper } from "./RewarderTestHelper.sol";
 import { InvalidReward } from "@frak/reward/Rewarder.sol";
 
@@ -118,11 +118,18 @@ contract RewarderPayTest is RewarderTestHelper {
         rewarder.payUser(address(1), 1, contentIds, listenCounts);
     }
 
+    function test_payUser_LargeReward() public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
+        mintFraktions(address(1), 20);
+
+        (uint16[] memory listenCounts, uint256[] memory contentIds) = basePayParam(300);
+        rewarder.payUser(address(1), 1, contentIds, listenCounts);
+    }
+
     function testFuzz_payUser(uint16 listenCount) public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
         vm.assume(listenCount < 300);
 
         if (listenCount % 2 == 0) {
-            mintFraktions(address(1));
+            mintFraktions(address(1), 10);
         }
 
         uint16[] memory listenCounts = new uint16[](1);
@@ -160,13 +167,11 @@ contract RewarderPayTest is RewarderTestHelper {
 
     function test_fail_payUser_RewardTooLarge() public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
         // Mint tokens for the user
-        uint256 fraktionId = contentId.buildDiamondNftId();
-        fraktionTokens.setSupplyBatch(fraktionId.asSingletonArray(), uint256(10000).asSingletonArray());
-        fraktionTokens.mint(address(1), fraktionId, 10000);
+        mintFraktions(address(1), 100);
 
         // Then try to pay him
-        (uint16[] memory listenCounts, uint256[] memory contentIds) = basePayParam();
-        vm.expectRevert(InvalidReward.selector);
+        (uint16[] memory listenCounts, uint256[] memory contentIds) = basePayParam(300);
+        vm.expectRevert(RewardTooLarge.selector);
         rewarder.payUser(address(1), 1, contentIds, listenCounts);
     }
 
@@ -182,20 +187,24 @@ contract RewarderPayTest is RewarderTestHelper {
      */
 
     function basePayParam() private view returns (uint16[] memory, uint256[] memory) {
+        return basePayParam(50);
+    }
+
+    function basePayParam(uint16 listenCount) private view returns (uint16[] memory, uint256[] memory) {
         uint16[] memory listenCounts = new uint16[](1);
-        listenCounts[0] = 50;
+        listenCounts[0] = listenCount;
         return (listenCounts, contentId.asSingletonArray());
     }
 
-    function mintFraktions(address target) private {
+    function mintFraktions(address target, uint256 amount) private {
         uint256[] memory fraktionIds = contentId.buildSnftIds(FrakMath.payableTokenTypes());
         uint256[] memory amounts = new uint256[](fraktionIds.length);
         for (uint256 i = 0; i < fraktionIds.length; i++) {
-            amounts[i] = 10;
+            amounts[i] = amount;
         }
         fraktionTokens.setSupplyBatch(fraktionIds, amounts);
         for (uint256 i = 0; i < fraktionIds.length; i++) {
-            fraktionTokens.mint(target, fraktionIds[i], 10);
+            fraktionTokens.mint(target, fraktionIds[i], amount);
         }
     }
 }
