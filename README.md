@@ -12,15 +12,9 @@
 [![SafetinEcosystem](https://badgen.net/badge/Safetin%20erc20/passed/green?icon=https://uploads-ssl.webflow.com/624b2fb0a98b08011e0bf1d0/624c870d20ffb8fcf547507c_icon-safetin.svg)](https://www.safetin.com/audit/frak-2)
 [![MythXBadge](https://badgen.net/https/api.mythx.io/v1/projects/df0aab13-6b4e-4e67-ab53-d4472414264a/badge/data?cache=300&icon=https://raw.githubusercontent.com/ConsenSys/mythx-github-badge/main/logo_white.svg)](https://docs.mythx.io/dashboard/github-badges)
 
-The Frak Ecosystem is build to align interests of Creators and their Community in order to reinvent the IP monetization
-market. Creators mint their Work as a NFT and can fractionalize it in different rarity tokens to offer their community
-the opportunity to buy some shares, in exchange for profits, rewards or even governance rights.
-Then, when a User interact (listen, watch, read...) with content, on the platform of their choice, Creators earn
-tokens (TSE) that they share with Users. Several interactions can make Users reach the next level to get special
-NFT.Creators mint their Work as a NFT and fractionalize it to offer their community the opportunity to buy some shares,
-in exchange for profits, rewards or even governance rights (micro DAO).
-Creators’ and Users’ FRK earnings are stored in the in-app custodial Wallet created for them. Custodial Wallets have a
-built-in Swap function.
+This repo contains the smart contract for the [Frak.id](https://frak.id/) plateform.
+
+It uses hardhat for deployment and upgrades, and foundry for unit test.
 
 ## Our Vision
 
@@ -28,6 +22,32 @@ Our vision is to give Creators the rightful place they deserve in society. The v
 those who create, those who fund and those who consume content. By empowering all these people to govern and to be
 rewarded for the value they create, whether that be through work, investment or engagement, the Frak ecosystem believes
 that Web3 is the ideal way to make that happens.
+
+
+## Installation
+
+To install and build with [**Hardhat**](https://github.com/nomiclabs/hardhat) :
+
+```sh
+# Install
+git clone https://github.com/frak-id/frak-id-blockchain.git
+cd frak-id-blockchain/
+npm i
+# Build
+npm run build
+# Test
+npm run test
+```
+
+To install with [**Foundry**](https://github.com/gakonst/foundry):
+
+```sh
+# Install
+git clone https://github.com/frak-id/frak-id-blockchain.git
+cd frak-id-blockchain/
+# Build
+forge build
+```
 
 ## Contracts
 
@@ -60,30 +80,21 @@ utils
 ├─ PushPullReward — "Abtract contract that implement basic Push/Pull reward (we store reward amount, then the user withdraw it), helping us gain some gas"
 ```
 
-## Installation
+# Status
 
-To install and build with [**Hardhat**](https://github.com/nomiclabs/hardhat) :
+| Contract name                                                     | Status           | Audited   | Deployment |
+|-------------------------------------------------------------------|------------------|-----------|------------|
+| [FrakToken](contracts/tokens/FrakTokenL2.sol) | Finalized        | [^1] | [Proxy](https://polygonscan.com/token/0x6261E4a478C98419EaFa6289509C49058D21Df8c) |
+| [FraktionTokens](contracts/tokens/FraktionTokens.sol)       | Finalized        | [^2] | [Proxy](https://polygonscan.com/token/0x4B1611803687Ab821E1b670fE94CB93303D94F8a) |
+| [VestingWalletFactory](contracts/wallets/VestingWalletFactory.sol)       | Finalized        | [^2] | [Proxy](https://polygonscan.com/address/0xb8D79C7Bca3994dd5B4A80AD1c088CEBCd01f7F6) |
+| [MultiVestingWallets](contracts/wallets/MultiVestingWallets.sol)       | Finalized        | [^2] | [Proxy](https://polygonscan.com/address/0x4B1611803687Ab821E1b670fE94CB93303D94F8a) |
+| [Minter](contracts/minter/Minter.sol)       | Finalized        | [^2] | [Proxy](https://polygonscan.com/address/0x1adc8CAaA35551730eCd82e0eEA683Aa90dB6cf0) |
+| [Rewarder](contracts/reward/Rewarder.sol)       | Finalized        | [^2] | [Proxy](https://polygonscan.com/address/0x8D9fa601DA1416b087E9db6B6EaD63D4920A4528) |
+| [ContentPool](contracts/reward/pool/ContentPool.sol)       | Finalized        | [^2] | [Proxy](https://polygonscan.com/address/0xDCB34659B83C4F8708fd7AcAA3755547BF8BBcA0) |
+| [ReferralPool](contracts/reward/pool/ReferralPool.sol)       | Finalized        | [^2] | [Proxy](https://polygonscan.com/address/0x166d8CFEe1919bC2e8c7AdBB34F1613194e9C599) |
 
-```sh
-# Install
-git clone https://github.com/frak-id/frak-id-blockchain.git
-cd frak-id-blockchain/
-npm i
-# Build
-npm run build
-# Test
-npm run test
-```
-
-To install with [**Foundry**](https://github.com/gakonst/foundry):
-
-```sh
-# Install
-git clone https://github.com/frak-id/frak-id-blockchain.git
-cd frak-id-blockchain/
-# Build
-forge build
-```
+[^1]: [Safetin - ERC20](https://www.safetin.com/audit/frak)
+[^2]: [Safetin - Complete](https://www.safetin.com/audit/frak-2)
 
 ## Keep in touch
 
