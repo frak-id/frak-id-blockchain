@@ -420,6 +420,9 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
             // Compute and save the reward for this pool
             computeAndSaveReward(contentId, user, participant, lastPoolIndex);
         }
+
+        // If the new reward for the user is still 0, revert
+        if(_pendingRewards[user] == 0) revert NoReward();
     }
 
     /**
