@@ -12,7 +12,7 @@ import * as deployedAddresses from "../../addresses.json";
     ];
 
     // Get our contract factory and update it
-    for (let nameToAddress of nameToAddresses) {
+    for (const nameToAddress of nameToAddresses) {
       console.log(`Handling ${nameToAddress.name} updates`);
       const contractFactory = await ethers.getContractFactory(nameToAddress.name);
       const contract = await upgrades.upgradeProxy(nameToAddress.address, contractFactory);

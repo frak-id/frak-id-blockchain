@@ -2,7 +2,13 @@
 pragma solidity 0.8.17;
 
 import { FrakMath } from "@frak/utils/FrakMath.sol";
-import { ContractPaused, NotAuthorized, InvalidArray, InvalidAddress, RewardTooLarge } from "@frak/utils/FrakErrors.sol";
+import {
+    ContractPaused,
+    NotAuthorized,
+    InvalidArray,
+    InvalidAddress,
+    RewardTooLarge
+} from "@frak/utils/FrakErrors.sol";
 import { RewarderTestHelper } from "./RewarderTestHelper.sol";
 import { InvalidReward } from "@frak/reward/Rewarder.sol";
 
@@ -133,11 +139,12 @@ contract RewarderPayTest is RewarderTestHelper {
         rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
     }
 
-    function testFuzz_payUser_WithFraktions(uint16 listenCount) public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
+    function testFuzz_payUser_WithFraktions(
+        uint16 listenCount
+    ) public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
         vm.assume(listenCount < 300 && listenCount > 0);
 
         mintFraktions(address(1));
-        
 
         uint16[] memory listenCounts = new uint16[](1);
         listenCounts[0] = listenCount;
@@ -150,13 +157,13 @@ contract RewarderPayTest is RewarderTestHelper {
         contentPool.computeAllPoolsBalance(address(1));
     }
 
-
-    function testFuzz_payUser_WithFraktionsAndLoadOfState(uint16 listenCount) public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
+    function testFuzz_payUser_WithFraktionsAndLoadOfState(
+        uint16 listenCount
+    ) public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
         vm.assume(listenCount < 300 && listenCount > 0);
 
         mintFraktions(address(1));
         mintFraktions(address(2));
-        
 
         uint16[] memory listenCounts = new uint16[](1);
         listenCounts[0] = listenCount;

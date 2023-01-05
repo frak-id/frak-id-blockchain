@@ -58,7 +58,7 @@ export default {
   networks: {
     mumbai: {
       url: process.env.MUMBAI_PROVIDER,
-      accounts: [process.env.FRAK_DEPLOY_PRIV_KEY],
+      accounts: [process.env.SYBEL_DEPLOY_PRIV_KEY],
     },
     polygon: {
       url: process.env.POLYGON_PROVIDER,
