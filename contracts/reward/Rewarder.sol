@@ -43,12 +43,12 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     uint256 private constant CONTENT_TYPE_STREAMING = 4;
 
     /**
-     * @dev factor user to compute the number of token to generate (on 1e18 decimals)
+     * @notice factor user to compute the number of token to generate (on 1e18 decimals)
      */
     uint256 public tokenGenerationFactor;
 
     /**
-     * @dev The total frak minted for reward
+     * @notice The total frak minted for reward
      */
     uint256 public totalFrakMinted;
 
@@ -78,20 +78,9 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     address private foundationWallet;
 
     /**
-     * @dev Event emitted when a user is rewarded for his listen
+     * @notice Event emitted when a user is rewarded for his listen
      */
-    event UserRewarded(
-        address indexed user,
-        uint256[] contentIds,
-        uint16[] listenCount,
-        uint256 userReward,
-        uint256 poolRewards
-    );
-
-    /**
-     * @dev Event emitted when a user is rewarded for his listen
-     */
-    event RewardOnContent(address indexed user, uint256 contentId, uint256 baseUserReward);
+    event RewardOnContent(address indexed user, uint256 indexed contentId, uint256 baseUserReward);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -140,7 +129,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     }
 
     /**
-     * @dev Directly pay a user (or an owner) for the given frk amount
+     * @notice Directly pay a user for the given frk amount (used for offchain to onchain wallet migration)
      */
     function payUserDirectly(address listener, uint256 amount) external onlyRole(FrakRoles.REWARDER) whenNotPaused {
         // Ensure the param are valid and not too much
@@ -156,7 +145,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     }
 
     /**
-     * @dev Directly pay a user (or an owner) for the given frk amount
+     * @notice Directly pay all the creator for the given frk amount (used for offchain reward created by the user, that is sent to the creator)
      */
     function payCreatorDirectlyBatch(
         uint256[] calldata contentIds,
@@ -235,13 +224,6 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
             if (totalMint + totalFrakMinted > REWARD_MINT_CAP) revert InvalidReward();
             totalFrakMinted += totalMint;
         }
-        emit UserRewarded(
-            listener,
-            contentIds,
-            listenCounts,
-            totalRewards.user,
-            totalRewards.content + totalRewards.referral
-        );
 
         // If we got reward for the pool, transfer them
         if (totalRewards.content > 0) {
@@ -415,20 +397,29 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     }
 
     /**
-     * @dev Update the token generation factor
+     * @notice Update the token generation factor
      */
     function updateTpu(uint256 newTpu) external onlyRole(FrakRoles.ADMIN) {
         tokenGenerationFactor = newTpu;
     }
 
+    /**
+     * @notice Withdraw my pending founds
+     */
     function withdrawFounds() external virtual override whenNotPaused {
         _withdrawWithFee(msg.sender, 2, foundationWallet);
     }
 
+    /**
+     * @notice Withdraw the pending founds for a user
+     */
     function withdrawFounds(address user) external virtual override onlyRole(FrakRoles.ADMIN) whenNotPaused {
         _withdrawWithFee(user, 2, foundationWallet);
     }
 
+    /**
+     * @notice Update the content badge
+     */
     function updateContentBadge(
         uint256 contentId,
         uint256 badge
@@ -436,6 +427,9 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         _updateContentBadge(contentId, badge);
     }
 
+    /**
+     * @notice Update the listener badge
+     */
     function updateListenerBadge(
         address listener,
         uint256 badge

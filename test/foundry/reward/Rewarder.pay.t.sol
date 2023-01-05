@@ -126,15 +126,55 @@ contract RewarderPayTest is RewarderTestHelper {
     }
 
     function testFuzz_payUser(uint16 listenCount) public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
-        vm.assume(listenCount < 300);
-
-        if (listenCount % 2 == 0) {
-            mintFraktions(address(1), 10);
-        }
+        vm.assume(listenCount < 300 && listenCount > 0);
 
         uint16[] memory listenCounts = new uint16[](1);
         listenCounts[0] = listenCount;
         rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
+    }
+
+    function testFuzz_payUser_WithFraktions(uint16 listenCount) public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
+        vm.assume(listenCount < 300 && listenCount > 0);
+
+        mintFraktions(address(1));
+        
+
+        uint16[] memory listenCounts = new uint16[](1);
+        listenCounts[0] = listenCount;
+        rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
+
+        // Initial (runs: 256, μ: 650 604, ~: 650 604)
+        // With claim (runs: 256, μ: 682 988, ~: 682 988) -> so 32k more gas
+
+        // With claim
+        contentPool.computeAllPoolsBalance(address(1));
+    }
+
+
+    function testFuzz_payUser_WithFraktionsAndLoadOfState(uint16 listenCount) public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
+        vm.assume(listenCount < 300 && listenCount > 0);
+
+        mintFraktions(address(1));
+        mintFraktions(address(2));
+        
+
+        uint16[] memory listenCounts = new uint16[](1);
+        listenCounts[0] = listenCount;
+        rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
+
+        mintFraktions(address(3));
+        rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
+        mintFraktions(address(4));
+        rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
+        mintFraktions(address(5));
+        rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
+
+        // Base (runs: 256, μ: 2 017 515, ~: 2 017 515)
+        // With claim (runs: 256, μ: 2 072 266, ~: 2 072 266) -> so 50k more gas
+        // With claim opti (runs: 256, μ: 2 072 266, ~: 2 072 266) -> so 50k more gas
+
+        // With claim
+        contentPool.computeAllPoolsBalance(address(1));
     }
 
     function test_fail_payUser_ContractPaused() public withFrkToken(rewarderAddr) prankExecAsDeployer {
