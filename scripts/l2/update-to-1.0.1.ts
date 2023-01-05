@@ -10,11 +10,13 @@ import { updateContracts } from "../utils/updateContracts";
     // TODO : Deploy treasury here
 
     // Update our push and pull reward contract
+    const networkName = hre.hardhatArguments.network ?? "local";
+    const addresses = networkName === "mumbai" ? deployedAddresses.mumbai : deployedAddresses.polygon;
 
     const nameToAddresses = [
-      { name: "Rewarder", address: deployedAddresses.polygon.rewarder },
-      { name: "ContentPool", address: deployedAddresses.polygon.contentPool },
-      { name: "ReferralPool", address: deployedAddresses.polygon.referralPool },
+      { name: "Rewarder", address: addresses.rewarder },
+      { name: "ContentPool", address: addresses.contentPool },
+      { name: "ReferralPool", address: addresses.referralPool },
     ];
 
     // Get our contract factory and update it

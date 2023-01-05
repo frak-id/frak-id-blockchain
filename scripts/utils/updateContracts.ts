@@ -1,3 +1,4 @@
+import { Contract } from "ethers";
 import hre, { ethers, upgrades } from "hardhat";
 
 export async function updateContracts(
@@ -6,17 +7,42 @@ export async function updateContracts(
     address: string;
   }[],
 ) {
-  console.log("Start to update our contracts");
+  console.log(" - Start to update our contracts");
 
-  // Get our contract factory and update it
-  for (let nameToAddress of contracts) {
-    console.log(`Handling ${nameToAddress.name} updates`);
-    const contractFactory = await ethers.getContractFactory(nameToAddress.name);
-    const contract = await upgrades.upgradeProxy(nameToAddress.address, contractFactory);
-    await contract.deployed();
+  // Array of promise for our contract deployment
+  const deployedPromises = [];
 
-    await hre.run("verify:verify", { address: contract.address });
+  // Get our contract factory and update all of our contract
+  for (const nameToAddress of contracts) {
+    console.log(` -- Launching contract ${nameToAddress.name} update`);
+    try {
+      // Get our contract factory
+      const contractFactory = await ethers.getContractFactory(nameToAddress.name);
+      const contract = await upgrades.upgradeProxy(nameToAddress.address, contractFactory, {
+        unsafeAllowRenames: true,
+      });
+      // Save the deployment promise for further waiting
+      deployedPromises.push(contract.deployed());
+    } catch (e) {
+      console.log(` - An error occured while deploying the contract  ${nameToAddress.name} : ${e}`);
+    }
   }
 
-  console.log("Finished to update our contracts");
+  // Wait for all the contract to be deployed
+  console.log(` - Waiting for all contracts to be deployed`);
+  const deployedContracts = await Promise.all(deployedPromises);
+
+  // Verify all contracts
+  console.log(` - Verifying all deployed contracts`);
+  const verifiedPromise = deployedContracts.map(async contract => {
+    try {
+      console.log(` -- Verifying contract at ${contract.address}`);
+      await hre.run("verify:verify", { address: contract.address });
+    } catch (e) {
+      console.log(` -- Error when verifying contract at ${contract.address}`);
+    }
+  });
+  await Promise.all(verifiedPromise);
+
+  console.log(" - Finished to update our contracts");
 }
