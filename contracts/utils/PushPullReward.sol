@@ -28,7 +28,12 @@ abstract contract PushPullReward is Initializable {
     mapping(address => uint256) internal _pendingRewards;
 
     /**
-     * @dev Event emitted when a user withdraw his pending reward
+     * @notice Event emitted when a reward is added
+     */
+    event RewardAdded(address indexed user, uint256 amount);
+
+    /**
+     * @notice Event emitted when a user withdraw his pending reward
      */
     event RewardWithdrawed(address indexed user, uint256 amount, uint256 fees);
 
@@ -40,28 +45,36 @@ abstract contract PushPullReward is Initializable {
     }
 
     /**
-     * Add founds for the given user
+     * @dev Add founds for the given user
      */
     function _addFounds(address user, uint256 founds) internal {
         if (user == address(0)) revert InvalidAddress();
+        emit RewardAdded(user, founds);
         _pendingRewards[user] += founds;
     }
 
     /**
-     * Add founds for the given user
+     * @dev Add founds for the given user, without checking the operation (gas gain, usefull when founds are checked before)
      */
     function _addFoundsUnchecked(address user, uint256 founds) internal {
+        emit RewardAdded(user, founds);
         unchecked {
             _pendingRewards[user] += founds;
         }
     }
 
+    /**
+     * @notice For a user to directly claim their founds
+     */
     function withdrawFounds() external virtual;
 
+    /**
+     * @notice For an admin to withdraw the founds of the given user
+     */
     function withdrawFounds(address user) external virtual;
 
     /**
-     * Core logic of the withdraw method
+     * @dev Core logic of the withdraw method
      */
     function _withdraw(address user) internal {
         if (user == address(0)) revert InvalidAddress();
@@ -77,7 +90,7 @@ abstract contract PushPullReward is Initializable {
     }
 
     /**
-     * Core logic of the withdraw method
+     * @dev Core logic of the withdraw method, but with fee this time
      */
     function _withdrawWithFee(address user, uint256 feePercent, address feeRecipient) internal {
         if (user == address(0) || feeRecipient == address(0)) revert InvalidAddress();
@@ -103,7 +116,7 @@ abstract contract PushPullReward is Initializable {
     }
 
     /**
-     * Get the available founds for the given user
+     * @notice Get the available founds for the given user
      */
     function getAvailableFounds(address user) external view returns (uint256) {
         if (user == address(0)) revert InvalidAddress();

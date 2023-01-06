@@ -23,7 +23,6 @@ those who create, those who fund and those who consume content. By empowering al
 rewarded for the value they create, whether that be through work, investment or engagement, the Frak ecosystem believes
 that Web3 is the ideal way to make that happens.
 
-
 ## Installation
 
 To install and build with [**Hardhat**](https://github.com/nomiclabs/hardhat) :
@@ -82,16 +81,16 @@ utils
 
 # Status
 
-| Contract name                                                     | Status           | Audited   | Deployment |
-|-------------------------------------------------------------------|------------------|-----------|------------|
-| [FrakToken](contracts/tokens/FrakTokenL2.sol) | Finalized        | [^1] | [Proxy](https://polygonscan.com/token/0x6261E4a478C98419EaFa6289509C49058D21Df8c) |
-| [FraktionTokens](contracts/tokens/FraktionTokens.sol)       | Finalized        | [^2] | [Proxy](https://polygonscan.com/token/0x4B1611803687Ab821E1b670fE94CB93303D94F8a) |
-| [VestingWalletFactory](contracts/wallets/VestingWalletFactory.sol)       | Finalized        | [^2] | [Proxy](https://polygonscan.com/address/0xb8D79C7Bca3994dd5B4A80AD1c088CEBCd01f7F6) |
-| [MultiVestingWallets](contracts/wallets/MultiVestingWallets.sol)       | Finalized        | [^2] | [Proxy](https://polygonscan.com/address/0x4B1611803687Ab821E1b670fE94CB93303D94F8a) |
-| [Minter](contracts/minter/Minter.sol)       | Finalized        | [^2] | [Proxy](https://polygonscan.com/address/0x1adc8CAaA35551730eCd82e0eEA683Aa90dB6cf0) |
-| [Rewarder](contracts/reward/Rewarder.sol)       | Finalized        | [^2] | [Proxy](https://polygonscan.com/address/0x8D9fa601DA1416b087E9db6B6EaD63D4920A4528) |
-| [ContentPool](contracts/reward/pool/ContentPool.sol)       | Finalized        | [^2] | [Proxy](https://polygonscan.com/address/0xDCB34659B83C4F8708fd7AcAA3755547BF8BBcA0) |
-| [ReferralPool](contracts/reward/pool/ReferralPool.sol)       | Finalized        | [^2] | [Proxy](https://polygonscan.com/address/0x166d8CFEe1919bC2e8c7AdBB34F1613194e9C599) |
+| Contract name                                                      | Status    | Audited | Deployment                                                                          |
+| ------------------------------------------------------------------ | --------- | ------- | ----------------------------------------------------------------------------------- |
+| [FrakToken](contracts/tokens/FrakTokenL2.sol)                      | Finalized | [^1]    | [Proxy](https://polygonscan.com/token/0x6261E4a478C98419EaFa6289509C49058D21Df8c)   |
+| [FraktionTokens](contracts/tokens/FraktionTokens.sol)              | Finalized | [^2]    | [Proxy](https://polygonscan.com/token/0x4B1611803687Ab821E1b670fE94CB93303D94F8a)   |
+| [VestingWalletFactory](contracts/wallets/VestingWalletFactory.sol) | Finalized | [^2]    | [Proxy](https://polygonscan.com/address/0xb8D79C7Bca3994dd5B4A80AD1c088CEBCd01f7F6) |
+| [MultiVestingWallets](contracts/wallets/MultiVestingWallets.sol)   | Finalized | [^2]    | [Proxy](https://polygonscan.com/address/0x4B1611803687Ab821E1b670fE94CB93303D94F8a) |
+| [Minter](contracts/minter/Minter.sol)                              | Finalized | [^2]    | [Proxy](https://polygonscan.com/address/0x1adc8CAaA35551730eCd82e0eEA683Aa90dB6cf0) |
+| [Rewarder](contracts/reward/Rewarder.sol)                          | Finalized | [^2]    | [Proxy](https://polygonscan.com/address/0x8D9fa601DA1416b087E9db6B6EaD63D4920A4528) |
+| [ContentPool](contracts/reward/pool/ContentPool.sol)               | Finalized | [^2]    | [Proxy](https://polygonscan.com/address/0xDCB34659B83C4F8708fd7AcAA3755547BF8BBcA0) |
+| [ReferralPool](contracts/reward/pool/ReferralPool.sol)             | Finalized | [^2]    | [Proxy](https://polygonscan.com/address/0x166d8CFEe1919bC2e8c7AdBB34F1613194e9C599) |
 
 [^1]: [Safetin - ERC20](https://www.safetin.com/audit/frak)
 [^2]: [Safetin - Complete](https://www.safetin.com/audit/frak-2)
