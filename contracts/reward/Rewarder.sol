@@ -80,7 +80,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /**
      * @notice Event emitted when a user is rewarded for his listen
      */
-    event RewardOnContent(address indexed user, uint256 indexed contentId, uint256 baseUserReward);
+    event RewardOnContent(address indexed user, uint256 indexed contentId, uint256 baseUserReward, uint256 earningFactor, uint16 ccuCount);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -300,7 +300,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         }
 
         // Emit the user reward event, to compute the total amount earned for the given content
-        emit RewardOnContent(listener, contentId, userReward);
+        emit RewardOnContent(listener, contentId, userReward, earningFactor, listenCount);
 
         // Save the amount for the owner
         address owner = fraktionTokens.ownerOf(contentId);
