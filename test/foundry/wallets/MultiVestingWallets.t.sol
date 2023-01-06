@@ -9,8 +9,6 @@ import {
     InvalidDuration,
     InvalidDate
 } from "@frak/wallets/MultiVestingWallets.sol";
-import { PRBTest } from "@prb/test/PRBTest.sol";
-import { UUPSTestHelper } from "../UUPSTestHelper.sol";
 import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
 import {
     NotAuthorized,
