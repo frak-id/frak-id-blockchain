@@ -1,7 +1,5 @@
 {
-  "goerli": {
-    "frakToken": "0x6B787B2bb1307141085DC7AEdeDe59e407015614"
-  },
+  "goerli": { "frakToken": "0x6B787B2bb1307141085DC7AEdeDe59e407015614" },
   "mumbai": {
     "frakToken": "0xbCeE0E1C02E91EAFaEd69eD2B1DC5199789575df",
     "multiVestingWallet": "0x2F7686B92bBf17C58Ca2d18aB04C8BDeaEE410f2",
@@ -31,6 +29,7 @@
     "referralPool": "0x166d8CFEe1919bC2e8c7AdBB34F1613194e9C599",
     "contentPool": "0xDCB34659B83C4F8708fd7AcAA3755547BF8BBcA0",
     "rewarder": "0x8D9fa601DA1416b087E9db6B6EaD63D4920A4528",
-    "minter": "0x1adc8CAaA35551730eCd82e0eEA683Aa90dB6cf0"
+    "minter": "0x1adc8CAaA35551730eCd82e0eEA683Aa90dB6cf0",
+    "frakTreasuryWallet": "0x7053f61CEA3B7C3b5f0e14de6eEdB01cA1850408"
   }
 }

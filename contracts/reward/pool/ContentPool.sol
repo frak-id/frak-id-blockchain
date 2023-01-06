@@ -422,7 +422,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         }
 
         // If the new reward for the user is still 0, revert
-        if(_pendingRewards[user] == 0) revert NoReward();
+        if (_pendingRewards[user] == 0) revert NoReward();
     }
 
     /**
