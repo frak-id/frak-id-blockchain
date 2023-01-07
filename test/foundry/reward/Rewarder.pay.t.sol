@@ -243,6 +243,10 @@ contract RewarderPayTest is RewarderTestHelper {
         return (listenCounts, contentId.asSingletonArray());
     }
 
+    function mintFraktions(address target) private {
+        mintFraktions(target, 10);
+    }
+
     function mintFraktions(address target, uint256 amount) private {
         uint256[] memory fraktionIds = contentId.buildSnftIds(FrakMath.payableTokenTypes());
         uint256[] memory amounts = new uint256[](fraktionIds.length);
