@@ -458,7 +458,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
             if (vesting.startDate > MAX_TIMESTAMP) {
                 uint48 newDate = vesting.startDate / 1000;
                 // If that's good, update the date
-                if (block.timestamp > newDate && newDate < MAX_TIMESTAMP) {
+                if (newDate > block.timestamp && newDate < MAX_TIMESTAMP) {
                     vestings[vestingId].startDate = newDate;
                 }
             }
