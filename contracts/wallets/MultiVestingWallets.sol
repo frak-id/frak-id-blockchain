@@ -60,6 +60,9 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     /// Hard reward cap, of 200 million frk
     uint96 private constant REWARD_CAP = 200_000_000 ether;
 
+    /// Max possible timestamp at the 13 january 2050
+    uint256 private constant MAX_TIMESTAMP = 2_525_644_800;
+
     /// Currently locked tokens that are being used by all of the vestings
     uint96 public totalSupply;
 
@@ -179,7 +182,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
      */
     function _requireVestInputs(uint32 duration, uint48 startDate) internal view {
         if (duration == 0) revert InvalidDuration();
-        if (block.timestamp > startDate) revert InvalidDate();
+        if (block.timestamp > startDate || startDate > MAX_TIMESTAMP) revert InvalidDate();
     }
 
     /**

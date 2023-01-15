@@ -145,6 +145,11 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
         vestingWallets.createVest(address(1), 10, 10, uint48(block.timestamp - 1));
     }
 
+    function test_fail_createVest_InvalidStartDateTooFar() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
+        vm.expectRevert(InvalidDate.selector);
+        vestingWallets.createVest(address(1), 10, 10, 2_525_644_801);
+    }
+
     function test_fail_createVest_NotEnoughReserve() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
         vm.expectRevert(NotEnoughFounds.selector);
         vestingWallets.createVest(address(1), 11, 10, uint48(block.timestamp + 1));
