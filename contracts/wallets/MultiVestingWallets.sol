@@ -444,4 +444,24 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     function _addOwnership(address account, uint24 vestingId) internal {
         owned[account].add(vestingId);
     }
+
+    /**
+     * @dev Update a vesting start date
+     */
+    function fixVestingDate(uint24[] calldata vestingIds) external onlyRole(FrakRoles.VESTING_MANAGER) {
+        for (uint256 index = 0; index < vestingIds.length; index++) {
+            // Get the vesting
+            uint24 vestingId = vestingIds[index];
+            Vesting memory vesting = _getVesting(vestingId);
+
+            // Check is date on update it if needed
+            if(vesting.startDate > MAX_TIMESTAMP) {
+                uint48 newDate = vesting.startDate / 1000;
+                // If that's good, update the date
+                if(block.timestamp > newDate && newDate < MAX_TIMESTAMP) {
+                    vestings[vestingId].startDate = newDate;
+                }
+            }
+        }
+    }
 }
