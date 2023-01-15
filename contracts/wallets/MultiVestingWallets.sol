@@ -455,10 +455,10 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
             Vesting memory vesting = _getVesting(vestingId);
 
             // Check is date on update it if needed
-            if(vesting.startDate > MAX_TIMESTAMP) {
+            if (vesting.startDate > MAX_TIMESTAMP) {
                 uint48 newDate = vesting.startDate / 1000;
                 // If that's good, update the date
-                if(block.timestamp > newDate && newDate < MAX_TIMESTAMP) {
+                if (block.timestamp > newDate && newDate < MAX_TIMESTAMP) {
                     vestings[vestingId].startDate = newDate;
                 }
             }

@@ -80,7 +80,13 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /**
      * @notice Event emitted when a user is rewarded for his listen
      */
-    event RewardOnContent(address indexed user, uint256 indexed contentId, uint256 baseUserReward, uint256 earningFactor, uint16 ccuCount);
+    event RewardOnContent(
+        address indexed user,
+        uint256 indexed contentId,
+        uint256 baseUserReward,
+        uint256 earningFactor,
+        uint16 ccuCount
+    );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

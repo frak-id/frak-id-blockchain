@@ -54,8 +54,6 @@ describe.only("FrakTreasuryWallet", () => {
       // Can't auto transfer
       await expect(treasuryWallet.transfer(addr2.address, mintPerIteration)).to.be.reverted;
       await frakToken.mint(treasuryWallet.address, 100);
-      // Can transfer all the remaining balance
-      console.log(await frakToken.balanceOf(treasuryWallet.address));
       // Can't transfer more than the balance
       await expect(treasuryWallet.transfer(addr2.address, 101)).to.be.reverted;
       await expect(treasuryWallet.transfer(addr2.address, 100)).to.not.be.reverted;
