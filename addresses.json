@@ -2,8 +2,8 @@
   "goerli": { "frakToken": "0x6B787B2bb1307141085DC7AEdeDe59e407015614" },
   "mumbai": {
     "frakToken": "0xbCeE0E1C02E91EAFaEd69eD2B1DC5199789575df",
-    "multiVestingWallet": "0x2F7686B92bBf17C58Ca2d18aB04C8BDeaEE410f2",
-    "vestingWalletFactory": "0xc4ff8416FbD250de0cA752bA7f79De588464Bdd4",
+    "multiVestingWallet": "0x08F674c3577f759D315336ae5a7ff6ea5bE2c35E",
+    "vestingWalletFactory": "0x20a174B8b62CF69a0b1700140818b6345FBC8B34",
     "fraktionTokens": "0x00ec5dd47eD5341A43d66F8aA7b6793277d1e29E",
     "referralPool": "0x40AF2De1319F32e9eEEeB8F203FeB0dfA446F897",
     "contentPool": "0xf10eF8435FD583B7007C5984DB27462B4401F380",
