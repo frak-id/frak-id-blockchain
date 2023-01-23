@@ -17,15 +17,20 @@ error InvalidSupply();
 /// @dev Error emitted when it remain some fraktion supply when wanting to increase it
 error RemainingSupply();
 
+/// @dev Error emitted when we only want to mint a free fraktion, and that's not a free fraktion
+error ExpectingOnlyFreeFraktion();
+
+/// @dev Error emitted when the user already have a free fraktion
+error AlreadyHaveFreeFraktion();
+
 /**
  * @dev Represent our minter contract
- * Remain to dev :
- *   - New supply increase system (each week, only if all fractions are sold)
- *   - Add allowance to the user when he mint a fraction (web2)
+ * @notice Minter contract
  */
 /// @custom:security-contact contact@frak.id
 contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges {
     using SafeERC20Upgradeable for FrakToken;
+    using FrakMath for uint256;
 
     /**
      * @dev Access our internal tokens
@@ -90,10 +95,10 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
         // Then set the supply for each token types
         uint256[] memory ids = new uint256[](4);
-        ids[0] = FrakMath.buildCommonNftId(contentId);
-        ids[1] = FrakMath.buildPremiumNftId(contentId);
-        ids[2] = FrakMath.buildGoldNftId(contentId);
-        ids[3] = FrakMath.buildDiamondNftId(contentId);
+        ids[0] = contentId.buildCommonNftId();
+        ids[1] = contentId.buildPremiumNftId();
+        ids[2] = contentId.buildGoldNftId();
+        ids[3] = contentId.buildDiamondNftId();
         uint256[] memory supplies = new uint256[](4);
         supplies[0] = commonSupply;
         supplies[1] = premiumSupply;
@@ -133,13 +138,38 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         // Compute the supply difference
         uint256 newRealSupply = currentSupply + newSupply;
         // Mint his Fraction of NFT
-        fraktionTokens.setSupplyBatch(FrakMath.asSingletonArray(id), FrakMath.asSingletonArray(newRealSupply));
+        fraktionTokens.setSupplyBatch(id.asSingletonArray(), newRealSupply.asSingletonArray());
     }
 
+    /**
+     * @notice  Update the cost badge for the given fraktion
+     * @dev     Call to the FraktionCostBadges subclass to update the cost badge, need the right role and contract unpaused
+     * @param   fractionId The id of the fraktion we will update the badge
+     * @param   badge The new badge for the fraktion
+     */
     function updateCostBadge(
         uint256 fractionId,
         uint96 badge
     ) external override onlyRole(FrakRoles.BADGE_UPDATER) whenNotPaused {
         _updateCostBadge(fractionId, badge);
+    }
+
+    /**
+     * @notice  Mint a free fraktion for the given user
+     * @dev     Will mint a new free FraktionToken for the user, by first ensuring the user doesn't have any fraktion, only performed when contract not paused and by the right person
+     * @param   id  Id of the free fraktion
+     * @param   to  Address of the user
+     */
+    function mintFreeFractionForUser(uint256 id, address to) external override onlyRole(FrakRoles.MINTER) whenNotPaused {
+        // Ensure it's a free fraktion
+        uint256 tokenType = id.extractTokenType();
+        if(tokenType != FrakMath.TOKEN_TYPE_FREE_MASK) revert ExpectingOnlyFreeFraktion();
+
+        // Ensure the user doesn't have any free fraktion for this content yet
+        uint256 userBalance = fraktionTokens.balanceOf(to, id);
+        if(userBalance != 0) revert AlreadyHaveFreeFraktion();
+
+        // If we are all good, mint the free fraktion to the user
+        fraktionTokens.mint( to, id, 1);
     }
 }

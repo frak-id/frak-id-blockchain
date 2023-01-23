@@ -5,8 +5,10 @@ import { IPausable } from "../utils/IPausable.sol";
 
 /**
  * @dev Represent our minter contract
+ * @notice Interface for the minter contract
  */
 interface IMinter is IPausable {
+    
     /**
      * @dev Add a new content to our eco system
      */
@@ -19,9 +21,14 @@ interface IMinter is IPausable {
     ) external returns (uint256);
 
     /**
-     * @dev Mint a new fraction of nft
+     * @notice Mint a new fraction of nft
      */
     function mintFractionForUser(uint256 id, address to, uint256 amount) external;
+
+    /**
+     * @notice Mint a new free fraction of nft
+     */
+    function mintFreeFractionForUser(uint256 id, address to) external;
 
     /**
      * @dev Increase the supply for a content

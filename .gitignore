@@ -41,3 +41,6 @@ forge-cache/
 
 # Out folder
 out/
+
+# Forge doc folder
+doc/
