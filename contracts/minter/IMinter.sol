@@ -11,7 +11,6 @@ import { IPausable } from "../utils/IPausable.sol";
  * @custom:security-contact contact@frak.id
  */
 interface IMinter is IPausable {
-
     /**
      * @notice  Mint a new content to the FrkEcosystem
      * @dev     Will ensure the role and contract state, then the param, and finally call the FraktionTokens contract to mint the new content
@@ -29,7 +28,7 @@ interface IMinter is IPausable {
         uint256 goldSupply,
         uint256 diamondSupply
     ) external returns (uint256 contentId);
-    
+
     /**
      * @notice  Mint a new fraktion for the given amount and user
      * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer and mint the fraktion
