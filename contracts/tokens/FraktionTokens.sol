@@ -8,8 +8,11 @@ import { FrakRoles } from "../utils/FrakRoles.sol";
 import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
 import { InvalidArray } from "../utils/FrakErrors.sol";
 
-// Error
+/// @dev Error throwned when we don't have enough supply to mint a new fNFT
 error InsuficiantSupply();
+
+/// @dev Error throwned when we try to update the supply of a non supply aware token
+error SupplyUpdateNotAllowed();
 
 /// @custom:security-contact contact@frak.id
 /// @custom:oz-upgrades-unsafe-allow external-library-linking
@@ -106,6 +109,12 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         for (uint256 i; i < ids.length; ) {
             uint256 id = ids[i];
 
+            // We can't increase the supply of free fraktion and of NFT fraktion
+            uint8 tokenType = id.extractTokenType();
+            if (tokenType == FrakMath.TOKEN_TYPE_FREE_MASK || tokenType == FrakMath.TOKEN_TYPE_NFT_MASK)
+                revert SupplyUpdateNotAllowed();
+
+            // Update our supply if we are all good
             _availableSupplies[id] = supplies[i];
             _isSupplyAware[id] = true;
             // Emit the supply update event
