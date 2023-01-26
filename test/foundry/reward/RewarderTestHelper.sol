@@ -46,7 +46,7 @@ contract RewarderTestHelper is FrkTokenTestHelper {
         address referralProxyAddr = deployContract(address(new ReferralPool()), initData);
         referralPool = ReferralPool(referralProxyAddr);
 
-        // Deploy fraktions token
+        // Deploy rewarder contract
         initData = abi.encodeCall(
             Rewarder.initialize,
             (address(frakToken), fraktionProxyAddr, contentPoolProxyAddr, referralProxyAddr, foundationAddr)
