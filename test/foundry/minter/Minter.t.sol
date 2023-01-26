@@ -3,12 +3,24 @@ pragma solidity 0.8.17;
 
 import { InvalidReward } from "@frak/reward/Rewarder.sol";
 import { NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge } from "@frak/utils/FrakErrors.sol";
-import { FraktionTokens, InsuficiantSupply } from "@frak/tokens/FraktionTokens.sol";
+import { FraktionTokens, InsuficiantSupply, SupplyUpdateNotAllowed } from "@frak/tokens/FraktionTokens.sol";
 import { FrakMath } from "@frak/utils/FrakMath.sol";
 import { FrakRoles } from "@frak/utils/FrakRoles.sol";
-import { Minter, InvalidSupply, InvalidAddress, ExpectingOnlyFreeFraktion, AlreadyHaveFreeFraktion } from "@frak/minter/Minter.sol";
+import {
+    Minter,
+    InvalidSupply,
+    InvalidAddress,
+    ExpectingOnlyFreeFraktion,
+    AlreadyHaveFreeFraktion
+} from "@frak/minter/Minter.sol";
 import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
-import { NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge, InvalidFraktionType } from "@frak/utils/FrakErrors.sol";
+import {
+    NotAuthorized,
+    InvalidAddress,
+    ContractPaused,
+    BadgeTooLarge,
+    InvalidFraktionType
+} from "@frak/utils/FrakErrors.sol";
 
 /// Testing minter contract
 contract MinterTest is FrkTokenTestHelper {
@@ -21,7 +33,6 @@ contract MinterTest is FrkTokenTestHelper {
     address minterAddr;
     Minter minter;
 
-
     function setUp() public {
         _setupFrkToken();
 
@@ -31,10 +42,7 @@ contract MinterTest is FrkTokenTestHelper {
         fraktionTokens = FraktionTokens(fraktionProxyAddr);
 
         // Deploy our minter contract
-        initData = abi.encodeCall(
-            Minter.initialize,
-            (address(frakToken), fraktionProxyAddr, foundationAddr)
-        );
+        initData = abi.encodeCall(Minter.initialize, (address(frakToken), fraktionProxyAddr, foundationAddr));
         minterAddr = deployContract(address(new Minter()), initData);
         minter = Minter(minterAddr);
 
@@ -201,4 +209,35 @@ contract MinterTest is FrkTokenTestHelper {
         minter.mintFreeFraktionForUser(contentId.buildFreeNftId(), address(1));
     }
 
+    /*
+     * ===== TEST : increaseSupply(uint256 id, uint256 newSupply) =====
+     */
+    function test_increaseSupply() public prankExecAsDeployer {
+        // Add an initial content
+        uint256 contentId = minter.addContent(address(1), 1, 1, 1, 0);
+        // Increase it's diamond supply
+        minter.increaseSupply(contentId.buildDiamondNftId(), 1);
+    }
+
+    function test_fail_increaseSupply_ContractPaused() public prankExecAsDeployer {
+        minter.pause();
+        vm.expectRevert(ContractPaused.selector);
+        minter.increaseSupply(1, 1);
+    }
+
+    function test_fail_increaseSupply_NotAuthorized() public {
+        vm.expectRevert(NotAuthorized.selector);
+        minter.increaseSupply(1, 1);
+    }
+
+    function test_fail_increaseSupply_SupplyUpdateNotAllowed() public prankExecAsDeployer {
+        // Add an initial content
+        uint256 contentId = minter.addContent(address(1), 1, 1, 1, 0);
+        // Revert cause of free fraktion
+        vm.expectRevert(SupplyUpdateNotAllowed.selector);
+        minter.increaseSupply(contentId.buildFreeNftId(), 1);
+        // Revert cause of nft id
+        vm.expectRevert(SupplyUpdateNotAllowed.selector);
+        minter.increaseSupply(contentId.buildNftId(), 1);
+    }
 }

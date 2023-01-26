@@ -693,7 +693,7 @@
             "slot": "151",
             "type": "t_bool",
             "contract": "FrakAccessControlUpgradeable",
-            "src": "contracts/utils/FrakAccessControlUpgradeable.sol:37"
+            "src": "contracts/utils/FrakAccessControlUpgradeable.sol:22"
           },
           {
             "label": "_roles",
@@ -701,7 +701,7 @@
             "slot": "152",
             "type": "t_mapping(t_bytes32,t_mapping(t_address,t_bool))",
             "contract": "FrakAccessControlUpgradeable",
-            "src": "contracts/utils/FrakAccessControlUpgradeable.sol:40"
+            "src": "contracts/utils/FrakAccessControlUpgradeable.sol:25"
           },
           {
             "label": "__gap",
@@ -749,15 +749,15 @@
             "slot": "253",
             "type": "t_uint256",
             "contract": "FraktionTokens",
-            "src": "contracts/tokens/FraktionTokens.sol:19"
+            "src": "contracts/tokens/FraktionTokens.sol:20"
           },
           {
             "label": "transferCallback",
             "offset": 0,
             "slot": "254",
-            "type": "t_contract(FraktionTransferCallback)8213",
+            "type": "t_contract(FraktionTransferCallback)4935",
             "contract": "FraktionTokens",
-            "src": "contracts/tokens/FraktionTokens.sol:22"
+            "src": "contracts/tokens/FraktionTokens.sol:23"
           },
           {
             "label": "owners",
@@ -765,7 +765,7 @@
             "slot": "255",
             "type": "t_mapping(t_uint256,t_address)",
             "contract": "FraktionTokens",
-            "src": "contracts/tokens/FraktionTokens.sol:25"
+            "src": "contracts/tokens/FraktionTokens.sol:26"
           },
           {
             "label": "_availableSupplies",
@@ -773,7 +773,7 @@
             "slot": "256",
             "type": "t_mapping(t_uint256,t_uint256)",
             "contract": "FraktionTokens",
-            "src": "contracts/tokens/FraktionTokens.sol:28"
+            "src": "contracts/tokens/FraktionTokens.sol:29"
           },
           {
             "label": "_isSupplyAware",
@@ -781,7 +781,7 @@
             "slot": "257",
             "type": "t_mapping(t_uint256,t_bool)",
             "contract": "FraktionTokens",
-            "src": "contracts/tokens/FraktionTokens.sol:31"
+            "src": "contracts/tokens/FraktionTokens.sol:32"
           }
         ],
         "types": {
@@ -805,7 +805,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(FraktionTransferCallback)8213": {
+          "t_contract(FraktionTransferCallback)4935": {
             "label": "contract FraktionTransferCallback",
             "numberOfBytes": "20"
           },
@@ -3660,6 +3660,222 @@
           "t_uint96": {
             "label": "uint96",
             "numberOfBytes": "12"
+          }
+        }
+      }
+    },
+    "0b6d7f9040d6b2ddb4993cf7b47fd5395b5c3545ba61a0ee823392b0e1ee42e3": {
+      "address": "0xf4d43d70E7F9E898D7D4627a0a2e89f1574e5794",
+      "txHash": "0x45dfa8ba4a8acfc1b47d0bd4a1cd4da077efd6bdda45cab5f2e14d2ef84b6bba",
+      "layout": {
+        "solcVersion": "0.8.17",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:211"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
+          },
+          {
+            "label": "_paused",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_bool",
+            "contract": "FrakAccessControlUpgradeable",
+            "src": "contracts/utils/FrakAccessControlUpgradeable.sol:22"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_mapping(t_bytes32,t_mapping(t_address,t_bool))",
+            "contract": "FrakAccessControlUpgradeable",
+            "src": "contracts/utils/FrakAccessControlUpgradeable.sol:25"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "153",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_balances",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+            "contract": "ERC1155Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:25"
+          },
+          {
+            "label": "_operatorApprovals",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_bool))",
+            "contract": "ERC1155Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:28"
+          },
+          {
+            "label": "_uri",
+            "offset": 0,
+            "slot": "205",
+            "type": "t_string_storage",
+            "contract": "ERC1155Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:31"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "206",
+            "type": "t_array(t_uint256)47_storage",
+            "contract": "ERC1155Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:528"
+          },
+          {
+            "label": "_currentContentTokenId",
+            "offset": 0,
+            "slot": "253",
+            "type": "t_uint256",
+            "contract": "FraktionTokens",
+            "src": "contracts/tokens/FraktionTokens.sol:23"
+          },
+          {
+            "label": "transferCallback",
+            "offset": 0,
+            "slot": "254",
+            "type": "t_contract(FraktionTransferCallback)3166",
+            "contract": "FraktionTokens",
+            "src": "contracts/tokens/FraktionTokens.sol:26"
+          },
+          {
+            "label": "owners",
+            "offset": 0,
+            "slot": "255",
+            "type": "t_mapping(t_uint256,t_address)",
+            "contract": "FraktionTokens",
+            "src": "contracts/tokens/FraktionTokens.sol:29"
+          },
+          {
+            "label": "_availableSupplies",
+            "offset": 0,
+            "slot": "256",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "contract": "FraktionTokens",
+            "src": "contracts/tokens/FraktionTokens.sol:32"
+          },
+          {
+            "label": "_isSupplyAware",
+            "offset": 0,
+            "slot": "257",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "contract": "FraktionTokens",
+            "src": "contracts/tokens/FraktionTokens.sol:35"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)47_storage": {
+            "label": "uint256[47]",
+            "numberOfBytes": "1504"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(FraktionTransferCallback)3166": {
+            "label": "contract FraktionTransferCallback",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_bool))": {
+            "label": "mapping(address => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_mapping(t_address,t_bool))": {
+            "label": "mapping(bytes32 => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(uint256 => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
           }
         }
       }

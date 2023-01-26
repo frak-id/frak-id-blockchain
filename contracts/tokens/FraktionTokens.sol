@@ -8,8 +8,11 @@ import { FrakRoles } from "../utils/FrakRoles.sol";
 import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
 import { InvalidArray } from "../utils/FrakErrors.sol";
 
-// Error
+/// @dev Error throwned when we don't have enough supply to mint a new fNFT
 error InsuficiantSupply();
+
+/// @dev Error throwned when we try to update the supply of a non supply aware token
+error SupplyUpdateNotAllowed();
 
 /// @custom:security-contact contact@frak.id
 /// @custom:oz-upgrades-unsafe-allow external-library-linking
@@ -106,6 +109,12 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         for (uint256 i; i < ids.length; ) {
             uint256 id = ids[i];
 
+            // We can't increase the supply of free fraktion and of NFT fraktion
+            uint8 tokenType = id.extractTokenType();
+            if (tokenType == FrakMath.TOKEN_TYPE_FREE_MASK || tokenType == FrakMath.TOKEN_TYPE_NFT_MASK)
+                revert SupplyUpdateNotAllowed();
+
+            // Update our supply if we are all good
             _availableSupplies[id] = supplies[i];
             _isSupplyAware[id] = true;
             // Emit the supply update event
@@ -194,5 +203,36 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
      */
     function supplyOf(uint256 tokenId) external view returns (uint256) {
         return _availableSupplies[tokenId];
+    }
+
+    /**
+     * @dev Fix the supply for each token id's
+     */
+    function fixSupplyBatch(uint256[] calldata ids) external onlyRole(FrakRoles.ADMIN) whenNotPaused {
+        // In the case we are sending the token to a given wallet
+        for (uint256 i; i < ids.length; ) {
+            uint256 id = ids[i];
+
+            // Get the token type
+            uint8 tokenType = id.extractTokenType();
+
+            // If it shouldn't be supply aware, check if it was set
+            if (tokenType == FrakMath.TOKEN_TYPE_FREE_MASK) {
+                bool isSupplyAware = _isSupplyAware[id];
+                // Reset the variable if it was supply aware
+                if (isSupplyAware) {
+                    _isSupplyAware[id] = false;
+                    _availableSupplies[id] = 0;
+                }
+            } else if (tokenType == FrakMath.TOKEN_TYPE_NFT_MASK && _availableSupplies[id] > 0) {
+                // If that's an nft, the supply should remain to 0
+                _availableSupplies[id] = 0;
+            }
+
+            // Increase our counter
+            unchecked {
+                ++i;
+            }
+        }
     }
 }
