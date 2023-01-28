@@ -11,21 +11,21 @@ import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgr
 import {InvalidAddress} from "../utils/FrakErrors.sol";
 import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
-/// @notice Error emitted when the input supply is invalid
+/// @dev Error emitted when the input supply is invalid
 error InvalidSupply();
 
-/// @notice Error emitted when it remain some fraktion supply when wanting to increase it
+/// @dev Error emitted when it remain some fraktion supply when wanting to increase it
 error RemainingSupply();
 
-/// @notice Error emitted when we only want to mint a free fraktion, and that's not a free fraktion
+/// @dev Error emitted when we only want to mint a free fraktion, and that's not a free fraktion
 error ExpectingOnlyFreeFraktion();
 
-/// @notice Error emitted when the user already have a free fraktion
+/// @dev Error emitted when the user already have a free fraktion
 error AlreadyHaveFreeFraktion();
 
 /**
  * @author  @KONFeature
- * @title   Frk Minter contract
+ * @title   Minter
  * @notice  This contract will mint new content on the ecosytem, and mint fraktions for the user
  * @dev     Communicate with the FrkToken and FraktionTokens contract to handle minting of content and fraktions
  * @custom:security-contact contact@frak.id
@@ -34,29 +34,19 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
     using SafeERC20Upgradeable for FrakToken;
     using FrakMath for uint256;
 
-    /**
-     * @notice Reference to the fraktion tokens contract (ERC1155)
-     */
+    //// @dev Reference to the fraktion tokens contract (ERC1155)
     FraktionTokens private fraktionTokens;
 
-    /**
-     * @notice Reference to the Frak token contract (ERC20)
-     */
+    /// @dev Reference to the Frak token contract (ERC20)
     FrakToken private frakToken;
 
-    /**
-     * @notice Address of our foundation wallet (for fee's payment)
-     */
+    /// @dev Address of our foundation wallet (for fee's payment)
     address private foundationWallet;
 
-    /**
-     * @notice Event emitted when a new content is minted
-     */
+    /// @dev Event emitted when a new content is minted
     event ContentMinted(uint256 baseId, address indexed owner);
 
-    /**
-     * @notice Event emitted when a new fraktion for a content is minted
-     */
+    /// @dev Event emitted when a new fraktion for a content is minted
     event FractionMinted(uint256 indexed fractionId, address indexed user, uint256 amount, uint256 cost);
 
     /// @custom:oz-upgrades-unsafe-allow constructor

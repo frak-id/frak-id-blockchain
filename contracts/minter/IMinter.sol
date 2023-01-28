@@ -5,7 +5,7 @@ import {IPausable} from "../utils/IPausable.sol";
 
 /**
  * @author  @KONFeature
- * @title   Frk Minter contract interface
+ * @title   Minter interface
  * @notice  This contract describe the method exposed by the Minter contract
  * @dev     Just an interface to ease the development and upgradeability
  * @custom:security-contact contact@frak.id

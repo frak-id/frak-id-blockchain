@@ -8,22 +8,39 @@ import {IPausable} from "./IPausable.sol";
 import {FrakRoles} from "./FrakRoles.sol";
 import {NotAuthorized, ContractPaused, ContractNotPaused, RenounceForCallerOnly} from "./FrakErrors.sol";
 
-/// @custom:security-contact contact@frak.id
+/**
+ * @author @KONFeature
+ * @title FrakAccessControlUpgradeable
+ * @dev This contract provides an upgradeable access control framework, with roles and pausing functionality.
+ *
+ * Roles can be granted and revoked by a designated admin role, and certain functions can be restricted to certain roles
+ * using the 'onlyRole' modifier. The contract can also be paused, disabling all non-admin functionality.
+ *
+ * This contract is upgradeable, meaning that it can be replaced with a new implementation, while preserving its state.
+ *
+ * @custom:security-contact contact@frak.id
+ */
 abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradeable, IPausable, UUPSUpgradeable {
-    /// Event emitted when contract is paused or unpaused
+    /// @dev Event emitted when the contract is paused
     event Paused();
+    /// @dev Event emitted when the contract is un-paused
     event Unpaused();
 
-    /// Event emitted when roles changes
+    /// @dev Event emitted when a role is granted
     event RoleGranted(address indexed account, bytes32 indexed role);
+    /// @dev Event emitted when a role is revoked
     event RoleRevoked(address indexed account, bytes32 indexed role);
 
-    // Is this contract paused ?
+    /// @dev Is this contract currently paused ?
     bool private _paused;
 
-    // Roles to members
+    /// @dev Mapping of roles -> user -> hasTheRight
     mapping(bytes32 => mapping(address => bool)) private _roles;
 
+    /**
+     * @notice Initializes the contract, granting the ADMIN, PAUSER, and UPGRADER roles to the msg.sender.
+     * Also, set the contract as unpaused.
+     */
     function __FrakAccessControlUpgradeable_init() internal onlyInitializing {
         __Context_init();
         __UUPSUpgradeable_init();
@@ -38,6 +55,7 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
 
     /**
      * @dev Returns true if the contract is paused, and false otherwise.
+     * @return bool representing whether the contract is paused.
      */
     function paused() private view returns (bool) {
         return _paused;

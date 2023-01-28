@@ -6,6 +6,8 @@ import {FrakRoles} from "../../utils/FrakRoles.sol";
 import {InvalidFraktionType} from "../../utils/FrakErrors.sol";
 
 /**
+ * @author  @KONFeature
+ * @title   FractionCostBadges
  * @dev Abstract contract for managing the badge costs of fractions.
  * @notice This contract contains methods and variables for initializing, updating, and getting the badge costs of fractions.
  * @custom:security-contact contact@frak.id
