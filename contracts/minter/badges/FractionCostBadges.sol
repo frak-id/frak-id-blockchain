@@ -1,24 +1,43 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { FrakMath } from "../../utils/FrakMath.sol";
-import { FrakRoles } from "../../utils/FrakRoles.sol";
-import { InvalidFraktionType } from "../../utils/FrakErrors.sol";
+import {FrakMath} from "../../utils/FrakMath.sol";
+import {FrakRoles} from "../../utils/FrakRoles.sol";
+import {InvalidFraktionType} from "../../utils/FrakErrors.sol";
 
 /**
- * @dev Handle the computation of our listener badges
+ * @author  @KONFeature
+ * @title   FractionCostBadges
+ * @dev Abstract contract for managing the badge costs of fractions.
+ * @notice This contract contains methods and variables for initializing, updating, and getting the badge costs of fractions.
+ * @custom:security-contact contact@frak.id
  */
-/// @custom:security-contact contact@frak.id
 abstract contract FractionCostBadges {
+    /**
+     * @dev Emitted when the badge cost of a fraction is updated.
+     * @param id The id of the updated fraction.
+     * @param badge The new badge cost of the fraction in wei.
+     */
     event FractionCostBadgeUpdated(uint256 id, uint96 badge);
 
-    // Map f nft id to cost badge
+    /**
+     * @dev Map f nft id to cost badge.
+     * @notice This variable is private and can only be accessed by the current contract.
+     */
     mapping(uint256 => uint96) private fractionBadges;
 
+    /**
+     * @dev Update the badge cost of the specified fraction.
+     * @notice This function can be overridden by inheriting contracts.
+     * @param fractionId The id of the fraction to update the badge cost of.
+     * @param badge The new badge cost of the fraction in wei.
+     */
     function updateCostBadge(uint256 fractionId, uint96 badge) external virtual;
 
     /**
-     * @dev Update the content internal coefficient
+     * @dev Update the badge cost of the specified fraction and emit an event.
+     * @param fractionId The id of the fraction to update the badge cost of.
+     * @param badge The new badge cost of the fraction in wei.
      */
     function _updateCostBadge(uint256 fractionId, uint96 badge) internal {
         fractionBadges[fractionId] = badge;
@@ -26,7 +45,10 @@ abstract contract FractionCostBadges {
     }
 
     /**
-     * @dev Get the payment badges for the given informations
+     * @dev Returns the badge cost of the specified fraction.
+     * @notice If the badge of this fraction isn't set yet, it will be set to the default initial cost.
+     * @param fractionId The id of the fraction to get the badge cost of.
+     * @return fractionBadge The badge cost of the specified fraction in wei.
      */
     function getCostBadge(uint256 fractionId) public view returns (uint96 fractionBadge) {
         fractionBadge = fractionBadges[fractionId];
@@ -39,9 +61,10 @@ abstract contract FractionCostBadges {
     }
 
     /**
-     * @dev The initial cost of a fraction type
-     * We use a pure function instead of a mapping to economise on storage read,
-     * and since this reawrd shouldn't evolve really fast
+     * @dev Returns the initial cost of a fraction of the specified token type in wei.
+     * @notice This method should only be called with valid token types as defined by the FrakMath contract.
+     * @param tokenType The type of token to get the initial cost of.
+     * @return initialCost The initial cost of the specified token type in wei.
      */
     function initialFractionCost(uint8 tokenType) public pure returns (uint96 initialCost) {
         if (tokenType == FrakMath.TOKEN_TYPE_COMMON_MASK) {

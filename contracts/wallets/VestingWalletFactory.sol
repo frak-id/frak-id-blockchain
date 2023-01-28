@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import { MultiVestingWallets } from "./MultiVestingWallets.sol";
-import { FrakAccessControlUpgradeable } from "../utils/FrakAccessControlUpgradeable.sol";
-import { FrakRoles } from "../utils/FrakRoles.sol";
-import { InvalidArray, InvalidAddress, NoReward, RewardTooLarge } from "../utils/FrakErrors.sol";
+import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {MultiVestingWallets} from "./MultiVestingWallets.sol";
+import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
+import {FrakRoles} from "../utils/FrakRoles.sol";
+import {InvalidArray, InvalidAddress, NoReward, RewardTooLarge} from "../utils/FrakErrors.sol";
 
 /// @dev error throwned when the creation param are invalid
 error InvalidCreationParam();
@@ -81,7 +81,7 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
         // Increase the total group supply
         totalGroupCap += rewardCap;
         // Build and save this group
-        vestingGroup[id] = VestingGroup({ rewardCap: rewardCap, supply: 0, duration: duration });
+        vestingGroup[id] = VestingGroup({rewardCap: rewardCap, supply: 0, duration: duration});
         // Emit the event
         emit GroupAdded(id, rewardCap, duration);
     }
@@ -89,11 +89,11 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
     /**
      * @notice Transfer a group reserve to another one
      */
-    function transferGroupReserve(
-        uint8 initialId,
-        uint8 targetId,
-        uint96 amount
-    ) external whenNotPaused onlyRole(FrakRoles.ADMIN) {
+    function transferGroupReserve(uint8 initialId, uint8 targetId, uint96 amount)
+        external
+        whenNotPaused
+        onlyRole(FrakRoles.ADMIN)
+    {
         // Ensure the group as enough supply
         VestingGroup storage initialGroup = _getSafeVestingGroup(initialId);
         if (initialGroup.supply > initialGroup.rewardCap - amount) revert InsuficiantGroupSupply();
@@ -124,12 +124,11 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
     /**
      * @dev Create a new vesting wallet
      */
-    function addVestingWallet(
-        address beneficiary,
-        uint256 reward,
-        uint8 groupId,
-        uint48 startDate
-    ) external onlyRole(FrakRoles.VESTING_CREATOR) whenNotPaused {
+    function addVestingWallet(address beneficiary, uint256 reward, uint8 groupId, uint48 startDate)
+        external
+        onlyRole(FrakRoles.VESTING_CREATOR)
+        whenNotPaused
+    {
         // Ensure all the param are correct
         if (reward == 0) revert NoReward();
         if (beneficiary == address(0)) revert InvalidAddress();
@@ -164,7 +163,7 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
 
         // Compute the total rewards to ensure it don't exceed the group cap
         uint256 totalReward;
-        for (uint256 index; index < rewards.length; ) {
+        for (uint256 index; index < rewards.length;) {
             unchecked {
                 // Increase the total rewards
                 totalReward += rewards[index];
@@ -183,7 +182,7 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
         multiVestingWallets.createVestBatch(beneficiaries, rewards, group.duration, startDate);
 
         // Emit the event's
-        for (uint256 index; index < beneficiaries.length; ) {
+        for (uint256 index; index < beneficiaries.length;) {
             emit GroupUserAdded(groupId, beneficiaries[index], uint96(rewards[index]));
 
             // Increment the index

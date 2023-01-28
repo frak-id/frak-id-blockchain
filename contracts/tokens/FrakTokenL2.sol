@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { ERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import { FrakRoles } from "../utils/FrakRoles.sol";
-import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
-import { ContextMixin } from "../utils/ContextMixin.sol";
-import { NativeMetaTransaction } from "../utils/NativeMetaTransaction.sol";
+import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import {FrakRoles} from "../utils/FrakRoles.sol";
+import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
+import {ContextMixin} from "../utils/ContextMixin.sol";
+import {NativeMetaTransaction} from "../utils/NativeMetaTransaction.sol";
 
 // Error
 /// @dev error throwned when the contract cap is exceeded

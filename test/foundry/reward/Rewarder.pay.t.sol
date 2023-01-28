@@ -1,18 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { FrakMath } from "@frak/utils/FrakMath.sol";
-import {
-    ContractPaused,
-    NotAuthorized,
-    InvalidArray,
-    InvalidAddress,
-    RewardTooLarge
-} from "@frak/utils/FrakErrors.sol";
-import { RewarderTestHelper } from "./RewarderTestHelper.sol";
-import { InvalidReward } from "@frak/reward/Rewarder.sol";
+import {FrakMath} from "@frak/utils/FrakMath.sol";
+import {ContractPaused, NotAuthorized, InvalidArray, InvalidAddress, RewardTooLarge} from "@frak/utils/FrakErrors.sol";
+import {RewarderTestHelper} from "./RewarderTestHelper.sol";
+import {InvalidReward} from "@frak/reward/Rewarder.sol";
 
-/// Testing the frak l2 token
+/// Testing the rewarder pay function
 contract RewarderPayTest is RewarderTestHelper {
     using FrakMath for uint256;
 
@@ -139,9 +133,11 @@ contract RewarderPayTest is RewarderTestHelper {
         rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
     }
 
-    function testFuzz_payUser_WithFraktions(
-        uint16 listenCount
-    ) public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
+    function testFuzz_payUser_WithFraktions(uint16 listenCount)
+        public
+        withLotFrkToken(rewarderAddr)
+        prankExecAsDeployer
+    {
         vm.assume(listenCount < 300 && listenCount > 0);
 
         mintFraktions(address(1));
@@ -157,9 +153,11 @@ contract RewarderPayTest is RewarderTestHelper {
         contentPool.computeAllPoolsBalance(address(1));
     }
 
-    function testFuzz_payUser_WithFraktionsAndLoadOfState(
-        uint16 listenCount
-    ) public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
+    function testFuzz_payUser_WithFraktionsAndLoadOfState(uint16 listenCount)
+        public
+        withLotFrkToken(rewarderAddr)
+        prankExecAsDeployer
+    {
         vm.assume(listenCount < 300 && listenCount > 0);
 
         mintFraktions(address(1));
@@ -224,7 +222,7 @@ contract RewarderPayTest is RewarderTestHelper {
 
     function test_fail_payUser_InexistantContent() public withFrkToken(rewarderAddr) prankExecAsDeployer {
         // Then try to pay him
-        (uint16[] memory listenCounts, ) = basePayParam();
+        (uint16[] memory listenCounts,) = basePayParam();
         vm.expectRevert(InvalidAddress.selector);
         rewarder.payUser(address(1), 1, uint256(13).asSingletonArray(), listenCounts);
     }

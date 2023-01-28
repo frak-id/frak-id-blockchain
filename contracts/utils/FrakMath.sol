@@ -1,17 +1,29 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
+/**
+ * @author  @KONFeature
+ * @title   FrakMath
+ * @notice  Contain some math utils for the Frak ecosystem (token ids, type extractor etc)
+ * @custom:security-contact contact@frak.id
+ */
 library FrakMath {
-    // The offset of the id and the mask we use to store the token type
+    /// @dev The offset of the id we use to store the token type
     uint8 internal constant ID_OFFSET = 4;
+    /// @dev The mask we use to store the token type in the token id
     uint8 internal constant TYPE_MASK = 0xF;
 
-    // The mask for the different content specfic types
+    /// @dev NFT Token type mask
     uint8 internal constant TOKEN_TYPE_NFT_MASK = 1;
+    /// @dev Free Token type mask
     uint8 internal constant TOKEN_TYPE_FREE_MASK = 2;
+    /// @dev Common Token type mask
     uint8 internal constant TOKEN_TYPE_COMMON_MASK = 3;
+    /// @dev Premium Token type mask
     uint8 internal constant TOKEN_TYPE_PREMIUM_MASK = 4;
+    /// @dev Gold Token type mask
     uint8 internal constant TOKEN_TYPE_GOLD_MASK = 5;
+    /// @dev Diamond Token type mask
     uint8 internal constant TOKEN_TYPE_DIAMOND_MASK = 6;
 
     /**
@@ -28,7 +40,7 @@ library FrakMath {
      */
     function buildSnftIds(uint256 id, uint256[] memory types) internal pure returns (uint256[] memory) {
         uint256[] memory tokenIds = new uint256[](types.length);
-        for (uint256 i; i < types.length; ) {
+        for (uint256 i; i < types.length;) {
             unchecked {
                 tokenIds[i] = buildSnftId(id, types[i]);
                 ++i;
