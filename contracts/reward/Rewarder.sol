@@ -334,6 +334,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         }
     }
 
+    /// @dev Use multi wad div down for multi precision when multiple value of 1 eth
     function wadMulDivDown(uint256 x, uint256 y) internal pure returns (uint256 z) {
         assembly {
             // Divide x * y by the 1e18 (decimals).
@@ -341,7 +342,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         }
     }
 
-    /// Use multi wad div down for multi precision when multiple value of 1 eth
+    /// @dev Use multi wad div down for multi precision when multiple value of 1 eth
     function multiWadMulDivDown(uint256 x, uint256 y, uint256 z) internal pure returns (uint256 r) {
         assembly {
             // Divide x * y by the 1e18 (decimals).
@@ -393,28 +394,28 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     }
 
     /**
-     * @notice Update the token generation factor
+     * @dev Update the token generation factor
      */
     function updateTpu(uint256 newTpu) external onlyRole(FrakRoles.ADMIN) {
         tokenGenerationFactor = newTpu;
     }
 
     /**
-     * @notice Withdraw my pending founds
+     * @dev Withdraw my pending founds
      */
     function withdrawFounds() external virtual override whenNotPaused {
         _withdrawWithFee(msg.sender, 2, foundationWallet);
     }
 
     /**
-     * @notice Withdraw the pending founds for a user
+     * @dev Withdraw the pending founds for a user
      */
     function withdrawFounds(address user) external virtual override onlyRole(FrakRoles.ADMIN) whenNotPaused {
         _withdrawWithFee(user, 2, foundationWallet);
     }
 
     /**
-     * @notice Update the content badge
+     * @dev Update the content badge
      */
     function updateContentBadge(uint256 contentId, uint256 badge)
         external

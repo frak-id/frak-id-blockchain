@@ -24,6 +24,8 @@ contract ContentPoolTest is FrkTokenTestHelper {
 
         prankDeployer();
         contentPool.grantRole(FrakRoles.REWARDER, deployer);
+        prankDeployer();
+        contentPool.grantRole(FrakRoles.TOKEN_CONTRACT, deployer);
     }
 
     /*
@@ -59,5 +61,18 @@ contract ContentPoolTest is FrkTokenTestHelper {
 
         vm.expectRevert(NoReward.selector);
         contentPool.addReward(1, 100_001 ether);
+    }
+
+    function test_fullProcess() public prankExecAsDeployer {
+        // Add some initial reward
+        contentPool.addReward(1, 1 ether);
+
+        // Update a user shares
+        contentPool.onFraktionsTransferred(
+            address(0), address(1), uint256(1).buildPremiumNftId().asSingletonArray(), uint256(1).asSingletonArray()
+        );
+
+        // Compute it's reward
+        contentPool.computeAllPoolsBalance(address(1));
     }
 }
