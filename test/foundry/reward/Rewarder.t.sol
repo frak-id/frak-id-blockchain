@@ -5,7 +5,7 @@ import {InvalidReward} from "@frak/reward/Rewarder.sol";
 import {RewarderTestHelper} from "./RewarderTestHelper.sol";
 import {NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge} from "@frak/utils/FrakErrors.sol";
 
-/// Testing the rewarder token
+/// Testing the rewarder
 contract RewarderTest is RewarderTestHelper {
     function setUp() public {
         _baseSetUp();

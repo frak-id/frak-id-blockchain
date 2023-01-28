@@ -6,7 +6,7 @@ import {ContractPaused, NotAuthorized, InvalidArray, InvalidAddress, RewardTooLa
 import {RewarderTestHelper} from "./RewarderTestHelper.sol";
 import {InvalidReward} from "@frak/reward/Rewarder.sol";
 
-/// Testing the frak l2 token
+/// Testing the rewarder pay function
 contract RewarderPayTest is RewarderTestHelper {
     using FrakMath for uint256;
 

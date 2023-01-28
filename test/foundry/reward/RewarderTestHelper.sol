@@ -13,7 +13,7 @@ import {MultiVestingWallets} from "@frak/wallets/MultiVestingWallets.sol";
 import {PRBTest} from "@prb/test/PRBTest.sol";
 import {FrkTokenTestHelper} from "../FrkTokenTestHelper.sol";
 
-/// Testing the frak l2 token
+/// Helper for our rewarder test
 contract RewarderTestHelper is FrkTokenTestHelper {
     using FrakMath for address;
     using FrakMath for uint256;
@@ -37,7 +37,7 @@ contract RewarderTestHelper is FrkTokenTestHelper {
         fraktionTokens = FraktionTokens(fraktionProxyAddr);
 
         // Deploy content pool
-        initData = abi.encodeCall(ContentPool.initialize, (fraktionProxyAddr));
+        initData = abi.encodeCall(ContentPool.initialize, (address(frakToken)));
         address contentPoolProxyAddr = deployContract(address(new ContentPool()), initData);
         contentPool = ContentPool(contentPoolProxyAddr);
 
