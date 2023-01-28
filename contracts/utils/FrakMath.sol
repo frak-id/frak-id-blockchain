@@ -28,7 +28,7 @@ library FrakMath {
      */
     function buildSnftIds(uint256 id, uint256[] memory types) internal pure returns (uint256[] memory) {
         uint256[] memory tokenIds = new uint256[](types.length);
-        for (uint256 i; i < types.length; ) {
+        for (uint256 i; i < types.length;) {
             unchecked {
                 tokenIds[i] = buildSnftId(id, types[i]);
                 ++i;

@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { FrakToken } from "@frak/tokens/FrakTokenL2.sol";
-import { FraktionTokens } from "@frak/tokens/FraktionTokens.sol";
-import { ContentPool } from "@frak/reward/pool/ContentPool.sol";
-import { ReferralPool } from "@frak/reward/pool/ReferralPool.sol";
-import { Rewarder } from "@frak/reward/Rewarder.sol";
-import { FraktionTokens } from "@frak/tokens/FraktionTokens.sol";
-import { FrakMath } from "@frak/utils/FrakMath.sol";
-import { FrakRoles } from "@frak/utils/FrakRoles.sol";
-import { MultiVestingWallets } from "@frak/wallets/MultiVestingWallets.sol";
-import { PRBTest } from "@prb/test/PRBTest.sol";
-import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
+import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
+import {FraktionTokens} from "@frak/tokens/FraktionTokens.sol";
+import {ContentPool} from "@frak/reward/pool/ContentPool.sol";
+import {ReferralPool} from "@frak/reward/pool/ReferralPool.sol";
+import {Rewarder} from "@frak/reward/Rewarder.sol";
+import {FraktionTokens} from "@frak/tokens/FraktionTokens.sol";
+import {FrakMath} from "@frak/utils/FrakMath.sol";
+import {FrakRoles} from "@frak/utils/FrakRoles.sol";
+import {MultiVestingWallets} from "@frak/wallets/MultiVestingWallets.sol";
+import {PRBTest} from "@prb/test/PRBTest.sol";
+import {FrkTokenTestHelper} from "../FrkTokenTestHelper.sol";
 
 /// Testing the frak l2 token
 contract RewarderTestHelper is FrkTokenTestHelper {

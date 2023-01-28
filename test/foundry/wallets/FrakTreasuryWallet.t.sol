@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { FrakToken } from "@frak/tokens/FrakTokenL2.sol";
-import { FrakMath } from "@frak/utils/FrakMath.sol";
-import { FrakRoles } from "@frak/utils/FrakRoles.sol";
-import { FrakTreasuryWallet, NotEnoughTreasury } from "@frak/wallets/FrakTreasuryWallet.sol";
-import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
-import { NotAuthorized, InvalidAddress, NoReward, ContractPaused, RewardTooLarge } from "@frak/utils/FrakErrors.sol";
+import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
+import {FrakMath} from "@frak/utils/FrakMath.sol";
+import {FrakRoles} from "@frak/utils/FrakRoles.sol";
+import {FrakTreasuryWallet, NotEnoughTreasury} from "@frak/wallets/FrakTreasuryWallet.sol";
+import {FrkTokenTestHelper} from "../FrkTokenTestHelper.sol";
+import {NotAuthorized, InvalidAddress, NoReward, ContractPaused, RewardTooLarge} from "@frak/utils/FrakErrors.sol";
 
 /// Testing the frak l2 token
 contract FrakTreasuryWalletTest is FrkTokenTestHelper {

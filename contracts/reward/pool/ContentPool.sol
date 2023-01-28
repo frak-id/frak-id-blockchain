@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { FrakMath } from "../../utils/FrakMath.sol";
-import { FrakRoles } from "../../utils/FrakRoles.sol";
-import { FraktionTokens } from "../../tokens/FraktionTokens.sol";
-import { FraktionTransferCallback } from "../../tokens/FraktionTransferCallback.sol";
-import { PushPullReward } from "../../utils/PushPullReward.sol";
-import { FrakAccessControlUpgradeable } from "../../utils/FrakAccessControlUpgradeable.sol";
-import { InvalidAddress, NoReward } from "../../utils/FrakErrors.sol";
-import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {FrakMath} from "../../utils/FrakMath.sol";
+import {FrakRoles} from "../../utils/FrakRoles.sol";
+import {FraktionTokens} from "../../tokens/FraktionTokens.sol";
+import {FraktionTransferCallback} from "../../tokens/FraktionTransferCallback.sol";
+import {PushPullReward} from "../../utils/PushPullReward.sol";
+import {FrakAccessControlUpgradeable} from "../../utils/FrakAccessControlUpgradeable.sol";
+import {InvalidAddress, NoReward} from "../../utils/FrakErrors.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /// @dev The pool state is closed
 error PoolStateClosed();
@@ -46,7 +46,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         uint96 lastStateClaim; // The last state amount claimed
         // Second storage slot
         uint256 lastStateIndex; // What was the last state index he claimed in the pool ?
-        // Last withdraw timestamp ? For lock on that ? Like a claim max every 6 hours
+            // Last withdraw timestamp ? For lock on that ? Like a claim max every 6 hours
     }
 
     /**
@@ -113,15 +113,14 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /**
      * @dev called when new fraktions are transfered
      */
-    function onFraktionsTransferred(
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amount
-    ) external override onlyRole(FrakRoles.TOKEN_CONTRACT) {
+    function onFraktionsTransferred(address from, address to, uint256[] memory ids, uint256[] memory amount)
+        external
+        override
+        onlyRole(FrakRoles.TOKEN_CONTRACT)
+    {
         if (from != address(0) && to != address(0)) {
             // Handle share transfer between participant, with no update on the total pool rewards
-            for (uint256 index; index < ids.length; ) {
+            for (uint256 index; index < ids.length;) {
                 updateParticipants(from, to, ids[index], amount[index]);
                 unchecked {
                     ++index;
@@ -129,7 +128,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
             }
         } else {
             // Otherwise (in case of mined or burned token), also update the pool
-            for (uint256 index; index < ids.length; ) {
+            for (uint256 index; index < ids.length;) {
                 updateParticipantAndPool(from, to, ids[index], amount[index]);
                 unchecked {
                     ++index;
@@ -220,7 +219,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         } else {
             // Otherwise, create a new reward state
             contentRewardStates.push(
-                RewardState({ totalShares: uint128(newTotalShares), currentPoolReward: 0, open: true })
+                RewardState({totalShares: uint128(newTotalShares), currentPoolReward: 0, open: true})
             );
             currentStateIndex[contentId] = contentRewardStates.length - 1;
         }
@@ -231,12 +230,9 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /**
      * Increase the share the user got in a pool
      */
-    function _increaseParticipantShare(
-        uint256 contentId,
-        Participant storage participant,
-        address user,
-        uint120 amount
-    ) internal {
+    function _increaseParticipantShare(uint256 contentId, Participant storage participant, address user, uint120 amount)
+        internal
+    {
         // Add this pool to the user participating pool if he have 0 shares before
         if (participant.shares == 0) {
             userContentPools[user].add(contentId);
@@ -252,12 +248,9 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /**
      * Decrease the share the user got in a pool
      */
-    function _decreaseParticipantShare(
-        uint256 contentId,
-        Participant storage participant,
-        address user,
-        uint120 amount
-    ) internal {
+    function _decreaseParticipantShare(uint256 contentId, Participant storage participant, address user, uint120 amount)
+        internal
+    {
         // Decrease his share
         unchecked {
             participant.shares -= amount;
@@ -274,15 +267,16 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
      * Find only the last reward state for the given content
      */
     function lastContentState(uint256 contentId) internal returns (RewardState storage state) {
-        (state, ) = lastContentStateWithIndex(contentId);
+        (state,) = lastContentStateWithIndex(contentId);
     }
 
     /**
      * Find the last reward state, with it's index for the given content
      */
-    function lastContentStateWithIndex(
-        uint256 contentId
-    ) internal returns (RewardState storage state, uint256 rewardIndex) {
+    function lastContentStateWithIndex(uint256 contentId)
+        internal
+        returns (RewardState storage state, uint256 rewardIndex)
+    {
         rewardIndex = currentStateIndex[contentId];
         // Ensure we got a state, otherwise create the first one
         RewardState[] storage contentRewardStates = rewardStates[contentId];
@@ -338,7 +332,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         // Var used to backup the reward the user got on the last state
         uint256 lastStateReward;
         // Then, iterate over all the states from the last states he fetched
-        for (uint256 stateIndex = _participant.lastStateIndex + 1; stateIndex <= toStateIndex; ) {
+        for (uint256 stateIndex = _participant.lastStateIndex + 1; stateIndex <= toStateIndex;) {
             // Get the reward state
             currentState = contentStates[stateIndex];
             unchecked {
@@ -365,10 +359,11 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /**
      * ComputonFraktionsTransferedward in the given state
      */
-    function computeUserReward(
-        RewardState memory state,
-        Participant memory participant
-    ) internal pure returns (uint256 stateReward) {
+    function computeUserReward(RewardState memory state, Participant memory participant)
+        internal
+        pure
+        returns (uint256 stateReward)
+    {
         // We can safely do an unchecked operation here since the pool reward, participant shares and total shares are all verified before being stored
         unchecked {
             stateReward = (state.currentPoolReward * participant.shares) / state.totalShares;
@@ -399,9 +394,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
                 // diamond
                 shares := 200
             }
-            default {
-                shares := 0
-            }
+            default { shares := 0 }
         }
     }
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { IPausable } from "../utils/IPausable.sol";
+import {IPausable} from "../utils/IPausable.sol";
 
 /**
  * @author  @KONFeature

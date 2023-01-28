@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { FrakToken } from "@frak/tokens/FrakTokenL2.sol";
-import { FrakMath } from "@frak/utils/FrakMath.sol";
+import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
+import {FrakMath} from "@frak/utils/FrakMath.sol";
 import {
-    MultiVestingWallets,
-    NotEnoughFounds,
-    InvalidDuration,
-    InvalidDate
+    MultiVestingWallets, NotEnoughFounds, InvalidDuration, InvalidDate
 } from "@frak/wallets/MultiVestingWallets.sol";
-import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
+import {FrkTokenTestHelper} from "../FrkTokenTestHelper.sol";
 import {
     NotAuthorized,
     InvalidArray,
@@ -182,10 +179,7 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
         // Ask to transfer the available reserve
         prankDeployer();
         vestingWallets.createVestBatch(
-            address(1).asSingletonArray(),
-            uint256(10).asSingletonArray(),
-            10,
-            uint48(block.timestamp + 1)
+            address(1).asSingletonArray(), uint256(10).asSingletonArray(), 10, uint48(block.timestamp + 1)
         );
         assertEq(vestingWallets.balanceOf(address(1)), 10);
     }
@@ -193,10 +187,7 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
     function test_fail_createVestBatch_NotManager() public withFrkToken(multiVestingAddr) {
         vm.expectRevert(NotAuthorized.selector);
         vestingWallets.createVestBatch(
-            address(1).asSingletonArray(),
-            uint256(10).asSingletonArray(),
-            10,
-            uint48(block.timestamp + 1)
+            address(1).asSingletonArray(), uint256(10).asSingletonArray(), 10, uint48(block.timestamp + 1)
         );
     }
 
@@ -205,20 +196,14 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
 
         vm.expectRevert(ContractPaused.selector);
         vestingWallets.createVestBatch(
-            address(1).asSingletonArray(),
-            uint256(10).asSingletonArray(),
-            10,
-            uint48(block.timestamp + 1)
+            address(1).asSingletonArray(), uint256(10).asSingletonArray(), 10, uint48(block.timestamp + 1)
         );
     }
 
     function test_fail_createVestBatch_NotEnoughReserve() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
         vm.expectRevert(NotEnoughFounds.selector);
         vestingWallets.createVestBatch(
-            address(1).asSingletonArray(),
-            uint256(11).asSingletonArray(),
-            10,
-            uint48(block.timestamp + 1)
+            address(1).asSingletonArray(), uint256(11).asSingletonArray(), 10, uint48(block.timestamp + 1)
         );
     }
 

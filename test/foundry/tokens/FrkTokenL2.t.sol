@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { PRBTest } from "@prb/test/PRBTest.sol";
-import { FrakToken, CapExceed } from "@frak/tokens/FrakTokenL2.sol";
-import { NotAuthorized } from "@frak/utils/FrakErrors.sol";
-import { UUPSTestHelper } from "../UUPSTestHelper.sol";
+import {PRBTest} from "@prb/test/PRBTest.sol";
+import {FrakToken, CapExceed} from "@frak/tokens/FrakTokenL2.sol";
+import {NotAuthorized} from "@frak/utils/FrakErrors.sol";
+import {UUPSTestHelper} from "../UUPSTestHelper.sol";
 
 /// Testing the frak l2 token
 contract FrkTokenL2Test is UUPSTestHelper {

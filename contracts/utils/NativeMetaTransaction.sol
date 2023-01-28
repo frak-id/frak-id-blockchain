@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { EIP712Base } from "./EIP712Base.sol";
+import {EIP712Base} from "./EIP712Base.sol";
 
 /// @dev error throwned when the signer is invalid
 error InvalidSigner();
@@ -13,7 +13,9 @@ error CallError();
 contract NativeMetaTransaction is EIP712Base {
     bytes32 private constant META_TRANSACTION_TYPEHASH =
         keccak256(bytes("MetaTransaction(uint256 nonce,address from,bytes functionSignature)"));
+
     event MetaTransactionExecuted(address userAddress, address relayerAddress, bytes functionSignature);
+
     mapping(address => uint256) nonces;
 
     /*
@@ -34,11 +36,8 @@ contract NativeMetaTransaction is EIP712Base {
         bytes32 sigS,
         uint8 sigV
     ) public payable returns (bytes memory) {
-        MetaTransaction memory metaTx = MetaTransaction({
-            nonce: nonces[userAddress],
-            from: userAddress,
-            functionSignature: functionSignature
-        });
+        MetaTransaction memory metaTx =
+            MetaTransaction({nonce: nonces[userAddress], from: userAddress, functionSignature: functionSignature});
 
         if (!verify(userAddress, metaTx, sigR, sigS, sigV)) revert InvalidSignature();
 
@@ -55,23 +54,20 @@ contract NativeMetaTransaction is EIP712Base {
     }
 
     function hashMetaTransaction(MetaTransaction memory metaTx) internal pure returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(META_TRANSACTION_TYPEHASH, metaTx.nonce, metaTx.from, keccak256(metaTx.functionSignature))
-            );
+        return keccak256(
+            abi.encode(META_TRANSACTION_TYPEHASH, metaTx.nonce, metaTx.from, keccak256(metaTx.functionSignature))
+        );
     }
 
     function getNonce(address user) public view returns (uint256 nonce) {
         nonce = nonces[user];
     }
 
-    function verify(
-        address signer,
-        MetaTransaction memory metaTx,
-        bytes32 sigR,
-        bytes32 sigS,
-        uint8 sigV
-    ) internal view returns (bool) {
+    function verify(address signer, MetaTransaction memory metaTx, bytes32 sigR, bytes32 sigS, uint8 sigV)
+        internal
+        view
+        returns (bool)
+    {
         if (signer == address(0)) revert InvalidSigner();
         return signer == ecrecover(toTypedMessageHash(hashMetaTransaction(metaTx)), sigV, sigR, sigS);
     }

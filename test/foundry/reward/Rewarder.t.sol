@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { InvalidReward } from "@frak/reward/Rewarder.sol";
-import { RewarderTestHelper } from "./RewarderTestHelper.sol";
-import { NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge } from "@frak/utils/FrakErrors.sol";
+import {InvalidReward} from "@frak/reward/Rewarder.sol";
+import {RewarderTestHelper} from "./RewarderTestHelper.sol";
+import {NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge} from "@frak/utils/FrakErrors.sol";
 
-/// Testing the frak l2 token
+/// Testing the rewarder token
 contract RewarderTest is RewarderTestHelper {
     function setUp() public {
         _baseSetUp();

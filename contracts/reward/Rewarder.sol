@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { IRewarder } from "./IRewarder.sol";
-import { ContentBadges } from "./badges/ContentBadges.sol";
-import { ListenerBadges } from "./badges/ListenerBadges.sol";
-import { ContentPool } from "./pool/ContentPool.sol";
-import { ReferralPool } from "./pool/ReferralPool.sol";
-import { FrakMath } from "../utils/FrakMath.sol";
-import { FrakRoles } from "../utils/FrakRoles.sol";
-import { FraktionTokens } from "../tokens/FraktionTokens.sol";
-import { FrakToken } from "../tokens/FrakTokenL2.sol";
-import { FrakAccessControlUpgradeable } from "../utils/FrakAccessControlUpgradeable.sol";
-import { InvalidAddress, InvalidArray, RewardTooLarge } from "../utils/FrakErrors.sol";
-import { PushPullReward } from "../utils/PushPullReward.sol";
-import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {IRewarder} from "./IRewarder.sol";
+import {ContentBadges} from "./badges/ContentBadges.sol";
+import {ListenerBadges} from "./badges/ListenerBadges.sol";
+import {ContentPool} from "./pool/ContentPool.sol";
+import {ReferralPool} from "./pool/ReferralPool.sol";
+import {FrakMath} from "../utils/FrakMath.sol";
+import {FrakRoles} from "../utils/FrakRoles.sol";
+import {FraktionTokens} from "../tokens/FraktionTokens.sol";
+import {FrakToken} from "../tokens/FrakTokenL2.sol";
+import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
+import {InvalidAddress, InvalidArray, RewardTooLarge} from "../utils/FrakErrors.sol";
+import {PushPullReward} from "../utils/PushPullReward.sol";
+import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 // Error throwned by this contract
 error TooMuchCcu();
@@ -81,11 +81,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
      * @notice Event emitted when a user is rewarded for his listen
      */
     event RewardOnContent(
-        address indexed user,
-        uint256 indexed contentId,
-        uint256 baseUserReward,
-        uint256 earningFactor,
-        uint16 ccuCount
+        address indexed user, uint256 indexed contentId, uint256 baseUserReward, uint256 earningFactor, uint16 ccuCount
     );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -101,11 +97,8 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         address foundationAddr
     ) external initializer {
         if (
-            frkTokenAddr == address(0) ||
-            fraktionTokensAddr == address(0) ||
-            contentPoolAddr == address(0) ||
-            referralAddr == address(0) ||
-            foundationAddr == address(0)
+            frkTokenAddr == address(0) || fraktionTokensAddr == address(0) || contentPoolAddr == address(0)
+                || referralAddr == address(0) || foundationAddr == address(0)
         ) revert InvalidAddress();
 
         // Only for v1 deployment
@@ -140,8 +133,9 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     function payUserDirectly(address listener, uint256 amount) external onlyRole(FrakRoles.REWARDER) whenNotPaused {
         // Ensure the param are valid and not too much
         if (listener == address(0)) revert InvalidAddress();
-        if (amount > DIRECT_REWARD_CAP || amount == 0 || amount + totalFrakMinted > REWARD_MINT_CAP)
+        if (amount > DIRECT_REWARD_CAP || amount == 0 || amount + totalFrakMinted > REWARD_MINT_CAP) {
             revert InvalidReward();
+        }
 
         // Increase our total frak minted
         totalFrakMinted += amount;
@@ -153,18 +147,20 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /**
      * @notice Directly pay all the creator for the given frk amount (used for offchain reward created by the user, that is sent to the creator)
      */
-    function payCreatorDirectlyBatch(
-        uint256[] calldata contentIds,
-        uint256[] calldata amounts
-    ) external onlyRole(FrakRoles.REWARDER) whenNotPaused {
+    function payCreatorDirectlyBatch(uint256[] calldata contentIds, uint256[] calldata amounts)
+        external
+        onlyRole(FrakRoles.REWARDER)
+        whenNotPaused
+    {
         // Ensure we got valid data
         if (contentIds.length != amounts.length || contentIds.length > MAX_BATCH_AMOUNT) revert InvalidArray();
 
         // Then, for each content contentIds
-        for (uint256 i; i < contentIds.length; ) {
+        for (uint256 i; i < contentIds.length;) {
             // Ensure the reward is valid
-            if (amounts[i] > DIRECT_REWARD_CAP || amounts[i] == 0 || amounts[i] + totalFrakMinted > REWARD_MINT_CAP)
+            if (amounts[i] > DIRECT_REWARD_CAP || amounts[i] == 0 || amounts[i] + totalFrakMinted > REWARD_MINT_CAP) {
                 revert InvalidReward();
+            }
             // Increase our total frak minted
             totalFrakMinted += amounts[i];
             // Get the creator address
@@ -182,12 +178,11 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /**
      * @dev Compute the reward for a user, given the content and listens, and pay him and the owner
      */
-    function payUser(
-        address listener,
-        uint8 contentType,
-        uint256[] calldata contentIds,
-        uint16[] calldata listenCounts
-    ) external onlyRole(FrakRoles.REWARDER) whenNotPaused {
+    function payUser(address listener, uint8 contentType, uint256[] calldata contentIds, uint16[] calldata listenCounts)
+        external
+        onlyRole(FrakRoles.REWARDER)
+        whenNotPaused
+    {
         // Ensure we got valid data
         if (contentIds.length != listenCounts.length || contentIds.length > MAX_BATCH_AMOUNT) revert InvalidArray();
 
@@ -199,14 +194,9 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         uint256 rewardForContentType = baseRewardForContentType(contentType);
 
         // Iterate over each content the user listened
-        for (uint256 i; i < contentIds.length; ) {
+        for (uint256 i; i < contentIds.length;) {
             computeRewardForContent(
-                contentIds[i],
-                listenCounts[i],
-                rewardForContentType,
-                listener,
-                fraktionTypes,
-                totalRewards
+                contentIds[i], listenCounts[i], rewardForContentType, listener, fraktionTypes, totalRewards
             );
 
             // Finally, increase the counter
@@ -317,11 +307,11 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /**
      * @dev Compute the earning factor for a listener on a given content
      */
-    function earningFactorForListener(
-        uint256[] memory fraktionTypes,
-        address listener,
-        uint256 contentId
-    ) private view returns (uint256 earningFactor, bool hasOnePaidFraktion) {
+    function earningFactorForListener(uint256[] memory fraktionTypes, address listener, uint256 contentId)
+        private
+        view
+        returns (uint256 earningFactor, bool hasOnePaidFraktion)
+    {
         // Build the ids for eachs fraktion that can generate reward, and get the user balance for each one if this fraktions
         uint256[] memory fraktionIds = contentId.buildSnftIds(fraktionTypes);
         uint256[] memory tokenBalances = fraktionTokens.balanceOfIdsBatch(listener, fraktionIds);
@@ -331,7 +321,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         hasOnePaidFraktion = false;
 
         // Iterate over each balance to compute the earning factor
-        for (uint256 balanceIndex; balanceIndex < tokenBalances.length; ) {
+        for (uint256 balanceIndex; balanceIndex < tokenBalances.length;) {
             uint256 balance = tokenBalances[balanceIndex];
             // Check if that was a paid fraktion or not
             hasOnePaidFraktion = hasOnePaidFraktion || (fraktionTypes[balanceIndex].isPayedTokenToken() && balance > 0);
@@ -426,20 +416,24 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /**
      * @notice Update the content badge
      */
-    function updateContentBadge(
-        uint256 contentId,
-        uint256 badge
-    ) external override onlyRole(FrakRoles.BADGE_UPDATER) whenNotPaused {
+    function updateContentBadge(uint256 contentId, uint256 badge)
+        external
+        override
+        onlyRole(FrakRoles.BADGE_UPDATER)
+        whenNotPaused
+    {
         _updateContentBadge(contentId, badge);
     }
 
     /**
      * @notice Update the listener badge
      */
-    function updateListenerBadge(
-        address listener,
-        uint256 badge
-    ) external override onlyRole(FrakRoles.BADGE_UPDATER) whenNotPaused {
+    function updateListenerBadge(address listener, uint256 badge)
+        external
+        override
+        onlyRole(FrakRoles.BADGE_UPDATER)
+        whenNotPaused
+    {
         _updateListenerBadge(listener, badge);
     }
 }

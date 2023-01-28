@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { FrakMath } from "../../utils/FrakMath.sol";
-import { FrakRoles } from "../../utils/FrakRoles.sol";
-import { BadgeTooLarge } from "../../utils/FrakErrors.sol";
+import {FrakMath} from "../../utils/FrakMath.sol";
+import {FrakRoles} from "../../utils/FrakRoles.sol";
+import {BadgeTooLarge} from "../../utils/FrakErrors.sol";
 
 /**
  * @dev Handle the computation of our listener badges

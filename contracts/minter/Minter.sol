@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { IMinter } from "./IMinter.sol";
-import { FractionCostBadges } from "./badges/FractionCostBadges.sol";
-import { FrakMath } from "../utils/FrakMath.sol";
-import { FrakRoles } from "../utils/FrakRoles.sol";
-import { FraktionTokens } from "../tokens/FraktionTokens.sol";
-import { FrakToken } from "../tokens/FrakTokenL2.sol";
-import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
-import { InvalidAddress } from "../utils/FrakErrors.sol";
-import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {IMinter} from "./IMinter.sol";
+import {FractionCostBadges} from "./badges/FractionCostBadges.sol";
+import {FrakMath} from "../utils/FrakMath.sol";
+import {FrakRoles} from "../utils/FrakRoles.sol";
+import {FraktionTokens} from "../tokens/FraktionTokens.sol";
+import {FrakToken} from "../tokens/FrakTokenL2.sol";
+import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
+import {InvalidAddress} from "../utils/FrakErrors.sol";
+import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 /// @notice Error emitted when the input supply is invalid
 error InvalidSupply();
@@ -71,9 +71,13 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
      * @param   fraktionTokensAddr  The address of the FraktionTokens contract
      * @param   foundationAddr  The foundation wallet address
      */
-    function initialize(address frkTokenAddr, address fraktionTokensAddr, address foundationAddr) external initializer {
-        if (frkTokenAddr == address(0) || fraktionTokensAddr == address(0) || foundationAddr == address(0))
+    function initialize(address frkTokenAddr, address fraktionTokensAddr, address foundationAddr)
+        external
+        initializer
+    {
+        if (frkTokenAddr == address(0) || fraktionTokensAddr == address(0) || foundationAddr == address(0)) {
             revert InvalidAddress();
+        }
 
         // Only for v1 deployment
         __MintingAccessControlUpgradeable_init();
@@ -105,8 +109,9 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         uint256 diamondSupply
     ) external override onlyRole(FrakRoles.MINTER) whenNotPaused returns (uint256 contentId) {
         if (contentOwnerAddress == address(0)) revert InvalidAddress();
-        if (commonSupply == 0 || commonSupply > 500 || premiumSupply > 200 || goldSupply > 50 || diamondSupply > 20)
+        if (commonSupply == 0 || commonSupply > 500 || premiumSupply > 200 || goldSupply > 50 || diamondSupply > 20) {
             revert InvalidSupply();
+        }
         // Try to mint the new content
         contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
         // Then set the supply for each token types
@@ -134,11 +139,12 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
      * @param   to  The address on which we will mint the fraktion
      * @param   amount  The amount of fraktion to be minted for the user
      */
-    function mintFractionForUser(
-        uint256 id,
-        address to,
-        uint256 amount
-    ) external override onlyRole(FrakRoles.MINTER) whenNotPaused {
+    function mintFractionForUser(uint256 id, address to, uint256 amount)
+        external
+        override
+        onlyRole(FrakRoles.MINTER)
+        whenNotPaused
+    {
         // Get the cost of the fraction
         uint256 totalCost = getCostBadge(id) * amount;
         // Emit the event
@@ -155,10 +161,12 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
      * @param   id  Id of the free fraktion
      * @param   to  Address of the user
      */
-    function mintFreeFraktionForUser(
-        uint256 id,
-        address to
-    ) external override onlyRole(FrakRoles.MINTER) whenNotPaused {
+    function mintFreeFraktionForUser(uint256 id, address to)
+        external
+        override
+        onlyRole(FrakRoles.MINTER)
+        whenNotPaused
+    {
         // Ensure it's a free fraktion
         uint256 tokenType = id.extractTokenType();
         if (tokenType != FrakMath.TOKEN_TYPE_FREE_MASK) revert ExpectingOnlyFreeFraktion();
@@ -192,10 +200,12 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
      * @param   fractionId The id of the fraktion we will update the badge
      * @param   badge The new badge for the fraktion
      */
-    function updateCostBadge(
-        uint256 fractionId,
-        uint96 badge
-    ) external override onlyRole(FrakRoles.BADGE_UPDATER) whenNotPaused {
+    function updateCostBadge(uint256 fractionId, uint96 badge)
+        external
+        override
+        onlyRole(FrakRoles.BADGE_UPDATER)
+        whenNotPaused
+    {
         _updateCostBadge(fractionId, badge);
     }
 }

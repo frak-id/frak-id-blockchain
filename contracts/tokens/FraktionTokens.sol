@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { ERC1155Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
-import { FraktionTransferCallback } from "./FraktionTransferCallback.sol";
-import { FrakMath } from "../utils/FrakMath.sol";
-import { FrakRoles } from "../utils/FrakRoles.sol";
-import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
-import { InvalidArray } from "../utils/FrakErrors.sol";
+import {ERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import {FraktionTransferCallback} from "./FraktionTransferCallback.sol";
+import {FrakMath} from "../utils/FrakMath.sol";
+import {FrakRoles} from "../utils/FrakRoles.sol";
+import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
+import {InvalidArray} from "../utils/FrakErrors.sol";
 
 /// @dev Error throwned when we don't have enough supply to mint a new fNFT
 error InsuficiantSupply();
@@ -66,9 +66,12 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     /**
      * @dev Mint a new content, return the id of the built content
      */
-    function mintNewContent(
-        address ownerAddress
-    ) external onlyRole(FrakRoles.MINTER) whenNotPaused returns (uint256 id) {
+    function mintNewContent(address ownerAddress)
+        external
+        onlyRole(FrakRoles.MINTER)
+        whenNotPaused
+        returns (uint256 id)
+    {
         // Get the next content id and increment the current content token id
         id = ++_currentContentTokenId;
 
@@ -85,9 +88,14 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     /**
      * @dev Batch balance of for single address
      */
-    function balanceOfIdsBatch(address account, uint256[] calldata ids) public view virtual returns (uint256[] memory) {
+    function balanceOfIdsBatch(address account, uint256[] calldata ids)
+        public
+        view
+        virtual
+        returns (uint256[] memory)
+    {
         uint256[] memory batchBalances = new uint256[](ids.length);
-        for (uint256 i; i < ids.length; ) {
+        for (uint256 i; i < ids.length;) {
             unchecked {
                 // TODO : Find a way to directly check _balances var without the require check
                 batchBalances[i] = balanceOf(account, ids[i]);
@@ -100,19 +108,21 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     /**
      * @dev Set the supply for each token ids
      */
-    function setSupplyBatch(
-        uint256[] calldata ids,
-        uint256[] calldata supplies
-    ) external onlyRole(FrakRoles.MINTER) whenNotPaused {
+    function setSupplyBatch(uint256[] calldata ids, uint256[] calldata supplies)
+        external
+        onlyRole(FrakRoles.MINTER)
+        whenNotPaused
+    {
         if (ids.length == 0 || ids.length != supplies.length) revert InvalidArray();
         // Iterate over each ids and increment their supplies
-        for (uint256 i; i < ids.length; ) {
+        for (uint256 i; i < ids.length;) {
             uint256 id = ids[i];
 
             // We can't increase the supply of free fraktion and of NFT fraktion
             uint8 tokenType = id.extractTokenType();
-            if (tokenType == FrakMath.TOKEN_TYPE_FREE_MASK || tokenType == FrakMath.TOKEN_TYPE_NFT_MASK)
+            if (tokenType == FrakMath.TOKEN_TYPE_FREE_MASK || tokenType == FrakMath.TOKEN_TYPE_NFT_MASK) {
                 revert SupplyUpdateNotAllowed();
+            }
 
             // Update our supply if we are all good
             _availableSupplies[id] = supplies[i];
@@ -138,7 +148,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         bytes memory
     ) internal override whenNotPaused {
         // In the case we are sending the token to a given wallet
-        for (uint256 i; i < ids.length; ) {
+        for (uint256 i; i < ids.length;) {
             uint256 id = ids[i];
 
             if (_isSupplyAware[id]) {
@@ -210,7 +220,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
      */
     function fixSupplyBatch(uint256[] calldata ids) external onlyRole(FrakRoles.ADMIN) whenNotPaused {
         // In the case we are sending the token to a given wallet
-        for (uint256 i; i < ids.length; ) {
+        for (uint256 i; i < ids.length;) {
             uint256 id = ids[i];
 
             // Get the token type

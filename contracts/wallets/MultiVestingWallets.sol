@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import { FrakAccessControlUpgradeable } from "../utils/FrakAccessControlUpgradeable.sol";
-import { FrakRoles } from "../utils/FrakRoles.sol";
-import { NotAuthorized, InvalidArray, InvalidAddress, NoReward, RewardTooLarge } from "../utils/FrakErrors.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
+import {FrakRoles} from "../utils/FrakRoles.sol";
+import {NotAuthorized, InvalidArray, InvalidAddress, NoReward, RewardTooLarge} from "../utils/FrakErrors.sol";
 
 /// @dev error emitted when the contract doesn't have enough founds
 error NotEnoughFounds();
@@ -29,11 +29,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
 
     /// Emitted when a vesting is created
     event VestingCreated(
-        uint24 indexed id,
-        address indexed beneficiary,
-        uint96 amount,
-        uint32 duration,
-        uint48 startDate
+        uint24 indexed id, address indexed beneficiary, uint96 amount, uint32 duration, uint48 startDate
     );
 
     /// Emitted when a vesting is transfered between 2 address
@@ -140,12 +136,11 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     /**
      * @notice Create a new vesting.
      */
-    function createVest(
-        address beneficiary,
-        uint256 amount,
-        uint32 duration,
-        uint48 startDate
-    ) external whenNotPaused onlyRole(FrakRoles.VESTING_MANAGER) {
+    function createVest(address beneficiary, uint256 amount, uint32 duration, uint48 startDate)
+        external
+        whenNotPaused
+        onlyRole(FrakRoles.VESTING_MANAGER)
+    {
         _requireVestInputs(duration, startDate);
         if (amount > availableReserve()) revert NotEnoughFounds();
         _createVesting(beneficiary, amount, duration, startDate);
@@ -165,7 +160,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
 
         uint256 freeReserve = availableReserve();
 
-        for (uint256 index; index < beneficiaries.length; ) {
+        for (uint256 index; index < beneficiaries.length;) {
             uint256 amount = amounts[index];
             if (amount > freeReserve) revert NotEnoughFounds();
             _createVesting(beneficiaries[index], amount, duration, startDate);
@@ -273,7 +268,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     function _releaseAll(address beneficiary) internal whenNotPaused returns (uint256 released) {
         EnumerableSet.UintSet storage indexes = owned[beneficiary];
 
-        for (uint256 index; index < indexes.length(); ) {
+        for (uint256 index; index < indexes.length();) {
             uint24 vestingId = uint24(indexes.at(index));
             Vesting storage vesting = _getVesting(vestingId);
 
@@ -348,7 +343,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     function balanceOf(address beneficiary) external view returns (uint256 balance) {
         uint256[] memory _vestingIds = owned[beneficiary].values();
 
-        for (uint256 index; index < _vestingIds.length; ) {
+        for (uint256 index; index < _vestingIds.length;) {
             uint24 vestingId = uint24(_vestingIds[index]);
             balance += balanceOfVesting(vestingId);
 
@@ -423,10 +418,11 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
      * @param beneficiary Address to get it from.
      * @return vesting struct stored in the storage.
      */
-    function _getVestingForBeneficiary(
-        uint24 vestingId,
-        address beneficiary
-    ) internal view returns (Vesting storage vesting) {
+    function _getVestingForBeneficiary(uint24 vestingId, address beneficiary)
+        internal
+        view
+        returns (Vesting storage vesting)
+    {
         vesting = _getVesting(vestingId);
         if (vesting.beneficiary != beneficiary) revert NotAuthorized();
     }
