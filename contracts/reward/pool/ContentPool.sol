@@ -211,8 +211,9 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         }
 
         // Finally, update the content pool with the new shares
-        if (currentState.currentPoolReward == 0) {
+        if (currentState.currentPoolReward == 0 || currentState.totalShares == 0) {
             // If it havn't any, just update the pool total shares and reopen it
+            // Or if we havn't any shares on this state (at init for example)
             currentState.totalShares = uint128(newTotalShares);
             currentState.open = true;
         } else {
@@ -363,6 +364,8 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         pure
         returns (uint256 stateReward)
     {
+        // Directly exit if this state doesn't have a total share
+        if (state.totalShares == 0) return 0;
         // We can safely do an unchecked operation here since the pool reward, participant shares and total shares are all verified before being stored
         unchecked {
             stateReward = (state.currentPoolReward * participant.shares) / state.totalShares;
@@ -439,5 +442,25 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         if (user == address(0)) revert InvalidAddress();
         _computeAndSaveAllForUser(user);
         _withdraw(user);
+    }
+
+    /**
+     * @dev Get the current reward state for the given content
+     */
+    function getCurrentRewardState(uint256 contentId) external view returns (RewardState memory rewardState) {
+        uint256 stateIndex = currentStateIndex[contentId];
+        RewardState[] storage contentRewardStates = rewardStates[contentId];
+        rewardState = contentRewardStates[stateIndex];
+    }
+
+    /**
+     * @dev Get the current participant state for the given content
+     */
+    function getParticipantForContent(uint256 contentId, address user)
+        external
+        view
+        returns (Participant memory participant)
+    {
+        participant = participants[contentId][user];
     }
 }
