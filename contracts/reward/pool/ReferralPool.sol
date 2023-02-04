@@ -56,6 +56,7 @@ contract ReferralPool is FrakAccessControlUpgradeable, PushPullReward {
      */
     function userReferred(uint256 contentId, address user, address referer)
         external
+        payable
         onlyRole(FrakRoles.ADMIN)
         whenNotPaused
     {
@@ -84,6 +85,7 @@ contract ReferralPool is FrakAccessControlUpgradeable, PushPullReward {
      */
     function payAllReferer(uint256 contentId, address user, uint256 amount)
         public
+        payable
         onlyRole(FrakRoles.REWARDER)
         whenNotPaused
         returns (uint256 totalAmount)

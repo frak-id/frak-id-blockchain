@@ -68,6 +68,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
      */
     function mintNewContent(address ownerAddress)
         external
+        payable
         onlyRole(FrakRoles.MINTER)
         whenNotPaused
         returns (uint256 id)
@@ -190,14 +191,14 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     /**
      * @dev Mint a new fraction of a nft
      */
-    function mint(address to, uint256 id, uint256 amount) external onlyRole(FrakRoles.MINTER) whenNotPaused {
+    function mint(address to, uint256 id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
         _mint(to, id, amount, new bytes(0x0));
     }
 
     /**
      * @dev Burn a fraction of a nft
      */
-    function burn(address from, uint256 id, uint256 amount) external onlyRole(FrakRoles.MINTER) whenNotPaused {
+    function burn(address from, uint256 id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
         _burn(from, id, amount);
     }
 

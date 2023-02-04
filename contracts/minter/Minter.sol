@@ -97,7 +97,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         uint256 premiumSupply,
         uint256 goldSupply,
         uint256 diamondSupply
-    ) external override onlyRole(FrakRoles.MINTER) whenNotPaused returns (uint256 contentId) {
+    ) external payable override onlyRole(FrakRoles.MINTER) whenNotPaused returns (uint256 contentId) {
         if (contentOwnerAddress == address(0)) revert InvalidAddress();
         if (commonSupply == 0 || commonSupply > 500 || premiumSupply > 200 || goldSupply > 50 || diamondSupply > 20) {
             revert InvalidSupply();
@@ -131,6 +131,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
      */
     function mintFractionForUser(uint256 id, address to, uint256 amount)
         external
+        payable
         override
         onlyRole(FrakRoles.MINTER)
         whenNotPaused
@@ -153,6 +154,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
      */
     function mintFreeFraktionForUser(uint256 id, address to)
         external
+        payable
         override
         onlyRole(FrakRoles.MINTER)
         whenNotPaused

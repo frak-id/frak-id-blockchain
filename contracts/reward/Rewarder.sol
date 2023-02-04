@@ -130,7 +130,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /**
      * @notice Directly pay a user for the given frk amount (used for offchain to onchain wallet migration)
      */
-    function payUserDirectly(address listener, uint256 amount) external onlyRole(FrakRoles.REWARDER) whenNotPaused {
+    function payUserDirectly(address listener, uint256 amount) external payable onlyRole(FrakRoles.REWARDER) whenNotPaused {
         // Ensure the param are valid and not too much
         if (listener == address(0)) revert InvalidAddress();
         if (amount > DIRECT_REWARD_CAP || amount == 0 || amount + totalFrakMinted > REWARD_MINT_CAP) {
@@ -149,6 +149,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
      */
     function payCreatorDirectlyBatch(uint256[] calldata contentIds, uint256[] calldata amounts)
         external
+        payable
         onlyRole(FrakRoles.REWARDER)
         whenNotPaused
     {
@@ -180,6 +181,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
      */
     function payUser(address listener, uint8 contentType, uint256[] calldata contentIds, uint16[] calldata listenCounts)
         external
+        payable
         onlyRole(FrakRoles.REWARDER)
         whenNotPaused
     {

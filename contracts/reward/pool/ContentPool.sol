@@ -99,7 +99,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /**
      * @dev Add a reward inside a content pool
      */
-    function addReward(uint256 contentId, uint256 rewardAmount) external onlyRole(FrakRoles.REWARDER) whenNotPaused {
+    function addReward(uint256 contentId, uint256 rewardAmount) external payable onlyRole(FrakRoles.REWARDER) whenNotPaused {
         if (rewardAmount == 0 || rewardAmount > MAX_REWARD) revert NoReward();
         RewardState storage currentState = lastContentState(contentId);
         if (!currentState.open) revert PoolStateClosed();
@@ -114,6 +114,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
      */
     function onFraktionsTransferred(address from, address to, uint256[] memory ids, uint256[] memory amount)
         external
+        payable
         override
         onlyRole(FrakRoles.TOKEN_CONTRACT)
     {
@@ -423,7 +424,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /**
      * @dev Compute all the reward for the given user
      */
-    function computeAllPoolsBalance(address user) external onlyRole(FrakRoles.ADMIN) whenNotPaused {
+    function computeAllPoolsBalance(address user) external payable onlyRole(FrakRoles.ADMIN) whenNotPaused {
         _computeAndSaveAllForUser(user);
     }
 
