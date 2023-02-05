@@ -18,7 +18,7 @@ error PoolStateAlreadyClaimed();
 /**
  * @author  @KONFeature
  * @title   ContentPool
- * @dev     Represent our content pool contract 
+ * @dev     Represent our content pool contract
  * @custom:security-contact contact@frak.id
  */
 contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTransferCallback {
@@ -99,7 +99,12 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /**
      * @dev Add a reward inside a content pool
      */
-    function addReward(uint256 contentId, uint256 rewardAmount) external payable onlyRole(FrakRoles.REWARDER) whenNotPaused {
+    function addReward(uint256 contentId, uint256 rewardAmount)
+        external
+        payable
+        onlyRole(FrakRoles.REWARDER)
+        whenNotPaused
+    {
         if (rewardAmount == 0 || rewardAmount > MAX_REWARD) revert NoReward();
         RewardState storage currentState = lastContentState(contentId);
         if (!currentState.open) revert PoolStateClosed();

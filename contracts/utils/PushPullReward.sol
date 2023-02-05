@@ -17,6 +17,12 @@ error NotEnoughFound();
 abstract contract PushPullReward is Initializable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
+    /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
+    uint256 private constant _INVALID_ADDRESS_SELECTOR = 0xe6c4247b;
+
+    /// @dev 'bytes4(keccak256(bytes("RewardTooLarge()")))'
+    uint256 private constant _REWARD_TOO_LARGE_SELECTOR = 0x71009bf7;
+
     /**
      * Access the token that will deliver the tokens
      */
@@ -48,7 +54,12 @@ abstract contract PushPullReward is Initializable {
      * @dev Add founds for the given user
      */
     function _addFounds(address user, uint256 founds) internal {
-        if (user == address(0)) revert InvalidAddress();
+        assembly {
+            if iszero(user) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
         emit RewardAdded(user, founds);
         _pendingRewards[user] += founds;
     }
@@ -77,7 +88,12 @@ abstract contract PushPullReward is Initializable {
      * @dev Core logic of the withdraw method
      */
     function _withdraw(address user) internal {
-        if (user == address(0)) revert InvalidAddress();
+        assembly {
+            if iszero(user) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
         // Ensure the user have a pending reward
         uint256 pendingReward = _pendingRewards[user];
         if (pendingReward == 0) revert NoReward();
@@ -93,8 +109,16 @@ abstract contract PushPullReward is Initializable {
      * @dev Core logic of the withdraw method, but with fee this time
      */
     function _withdrawWithFee(address user, uint256 feePercent, address feeRecipient) internal {
-        if (user == address(0) || feeRecipient == address(0)) revert InvalidAddress();
-        if (feePercent > 10) revert RewardTooLarge();
+        assembly {
+            if or(iszero(user), iszero(feePercent)) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+            if gt(feePercent, 10) {
+                mstore(0x00, _REWARD_TOO_LARGE_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
         // The fees can't be more than 10% of the user reward
         // Ensure the user have a pending reward
         uint256 pendingReward = _pendingRewards[user];

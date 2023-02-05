@@ -42,6 +42,15 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     uint256 private constant CONTENT_TYPE_MUSIC = 3;
     uint256 private constant CONTENT_TYPE_STREAMING = 4;
 
+    /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
+    uint256 private constant _INVALID_ADDRESS_SELECTOR = 0xe6c4247b;
+
+    /// @dev 'bytes4(keccak256(bytes("InvalidReward()")))'
+    uint256 private constant _INVALID_REWARD_SELECTOR = 0x28829e82;
+
+    /// @dev 'bytes4(keccak256(bytes("InvalidArray()")))'
+    uint256 private constant _INVALID_ARRAY_SELECTOR = 0x1ec5aa51;
+
     /**
      * @notice factor user to compute the number of token to generate (on 1e18 decimals)
      */
@@ -130,15 +139,32 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /**
      * @notice Directly pay a user for the given frk amount (used for offchain to onchain wallet migration)
      */
-    function payUserDirectly(address listener, uint256 amount) external payable onlyRole(FrakRoles.REWARDER) whenNotPaused {
-        // Ensure the param are valid and not too much
-        if (listener == address(0)) revert InvalidAddress();
-        if (amount > DIRECT_REWARD_CAP || amount == 0 || amount + totalFrakMinted > REWARD_MINT_CAP) {
-            revert InvalidReward();
+    function payUserDirectly(address listener, uint256 amount)
+        external
+        payable
+        onlyRole(FrakRoles.REWARDER)
+        whenNotPaused
+    {
+        assembly {
+            // Ensure the param are valid and not too much
+            if iszero(listener) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+            if or(iszero(amount), gt(amount, DIRECT_REWARD_CAP)) {
+                mstore(0x00, _INVALID_REWARD_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+            // Compute the new total amount
+            let newTotalAmount := add(amount, mload(totalFrakMinted.slot))
+            // Ensure it's good
+            if gt(newTotalAmount, REWARD_MINT_CAP) {
+                mstore(0x00, _INVALID_REWARD_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+            // Increase our total frak minted
+            sstore(totalFrakMinted.slot, newTotalAmount)
         }
-
-        // Increase our total frak minted
-        totalFrakMinted += amount;
 
         // Mint the reward for the user
         frakToken.safeTransfer(listener, amount);
@@ -153,20 +179,44 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         onlyRole(FrakRoles.REWARDER)
         whenNotPaused
     {
-        // Ensure we got valid data
-        if (contentIds.length != amounts.length || contentIds.length > MAX_BATCH_AMOUNT) revert InvalidArray();
+        assembly {
+            // Ensure we got valid data
+            if or(iszero(eq(contentIds.length, amounts.length)), gt(contentIds.length, MAX_BATCH_AMOUNT)) {
+                mstore(0x00, _INVALID_ARRAY_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
 
         // Then, for each content contentIds
         for (uint256 i; i < contentIds.length;) {
-            // Ensure the reward is valid
-            if (amounts[i] > DIRECT_REWARD_CAP || amounts[i] == 0 || amounts[i] + totalFrakMinted > REWARD_MINT_CAP) {
-                revert InvalidReward();
+            // TODO : Do that in assembly (all the for loops)
+            // TODO : copy calldata to memory for iteration ? calldatacopy(...)
+            uint256 amount = amounts[i];
+            assembly {
+                // Ensure the reward is valid
+                if or(iszero(amount), gt(amount, DIRECT_REWARD_CAP)) {
+                    mstore(0x00, _INVALID_REWARD_SELECTOR)
+                    revert(0x1c, 0x04)
+                }
+                // Compute the new total amount
+                let newTotalAmount := add(amount, mload(totalFrakMinted.slot))
+                // Ensure it's good
+                if gt(newTotalAmount, REWARD_MINT_CAP) {
+                    mstore(0x00, _INVALID_REWARD_SELECTOR)
+                    revert(0x1c, 0x04)
+                }
+                // Increase our total frak minted
+                sstore(totalFrakMinted.slot, newTotalAmount)
             }
-            // Increase our total frak minted
-            totalFrakMinted += amounts[i];
             // Get the creator address
             address owner = fraktionTokens.ownerOf(contentIds[i]);
-            if (owner == address(0)) revert InvalidAddress();
+            // Ensure it's not zero
+            assembly {
+                if iszero(owner) {
+                    mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                    revert(0x1c, 0x04)
+                }
+            }
             // Add this founds
             _addFoundsUnchecked(owner, amounts[i]);
 
@@ -186,7 +236,16 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         whenNotPaused
     {
         // Ensure we got valid data
-        if (contentIds.length != listenCounts.length || contentIds.length > MAX_BATCH_AMOUNT) revert InvalidArray();
+        assembly {
+            if iszero(listener) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+            if or(iszero(eq(contentIds.length, listenCounts.length)), gt(contentIds.length, MAX_BATCH_AMOUNT)) {
+                mstore(0x00, _INVALID_ARRAY_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
 
         // Get the data we will need in this level
         TotalRewards memory totalRewards = TotalRewards(0, 0, 0, 0);
@@ -302,7 +361,13 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
 
         // Save the amount for the owner
         address owner = fraktionTokens.ownerOf(contentId);
-        if (owner == address(0)) revert InvalidAddress();
+        // Ensure it's not zero
+        assembly {
+            if iszero(owner) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
         _addFoundsUnchecked(owner, ownerReward);
     }
 
