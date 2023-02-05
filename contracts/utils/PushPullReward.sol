@@ -23,6 +23,9 @@ abstract contract PushPullReward is Initializable {
     /// @dev 'bytes4(keccak256(bytes("RewardTooLarge()")))'
     uint256 private constant _REWARD_TOO_LARGE_SELECTOR = 0x71009bf7;
 
+    /// @dev 'bytes4(keccak256(bytes("NoReward()")))'
+    uint256 private constant _NO_REWARD_SELECTOR = 0x6e992686;
+
     /**
      * Access the token that will deliver the tokens
      */
@@ -60,8 +63,7 @@ abstract contract PushPullReward is Initializable {
                 revert(0x1c, 0x04)
             }
         }
-        emit RewardAdded(user, founds);
-        _pendingRewards[user] += founds;
+        _addFoundsUnchecked(user, founds);
     }
 
     /**
@@ -69,8 +71,14 @@ abstract contract PushPullReward is Initializable {
      */
     function _addFoundsUnchecked(address user, uint256 founds) internal {
         emit RewardAdded(user, founds);
-        unchecked {
-            _pendingRewards[user] += founds;
+        assembly {
+            // Get the current pending reward
+            // Kecak (user, _pendingRewards.slot)
+            mstore(0, user)
+            mstore(0x20, _pendingRewards.slot)
+            let rewardSlot := keccak256(0, 0x40)
+            // Store the updated reward
+            sstore(rewardSlot, add(sload(rewardSlot), founds))
         }
     }
 
@@ -88,28 +96,41 @@ abstract contract PushPullReward is Initializable {
      * @dev Core logic of the withdraw method
      */
     function _withdraw(address user) internal {
+        uint256 userAmount;
         assembly {
+            // Check input params
             if iszero(user) {
                 mstore(0x00, _INVALID_ADDRESS_SELECTOR)
                 revert(0x1c, 0x04)
             }
+            // Get the current pending reward
+            // Kecak (user, _pendingRewards.slot)
+            mstore(0, user)
+            mstore(0x20, _pendingRewards.slot)
+            let rewardSlot := keccak256(0, 0x40)
+            userAmount := sload(rewardSlot)
+            // Revert if no reward
+            if iszero(userAmount) {
+                mstore(0x00, _NO_REWARD_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+            // Reset his reward
+            sstore(rewardSlot, 0)
         }
-        // Ensure the user have a pending reward
-        uint256 pendingReward = _pendingRewards[user];
-        if (pendingReward == 0) revert NoReward();
-        // Reset the user pending balance
-        _pendingRewards[user] = 0;
         // Emit the withdraw event
-        emit RewardWithdrawed(user, pendingReward, 0);
+        emit RewardWithdrawed(user, userAmount, 0);
         // Perform the transfer of the founds
-        token.safeTransfer(user, pendingReward);
+        token.safeTransfer(user, userAmount);
     }
 
     /**
      * @dev Core logic of the withdraw method, but with fee this time
      */
     function _withdrawWithFee(address user, uint256 feePercent, address feeRecipient) internal {
+        uint256 feesAmount;
+        uint256 userAmount;
         assembly {
+            // Check input params
             if or(iszero(user), iszero(feePercent)) {
                 mstore(0x00, _INVALID_ADDRESS_SELECTOR)
                 revert(0x1c, 0x04)
@@ -118,24 +139,27 @@ abstract contract PushPullReward is Initializable {
                 mstore(0x00, _REWARD_TOO_LARGE_SELECTOR)
                 revert(0x1c, 0x04)
             }
-        }
-        // The fees can't be more than 10% of the user reward
-        // Ensure the user have a pending reward
-        uint256 pendingReward = _pendingRewards[user];
-        if (pendingReward == 0) revert NoReward();
-        // Reset the user pending balance
-        _pendingRewards[user] = 0;
-        // Compute the amount of fees
-        uint256 feesAmount;
-        uint256 userReward;
-        unchecked {
-            feesAmount = (pendingReward * feePercent) / 100;
-            userReward = pendingReward - feesAmount;
+            // Get the current pending reward
+            // Kecak (user, _pendingRewards.slot)
+            mstore(0, user)
+            mstore(0x20, _pendingRewards.slot)
+            let rewardSlot := keccak256(0, 0x40)
+            let pendingReward := sload(rewardSlot)
+            // Revert if no reward
+            if iszero(pendingReward) {
+                mstore(0x00, _NO_REWARD_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+            // Reset his reward
+            sstore(rewardSlot, 0)
+            // Compute the fee's amount
+            feesAmount := div(mul(pendingReward, feePercent), 100)
+            userAmount := sub(pendingReward, feesAmount)
         }
         // Emit the withdraw event
-        emit RewardWithdrawed(user, userReward, feesAmount);
+        emit RewardWithdrawed(user, userAmount, feesAmount);
         // Perform the transfer of the founds
-        token.safeTransfer(user, userReward);
+        token.safeTransfer(user, userAmount);
         token.safeTransfer(feeRecipient, feesAmount);
     }
 

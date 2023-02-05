@@ -153,15 +153,15 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
             mstore(0, account)
             mstore(0x20, roleSlote)
             let slot := keccak256(0, 0x40)
-        
+
             // Get var at the given slot
-            let hasTheRole:= sload(slot)
-            
+            let hasTheRole := sload(slot)
+
             // Ensre the user has the right roles
             if eq(hasTheRole, false) {
                 mstore(0x00, _NOT_AUTHORIZED_SELECTOR)
                 revert(0x1c, 0x04)
-            } 
+            }
         }
     }
 
