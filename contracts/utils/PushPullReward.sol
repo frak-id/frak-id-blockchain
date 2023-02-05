@@ -143,7 +143,12 @@ abstract contract PushPullReward is Initializable {
      * @notice Get the available founds for the given user
      */
     function getAvailableFounds(address user) external view returns (uint256) {
-        if (user == address(0)) revert InvalidAddress();
+        assembly {
+            if iszero(user) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
         return _pendingRewards[user];
     }
 }

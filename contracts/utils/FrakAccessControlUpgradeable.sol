@@ -37,6 +37,15 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     /// @dev Mapping of roles -> user -> hasTheRight
     mapping(bytes32 => mapping(address => bool)) private _roles;
 
+    /// @dev 'bytes4(keccak256(bytes("ContractPaused()")))'
+    uint256 private constant _PAUSED_SELECTOR = 0xab35696f;
+
+    /// @dev 'bytes4(keccak256(bytes("ContractNotPaused()")))'
+    uint256 private constant _NOT_PAUSED_SELECTOR = 0xdcdde9dd;
+
+    /// @dev 'bytes4(keccak256(bytes("NotAuthorized()")))'
+    uint256 private constant _NOT_AUTHORIZED_SELECTOR = 0xea8e4eb5;
+
     /**
      * @notice Initializes the contract, granting the ADMIN, PAUSER, and UPGRADER roles to the msg.sender.
      * Also, set the contract as unpaused.
@@ -69,7 +78,12 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
      * - The contract must not be paused.
      */
     modifier whenNotPaused() {
-        if (paused()) revert ContractPaused();
+        assembly {
+            if sload(_paused.slot) {
+                mstore(0x00, _PAUSED_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
         _;
     }
 
@@ -81,7 +95,12 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
      * - The contract must be paused.
      */
     modifier whenPaused() {
-        if (!paused()) revert ContractNotPaused();
+        assembly {
+            if eq(sload(_paused.slot), false) {
+                mstore(0x00, _NOT_PAUSED_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
         _;
     }
 
@@ -125,7 +144,25 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
      * @notice Check the given user have the role
      */
     function _checkRole(bytes32 role, address account) internal view virtual {
-        if (!hasRole(role, account)) revert NotAuthorized();
+        assembly {
+            // Kecak (role, _roles.slot)
+            mstore(0, role)
+            mstore(0x20, _roles.slot)
+            let roleSlote := keccak256(0, 0x40)
+            // Kecak (acount, roleSlot)
+            mstore(0, account)
+            mstore(0x20, roleSlote)
+            let slot := keccak256(0, 0x40)
+        
+            // Get var at the given slot
+            let hasTheRole:= sload(slot)
+            
+            // Ensre the user has the right roles
+            if eq(hasTheRole, false) {
+                mstore(0x00, _NOT_AUTHORIZED_SELECTOR)
+                revert(0x1c, 0x04)
+            } 
+        }
     }
 
     /**
