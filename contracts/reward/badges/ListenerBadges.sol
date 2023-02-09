@@ -32,11 +32,16 @@ abstract contract ListenerBadges {
      * @dev Update the content internal coefficient
      */
     function getListenerBadge(address listener) public view returns (uint256 listenerBadge) {
-        listenerBadge = _listenerBadges[listener];
-        if (listenerBadge == 0) {
-            // If the badge of this listener isn't set yet, set it to default
-            listenerBadge = 1 ether;
+        assembly {
+            // Get the current listener badge
+            // Kecak (listener, _listenerBadges.slot)
+            mstore(0, listener)
+            mstore(0x20, _listenerBadges.slot)
+            let badgeSlot := keccak256(0, 0x40)
+            // Load it
+            listenerBadge := sload(badgeSlot)
+            // If null, set it to 1 ether by default
+            if iszero(listenerBadge) { listenerBadge := 1000000000000000000 }
         }
-        return listenerBadge;
     }
 }

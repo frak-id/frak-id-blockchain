@@ -7,9 +7,6 @@ import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20
 import {FrakAccessControlUpgradeable} from "./FrakAccessControlUpgradeable.sol";
 import {NoReward, InvalidAddress, RewardTooLarge} from "./FrakErrors.sol";
 
-/// @dev Error throwned when the contract havn't enough founds for the withdraw
-error NotEnoughFound();
-
 /**
  * @dev Abstraction for contract that give a push / pull reward, address based
  */
@@ -26,25 +23,25 @@ abstract contract PushPullReward is Initializable {
     /// @dev 'bytes4(keccak256(bytes("NoReward()")))'
     uint256 private constant _NO_REWARD_SELECTOR = 0x6e992686;
 
-    /**
-     * Access the token that will deliver the tokens
-     */
-    IERC20Upgradeable internal token;
-
-    /**
-     * The pending reward for the given address
-     */
-    mapping(address => uint256) internal _pendingRewards;
-
-    /**
-     * @notice Event emitted when a reward is added
-     */
+    /// @dev Event emitted when a reward is added
     event RewardAdded(address indexed user, uint256 amount);
 
-    /**
-     * @notice Event emitted when a user withdraw his pending reward
-     */
+    /// @dev Event emitted when a user withdraw his pending reward
     event RewardWithdrawed(address indexed user, uint256 amount, uint256 fees);
+
+    /// @dev 'keccak256(bytes("RewardAdded(address,uint256)"))'
+    uint256 private constant _REWARD_ADDED_EVENT_SELECTOR =
+        0xac24935fd910bc682b5ccb1a07b718cadf8cf2f6d1404c4f3ddc3662dae40e29;
+
+    /// @dev 'keccak256(bytes("RewardWithdrawed(address,uint256,uint256)"))'
+    uint256 private constant _REWARD_WITHDRAWAD_EVENT_SELECTOR =
+        0xaeee89f8ffa85f63cb6ab3536b526d899fe7213514e54d6ca591edbe187e6866;
+
+    /// @dev The pending reward for the given address
+    mapping(address => uint256) internal _pendingRewards;
+
+    /// @dev Access the token that will deliver the tokens
+    IERC20Upgradeable internal token;
 
     /**
      * Init of this contract
@@ -70,8 +67,10 @@ abstract contract PushPullReward is Initializable {
      * @dev Add founds for the given user, without checking the operation (gas gain, usefull when founds are checked before)
      */
     function _addFoundsUnchecked(address user, uint256 founds) internal {
-        emit RewardAdded(user, founds);
         assembly {
+            // Emit the witdraw event
+            mstore(0x00, founds)
+            log2(0, 0x20, _REWARD_WITHDRAWAD_EVENT_SELECTOR, user)
             // Get the current pending reward
             // Kecak (user, _pendingRewards.slot)
             mstore(0, user)
@@ -114,11 +113,13 @@ abstract contract PushPullReward is Initializable {
                 mstore(0x00, _NO_REWARD_SELECTOR)
                 revert(0x1c, 0x04)
             }
+            // Emit the witdraw event
+            mstore(0x00, userAmount)
+            mstore(0x20, 0)
+            log2(0, 0x40, _REWARD_WITHDRAWAD_EVENT_SELECTOR, user)
             // Reset his reward
             sstore(rewardSlot, 0)
         }
-        // Emit the withdraw event
-        emit RewardWithdrawed(user, userAmount, 0);
         // Perform the transfer of the founds
         token.safeTransfer(user, userAmount);
     }
@@ -155,9 +156,11 @@ abstract contract PushPullReward is Initializable {
             // Compute the fee's amount
             feesAmount := div(mul(pendingReward, feePercent), 100)
             userAmount := sub(pendingReward, feesAmount)
+            // Emit the witdraw event
+            mstore(0x00, userAmount)
+            mstore(0x20, feesAmount)
+            log2(0, 0x40, _REWARD_WITHDRAWAD_EVENT_SELECTOR, user)
         }
-        // Emit the withdraw event
-        emit RewardWithdrawed(user, userAmount, feesAmount);
         // Perform the transfer of the founds
         token.safeTransfer(user, userAmount);
         token.safeTransfer(feeRecipient, feesAmount);

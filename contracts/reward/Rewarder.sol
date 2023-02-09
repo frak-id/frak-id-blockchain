@@ -51,6 +51,18 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /// @dev 'bytes4(keccak256(bytes("InvalidArray()")))'
     uint256 private constant _INVALID_ARRAY_SELECTOR = 0x1ec5aa51;
 
+    /// @dev 'bytes4(keccak256(bytes("RewardTooLarge()")))'
+    uint256 private constant _REWARD_TOO_LARGE_SELECTOR = 0x71009bf7;
+
+    /// @dev Event emitted when a user is rewarded for his listen
+    event RewardOnContent(
+        address indexed user, uint256 indexed contentId, uint256 baseUserReward, uint256 earningFactor, uint16 ccuCount
+    );
+
+    /// @dev 'keccak256(bytes("RewardOnContent(address,uint256,uint256,uint256,uint16"))'
+    uint256 private constant _REWARD_ON_CONTENT_EVENT_SELECTOR =
+        0x660494162a7aab2356c74a0a63c109a0a2ac6ac9d3b95415756bac61af417ecb;
+
     /**
      * @notice factor user to compute the number of token to generate (on 1e18 decimals)
      */
@@ -85,13 +97,6 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
      * @dev Address of the foundation wallet
      */
     address private foundationWallet;
-
-    /**
-     * @notice Event emitted when a user is rewarded for his listen
-     */
-    event RewardOnContent(
-        address indexed user, uint256 indexed contentId, uint256 baseUserReward, uint256 earningFactor, uint16 ccuCount
-    );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -156,7 +161,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
                 revert(0x1c, 0x04)
             }
             // Compute the new total amount
-            let newTotalAmount := add(amount, mload(totalFrakMinted.slot))
+            let newTotalAmount := add(amount, sload(totalFrakMinted.slot))
             // Ensure it's good
             if gt(newTotalAmount, REWARD_MINT_CAP) {
                 mstore(0x00, _INVALID_REWARD_SELECTOR)
@@ -199,7 +204,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
                     revert(0x1c, 0x04)
                 }
                 // Compute the new total amount
-                let newTotalAmount := add(amount, mload(totalFrakMinted.slot))
+                let newTotalAmount := add(amount, sload(totalFrakMinted.slot))
                 // Ensure it's good
                 if gt(newTotalAmount, REWARD_MINT_CAP) {
                     mstore(0x00, _INVALID_REWARD_SELECTOR)
@@ -276,10 +281,21 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         _addFoundsUnchecked(listener, totalRewards.user);
 
         // Compute the total amount to mint, and ensure we don't exceed our cap
-        unchecked {
-            uint256 totalMint = totalRewards.user + totalRewards.owners + totalRewards.content + totalRewards.referral;
-            if (totalMint + totalFrakMinted > REWARD_MINT_CAP) revert InvalidReward();
-            totalFrakMinted += totalMint;
+        assembly {
+            // Compute the total to be minted
+            let userAndOwner := add(mload(totalRewards), mload(add(totalRewards, 0x20)))
+            let referralAndContent := add(mload(add(totalRewards, 0x40)), mload(add(totalRewards, 0x60)))
+            let totalMint := add(userAndOwner, referralAndContent)
+
+            // Compute the new total amount
+            let newTotalAmount := add(totalMint, sload(totalFrakMinted.slot))
+            // Ensure it's good
+            if gt(newTotalAmount, REWARD_MINT_CAP) {
+                mstore(0x00, _REWARD_TOO_LARGE_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+            // Increase our total frak minted
+            sstore(totalFrakMinted.slot, newTotalAmount)
         }
 
         // If we got reward for the pool, transfer them
@@ -321,7 +337,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
             // Compute the reward for the content pool and the referral
             uint256 contentPoolReward;
             unchecked {
-                // Compute the rewards
+                // Compute the reward
                 userReward = (totalReward * 35) / 100;
                 ownerReward = totalReward - userReward;
 
@@ -387,18 +403,53 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         earningFactor = baseRewardForTokenType(FrakMath.TOKEN_TYPE_FREE_MASK);
         hasOnePaidFraktion = false;
 
+        assembly {
+            // Get the length
+            let length := mload(tokenBalances)
+
+            // Load the offset for each one of our storage pointer
+            let tokenBalancesOffset := add(tokenBalances, 0x20)
+            let fraktionTypeOffset := add(fraktionTypes, 0x20)
+
+            // Iterate over each one of them
+            for { let i := 0 } lt(i, length) { i := add(i, 1) } {
+                // Get balance and fraktion type
+                let tokenBalance := mload(add(tokenBalancesOffset, mul(0x20, i)))
+                let fraktionType := mload(add(fraktionTypeOffset, mul(0x20, i)))
+
+                // Update the one paid fraktion value
+                if not(hasOnePaidFraktion) {
+                    let isPayedFraktion := and(gt(fraktionType, 2), lt(fraktionType, 7))
+                    hasOnePaidFraktion := and(isPayedFraktion, gt(tokenBalance, 0))
+                }
+
+                // Get base reward for the fraktion type
+                let addedReward := 0
+                switch fraktionType
+                case 2 { addedReward := mul(10000000000000000, tokenBalance) } // free - 0.01
+                case 3 { addedReward := mul(100000000000000000, tokenBalance) } // common - 0.1
+                case 4 { addedReward := mul(500000000000000000, tokenBalance) } // premium - 0.5
+                case 5 { addedReward := mul(1000000000000000000, tokenBalance) } // gold - 1
+                case 6 { addedReward := mul(2000000000000000000, tokenBalance) } // diamond - 2 
+                default {}
+
+                // Update the earning factor if balance are present
+                earningFactor := add(earningFactor, addedReward)
+            }
+        }
+
         // Iterate over each balance to compute the earning factor
-        for (uint256 balanceIndex; balanceIndex < tokenBalances.length;) {
+        /*for (uint256 balanceIndex; balanceIndex < tokenBalances.length;) {
             uint256 balance = tokenBalances[balanceIndex];
             // Check if that was a paid fraktion or not
-            hasOnePaidFraktion = hasOnePaidFraktion || (fraktionTypes[balanceIndex].isPayedTokenToken() && balance > 0);
+            hasOnePaidFraktion = hasOnePaidFraktion || fraktionTypes[balanceIndex].isPayedTokenToken() && balance > 0);
             // Increase the earning factor
             unchecked {
                 // On 1e18 decimals
                 earningFactor += balance * baseRewardForTokenType(fraktionTypes[balanceIndex]);
                 ++balanceIndex;
             }
-        }
+        }*/
     }
 
     /// @dev Use multi wad div down for multi precision when multiple value of 1 eth

@@ -32,11 +32,16 @@ abstract contract ContentBadges {
      * @dev Get the payment badges for the given informations
      */
     function getContentBadge(uint256 contentId) public view returns (uint256 badge) {
-        badge = _contentBadges[contentId];
-        if (badge == 0) {
-            // If the badge of this content isn't set yet, set it to default
-            badge = 1 ether;
+        assembly {
+            // Get the current content badge
+            // Kecak (contentId, _contentBadges.slot)
+            mstore(0, contentId)
+            mstore(0x20, _contentBadges.slot)
+            let badgeSlot := keccak256(0, 0x40)
+            // Load it
+            badge := sload(badgeSlot)
+            // If null, set it to 1 ether by default
+            if iszero(badge) { badge := 1000000000000000000 }
         }
-        return badge;
     }
 }
