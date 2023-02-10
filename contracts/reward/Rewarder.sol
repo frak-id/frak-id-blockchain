@@ -400,8 +400,8 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         uint256[] memory tokenBalances = fraktionTokens.balanceOfIdsBatch(listener, fraktionIds);
 
         // default value to free fraktion
-        earningFactor = baseRewardForTokenType(FrakMath.TOKEN_TYPE_FREE_MASK);
-        hasOnePaidFraktion = false;
+        earningFactor = 0.01 ether; // free - 0.01
+        hasOnePaidFraktion;
 
         assembly {
             // Get the length
@@ -423,10 +423,9 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
                     hasOnePaidFraktion := and(isPayedFraktion, gt(tokenBalance, 0))
                 }
 
-                // Get base reward for the fraktion type
+                // Get base reward for the fraktion type (only payed one, since free is handled on init of the var)
                 let addedReward := 0
                 switch fraktionType
-                case 2 { addedReward := mul(10000000000000000, tokenBalance) } // free - 0.01
                 case 3 { addedReward := mul(100000000000000000, tokenBalance) } // common - 0.1
                 case 4 { addedReward := mul(500000000000000000, tokenBalance) } // premium - 0.5
                 case 5 { addedReward := mul(1000000000000000000, tokenBalance) } // gold - 1

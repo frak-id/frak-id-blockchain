@@ -34,6 +34,15 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
     using SafeERC20Upgradeable for FrakToken;
     using FrakMath for uint256;
 
+    /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
+    uint256 private constant _INVALID_ADDRESS_SELECTOR = 0xe6c4247b;
+
+    /// @dev Event emitted when a new content is minted
+    event ContentMinted(uint256 baseId, address indexed owner);
+
+    /// @dev Event emitted when a new fraktion for a content is minted
+    event FractionMinted(uint256 indexed fractionId, address indexed user, uint256 amount, uint256 cost);
+
     //// @dev Reference to the fraktion tokens contract (ERC1155)
     FraktionTokens private fraktionTokens;
 
@@ -42,12 +51,6 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
 
     /// @dev Address of our foundation wallet (for fee's payment)
     address private foundationWallet;
-
-    /// @dev Event emitted when a new content is minted
-    event ContentMinted(uint256 baseId, address indexed owner);
-
-    /// @dev Event emitted when a new fraktion for a content is minted
-    event FractionMinted(uint256 indexed fractionId, address indexed user, uint256 amount, uint256 cost);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -98,7 +101,14 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         uint256 goldSupply,
         uint256 diamondSupply
     ) external payable override onlyRole(FrakRoles.MINTER) whenNotPaused returns (uint256 contentId) {
-        if (contentOwnerAddress == address(0)) revert InvalidAddress();
+        assembly {
+            // Check owner address
+            if iszero(contentOwnerAddress) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+            // TODO : Check supplies
+        }
         if (commonSupply == 0 || commonSupply > 500 || premiumSupply > 200 || goldSupply > 50 || diamondSupply > 20) {
             revert InvalidSupply();
         }

@@ -74,7 +74,10 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         returns (uint256 id)
     {
         // Get the next content id and increment the current content token id
-        id = ++_currentContentTokenId;
+        assembly {
+            id := add(sload(_currentContentTokenId.slot), 1)
+            sstore(_currentContentTokenId.slot, id)
+        }
 
         // Mint the content nft into the content owner wallet directly
         uint256 nftId = id.buildNftId();
