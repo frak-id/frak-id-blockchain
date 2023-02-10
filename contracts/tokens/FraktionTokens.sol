@@ -114,6 +114,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
      */
     function setSupplyBatch(uint256[] calldata ids, uint256[] calldata supplies)
         external
+        payable
         onlyRole(FrakRoles.MINTER)
         whenNotPaused
     {
@@ -123,7 +124,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
             uint256 id = ids[i];
 
             // We can't increase the supply of free fraktion and of NFT fraktion
-            uint8 tokenType = id.extractTokenType();
+            uint256 tokenType = id.extractTokenType();
             if (tokenType == FrakMath.TOKEN_TYPE_FREE_MASK || tokenType == FrakMath.TOKEN_TYPE_NFT_MASK) {
                 revert SupplyUpdateNotAllowed();
             }
@@ -228,7 +229,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
             uint256 id = ids[i];
 
             // Get the token type
-            uint8 tokenType = id.extractTokenType();
+            uint256 tokenType = id.extractTokenType();
 
             // If it shouldn't be supply aware, check if it was set
             if (tokenType == FrakMath.TOKEN_TYPE_FREE_MASK) {

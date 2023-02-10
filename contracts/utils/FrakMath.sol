@@ -25,6 +25,8 @@ library FrakMath {
     uint8 internal constant TOKEN_TYPE_GOLD_MASK = 5;
     /// @dev Diamond Token type mask
     uint8 internal constant TOKEN_TYPE_DIAMOND_MASK = 6;
+    /// @dev If a token type is <= to this value it's not a payed one
+    uint8 internal constant PAYED_TOKEN_TYPE_MAX = 7;
 
     /**
      * @dev Build the id for a S FNT
@@ -106,28 +108,36 @@ library FrakMath {
     /**
      * @dev Return the id of a content without the token type mask
      * @param id uint256 ID of the token tto exclude the mask of
-     * @return uint256 The id without the type mask
+     * @return contentId uint256 The id without the type mask
      */
-    function extractContentId(uint256 id) internal pure returns (uint256) {
-        return id >> ID_OFFSET;
+    function extractContentId(uint256 id) internal pure returns (uint256 contentId) {
+        assembly {
+            contentId := div(id, exp(2, ID_OFFSET))
+        }
     }
 
     /**
      * @dev Return the token type
      * @param id uint256 ID of the token to extract the mask from
-     * @return uint256 The token type
+     * @return tokenType uint256 The token type
      */
-    function extractTokenType(uint256 id) internal pure returns (uint8) {
-        return uint8(id & TYPE_MASK);
+    function extractTokenType(uint256 id) internal pure returns (uint256 tokenType) {
+        assembly {
+            tokenType := and(id, TYPE_MASK)
+        }
     }
 
     /**
      * @dev Return the token type
      * @param id uint256 ID of the token to extract the mask from
-     * @return uint256 The token type
+     * @return contentId uint256 The content id
+     * @return tokenType uint256 The token type
      */
-    function extractContentIdAndTokenType(uint256 id) internal pure returns (uint256, uint8) {
-        return (id >> ID_OFFSET, uint8(id & TYPE_MASK));
+    function extractContentIdAndTokenType(uint256 id) internal pure returns (uint256 contentId, uint256 tokenType) {
+        assembly {
+            contentId := div(id, exp(2, ID_OFFSET))
+            tokenType := and(id, TYPE_MASK)
+        }
     }
 
     /**
@@ -136,15 +146,17 @@ library FrakMath {
      * @return bool true if the token is related to a content, false otherwise
      */
     function isContentRelatedToken(uint256 id) internal pure returns (bool) {
-        uint8 tokenType = extractTokenType(id);
+        uint256 tokenType = extractTokenType(id);
         return tokenType > TOKEN_TYPE_NFT_MASK && tokenType <= TOKEN_TYPE_DIAMOND_MASK;
     }
 
     /**
      * @dev Check if the token is payed or not
      */
-    function isPayedTokenToken(uint256 tokenType) internal pure returns (bool) {
-        return tokenType > TOKEN_TYPE_FREE_MASK && tokenType <= TOKEN_TYPE_DIAMOND_MASK;
+    function isPayedTokenToken(uint256 tokenType) internal pure returns (bool isPayed) {
+        assembly {
+            isPayed := and(gt(tokenType, TOKEN_TYPE_FREE_MASK), lt(tokenType, PAYED_TOKEN_TYPE_MAX))
+        }
     }
 
     /**

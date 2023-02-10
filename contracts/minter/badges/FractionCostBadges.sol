@@ -54,7 +54,7 @@ abstract contract FractionCostBadges {
         fractionBadge = fractionBadges[fractionId];
         if (fractionBadge == 0) {
             // If the badge of this fraction isn't set yet, set it to default
-            uint8 tokenType = FrakMath.extractTokenType(fractionId);
+            uint256 tokenType = FrakMath.extractTokenType(fractionId);
             fractionBadge = initialFractionCost(tokenType);
         }
         return fractionBadge;
@@ -66,7 +66,7 @@ abstract contract FractionCostBadges {
      * @param tokenType The type of token to get the initial cost of.
      * @return initialCost The initial cost of the specified token type in wei.
      */
-    function initialFractionCost(uint8 tokenType) public pure returns (uint96 initialCost) {
+    function initialFractionCost(uint256 tokenType) public pure returns (uint96 initialCost) {
         if (tokenType == FrakMath.TOKEN_TYPE_COMMON_MASK) {
             initialCost = 20 ether; // 20 FRK
         } else if (tokenType == FrakMath.TOKEN_TYPE_PREMIUM_MASK) {

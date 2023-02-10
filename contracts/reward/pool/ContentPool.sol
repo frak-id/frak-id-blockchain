@@ -147,7 +147,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
      */
     function updateParticipants(address from, address to, uint256 fraktionId, uint256 amountMoved) private {
         // Extract content id and token type from this tx
-        (uint256 contentId, uint8 tokenType) = FrakMath.extractContentIdAndTokenType(fraktionId);
+        (uint256 contentId, uint256 tokenType) = FrakMath.extractContentIdAndTokenType(fraktionId);
         // Get the initial share value of this token
         uint256 sharesValue = getSharesForTokenType(tokenType);
         if (sharesValue == 0) return; // Jump this iteration if this fraktions doesn't count for any shares
@@ -176,7 +176,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
      */
     function updateParticipantAndPool(address from, address to, uint256 fraktionId, uint256 amountMoved) private {
         // Extract content id and token type from this tx
-        (uint256 contentId, uint8 tokenType) = FrakMath.extractContentIdAndTokenType(fraktionId);
+        (uint256 contentId, uint256 tokenType) = FrakMath.extractContentIdAndTokenType(fraktionId);
         // Get the total shares moved
         uint120 sharesMoved = uint120(getSharesForTokenType(tokenType) * amountMoved);
         if (sharesMoved == 0) return; // Jump this iteration if this fraktions doesn't count for any shares
@@ -383,7 +383,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
      * We use a pure function instead of a mapping to economise on storage read,
      * and since this reawrd shouldn't evolve really fast
      */
-    function getSharesForTokenType(uint8 tokenType) private pure returns (uint256 shares) {
+    function getSharesForTokenType(uint256 tokenType) private pure returns (uint256 shares) {
         assembly {
             switch tokenType
             case 3 {
