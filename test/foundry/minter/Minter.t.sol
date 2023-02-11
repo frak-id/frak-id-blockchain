@@ -119,7 +119,10 @@ contract MinterTest is FrkTokenTestHelper {
     function test_mintFractionForUser() public {
         // Add an initial content
         prankDeployer();
-        uint256 contentId = minter.addContent(address(1), 1, 1, 1, 1);
+        uint256 contentId = minter.addContent(address(1), 10, 1, 1, 1);
+        // Ensure the supply is good
+        assertEq(fraktionTokens.supplyOf(contentId.buildCommonNftId()), 10);
+        assertEq(fraktionTokens.supplyOf(contentId.buildDiamondNftId()), 1);
         // Approve the minter for token transfe
         prankDeployer();
         frakToken.mint(address(1), 500 ether);
@@ -128,6 +131,8 @@ contract MinterTest is FrkTokenTestHelper {
         // Launch the buy prcess
         prankDeployer();
         minter.mintFractionForUser(contentId.buildCommonNftId(), address(1), 1);
+        // Ensure the supply is good
+        assertEq(fraktionTokens.supplyOf(contentId.buildCommonNftId()), 9);
     }
 
     function test_fail_mintFractionForUser_ContractPaused() public prankExecAsDeployer {

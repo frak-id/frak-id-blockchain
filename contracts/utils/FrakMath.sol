@@ -162,10 +162,12 @@ library FrakMath {
     /**
      * @dev Check if the given token id is a content NFT
      * @param id uint256 ID of the token to check
-     * @return bool true if the token is a content nft, false otherwise
+     * @return isContent bool true if the token is a content nft, false otherwise
      */
-    function isContentNft(uint256 id) internal pure returns (bool) {
-        return extractTokenType(id) == TOKEN_TYPE_NFT_MASK;
+    function isContentNft(uint256 id) internal pure returns (bool isContent) {
+        assembly {
+            isContent := eq(and(id, TYPE_MASK), TOKEN_TYPE_NFT_MASK)
+        }
     }
 
     /**
