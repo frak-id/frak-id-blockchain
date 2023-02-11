@@ -2,12 +2,14 @@
 pragma solidity 0.8.17;
 
 /**
- * Interface needing to be implemented for contract who want to receive fraktion transfer callback
+ * @author  @KONFeature
+ * @title   FraktionTransferCallback
+ * @dev  Interface for contract who want to listen of the fraktion transfer (ERC1155 tokens transfer)
+ * @custom:security-contact contact@frak.id
  */
-/// @custom:security-contact contact@frak.id
 interface FraktionTransferCallback {
     /**
-     * Function called when a fraktion is transfered between two person
+     * @dev Function called when a fraktion is transfered between two person
      */
     function onFraktionsTransferred(address from, address to, uint256[] memory ids, uint256[] memory amount)
         external

@@ -14,8 +14,12 @@ error InsuficiantSupply();
 /// @dev Error throwned when we try to update the supply of a non supply aware token
 error SupplyUpdateNotAllowed();
 
-/// @custom:security-contact contact@frak.id
-/// @custom:oz-upgrades-unsafe-allow external-library-linking
+/**
+ * @author  @KONFeature
+ * @title   FraktionTokens
+ * @dev  ERC1155 for the Frak Fraktions tokens, used as ownership proof for a content, or investisment proof
+ * @custom:security-contact contact@frak.id
+ */
 contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     using FrakMath for uint256;
 
@@ -70,7 +74,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     }
 
     /**
-     * Register a new transaction callback
+     * @dev Register a new transaction callback
      */
     function registerNewCallback(address callbackAddr) external onlyRole(FrakRoles.ADMIN) whenNotPaused {
         transferCallback = FraktionTransferCallback(callbackAddr);

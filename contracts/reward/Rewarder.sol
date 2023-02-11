@@ -426,10 +426,14 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
                 // Get base reward for the fraktion type (only payed one, since free is handled on init of the var)
                 let addedReward := 0
                 switch fraktionType
-                case 3 { addedReward := mul(100000000000000000, tokenBalance) } // common - 0.1
-                case 4 { addedReward := mul(500000000000000000, tokenBalance) } // premium - 0.5
-                case 5 { addedReward := mul(1000000000000000000, tokenBalance) } // gold - 1
-                case 6 { addedReward := mul(2000000000000000000, tokenBalance) } // diamond - 2 
+                case 3 { addedReward := mul(100000000000000000, tokenBalance) }
+                // common - 0.1
+                case 4 { addedReward := mul(500000000000000000, tokenBalance) }
+                // premium - 0.5
+                case 5 { addedReward := mul(1000000000000000000, tokenBalance) }
+                // gold - 1
+                case 6 { addedReward := mul(2000000000000000000, tokenBalance) }
+                // diamond - 2
                 default {}
 
                 // Update the earning factor if balance are present
