@@ -37,13 +37,24 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
     uint256 private constant _INVALID_ADDRESS_SELECTOR = 0xe6c4247b;
 
+    /// @dev 'bytes4(keccak256(bytes("InvalidSupply()")))'
+    uint256 private constant _INVALID_SUPPLY_SELECTOR = 0x15ae6727;
+
     /// @dev Event emitted when a new content is minted
     event ContentMinted(uint256 baseId, address indexed owner);
 
     /// @dev Event emitted when a new fraktion for a content is minted
     event FractionMinted(uint256 indexed fractionId, address indexed user, uint256 amount, uint256 cost);
 
-    //// @dev Reference to the fraktion tokens contract (ERC1155)
+    /// @dev 'keccak256(bytes("ContentMinted(uint256,address)"))'
+    uint256 private constant _CONTENT_MINTED_EVENT_SELECTOR =
+        0x660494162a7aab2356c74a0a63c109a0a2ac6ac9d3b95415756bac61af417ecb;
+
+    /// @dev 'keccak256(bytes("FractionMinted(uint256,address,uint256,uint256)"))'
+    uint256 private constant _FRACTION_MINTED_EVENT_SELECTOR =
+        0x660494162a7aab2356c74a0a63c109a0a2ac6ac9d3b95415756bac61af417ecb;
+
+    /// @dev Reference to the fraktion tokens contract (ERC1155)
     FraktionTokens private fraktionTokens;
 
     /// @dev Reference to the Frak token contract (ERC20)
@@ -107,24 +118,32 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
                 mstore(0x00, _INVALID_ADDRESS_SELECTOR)
                 revert(0x1c, 0x04)
             }
-            // TODO : Check supplies
-        }
-        if (commonSupply == 0 || commonSupply > 500 || premiumSupply > 200 || goldSupply > 50 || diamondSupply > 20) {
-            revert InvalidSupply();
+            // Check supplies
+            if or(
+                or(iszero(commonSupply), gt(commonSupply, 500)),
+                or(or(gt(premiumSupply, 200), gt(goldSupply, 50)), gt(diamondSupply, 20))
+            ) {
+                mstore(0x00, _INVALID_SUPPLY_SELECTOR)
+                revert(0x1c, 0x04)
+            }
         }
         // Try to mint the new content
         contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
         // Then set the supply for each token types
         uint256[] memory ids = new uint256[](4);
-        ids[0] = contentId.buildCommonNftId();
-        ids[1] = contentId.buildPremiumNftId();
-        ids[2] = contentId.buildGoldNftId();
-        ids[3] = contentId.buildDiamondNftId();
         uint256[] memory supplies = new uint256[](4);
-        supplies[0] = commonSupply;
-        supplies[1] = premiumSupply;
-        supplies[2] = goldSupply;
-        supplies[3] = diamondSupply;
+        assembly {
+            // Store the ids
+            mstore(add(ids, 0x20), or(mul(contentId, exp(2, 4)), 3))
+            mstore(add(ids, 0x40), or(mul(contentId, exp(2, 4)), 4))
+            mstore(add(ids, 0x60), or(mul(contentId, exp(2, 4)), 5))
+            mstore(add(ids, 0x80), or(mul(contentId, exp(2, 4)), 6))
+            // Store the supplies
+            mstore(add(supplies, 0x20), commonSupply)
+            mstore(add(supplies, 0x40), premiumSupply)
+            mstore(add(supplies, 0x60), goldSupply)
+            mstore(add(supplies, 0x80), diamondSupply)
+        }
         fraktionTokens.setSupplyBatch(ids, supplies);
         // Emit the event
         emit ContentMinted(contentId, contentOwnerAddress);

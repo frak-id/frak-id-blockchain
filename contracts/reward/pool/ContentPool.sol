@@ -25,7 +25,17 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     // Add the library methods
     using EnumerableSet for EnumerableSet.UintSet;
 
-    uint256 private constant MAX_REWARD = 100_000 ether; // The max reward we can have in a pool
+    /// @dev Event emitted when a reward is added to the pool
+    event PoolRewardAdded(uint256 indexed contentId, uint256 reward);
+
+    /// @dev Event emitted when the pool shares are updated
+    event PoolSharesUpdated(uint256 indexed contentId, uint256 indexed poolId, uint256 totalShares);
+
+    /// @dev Event emitted when participant share are updated
+    event ParticipantShareUpdated(address indexed user, uint256 indexed contentId, uint256 shares);
+
+    /// @dev Maximum reward we can have in a pool
+    uint256 private constant MAX_REWARD = 100_000 ether;
 
     /**
      * @dev Represent a pool reward state
@@ -48,40 +58,17 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         uint256 lastStateIndex; // What was the last state index he claimed in the pool ?
     }
 
-    /**
-     * @dev The index of the current state index per content
-     */
+    /// @dev The index of the current state index per content
     mapping(uint256 => uint256) private currentStateIndex;
 
-    /**
-     * @dev All the different reward states per content id
-     */
+    /// @dev All the different reward states per content id
     mapping(uint256 => RewardState[]) private rewardStates;
 
-    /**
-     * @dev Mapping between content id, to address to participant
-     */
+    /// @dev Mapping between content id, to address to participant
     mapping(uint256 => mapping(address => Participant)) private participants;
 
-    /**
-     * @dev User address to list of content pool he is in
-     */
+    /// @dev User address to list of content pool he is in
     mapping(address => EnumerableSet.UintSet) private userContentPools;
-
-    /**
-     * @dev Event emitted when a reward is added to the pool
-     */
-    event PoolRewardAdded(uint256 indexed contentId, uint256 reward);
-
-    /**
-     * @dev Event emitted when the pool shares are updated
-     */
-    event PoolSharesUpdated(uint256 indexed contentId, uint256 indexed poolId, uint256 totalShares);
-
-    /**
-     * @dev Event emitted when participant share are updated
-     */
-    event ParticipantShareUpdated(address indexed user, uint256 indexed contentId, uint256 shares);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -384,7 +371,17 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
      * and since this reawrd shouldn't evolve really fast
      */
     function getSharesForTokenType(uint256 tokenType) private pure returns (uint256 shares) {
-        assembly {
+        if (tokenType == FrakMath.TOKEN_TYPE_COMMON_MASK) {
+            shares = 10;
+        } else if (tokenType == FrakMath.TOKEN_TYPE_PREMIUM_MASK) {
+            shares = 50;
+        } else if (tokenType == FrakMath.TOKEN_TYPE_GOLD_MASK) {
+            shares = 100;
+        } else if (tokenType == FrakMath.TOKEN_TYPE_DIAMOND_MASK) {
+            shares = 200;
+        }
+        // TODO : Why is solidity more gaz efficient than yul ? Check yul code
+        /*assembly {
             switch tokenType
             case 3 {
                 // common
@@ -403,7 +400,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
                 shares := 200
             }
             default { shares := 0 }
-        }
+        }*/
     }
 
     /**
