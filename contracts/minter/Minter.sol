@@ -11,18 +11,6 @@ import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgr
 import {InvalidAddress} from "../utils/FrakErrors.sol";
 import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
-/// @dev Error emitted when the input supply is invalid
-error InvalidSupply();
-
-/// @dev Error emitted when it remain some fraktion supply when wanting to increase it
-error RemainingSupply();
-
-/// @dev Error emitted when we only want to mint a free fraktion, and that's not a free fraktion
-error ExpectingOnlyFreeFraktion();
-
-/// @dev Error emitted when the user already have a free fraktion
-error AlreadyHaveFreeFraktion();
-
 /**
  * @author  @KONFeature
  * @title   Minter
@@ -34,11 +22,31 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
     using SafeERC20Upgradeable for FrakToken;
     using FrakMath for uint256;
 
+    /* -------------------------------------------------------------------------- */
+    /*                                   Error's                                  */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev Error emitted when the input supply is invalid
+    error InvalidSupply();
+
+    /// @dev Error emitted when it remain some fraktion supply when wanting to increase it
+    error RemainingSupply();
+
+    /// @dev Error emitted when we only want to mint a free fraktion, and that's not a free fraktion
+    error ExpectingOnlyFreeFraktion();
+
+    /// @dev Error emitted when the user already have a free fraktion
+    error AlreadyHaveFreeFraktion();
+
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
     uint256 private constant _INVALID_ADDRESS_SELECTOR = 0xe6c4247b;
 
     /// @dev 'bytes4(keccak256(bytes("InvalidSupply()")))'
     uint256 private constant _INVALID_SUPPLY_SELECTOR = 0x15ae6727;
+
+    /* -------------------------------------------------------------------------- */
+    /*                                   Event's                                  */
+    /* -------------------------------------------------------------------------- */
 
     /// @dev Event emitted when a new content is minted
     event ContentMinted(uint256 baseId, address indexed owner);
@@ -54,6 +62,10 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
     uint256 private constant _FRACTION_MINTED_EVENT_SELECTOR =
         0x660494162a7aab2356c74a0a63c109a0a2ac6ac9d3b95415756bac61af417ecb;
 
+    /* -------------------------------------------------------------------------- */
+    /*                                   Storage                                  */
+    /* -------------------------------------------------------------------------- */
+
     /// @dev Reference to the fraktion tokens contract (ERC1155)
     FraktionTokens private fraktionTokens;
 
@@ -62,6 +74,10 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
 
     /// @dev Address of our foundation wallet (for fee's payment)
     address private foundationWallet;
+
+    /* -------------------------------------------------------------------------- */
+    /*                                  Function                                  */
+    /* -------------------------------------------------------------------------- */
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -94,6 +110,10 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         // Grant the badge updater role to the sender
         _grantRole(FrakRoles.BADGE_UPDATER, msg.sender);
     }
+
+    /* -------------------------------------------------------------------------- */
+    /*                          External write function's                         */
+    /* -------------------------------------------------------------------------- */
 
     /**
      * @notice  Mint a new content to the FrkEcosystem

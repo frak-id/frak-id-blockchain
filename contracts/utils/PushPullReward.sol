@@ -14,6 +14,10 @@ import {NoReward, InvalidAddress, RewardTooLarge} from "./FrakErrors.sol";
 abstract contract PushPullReward is Initializable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
+    /* -------------------------------------------------------------------------- */
+    /*                               Custom error's                               */
+    /* -------------------------------------------------------------------------- */
+
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
     uint256 private constant _INVALID_ADDRESS_SELECTOR = 0xe6c4247b;
 
@@ -22,6 +26,10 @@ abstract contract PushPullReward is Initializable {
 
     /// @dev 'bytes4(keccak256(bytes("NoReward()")))'
     uint256 private constant _NO_REWARD_SELECTOR = 0x6e992686;
+
+    /* -------------------------------------------------------------------------- */
+    /*                                   Event's                                  */
+    /* -------------------------------------------------------------------------- */
 
     /// @dev Event emitted when a reward is added
     event RewardAdded(address indexed user, uint256 amount);
@@ -37,6 +45,10 @@ abstract contract PushPullReward is Initializable {
     uint256 private constant _REWARD_WITHDRAWAD_EVENT_SELECTOR =
         0xaeee89f8ffa85f63cb6ab3536b526d899fe7213514e54d6ca591edbe187e6866;
 
+    /* -------------------------------------------------------------------------- */
+    /*                                   Storage                                  */
+    /* -------------------------------------------------------------------------- */
+
     /// @dev The pending reward for the given address
     mapping(address => uint256) internal _pendingRewards;
 
@@ -49,6 +61,41 @@ abstract contract PushPullReward is Initializable {
     function __PushPullReward_init(address tokenAddr) internal onlyInitializing {
         token = IERC20Upgradeable(tokenAddr);
     }
+
+    /* -------------------------------------------------------------------------- */
+    /*                         External virtual function's                        */
+    /* -------------------------------------------------------------------------- */
+
+    /**
+     * @dev For a user to directly claim their founds
+     */
+    function withdrawFounds() external virtual;
+
+    /**
+     * @dev For an admin to withdraw the founds of the given user
+     */
+    function withdrawFounds(address user) external virtual;
+
+    /* -------------------------------------------------------------------------- */
+    /*                          External view function's                          */
+    /* -------------------------------------------------------------------------- */
+
+    /**
+     * @notice Get the available founds for the given user
+     */
+    function getAvailableFounds(address user) external view returns (uint256) {
+        assembly {
+            if iszero(user) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
+        return _pendingRewards[user];
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                          Internal write function's                         */
+    /* -------------------------------------------------------------------------- */
 
     /**
      * @dev Add founds for the given user
@@ -80,16 +127,6 @@ abstract contract PushPullReward is Initializable {
             sstore(rewardSlot, add(sload(rewardSlot), founds))
         }
     }
-
-    /**
-     * @notice For a user to directly claim their founds
-     */
-    function withdrawFounds() external virtual;
-
-    /**
-     * @notice For an admin to withdraw the founds of the given user
-     */
-    function withdrawFounds(address user) external virtual;
 
     /**
      * @dev Core logic of the withdraw method
@@ -164,18 +201,5 @@ abstract contract PushPullReward is Initializable {
         // Perform the transfer of the founds
         token.safeTransfer(user, userAmount);
         token.safeTransfer(feeRecipient, feesAmount);
-    }
-
-    /**
-     * @notice Get the available founds for the given user
-     */
-    function getAvailableFounds(address user) external view returns (uint256) {
-        assembly {
-            if iszero(user) {
-                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-        }
-        return _pendingRewards[user];
     }
 }

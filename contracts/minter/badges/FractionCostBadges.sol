@@ -13,6 +13,10 @@ import {InvalidFraktionType} from "../../utils/FrakErrors.sol";
  * @custom:security-contact contact@frak.id
  */
 abstract contract FractionCostBadges {
+    /* -------------------------------------------------------------------------- */
+    /*                                   Event's                                  */
+    /* -------------------------------------------------------------------------- */
+
     /**
      * @dev Emitted when the badge cost of a fraction is updated.
      * @param id The id of the updated fraction.
@@ -20,11 +24,19 @@ abstract contract FractionCostBadges {
      */
     event FractionCostBadgeUpdated(uint256 id, uint96 badge);
 
+    /* -------------------------------------------------------------------------- */
+    /*                                   Storage                                  */
+    /* -------------------------------------------------------------------------- */
+
     /**
      * @dev Map f nft id to cost badge.
      * @notice This variable is private and can only be accessed by the current contract.
      */
     mapping(uint256 => uint96) private fractionBadges;
+
+    /* -------------------------------------------------------------------------- */
+    /*                             Abstract function's                            */
+    /* -------------------------------------------------------------------------- */
 
     /**
      * @dev Update the badge cost of the specified fraction.
@@ -33,6 +45,10 @@ abstract contract FractionCostBadges {
      * @param badge The new badge cost of the fraction in wei.
      */
     function updateCostBadge(uint256 fractionId, uint96 badge) external virtual;
+
+    /* -------------------------------------------------------------------------- */
+    /*                          Internal write function's                         */
+    /* -------------------------------------------------------------------------- */
 
     /**
      * @dev Update the badge cost of the specified fraction and emit an event.
@@ -43,6 +59,10 @@ abstract contract FractionCostBadges {
         fractionBadges[fractionId] = badge;
         emit FractionCostBadgeUpdated(fractionId, badge);
     }
+
+    /* -------------------------------------------------------------------------- */
+    /*                           Public read function's                           */
+    /* -------------------------------------------------------------------------- */
 
     /**
      * @dev Returns the badge cost of the specified fraction.
@@ -66,7 +86,7 @@ abstract contract FractionCostBadges {
      * @param tokenType The type of token to get the initial cost of.
      * @return initialCost The initial cost of the specified token type in wei.
      */
-    function initialFractionCost(uint256 tokenType) public pure returns (uint96 initialCost) {
+    function initialFractionCost(uint256 tokenType) internal pure returns (uint96 initialCost) {
         if (tokenType == FrakMath.TOKEN_TYPE_COMMON_MASK) {
             initialCost = 20 ether; // 20 FRK
         } else if (tokenType == FrakMath.TOKEN_TYPE_PREMIUM_MASK) {

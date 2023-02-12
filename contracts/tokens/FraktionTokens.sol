@@ -8,12 +8,6 @@ import {FrakRoles} from "../utils/FrakRoles.sol";
 import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
 import {InvalidArray} from "../utils/FrakErrors.sol";
 
-/// @dev Error throwned when we don't have enough supply to mint a new fNFT
-error InsuficiantSupply();
-
-/// @dev Error throwned when we try to update the supply of a non supply aware token
-error SupplyUpdateNotAllowed();
-
 /**
  * @author  @KONFeature
  * @title   FraktionTokens
@@ -23,6 +17,16 @@ error SupplyUpdateNotAllowed();
 contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     using FrakMath for uint256;
 
+    /* -------------------------------------------------------------------------- */
+    /*                               Custom error's                               */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev Error throwned when we don't have enough supply to mint a new fNFT
+    error InsuficiantSupply();
+
+    /// @dev Error throwned when we try to update the supply of a non supply aware token
+    error SupplyUpdateNotAllowed();
+
     /// @dev 'bytes4(keccak256(bytes("InsuficiantSupply()")))'
     uint256 private constant _INSUFICIENT_SUPPLY_SELECTOR = 0xa24b545a;
 
@@ -31,6 +35,10 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
 
     /// @dev 'bytes4(keccak256(bytes("SupplyUpdateNotAllowed()")))'
     uint256 private constant _SUPPLY_UPDATE_NOT_ALLOWED_SELECTOR = 0x48385ebd;
+
+    /* -------------------------------------------------------------------------- */
+    /*                                   Event's                                  */
+    /* -------------------------------------------------------------------------- */
 
     /// @dev Event emitted when the supply of a fraktion is updated
     event SuplyUpdated(uint256 indexed id, uint256 supply);
@@ -46,6 +54,10 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     uint256 private constant _CONTENT_OWNER_UPDATED_EVENT_SELECTOR =
         0x93a6136b2908baf16e82828e04e9ee9af54e129f5d10e1ae48a15773b307ede4;
 
+    /* -------------------------------------------------------------------------- */
+    /*                                   Storage                                  */
+    /* -------------------------------------------------------------------------- */
+
     /// @dev The current content token id
     uint256 private _currentContentTokenId;
 
@@ -53,7 +65,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     FraktionTransferCallback private transferCallback;
 
     /// @dev Id of content to owner of this content
-    mapping(uint256 => address) public owners;
+    mapping(uint256 => address) private owners;
 
     /// @dev Available supply of each tokens (classic, rare, epic and legendary only) by they id
     mapping(uint256 => uint256) private _availableSupplies;
@@ -73,12 +85,9 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         _currentContentTokenId = 1;
     }
 
-    /**
-     * @dev Register a new transaction callback
-     */
-    function registerNewCallback(address callbackAddr) external onlyRole(FrakRoles.ADMIN) whenNotPaused {
-        transferCallback = FraktionTransferCallback(callbackAddr);
-    }
+    /* -------------------------------------------------------------------------- */
+    /*                          External write function's                         */
+    /* -------------------------------------------------------------------------- */
 
     /**
      * @dev Mint a new content, return the id of the built content
@@ -104,26 +113,6 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
 
         // Return the content id
         return id;
-    }
-
-    /**
-     * @dev Batch balance of for single address
-     */
-    function balanceOfIdsBatch(address account, uint256[] calldata ids)
-        public
-        view
-        virtual
-        returns (uint256[] memory)
-    {
-        uint256[] memory batchBalances = new uint256[](ids.length);
-        for (uint256 i; i < ids.length;) {
-            unchecked {
-                // TODO : Find a way to directly check _balances var without the require check
-                batchBalances[i] = balanceOf(account, ids[i]);
-                ++i;
-            }
-        }
-        return batchBalances;
     }
 
     /**
@@ -178,6 +167,25 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
             }
         }
     }
+
+    /// @dev Register a new transaction callback
+    function registerNewCallback(address callbackAddr) external onlyRole(FrakRoles.ADMIN) whenNotPaused {
+        transferCallback = FraktionTransferCallback(callbackAddr);
+    }
+
+    /// @dev Mint a new fraction of a nft
+    function mint(address to, uint256 id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
+        _mint(to, id, amount, new bytes(0x0));
+    }
+
+    /// @dev Burn a fraction of a nft
+    function burn(address from, uint256 id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
+        _burn(from, id, amount);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                        Internal callback function's                        */
+    /* -------------------------------------------------------------------------- */
 
     /**
      * @dev Handle the transfer token (so update the content investor, change the owner of some content etc)
@@ -250,30 +258,36 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         }
     }
 
-    /**
-     * @dev Mint a new fraction of a nft
-     */
-    function mint(address to, uint256 id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
-        _mint(to, id, amount, new bytes(0x0));
-    }
+    /* -------------------------------------------------------------------------- */
+    /*                           Public view function's                           */
+    /* -------------------------------------------------------------------------- */
 
     /**
-     * @dev Burn a fraction of a nft
+     * @dev Batch balance of for single address
      */
-    function burn(address from, uint256 id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
-        _burn(from, id, amount);
+    function balanceOfIdsBatch(address account, uint256[] calldata ids)
+        public
+        view
+        virtual
+        returns (uint256[] memory)
+    {
+        uint256[] memory batchBalances = new uint256[](ids.length);
+        for (uint256 i; i < ids.length;) {
+            unchecked {
+                // TODO : Find a way to directly check _balances var without the require check
+                batchBalances[i] = balanceOf(account, ids[i]);
+                ++i;
+            }
+        }
+        return batchBalances;
     }
 
-    /**
-     * @dev Find the owner of the given content is
-     */
+    /// @dev Find the owner of the given 'contentId'
     function ownerOf(uint256 contentId) external view returns (address) {
         return owners[contentId];
     }
 
-    /**
-     * @dev Fidn the current supply of the given token
-     */
+    /// @dev Find the current supply of the given 'tokenId'
     function supplyOf(uint256 tokenId) external view returns (uint256) {
         return _availableSupplies[tokenId];
     }
