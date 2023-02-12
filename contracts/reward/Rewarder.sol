@@ -68,12 +68,12 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
 
     /// @dev Event emitted when a user is rewarded for his listen
     event RewardOnContent(
-        address indexed user, uint256 indexed contentId, uint256 baseUserReward, uint256 earningFactor, uint16 ccuCount
+        address indexed user, uint256 indexed contentId, uint256 baseUserReward, uint256 earningFactor
     );
 
-    /// @dev 'keccak256(bytes("RewardOnContent(address,uint256,uint256,uint256,uint16"))'
+    /// @dev 'keccak256(bytes("RewardOnContent(address,uint256,uint256,uint256"))'
     uint256 private constant _REWARD_ON_CONTENT_EVENT_SELECTOR =
-        0x660494162a7aab2356c74a0a63c109a0a2ac6ac9d3b95415756bac61af417ecb;
+        0x6396a2d965d9d843b0159912a8413f069bcce1830e320cd0b6cd5dc03d11eddf;
 
     /* -------------------------------------------------------------------------- */
     /*                                  Struct's                                  */
@@ -82,7 +82,6 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     struct TotalRewards {
         uint256 user;
         uint256 owners;
-        uint256 referral;
         uint256 content;
     }
 
@@ -258,12 +257,12 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /**
      * @dev Compute the reward for a user, given the content and listens, and pay him and the owner
      */
-    function payUser(address listener, uint8 contentType, uint256[] calldata contentIds, uint16[] calldata listenCounts)
-        external
-        payable
-        onlyRole(FrakRoles.REWARDER)
-        whenNotPaused
-    {
+    function payUser(
+        address listener,
+        uint256 contentType,
+        uint256[] calldata contentIds,
+        uint256[] calldata listenCounts
+    ) external payable onlyRole(FrakRoles.REWARDER) whenNotPaused {
         // Ensure we got valid data
         assembly {
             if iszero(listener) {
@@ -277,7 +276,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         }
 
         // Get the data we will need in this level
-        TotalRewards memory totalRewards = TotalRewards(0, 0, 0, 0);
+        TotalRewards memory totalRewards = TotalRewards(0, 0, 0);
 
         // Get all the payed fraktion types
         uint256[] memory fraktionTypes = FrakMath.payableTokenTypes();
@@ -326,9 +325,9 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         if (totalRewards.content > 0) {
             frakToken.safeTransfer(address(contentPool), totalRewards.content);
         }
-        if (totalRewards.referral > 0) {
+        /*if (totalRewards.referral > 0) {
             frakToken.safeTransfer(address(referralPool), totalRewards.referral);
-        }
+        }*/
     }
 
     /**
@@ -385,7 +384,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
      */
     function computeRewardForContent(
         uint256 contentId,
-        uint16 listenCount,
+        uint256 listenCount,
         uint256 rewardForContentType,
         address listener,
         uint256[] memory fraktionTypes,
@@ -396,57 +395,61 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
 
         // Get the content badge
         uint256 contentBadge = getContentBadge(contentId);
-        // Start our total reward with the earning factor, the listen count, and the TPU's
-        uint256 totalReward = wadMulDivDown(listenCount * earningFactor, tokenGenerationFactor);
-        // Then apply the content badge and then content type ratio
-        totalReward = multiWadMulDivDown(totalReward, contentBadge, rewardForContentType);
-        // Ensure the reward isn't too large
-        if (totalReward > SINGLE_REWARD_CAP) revert RewardTooLarge();
-        else if (totalReward == 0) return;
 
-        uint256 userReward;
         uint256 ownerReward;
-        if (hasOnePaidFraktion) {
-            // Compute the reward for the content pool and the referral
-            uint256 contentPoolReward;
-            unchecked {
-                // Compute the reward
-                userReward = (totalReward * 35) / 100;
-                ownerReward = totalReward - userReward;
+        uint256 contentPoolReward;
+        assembly {
+            // Compute the total reward
+            let loadedTpu := sload(tokenGenerationFactor.slot)
+            // Div by 1e18 since earning factor and token generation factor are on 1e18
+            let totalReward := div(mul(mul(listenCount, earningFactor), loadedTpu), 1000000000000000000)
+            totalReward :=
+                div(
+                    mul(div(mul(totalReward, contentBadge), 1000000000000000000), rewardForContentType), 1000000000000000000
+                )
 
-                // Increment the two amount that won't change after
-                totalRewards.user += userReward;
-
-                // Content pool reward at 10%
-                contentPoolReward = totalReward / 10;
+            // Exit directly if we got no reward
+            if iszero(totalReward) { return(0, 0) }
+            // Revert if the reward is too large
+            if gt(totalReward, SINGLE_REWARD_CAP) {
+                mstore(0x00, _REWARD_TOO_LARGE_SELECTOR)
+                revert(0x1c, 0x04)
             }
-            // Send the reward to the content ool and referral pool
-            contentPool.addReward(contentId, contentPoolReward);
 
-            // Decrease the owner reward by the pool amount used
-            unchecked {
-                // Decrease the owner reward
-                ownerReward -= contentPoolReward;
+            // User reward at 35%
+            let userReward := div(mul(totalReward, 35), 100)
+            mstore(totalRewards, add(mload(totalRewards), userReward))
 
-                // Increase all the total one
-                totalRewards.content += contentPoolReward;
-                totalRewards.owners += ownerReward;
+            // Check if the user has got paid fraktion
+            switch hasOnePaidFraktion
+            case 0 {
+                // No paid fraktion
+                ownerReward := sub(totalReward, userReward)
             }
-        } else {
-            // Increase the user and owners amount to be minted
-            unchecked {
-                // Compute the rewards
-                userReward = (totalReward * 35) / 100;
-                ownerReward = totalReward - userReward;
+            default {
+                // Have paid fraktion
+                contentPoolReward := div(totalReward, 10)
+                ownerReward := sub(sub(totalReward, userReward), contentPoolReward)
 
-                // Increment the totals rewards
-                totalRewards.user += userReward;
-                totalRewards.owners += ownerReward;
+                // Store the content pool reward
+                mstore(add(totalRewards, 0x40), add(mload(add(totalRewards, 0x40)), contentPoolReward))
             }
+
+            // Store the owner reward in memory
+            mstore(add(totalRewards, 0x20), add(mload(add(totalRewards, 0x20)), ownerReward))
+
+            // Emit the reward on content event's
+            mstore(0, userReward)
+            mstore(0x20, earningFactor)
+            log3(0, 0x40, _REWARD_ON_CONTENT_EVENT_SELECTOR, listener, contentId)
         }
 
         // Emit the user reward event, to compute the total amount earned for the given content
-        emit RewardOnContent(listener, contentId, userReward, earningFactor, listenCount);
+        // emit RewardOnContent(listener, contentId, userReward, earningFactor, listenCount);
+
+        if (contentPoolReward > 0) {
+            contentPool.addReward(contentId, contentPoolReward);
+        }
 
         // Save the amount for the owner
         address owner = fraktionTokens.ownerOf(contentId);
@@ -579,7 +582,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /**
      * @dev Get the base reward to the given content type
      */
-    function baseRewardForContentType(uint8 contentType) private pure returns (uint256 reward) {
+    function baseRewardForContentType(uint256 contentType) private pure returns (uint256 reward) {
         if (contentType == CONTENT_TYPE_VIDEO) {
             reward = 2 ether;
         } else if (contentType == CONTENT_TYPE_PODCAST) {

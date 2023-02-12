@@ -114,21 +114,21 @@ contract RewarderPayTest is RewarderTestHelper {
     )s =====
      */
     function test_payUser() public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
-        (uint16[] memory listenCounts, uint256[] memory contentIds) = basePayParam();
+        (uint256[] memory listenCounts, uint256[] memory contentIds) = basePayParam();
         rewarder.payUser(address(1), 1, contentIds, listenCounts);
     }
 
     function test_payUser_LargeReward() public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
         mintFraktions(address(1), 20);
 
-        (uint16[] memory listenCounts, uint256[] memory contentIds) = basePayParam(300);
+        (uint256[] memory listenCounts, uint256[] memory contentIds) = basePayParam(300);
         rewarder.payUser(address(1), 1, contentIds, listenCounts);
     }
 
-    function testFuzz_payUser(uint16 listenCount) public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
+    function testFuzz_payUser(uint256 listenCount) public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
         vm.assume(listenCount < 300 && listenCount > 0);
 
-        uint16[] memory listenCounts = new uint16[](1);
+        uint256[] memory listenCounts = new uint256[](1);
         listenCounts[0] = listenCount;
         rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
     }
@@ -142,7 +142,7 @@ contract RewarderPayTest is RewarderTestHelper {
 
         mintFraktions(address(1));
 
-        uint16[] memory listenCounts = new uint16[](1);
+        uint256[] memory listenCounts = new uint256[](1);
         listenCounts[0] = listenCount;
         rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
 
@@ -153,7 +153,7 @@ contract RewarderPayTest is RewarderTestHelper {
         contentPool.computeAllPoolsBalance(address(1));
     }
 
-    function testFuzz_payUser_WithFraktionsAndLoadOfState(uint16 listenCount)
+    function testFuzz_payUser_WithFraktionsAndLoadOfState(uint256 listenCount)
         public
         withLotFrkToken(rewarderAddr)
         prankExecAsDeployer
@@ -163,7 +163,7 @@ contract RewarderPayTest is RewarderTestHelper {
         mintFraktions(address(1));
         mintFraktions(address(2));
 
-        uint16[] memory listenCounts = new uint16[](1);
+        uint256[] memory listenCounts = new uint256[](1);
         listenCounts[0] = listenCount;
         rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
 
@@ -186,25 +186,25 @@ contract RewarderPayTest is RewarderTestHelper {
         rewarder.pause();
 
         vm.expectRevert(ContractPaused.selector);
-        (uint16[] memory listenCounts, uint256[] memory contentIds) = basePayParam();
+        (uint256[] memory listenCounts, uint256[] memory contentIds) = basePayParam();
         rewarder.payUser(address(1), 1, contentIds, listenCounts);
     }
 
     function test_fail_payUser_NotRewarder() public withFrkToken(rewarderAddr) {
-        (uint16[] memory listenCounts, uint256[] memory contentIds) = basePayParam();
+        (uint256[] memory listenCounts, uint256[] memory contentIds) = basePayParam();
         vm.expectRevert(NotAuthorized.selector);
         rewarder.payUser(address(1), 1, contentIds, listenCounts);
     }
 
     function test_fail_payUser_TooLargeArray() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        uint16[] memory listenCounts = new uint16[](21);
+        uint256[] memory listenCounts = new uint256[](21);
         uint256[] memory contentIds = new uint256[](21);
         vm.expectRevert(InvalidArray.selector);
         rewarder.payUser(address(1), 1, contentIds, listenCounts);
     }
 
     function test_fail_payUser_ArrayNotSameSize() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        uint16[] memory listenCounts = new uint16[](4);
+        uint256[] memory listenCounts = new uint256[](4);
         uint256[] memory contentIds = new uint256[](3);
         vm.expectRevert(InvalidArray.selector);
         rewarder.payUser(address(1), 1, contentIds, listenCounts);
@@ -215,14 +215,14 @@ contract RewarderPayTest is RewarderTestHelper {
         mintFraktions(address(1), 100);
 
         // Then try to pay him
-        (uint16[] memory listenCounts, uint256[] memory contentIds) = basePayParam(300);
+        (uint256[] memory listenCounts, uint256[] memory contentIds) = basePayParam(300);
         vm.expectRevert(RewardTooLarge.selector);
         rewarder.payUser(address(1), 1, contentIds, listenCounts);
     }
 
     function test_fail_payUser_InexistantContent() public withFrkToken(rewarderAddr) prankExecAsDeployer {
         // Then try to pay him
-        (uint16[] memory listenCounts,) = basePayParam();
+        (uint256[] memory listenCounts,) = basePayParam();
         vm.expectRevert(InvalidAddress.selector);
         rewarder.payUser(address(1), 1, uint256(13).asSingletonArray(), listenCounts);
     }
@@ -231,12 +231,12 @@ contract RewarderPayTest is RewarderTestHelper {
      * ===== UTILS=====
      */
 
-    function basePayParam() private view returns (uint16[] memory, uint256[] memory) {
+    function basePayParam() private view returns (uint256[] memory, uint256[] memory) {
         return basePayParam(50);
     }
 
-    function basePayParam(uint16 listenCount) private view returns (uint16[] memory, uint256[] memory) {
-        uint16[] memory listenCounts = new uint16[](1);
+    function basePayParam(uint16 listenCount) private view returns (uint256[] memory, uint256[] memory) {
+        uint256[] memory listenCounts = new uint256[](1);
         listenCounts[0] = listenCount;
         return (listenCounts, contentId.asSingletonArray());
     }

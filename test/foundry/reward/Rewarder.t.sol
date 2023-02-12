@@ -99,4 +99,60 @@ contract RewarderTest is RewarderTestHelper {
         vm.expectRevert(BadgeTooLarge.selector);
         rewarder.updateListenerBadge(address(1), 1001 ether);
     }
+
+    event Test(bytes4 errorCode);
+    event TestBis(bytes32 signature);
+    event TestId(uint256 id);
+
+    function testSelector() public {
+        bytes4 errorSelector = bytes4(keccak256(bytes("InsuficiantSupply()")));
+        emit Test(errorSelector);
+        errorSelector = bytes4(keccak256(bytes("ContractNotPaused()")));
+        emit Test(errorSelector);
+        errorSelector = bytes4(keccak256(bytes("RenounceForCallerOnly()")));
+        emit Test(errorSelector);
+        errorSelector = bytes4(keccak256(bytes("SupplyUpdateNotAllowed()")));
+        emit Test(errorSelector);
+
+        //  address indexed user, uint256 indexed contentId, uint256 baseUserReward, uint256 earningFactor, uint16 ccuCount
+        bytes32 bis = keccak256(bytes("RewardOnContent(address,uint256,uint256,uint256)"));
+        emit TestBis(bis);
+        bis = keccak256(bytes("RewardWithdrawed(address,uint256,uint256)"));
+        emit TestBis(bis);
+        bis = keccak256(bytes("ContentOwnerUpdated(uint256,uint256)"));
+        emit TestBis(bis);
+        bis = keccak256(bytes("SuplyUpdated(uint256,uint256)"));
+        emit TestBis(bis);
+        bis = keccak256(bytes("SuplyUpdated(uint256,uint256)"));
+        emit TestBis(bis);
+        bis = keccak256(bytes("ContentMinted(uint256,address)"));
+        emit TestBis(bis);
+        bis = keccak256(bytes("FractionMinted(uint256,address,uint256,uint256)"));
+        emit TestBis(bis);
+
+        uint256 baseId = 4555;
+        uint256 solContentId = (baseId << 4) | 5;
+        emit TestId(solContentId);
+        uint256 assContentId;
+        assembly {
+            assContentId := 1
+        }
+        emit TestId(assContentId);
+        assembly {
+            assContentId := shl(0x5, 1)
+        }
+        emit TestId(assContentId);
+        assembly {
+            assContentId := shl(0x5, 2)
+        }
+        emit TestId(assContentId);
+        assembly {
+            assContentId := shl(0x5, 3)
+        }
+        emit TestId(assContentId);
+        assembly {
+            assContentId := shl(0x5, 4)
+        }
+        emit TestId(assContentId);
+    }
 }
