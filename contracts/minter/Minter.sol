@@ -148,16 +148,18 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
             }
         }
         // Try to mint the new content
+        // mintNewContent selector : 0xb8fd7b0b
         contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
         // Then set the supply for each token types
         uint256[] memory ids = new uint256[](4);
         uint256[] memory supplies = new uint256[](4);
         assembly {
             // Store the ids
-            mstore(add(ids, 0x20), or(mul(contentId, exp(2, 4)), 3))
-            mstore(add(ids, 0x40), or(mul(contentId, exp(2, 4)), 4))
-            mstore(add(ids, 0x60), or(mul(contentId, exp(2, 4)), 5))
-            mstore(add(ids, 0x80), or(mul(contentId, exp(2, 4)), 6))
+            let shiftedContentId := shl(0x04, contentId)
+            mstore(add(ids, 0x20), or(shiftedContentId, 3))
+            mstore(add(ids, 0x40), or(shiftedContentId, 4))
+            mstore(add(ids, 0x60), or(shiftedContentId, 5))
+            mstore(add(ids, 0x80), or(shiftedContentId, 6))
             // Store the supplies
             mstore(add(supplies, 0x20), commonSupply)
             mstore(add(supplies, 0x40), premiumSupply)

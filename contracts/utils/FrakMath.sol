@@ -40,15 +40,15 @@ library FrakMath {
     /**
      * @dev Build the id for a S FNT
      */
-    function buildSnftIds(uint256 id, uint256[] memory types) internal pure returns (uint256[] memory) {
-        uint256[] memory tokenIds = new uint256[](types.length);
-        for (uint256 i; i < types.length;) {
+    function buildSnftIds(uint256 id, uint256[] memory types) internal pure returns (uint256[] memory tokenIds) {
+        uint256 length = types.length;
+        tokenIds = new uint256[](length);
+        for (uint256 i; i < length;) {
             unchecked {
                 tokenIds[i] = buildSnftId(id, types[i]);
                 ++i;
             }
         }
-        return tokenIds;
     }
 
     /**
@@ -112,7 +112,7 @@ library FrakMath {
      */
     function extractContentId(uint256 id) internal pure returns (uint256 contentId) {
         assembly {
-            contentId := div(id, exp(2, ID_OFFSET))
+            contentId := shr(ID_OFFSET, id)
         }
     }
 
@@ -135,7 +135,7 @@ library FrakMath {
      */
     function extractContentIdAndTokenType(uint256 id) internal pure returns (uint256 contentId, uint256 tokenType) {
         assembly {
-            contentId := div(id, exp(2, ID_OFFSET))
+            contentId := shr(ID_OFFSET, id)
             tokenType := and(id, TYPE_MASK)
         }
     }
@@ -173,20 +173,16 @@ library FrakMath {
     /**
      * @dev Create a singleton array of the given element
      */
-    function asSingletonArray(uint256 element) internal pure returns (uint256[] memory) {
-        uint256[] memory array = new uint256[](1);
+    function asSingletonArray(uint256 element) internal pure returns (uint256[] memory array) {
+        array = new uint256[](1);
         array[0] = element;
-
-        return array;
     }
 
     /**
      * @dev Create a singleton array of the given element
      */
-    function asSingletonArray(address element) internal pure returns (address[] memory) {
-        address[] memory array = new address[](1);
+    function asSingletonArray(address element) internal pure returns (address[] memory array) {
+        array = new address[](1);
         array[0] = element;
-
-        return array;
     }
 }

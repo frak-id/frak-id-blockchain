@@ -27,6 +27,10 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     using SafeERC20Upgradeable for FrakToken;
     using FrakMath for uint256;
 
+    /* -------------------------------------------------------------------------- */
+    /*                                 Constant's                                 */
+    /* -------------------------------------------------------------------------- */
+
     // The cap of frak token we can mint for the reward
     uint256 public constant REWARD_MINT_CAP = 1_500_000_000 ether;
     uint256 private constant SINGLE_REWARD_CAP = 50_000 ether;
@@ -42,6 +46,10 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     uint256 private constant CONTENT_TYPE_MUSIC = 3;
     uint256 private constant CONTENT_TYPE_STREAMING = 4;
 
+    /* -------------------------------------------------------------------------- */
+    /*                               Custom error's                               */
+    /* -------------------------------------------------------------------------- */
+
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
     uint256 private constant _INVALID_ADDRESS_SELECTOR = 0xe6c4247b;
 
@@ -54,6 +62,10 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /// @dev 'bytes4(keccak256(bytes("RewardTooLarge()")))'
     uint256 private constant _REWARD_TOO_LARGE_SELECTOR = 0x71009bf7;
 
+    /* -------------------------------------------------------------------------- */
+    /*                                   Event's                                  */
+    /* -------------------------------------------------------------------------- */
+
     /// @dev Event emitted when a user is rewarded for his listen
     event RewardOnContent(
         address indexed user, uint256 indexed contentId, uint256 baseUserReward, uint256 earningFactor, uint16 ccuCount
@@ -62,6 +74,21 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /// @dev 'keccak256(bytes("RewardOnContent(address,uint256,uint256,uint256,uint16"))'
     uint256 private constant _REWARD_ON_CONTENT_EVENT_SELECTOR =
         0x660494162a7aab2356c74a0a63c109a0a2ac6ac9d3b95415756bac61af417ecb;
+
+    /* -------------------------------------------------------------------------- */
+    /*                                  Struct's                                  */
+    /* -------------------------------------------------------------------------- */
+
+    struct TotalRewards {
+        uint256 user;
+        uint256 owners;
+        uint256 referral;
+        uint256 content;
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                                   Storage                                  */
+    /* -------------------------------------------------------------------------- */
 
     /**
      * @notice factor user to compute the number of token to generate (on 1e18 decimals)
@@ -134,15 +161,12 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         _grantRole(FrakRoles.BADGE_UPDATER, msg.sender);
     }
 
-    struct TotalRewards {
-        uint256 user;
-        uint256 owners;
-        uint256 referral;
-        uint256 content;
-    }
+    /* -------------------------------------------------------------------------- */
+    /*                          External write function's                         */
+    /* -------------------------------------------------------------------------- */
 
     /**
-     * @notice Directly pay a user for the given frk amount (used for offchain to onchain wallet migration)
+     * @dev Directly pay a user for the given frk amount (used for offchain to onchain wallet migration)
      */
     function payUserDirectly(address listener, uint256 amount)
         external
@@ -308,6 +332,55 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     }
 
     /**
+     * @dev Withdraw my pending founds
+     */
+    function withdrawFounds() external override whenNotPaused {
+        _withdrawWithFee(msg.sender, 2, foundationWallet);
+    }
+
+    /**
+     * @dev Withdraw the pending founds for a user
+     */
+    function withdrawFounds(address user) external override onlyRole(FrakRoles.ADMIN) whenNotPaused {
+        _withdrawWithFee(user, 2, foundationWallet);
+    }
+
+    /**
+     * @dev Update the token generation factor
+     */
+    function updateTpu(uint256 newTpu) external onlyRole(FrakRoles.ADMIN) {
+        tokenGenerationFactor = newTpu;
+    }
+
+    /**
+     * @dev Update the 'contentId' 'badge'
+     */
+    function updateContentBadge(uint256 contentId, uint256 badge)
+        external
+        override
+        onlyRole(FrakRoles.BADGE_UPDATER)
+        whenNotPaused
+    {
+        _updateContentBadge(contentId, badge);
+    }
+
+    /**
+     * @dev Update the 'listener' 'badge'
+     */
+    function updateListenerBadge(address listener, uint256 badge)
+        external
+        override
+        onlyRole(FrakRoles.BADGE_UPDATER)
+        whenNotPaused
+    {
+        _updateListenerBadge(listener, badge);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                          Internal write function's                         */
+    /* -------------------------------------------------------------------------- */
+
+    /**
      * @dev Compute the user and owner reward for the given content
      */
     function computeRewardForContent(
@@ -387,6 +460,10 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         _addFoundsUnchecked(owner, ownerReward);
     }
 
+    /* -------------------------------------------------------------------------- */
+    /*                          Internal view function's                          */
+    /* -------------------------------------------------------------------------- */
+
     /**
      * @dev Compute the earning factor for a listener on a given content
      */
@@ -399,11 +476,10 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         uint256[] memory fraktionIds = contentId.buildSnftIds(fraktionTypes);
         uint256[] memory tokenBalances = fraktionTokens.balanceOfIdsBatch(listener, fraktionIds);
 
-        // default value to free fraktion
-        earningFactor = 0.01 ether; // free - 0.01
-        hasOnePaidFraktion;
-
         assembly {
+            // Init our earning factor to a single free fraktion (more isn't taken in account) - 0.01 eth
+            earningFactor := 10000000000000000
+
             // Get the length
             let length := mload(tokenBalances)
 
@@ -426,15 +502,14 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
                 // Get base reward for the fraktion type (only payed one, since free is handled on init of the var)
                 let addedReward := 0
                 switch fraktionType
-                case 3 { addedReward := mul(100000000000000000, tokenBalance) }
                 // common - 0.1
-                case 4 { addedReward := mul(500000000000000000, tokenBalance) }
+                case 3 { addedReward := mul(100000000000000000, tokenBalance) }
                 // premium - 0.5
-                case 5 { addedReward := mul(1000000000000000000, tokenBalance) }
+                case 4 { addedReward := mul(500000000000000000, tokenBalance) }
                 // gold - 1
-                case 6 { addedReward := mul(2000000000000000000, tokenBalance) }
+                case 5 { addedReward := mul(1000000000000000000, tokenBalance) }
                 // diamond - 2
-                default {}
+                case 6 { addedReward := mul(2000000000000000000, tokenBalance) }
 
                 // Update the earning factor if balance are present
                 earningFactor := add(earningFactor, addedReward)
@@ -455,8 +530,12 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         }*/
     }
 
+    /* -------------------------------------------------------------------------- */
+    /*                          Internal pure function's                          */
+    /* -------------------------------------------------------------------------- */
+
     /// @dev Use multi wad div down for multi precision when multiple value of 1 eth
-    function wadMulDivDown(uint256 x, uint256 y) internal pure returns (uint256 z) {
+    function wadMulDivDown(uint256 x, uint256 y) private pure returns (uint256 z) {
         assembly {
             // Divide x * y by the 1e18 (decimals).
             z := div(mul(x, y), 1000000000000000000)
@@ -464,7 +543,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     }
 
     /// @dev Use multi wad div down for multi precision when multiple value of 1 eth
-    function multiWadMulDivDown(uint256 x, uint256 y, uint256 z) internal pure returns (uint256 r) {
+    function multiWadMulDivDown(uint256 x, uint256 y, uint256 z) private pure returns (uint256 r) {
         assembly {
             // Divide x * y by the 1e18 (decimals).
             r := div(mul(mul(x, y), z), mul(1000000000000000000, 1000000000000000000))
@@ -512,50 +591,5 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         } else {
             reward = 0;
         }
-    }
-
-    /**
-     * @dev Update the token generation factor
-     */
-    function updateTpu(uint256 newTpu) external onlyRole(FrakRoles.ADMIN) {
-        tokenGenerationFactor = newTpu;
-    }
-
-    /**
-     * @dev Withdraw my pending founds
-     */
-    function withdrawFounds() external virtual override whenNotPaused {
-        _withdrawWithFee(msg.sender, 2, foundationWallet);
-    }
-
-    /**
-     * @dev Withdraw the pending founds for a user
-     */
-    function withdrawFounds(address user) external virtual override onlyRole(FrakRoles.ADMIN) whenNotPaused {
-        _withdrawWithFee(user, 2, foundationWallet);
-    }
-
-    /**
-     * @dev Update the content badge
-     */
-    function updateContentBadge(uint256 contentId, uint256 badge)
-        external
-        override
-        onlyRole(FrakRoles.BADGE_UPDATER)
-        whenNotPaused
-    {
-        _updateContentBadge(contentId, badge);
-    }
-
-    /**
-     * @notice Update the listener badge
-     */
-    function updateListenerBadge(address listener, uint256 badge)
-        external
-        override
-        onlyRole(FrakRoles.BADGE_UPDATER)
-        whenNotPaused
-    {
-        _updateListenerBadge(listener, badge);
     }
 }

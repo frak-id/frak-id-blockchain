@@ -131,17 +131,11 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 revert(0x1c, 0x04)
             }
 
-            // Iterate over each ids
-            let idsOffset := ids.offset
-            let length := calldataload(idsOffset)
-
-            // Get the supplies offset
-            let suppliesOffset := supplies.offset
-
             // Iterate over all the ids and supplies
             for { let i := 0 } lt(i, ids.length) { i := add(i, 1) } {
-                let id := calldataload(add(idsOffset, mul(0x20, i)))
-                let supply := calldataload(add(suppliesOffset, mul(0x20, i)))
+                let iterationOffset := shl(0x05, i)
+                let id := calldataload(add(ids.offset, iterationOffset))
+                let supply := calldataload(add(supplies.offset, iterationOffset))
 
                 // Ensure the supply update of this token type is allowed
                 let tokenType := and(id, 0xF)
@@ -202,14 +196,15 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
             // Get the length
             let length := mload(ids)
 
-            // Load the offset for each one of our storage pointer
-            let idsOffset := add(ids, 0x20)
-            let amountsOffset := add(amounts, 0x20)
+            // Base offset to access array element's
+            let memOffset := 0x20
 
             // Iterate over all the ids and amount
-            for { let i := 0 } lt(i, length) { i := add(i, 1) } {
-                let id := mload(add(idsOffset, mul(0x20, i)))
-                let amount := mload(add(amountsOffset, mul(0x20, i)))
+            let i := 0
+            for {} lt(i, length) { i := add(i, 1) } {
+                let iterationOffset := shl(0x05, i)
+                let id := mload(add(add(ids, memOffset), iterationOffset))
+                let amount := mload(add(add(amounts, memOffset), iterationOffset))
 
                 // Get the slot to know if it's supply aware
                 // Kecak (id, _isSupplyAware.slot)
@@ -239,7 +234,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 // Content owner migration code block
                 let isOwnerNft := eq(and(id, 0xF), 1)
                 if isOwnerNft {
-                    let contentId := div(id, exp(2, 4))
+                    let contentId := shr(0x04, id)
                     // Get the owner slot
                     // Kecak (contentId, owners.slot)
                     mstore(0, contentId)
@@ -269,9 +264,9 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         public
         view
         virtual
-        returns (uint256[] memory)
+        returns (uint256[] memory batchBalances)
     {
-        uint256[] memory batchBalances = new uint256[](ids.length);
+        batchBalances = new uint256[](ids.length);
         for (uint256 i; i < ids.length;) {
             unchecked {
                 // TODO : Find a way to directly check _balances var without the require check
@@ -279,7 +274,6 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 ++i;
             }
         }
-        return batchBalances;
     }
 
     /// @dev Find the owner of the given 'contentId'
