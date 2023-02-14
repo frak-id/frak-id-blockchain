@@ -174,15 +174,37 @@ library FrakMath {
      * @dev Create a singleton array of the given element
      */
     function asSingletonArray(uint256 element) internal pure returns (uint256[] memory array) {
-        array = new uint256[](1);
-        array[0] = element;
+        assembly {
+            // Get free memory space for our array, and update the free mem space index
+            let memPointer := mload(0x40)
+            mstore(0x40, add(memPointer, 0x40))
+            
+            // Store our array (1st = length, 2nd = element)
+            mstore(memPointer, 0x01)
+            mstore(add(memPointer, 0x20), element)
+
+            // Set our array to our mem pointer
+            array := memPointer
+        }
+        return array;
     }
 
     /**
      * @dev Create a singleton array of the given element
      */
     function asSingletonArray(address element) internal pure returns (address[] memory array) {
-        array = new address[](1);
-        array[0] = element;
+        assembly {
+            // Get free memory space for our array, and update the free mem space index
+            let memPointer := mload(0x40)
+            mstore(0x40, add(memPointer, 0x40))
+            
+            // Store our array (1st = length, 2nd = element)
+            mstore(memPointer, 0x01)
+            mstore(add(memPointer, 0x20), element)
+
+            // Set our array to our mem pointer
+            array := memPointer
+        }
+        return array;
     }
 }

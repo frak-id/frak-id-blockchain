@@ -115,9 +115,9 @@ abstract contract PushPullReward is Initializable {
      */
     function _addFoundsUnchecked(address user, uint256 founds) internal {
         assembly {
-            // Emit the witdraw event
+            // Emit the added event
             mstore(0x00, founds)
-            log2(0, 0x20, _REWARD_WITHDRAWAD_EVENT_SELECTOR, user)
+            log2(0, 0x20, _REWARD_ADDED_EVENT_SELECTOR, user)
             // Get the current pending reward
             // Kecak (user, _pendingRewards.slot)
             mstore(0, user)

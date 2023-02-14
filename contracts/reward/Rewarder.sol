@@ -283,7 +283,8 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         uint256 rewardForContentType = baseRewardForContentType(contentType);
 
         // Iterate over each content the user listened
-        for (uint256 i; i < contentIds.length;) {
+        uint256 length = contentIds.length;
+        for (uint256 i; i < length;) {
             computeRewardForContent(
                 contentIds[i], listenCounts[i], rewardForContentType, listener, fraktionTypes, totalRewards
             );
@@ -297,14 +298,11 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         // Then outside of our loop find the user badge
         uint256 listenerBadge = getListenerBadge(listener);
 
-        // Update the total mint for user with his listener badges
-        totalRewards.user = wadMulDivDown(totalRewards.user, listenerBadge);
-
-        // Register the amount for listener
-        _addFoundsUnchecked(listener, totalRewards.user);
-
         // Compute the total amount to mint, and ensure we don't exceed our cap
         assembly {
+            // Update the total mint for user with his listener badges
+            mstore(totalRewards, div(mul(listenerBadge, mload(totalRewards)), 1000000000000000000))
+
             // Compute the total to be minted
             let userAndOwner := add(mload(totalRewards), mload(add(totalRewards, 0x20)))
             let referralAndContent := add(mload(add(totalRewards, 0x40)), mload(add(totalRewards, 0x60)))
@@ -320,6 +318,9 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
             // Increase our total frak minted
             sstore(totalFrakMinted.slot, newTotalAmount)
         }
+
+        // Register the amount for listener
+        _addFoundsUnchecked(listener, totalRewards.user);
 
         // If we got reward for the pool, transfer them
         if (totalRewards.content > 0) {
@@ -405,7 +406,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
             let totalReward := div(mul(mul(listenCount, earningFactor), loadedTpu), 1000000000000000000)
             totalReward :=
                 div(
-                    mul(div(mul(totalReward, contentBadge), 1000000000000000000), rewardForContentType), 1000000000000000000
+                    mul(mul(totalReward, contentBadge), rewardForContentType), mul(1000000000000000000, 1000000000000000000)
                 )
 
             // Exit directly if we got no reward
@@ -536,22 +537,6 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /* -------------------------------------------------------------------------- */
     /*                          Internal pure function's                          */
     /* -------------------------------------------------------------------------- */
-
-    /// @dev Use multi wad div down for multi precision when multiple value of 1 eth
-    function wadMulDivDown(uint256 x, uint256 y) private pure returns (uint256 z) {
-        assembly {
-            // Divide x * y by the 1e18 (decimals).
-            z := div(mul(x, y), 1000000000000000000)
-        }
-    }
-
-    /// @dev Use multi wad div down for multi precision when multiple value of 1 eth
-    function multiWadMulDivDown(uint256 x, uint256 y, uint256 z) private pure returns (uint256 r) {
-        assembly {
-            // Divide x * y by the 1e18 (decimals).
-            r := div(mul(mul(x, y), z), mul(1000000000000000000, 1000000000000000000))
-        }
-    }
 
     /**
      * @dev Get the base reward to the given token type
