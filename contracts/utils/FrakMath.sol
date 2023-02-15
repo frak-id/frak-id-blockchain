@@ -178,7 +178,7 @@ library FrakMath {
             // Get free memory space for our array, and update the free mem space index
             let memPointer := mload(0x40)
             mstore(0x40, add(memPointer, 0x40))
-            
+
             // Store our array (1st = length, 2nd = element)
             mstore(memPointer, 0x01)
             mstore(add(memPointer, 0x20), element)
@@ -197,7 +197,7 @@ library FrakMath {
             // Get free memory space for our array, and update the free mem space index
             let memPointer := mload(0x40)
             mstore(0x40, add(memPointer, 0x40))
-            
+
             // Store our array (1st = length, 2nd = element)
             mstore(memPointer, 0x01)
             mstore(add(memPointer, 0x20), element)
