@@ -2,7 +2,6 @@
 pragma solidity 0.8.17;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {FrakAccessControlUpgradeable} from "./FrakAccessControlUpgradeable.sol";
 import {NoReward, InvalidAddress, RewardTooLarge} from "./FrakErrors.sol";
@@ -12,7 +11,6 @@ import {NoReward, InvalidAddress, RewardTooLarge} from "./FrakErrors.sol";
  */
 /// @custom:security-contact contact@frak.id
 abstract contract PushPullReward is Initializable {
-    using SafeERC20Upgradeable for IERC20Upgradeable;
 
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */
@@ -158,7 +156,7 @@ abstract contract PushPullReward is Initializable {
             sstore(rewardSlot, 0)
         }
         // Perform the transfer of the founds
-        token.safeTransfer(user, userAmount);
+        token.transfer(user, userAmount);
     }
 
     /**
@@ -214,6 +212,6 @@ abstract contract PushPullReward is Initializable {
             log2(0, 0x40, _REWARD_WITHDRAWAD_EVENT_SELECTOR, user)
         }
         // Perform the transfer of the founds
-        token.safeTransfer(user, userAmount);
+        token.transfer(user, userAmount);
     }
 }

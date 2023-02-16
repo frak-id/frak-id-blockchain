@@ -9,7 +9,6 @@ import {FraktionTokens} from "../tokens/FraktionTokens.sol";
 import {FrakToken} from "../tokens/FrakTokenL2.sol";
 import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
 import {InvalidAddress} from "../utils/FrakErrors.sol";
-import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 /**
  * @author  @KONFeature
@@ -19,7 +18,6 @@ import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ER
  * @custom:security-contact contact@frak.id
  */
 contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges {
-    using SafeERC20Upgradeable for FrakToken;
     using FrakMath for uint256;
 
     /* -------------------------------------------------------------------------- */
@@ -207,7 +205,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
             log3(0, 0x40, _FRACTION_MINTED_EVENT_SELECTOR, id, to)
         }
         // Transfer the tokens
-        frakToken.safeTransferFrom(to, foundationWallet, totalCost);
+        frakToken.transferFrom(to, foundationWallet, totalCost);
         // Mint his Fraction of NFT
         fraktionTokens.mint(to, id, amount);
     }

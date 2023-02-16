@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {FrakToken} from "../tokens/FrakTokenL2.sol";
 import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
 import {FrakRoles} from "../utils/FrakRoles.sol";
@@ -11,8 +10,6 @@ import {InvalidAddress, RewardTooLarge, NoReward} from "../utils/FrakErrors.sol"
 error NotEnoughTreasury();
 
 contract FrakTreasuryWallet is MintingAccessControlUpgradeable {
-    using SafeERC20Upgradeable for FrakToken;
-
     // The cap of frk token for the treasury
     uint256 internal constant FRK_MINTING_CAP = 330_000_000 ether;
 
@@ -71,7 +68,7 @@ contract FrakTreasuryWallet is MintingAccessControlUpgradeable {
 
         // Once we are good, move the token to the given address
         emit TreasuryTransfer(target, amount);
-        frakToken.safeTransfer(target, amount);
+        frakToken.transfer(target, amount);
     }
 
     /**

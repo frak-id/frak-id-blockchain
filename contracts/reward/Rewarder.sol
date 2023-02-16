@@ -13,14 +13,12 @@ import {FrakToken} from "../tokens/FrakTokenL2.sol";
 import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
 import {InvalidAddress, InvalidArray, RewardTooLarge} from "../utils/FrakErrors.sol";
 import {PushPullReward} from "../utils/PushPullReward.sol";
-import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 /**
  * @dev Represent our rewarder contract
  */
 /// @custom:security-contact contact@frak.id
 contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, ListenerBadges, PushPullReward {
-    using SafeERC20Upgradeable for FrakToken;
     using FrakMath for uint256;
 
     /* -------------------------------------------------------------------------- */
@@ -183,7 +181,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         }
 
         // Mint the reward for the user
-        frakToken.safeTransfer(listener, amount);
+        frakToken.transfer(listener, amount);
     }
 
     /**
@@ -312,10 +310,10 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
 
         // If we got reward for the pool, transfer them
         if (totalRewards.content > 0) {
-            frakToken.safeTransfer(address(contentPool), totalRewards.content);
+            frakToken.transfer(address(contentPool), totalRewards.content);
         }
         /*if (totalRewards.referral > 0) {
-            frakToken.safeTransfer(address(referralPool), totalRewards.referral);
+            frakToken.transfer(address(referralPool), totalRewards.referral);
         }*/
     }
 
