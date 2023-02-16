@@ -113,6 +113,10 @@ contract RewarderTest is RewarderTestHelper {
         emit Test(errorSelector);
         errorSelector = bytes4(keccak256(bytes("SupplyUpdateNotAllowed()")));
         emit Test(errorSelector);
+        errorSelector = bytes4(keccak256(bytes("PoolStateClosed()")));
+        emit Test(errorSelector);
+        errorSelector = bytes4(keccak256(bytes("PoolStateAlreadyClaimed()")));
+        emit Test(errorSelector);
 
         //  address indexed user, uint256 indexed contentId, uint256 baseUserReward, uint256 earningFactor, uint16 ccuCount
         bytes32 bis = keccak256(bytes("RewardOnContent(address,uint256,uint256,uint256)"));
@@ -128,6 +132,12 @@ contract RewarderTest is RewarderTestHelper {
         bis = keccak256(bytes("ContentMinted(uint256,address)"));
         emit TestBis(bis);
         bis = keccak256(bytes("FractionMinted(uint256,address,uint256,uint256)"));
+        emit TestBis(bis);
+        bis = keccak256(bytes("PoolRewardAdded(uint256,uint256)"));
+        emit TestBis(bis);
+        bis = keccak256(bytes("PoolSharesUpdated(uint256,uint256,uint256)"));
+        emit TestBis(bis);
+        bis = keccak256(bytes("ParticipantSharesUpdated(uint256,uint256,uint256)"));
         emit TestBis(bis);
 
         uint256 baseId = 4555;
