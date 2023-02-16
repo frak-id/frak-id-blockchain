@@ -116,6 +116,15 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     }
 
     /* -------------------------------------------------------------------------- */
+    /*                          External view function's                          */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev Check if the user has the given role
+    function hasRole(bytes32 role, address account) public view returns (bool) {
+        return _roles[role][account];
+    }
+
+    /* -------------------------------------------------------------------------- */
     /*                          Internal write function's                         */
     /* -------------------------------------------------------------------------- */
 
@@ -177,11 +186,6 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
                 revert(0x1c, 0x04)
             }
         }
-    }
-
-    /// @dev Check if the user has the given role
-    function hasRole(bytes32 role, address account) public view returns (bool) {
-        return _roles[role][account];
     }
 
     /* -------------------------------------------------------------------------- */

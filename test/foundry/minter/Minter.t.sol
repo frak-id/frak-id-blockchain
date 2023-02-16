@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
-
-import {InvalidReward} from "@frak/reward/Rewarder.sol";
 import {NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge} from "@frak/utils/FrakErrors.sol";
 import {FraktionTokens} from "@frak/tokens/FraktionTokens.sol";
 import {FrakMath} from "@frak/utils/FrakMath.sol";

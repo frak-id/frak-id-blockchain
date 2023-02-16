@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
+import {Rewarder} from "@frak/reward/Rewarder.sol";
 import {FrakMath} from "@frak/utils/FrakMath.sol";
 import {ContractPaused, NotAuthorized, InvalidArray, InvalidAddress, RewardTooLarge} from "@frak/utils/FrakErrors.sol";
 import {RewarderTestHelper} from "./RewarderTestHelper.sol";
-import {InvalidReward} from "@frak/reward/Rewarder.sol";
 
 /// Testing the rewarder pay function
 contract RewarderPayTest is RewarderTestHelper {
@@ -42,12 +42,12 @@ contract RewarderPayTest is RewarderTestHelper {
     }
 
     function test_fail_payUserDirectly_InvalidReward() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        vm.expectRevert(InvalidReward.selector);
+        vm.expectRevert(Rewarder.InvalidReward.selector);
         rewarder.payUserDirectly(address(1), 0);
     }
 
     function test_fail_payUserDirectly_TooLargeReward() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        vm.expectRevert(InvalidReward.selector);
+        vm.expectRevert(Rewarder.InvalidReward.selector);
         rewarder.payUserDirectly(address(1), 1_000_001 ether);
     }
 
@@ -92,7 +92,7 @@ contract RewarderPayTest is RewarderTestHelper {
     }
 
     function test_fail_payCreatorDirectlyBatch_EmptyAmount() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        vm.expectRevert(InvalidReward.selector);
+        vm.expectRevert(Rewarder.InvalidReward.selector);
         rewarder.payCreatorDirectlyBatch(contentId.asSingletonArray(), uint256(0).asSingletonArray());
     }
 
@@ -101,7 +101,7 @@ contract RewarderPayTest is RewarderTestHelper {
         withLotFrkToken(rewarderAddr)
         prankExecAsDeployer
     {
-        vm.expectRevert(InvalidReward.selector);
+        vm.expectRevert(Rewarder.InvalidReward.selector);
         rewarder.payCreatorDirectlyBatch(contentId.asSingletonArray(), uint256(1_000_001 ether).asSingletonArray());
     }
 
