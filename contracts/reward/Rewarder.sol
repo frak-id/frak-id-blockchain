@@ -98,7 +98,10 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /// @dev Access our internal tokens
     FraktionTokens private fraktionTokens;
 
-    /// @dev Access our FRK token
+    /**
+     * @dev Access our FRK token
+     * @notice WARN This var is now unused, and so, this slot can be reused for other things
+     */ 
     FrakToken private frakToken;
 
     /// @dev Access our referral system
@@ -181,7 +184,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         }
 
         // Mint the reward for the user
-        frakToken.transfer(listener, amount);
+        token.transfer(listener, amount);
     }
 
     /**
@@ -310,10 +313,10 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
 
         // If we got reward for the pool, transfer them
         if (totalRewards.content > 0) {
-            frakToken.transfer(address(contentPool), totalRewards.content);
+            token.transfer(address(contentPool), totalRewards.content);
         }
         /*if (totalRewards.referral > 0) {
-            frakToken.transfer(address(referralPool), totalRewards.referral);
+            token.transfer(address(referralPool), totalRewards.referral);
         }*/
     }
 
