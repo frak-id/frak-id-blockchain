@@ -30,7 +30,7 @@ contract RewarderTest is RewarderTestHelper {
      */
     function test_updateTpu() public prankExecAsDeployer {
         rewarder.updateTpu(1 ether);
-        assertEq(rewarder.tokenGenerationFactor(), 1 ether);
+        assertEq(rewarder.getTpu(), 1 ether);
     }
 
     function test_fail_updateTpu_NotAuthorized() public {

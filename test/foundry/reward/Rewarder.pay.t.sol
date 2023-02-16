@@ -133,12 +133,12 @@ contract RewarderPayTest is RewarderTestHelper {
 
         // Get the previous claimable balance
         uint256 claimableBalance = rewarder.getAvailableFounds(address(1));
-        uint256 frakMinted = rewarder.totalFrakMinted();
+        uint256 frakMinted = rewarder.getFrkMinted();
         // Launch the pay
         rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
         // Ensure the claimable balance has increase
         assertGt(rewarder.getAvailableFounds(address(1)), claimableBalance);
-        assertGt(rewarder.totalFrakMinted(), frakMinted);
+        assertGt(rewarder.getFrkMinted(), frakMinted);
     }
 
     function testFuzz_payUser_WithFraktions(uint16 listenCount)
@@ -178,7 +178,16 @@ contract RewarderPayTest is RewarderTestHelper {
         assertEq(frakToken.balanceOf(address(1)), balance + ((availableFound * 98) / 100));
         balance = frakToken.balanceOf(address(1));
 
+        // Ensure the foundation doesn't have any fee's
+        balance = frakToken.balanceOf(foundationAddr);
+        availableFound = rewarder.getAvailableFounds(foundationAddr);
+        vm.prank(foundationAddr);
+        rewarder.withdrawFounds();
+        assertEq(frakToken.balanceOf(foundationAddr), balance + availableFound);
+
+
         // Compute and claim content pool rewards
+        balance = frakToken.balanceOf(address(1));
         vm.prank(address(1));
         contentPool.withdrawFounds();
         assertGt(frakToken.balanceOf(address(1)), balance);

@@ -163,6 +163,7 @@ abstract contract PushPullReward is Initializable {
 
     /**
      * @dev Core logic of the withdraw method, but with fee this time
+     * @notice If that's the fee recipient performing the call, withdraw without fee's (otherwise, infinite loop required to get all the frk foundation fee's)
      */
     function _withdrawWithFee(address user, uint256 feePercent, address feeRecipient) internal {
         uint256 feesAmount;
@@ -182,17 +183,31 @@ abstract contract PushPullReward is Initializable {
             mstore(0, user)
             mstore(0x20, _pendingRewards.slot)
             let rewardSlot := keccak256(0, 0x40)
+            // Get the slot for the fee recipient rewards
+            mstore(0, feeRecipient)
+            let feeRecipientSlot := keccak256(0, 0x40)
+            // Get the current user pending reward
             let pendingReward := sload(rewardSlot)
             // Revert if no reward
             if iszero(pendingReward) {
                 mstore(0x00, _NO_REWARD_SELECTOR)
                 revert(0x1c, 0x04)
             }
-            // Reset his reward
-            sstore(rewardSlot, 0)
             // Compute the fee's amount
-            feesAmount := div(mul(pendingReward, feePercent), 100)
-            userAmount := sub(pendingReward, feesAmount)
+            switch eq(feeRecipient, user)
+            case 1 {
+                // If the fee's recipient is the caller, no fee's
+                userAmount := pendingReward
+            }
+            default {
+                // Otherwise, apply the fee's percentage
+                feesAmount := div(mul(pendingReward, feePercent), 100)
+                userAmount := sub(pendingReward, feesAmount)
+            }
+            // Reset the user reward
+            sstore(rewardSlot, 0)
+            // Store the fee recipient reward (if any only)
+            if feesAmount { sstore(feeRecipientSlot, add(sload(feeRecipientSlot), feesAmount)) }
             // Emit the witdraw event
             mstore(0x00, userAmount)
             mstore(0x20, feesAmount)
@@ -200,6 +215,5 @@ abstract contract PushPullReward is Initializable {
         }
         // Perform the transfer of the founds
         token.safeTransfer(user, userAmount);
-        token.safeTransfer(feeRecipient, feesAmount);
     }
 }

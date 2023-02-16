@@ -46,6 +46,9 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     uint256 private constant CONTENT_TYPE_MUSIC = 3;
     uint256 private constant CONTENT_TYPE_STREAMING = 4;
 
+    /// @dev The percentage of fee's going to the FRK foundation
+    uint256 private constant FEE_PERCENT = 2;
+
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
@@ -89,39 +92,25 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /*                                   Storage                                  */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @notice factor user to compute the number of token to generate (on 1e18 decimals)
-     */
-    uint256 public tokenGenerationFactor;
+    /// @dev factor user to compute the number of token to generate (on 1e18 decimals)
+    uint256 private tokenGenerationFactor;
 
-    /**
-     * @notice The total frak minted for reward
-     */
-    uint256 public totalFrakMinted;
+    /// @dev The total frak minted for reward
+    uint256 private totalFrakMinted;
 
-    /**
-     * @dev Access our internal tokens
-     */
+    /// @dev Access our internal tokens
     FraktionTokens private fraktionTokens;
 
-    /**
-     * @dev Access our token
-     */
+    /// @dev Access our FRK token
     FrakToken private frakToken;
 
-    /**
-     * @dev Access our referral system
-     */
+    /// @dev Access our referral system
     ReferralPool private referralPool;
 
-    /**
-     * @dev Access our content pool
-     */
+    /// @dev Access our content pool
     ContentPool private contentPool;
 
-    /**
-     * @dev Address of the foundation wallet
-     */
+    /// @dev Address of the foundation wallet
     address private foundationWallet;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -335,26 +324,20 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
      * @dev Withdraw my pending founds
      */
     function withdrawFounds() external override whenNotPaused {
-        _withdrawWithFee(msg.sender, 2, foundationWallet);
+        _withdrawWithFee(msg.sender, FEE_PERCENT, foundationWallet);
     }
 
-    /**
-     * @dev Withdraw the pending founds for a user
-     */
+    /// @dev Withdraw the pending founds for 'user'
     function withdrawFounds(address user) external override onlyRole(FrakRoles.ADMIN) whenNotPaused {
-        _withdrawWithFee(user, 2, foundationWallet);
+        _withdrawWithFee(user, FEE_PERCENT, foundationWallet);
     }
 
-    /**
-     * @dev Update the token generation factor
-     */
+    /// @dev Update the token generation factor to 'newTpu'
     function updateTpu(uint256 newTpu) external onlyRole(FrakRoles.ADMIN) {
         tokenGenerationFactor = newTpu;
     }
 
-    /**
-     * @dev Update the 'contentId' 'badge'
-     */
+    /// @dev Update the 'contentId' 'badge'
     function updateContentBadge(uint256 contentId, uint256 badge)
         external
         override
@@ -364,9 +347,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         _updateContentBadge(contentId, badge);
     }
 
-    /**
-     * @dev Update the 'listener' 'badge'
-     */
+    /// @dev Update the 'listener' 'badge'
     function updateListenerBadge(address listener, uint256 badge)
         external
         override
@@ -374,6 +355,20 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         whenNotPaused
     {
         _updateListenerBadge(listener, badge);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                          External view function's                          */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev Get the current TPU
+    function getTpu() external view returns (uint256) {
+        return tokenGenerationFactor;
+    }
+
+    /// @dev Get the current number of FRK minted
+    function getFrkMinted() external view returns (uint256) {
+        return totalFrakMinted;
     }
 
     /* -------------------------------------------------------------------------- */
