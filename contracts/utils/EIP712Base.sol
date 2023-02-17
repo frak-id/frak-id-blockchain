@@ -11,10 +11,11 @@ contract EIP712Base is Initializable {
         bytes32 salt;
     }
 
-    string public constant ERC712_VERSION = "1";
+    string internal constant ERC712_VERSION = "1";
 
     bytes32 internal constant EIP712_DOMAIN_TYPEHASH =
         keccak256(bytes("EIP712Domain(string name,string version,address verifyingContract,bytes32 salt)"));
+
     bytes32 internal domainSeperator;
 
     // supposed to be called once while initializing.
@@ -40,8 +41,7 @@ contract EIP712Base is Initializable {
         return domainSeperator;
     }
 
-    function getChainId() public view returns (uint256) {
-        uint256 id;
+    function getChainId() public view returns (uint256 id) {
         assembly {
             id := chainid()
         }

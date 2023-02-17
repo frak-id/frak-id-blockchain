@@ -101,7 +101,8 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /* -------------------------------------------------------------------------- */
 
     /// @dev The index of the current state index per content
-    mapping(uint256 => uint256) private currentStateIndex;
+    /// TODO : This is unused now since we use the array length (more effecient since we perform a first sload on the mapping, and we need to do it anyway)
+    // mapping(uint256 => uint256) private currentStateIndex;
 
     /// @dev All the different reward states per content id
     mapping(uint256 => RewardState[]) private rewardStates;
@@ -218,7 +219,8 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
             uint256 sharesValue = getSharesForTokenType(tokenType);
             if (sharesValue == 0) return; // Jump this iteration if this fraktions doesn't count for any shares
             // Get the last state index
-            uint256 lastContentIndex = currentStateIndex[contentId];
+            RewardState[] storage contentStates = rewardStates[contentId];
+            uint256 lastContentIndex = contentStates.length - 1;
             // Get the total shares moved
             uint256 totalShares = sharesValue * amountMoved;
             // Warm up the access to this content participants
@@ -226,11 +228,11 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
 
             // Get the previous participant and compute his reward for this content
             Participant storage sender = contentParticipants[from];
-            computeAndSaveReward(contentId, from, sender, lastContentIndex);
+            computeAndSaveReward(contentStates, from, sender, lastContentIndex);
 
             // Do the same thing for the receiver
             Participant storage receiver = contentParticipants[to];
-            computeAndSaveReward(contentId, to, receiver, lastContentIndex);
+            computeAndSaveReward(contentStates, to, receiver, lastContentIndex);
 
             // Then update the shares for each one of them
             _increaseParticipantShare(contentId, receiver, to, uint120(totalShares));
@@ -252,13 +254,14 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
             // Get the mapping and array concerned by this content (warm up further access)
             mapping(address => Participant) storage contentParticipants = participants[contentId];
             RewardState[] storage contentRewardStates = rewardStates[contentId];
-            // Lock the current state for this content (since we will be updating his share)
-            uint256 stateIndex = currentStateIndex[contentId];
             // If state index is at 0, we perform state creation directly
             RewardState storage currentState;
+            uint256 stateIndex;
             if (contentRewardStates.length == 0) {
                 currentState = contentRewardStates.push();
+                stateIndex = 0;
             } else {
+                stateIndex = contentRewardStates.length - 1;
                 currentState = contentRewardStates[stateIndex];
             }
             // Tell it's closed, really necessary ?
@@ -269,7 +272,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
                 // In case of fraktions mint
                 // Get the previous participant and compute his reward for this content
                 Participant storage receiver = contentParticipants[to];
-                computeAndSaveReward(contentId, to, receiver, stateIndex);
+                computeAndSaveReward(contentRewardStates, to, receiver, stateIndex);
                 // Update his shares
                 _increaseParticipantShare(contentId, receiver, to, uint120(sharesMoved));
                 // Update the new total shares
@@ -278,7 +281,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
                 // In case of fraktions burn
                 // Get the previous participant and compute his reward for this content
                 Participant storage sender = contentParticipants[from];
-                computeAndSaveReward(contentId, from, sender, stateIndex);
+                computeAndSaveReward(contentRewardStates, from, sender, stateIndex);
                 // Update his shares
                 _decreaseParticipantShare(contentId, sender, from, uint120(sharesMoved));
                 // Update the new total shares
@@ -296,7 +299,6 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
                 RewardState storage newState = contentRewardStates.push();
                 newState.totalShares = uint128(newTotalShares);
                 newState.open = true;
-                currentStateIndex[contentId] = contentRewardStates.length - 1;
             }
             // Emit the pool update event
             emit PoolSharesUpdated(contentId, stateIndex, newTotalShares);
@@ -307,7 +309,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
      * @dev Compute and save the user reward to the given state
      */
     function computeAndSaveReward(
-        uint256 contentId,
+        RewardState[] storage contentStates,
         address user,
         Participant storage participant,
         uint256 toStateIndex
@@ -325,7 +327,6 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
                 return 0;
             }
             // Check if he got some more reward to claim on the last state he fetched, and init our claimable reward with that
-            RewardState[] storage contentStates = rewardStates[contentId];
             RewardState memory memCurrentRewardState = contentStates[memParticipant.lastStateIndex];
             uint256 userReward = computeUserReward(memCurrentRewardState, memParticipant);
             claimable = userReward - memParticipant.lastStateClaim;
@@ -415,9 +416,11 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
             // Get the content pool id and the participant and last pool id
             uint256 contentId = contentPoolIds.at(index);
             Participant storage participant = participants[contentId][user];
-            uint256 lastPoolIndex = currentStateIndex[contentId];
+            // Get our content states, and the target length
+            RewardState[] storage contentStates = rewardStates[contentId];
+            uint256 lastPoolIndex = contentStates.length - 1;
             // Compute and save the reward for this pool
-            computeAndSaveReward(contentId, user, participant, lastPoolIndex);
+            computeAndSaveReward(contentStates, user, participant, lastPoolIndex);
             unchecked {
                 ++index;
             }
@@ -453,7 +456,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
             state.open = true;
         } else {
             // Otherwise, get the current index and get it
-            rewardIndex = currentStateIndex[contentId];
+            rewardIndex = contentRewardStates.length - 1;
             state = contentRewardStates[rewardIndex];
         }
     }
@@ -504,8 +507,8 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
      * @dev Get the current reward state for the given content
      */
     function getCurrentRewardState(uint256 contentId) external view returns (RewardState memory rewardState) {
-        uint256 stateIndex = currentStateIndex[contentId];
-        rewardState = rewardStates[contentId][stateIndex];
+        RewardState[] storage contentStates = rewardStates[contentId];
+        rewardState = contentStates[contentStates.length - 1];
     }
 
     /**

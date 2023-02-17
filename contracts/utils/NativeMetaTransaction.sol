@@ -16,7 +16,7 @@ contract NativeMetaTransaction is EIP712Base {
 
     event MetaTransactionExecuted(address userAddress, address relayerAddress, bytes functionSignature);
 
-    mapping(address => uint256) nonces;
+    mapping(address => uint256) private nonces;
 
     /*
      * Meta transaction structure.
