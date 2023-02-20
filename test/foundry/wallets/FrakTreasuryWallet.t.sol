@@ -6,7 +6,14 @@ import {FrakMath} from "@frak/utils/FrakMath.sol";
 import {FrakRoles} from "@frak/utils/FrakRoles.sol";
 import {FrakTreasuryWallet, NotEnoughTreasury} from "@frak/wallets/FrakTreasuryWallet.sol";
 import {FrkTokenTestHelper} from "../FrkTokenTestHelper.sol";
-import {NotAuthorized, InvalidAddress, NoReward, ContractPaused, RewardTooLarge, InvalidArray} from "@frak/utils/FrakErrors.sol";
+import {
+    NotAuthorized,
+    InvalidAddress,
+    NoReward,
+    ContractPaused,
+    RewardTooLarge,
+    InvalidArray
+} from "@frak/utils/FrakErrors.sol";
 
 /// Testing the frak l2 token
 contract FrakTreasuryWalletTest is FrkTokenTestHelper {
@@ -133,7 +140,6 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper {
         vm.expectRevert(ContractPaused.selector);
         treasuryWallet.transferBatch(addrs, amounts);
     }
-    
 
     function test_fail_transferBatch_NoReward() public prankExecAsDeployer {
         (address[] memory addrs, uint256[] memory amounts) = baseBatchParam(0);

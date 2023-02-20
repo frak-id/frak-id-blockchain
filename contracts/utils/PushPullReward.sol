@@ -46,11 +46,11 @@ abstract contract PushPullReward is Initializable {
     /*                                   Storage                                  */
     /* -------------------------------------------------------------------------- */
 
-    /// @dev The pending reward for the given address
-    mapping(address => uint256) internal _pendingRewards;
-
     /// @dev Access the token that will deliver the tokens
     IERC20Upgradeable internal token;
+
+    /// @dev The pending reward for the given address
+    mapping(address => uint256) internal _pendingRewards;
 
     /**
      * Init of this contract
