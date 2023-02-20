@@ -185,7 +185,6 @@ contract RewarderPayTest is RewarderTestHelper {
         rewarder.withdrawFounds();
         assertEq(frakToken.balanceOf(foundationAddr), balance + availableFound);
 
-
         // Compute and claim content pool rewards
         balance = frakToken.balanceOf(address(1));
         vm.prank(address(1));

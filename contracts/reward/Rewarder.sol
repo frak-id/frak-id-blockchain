@@ -101,7 +101,7 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
     /**
      * @dev Access our FRK token
      * @notice WARN This var is now unused, and so, this slot can be reused for other things
-     */ 
+     */
     FrakToken private frakToken;
 
     /// @dev Access our referral system

@@ -11,7 +11,6 @@ import {NoReward, InvalidAddress, RewardTooLarge} from "./FrakErrors.sol";
  */
 /// @custom:security-contact contact@frak.id
 abstract contract PushPullReward is Initializable {
-
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
