@@ -19,10 +19,10 @@ error AlreadyInRefererChain();
 /// @custom:security-contact contact@frak.id
 contract ReferralPool is FrakAccessControlUpgradeable, PushPullReward {
     // The minimum reward is 1 mwei, to prevent iteration on really small amount
-    uint24 internal constant MINIMUM_REWARD = 1_000_000;
+    uint256 internal constant MINIMUM_REWARD = 1_000_000;
 
     // The maximal referal depth we can pay
-    uint8 internal constant MAX_DEPTH = 10;
+    uint256 internal constant MAX_DEPTH = 10;
 
     /**
      * @dev Event emitted when a user is rewarded for his listen
@@ -56,6 +56,7 @@ contract ReferralPool is FrakAccessControlUpgradeable, PushPullReward {
      */
     function userReferred(uint256 contentId, address user, address referer)
         external
+        payable
         onlyRole(FrakRoles.ADMIN)
         whenNotPaused
     {
@@ -84,6 +85,7 @@ contract ReferralPool is FrakAccessControlUpgradeable, PushPullReward {
      */
     function payAllReferer(uint256 contentId, address user, uint256 amount)
         public
+        payable
         onlyRole(FrakRoles.REWARDER)
         whenNotPaused
         returns (uint256 totalAmount)

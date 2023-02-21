@@ -27,7 +27,7 @@ interface IMinter is IPausable {
         uint256 premiumSupply,
         uint256 goldSupply,
         uint256 diamondSupply
-    ) external returns (uint256 contentId);
+    ) external payable returns (uint256 contentId);
 
     /**
      * @notice  Mint a new fraktion for the given amount and user
@@ -36,7 +36,7 @@ interface IMinter is IPausable {
      * @param   to  The address on which we will mint the fraktion
      * @param   amount  The amount of fraktion to be minted for the user
      */
-    function mintFractionForUser(uint256 id, address to, uint256 amount) external;
+    function mintFractionForUser(uint256 id, address to, uint256 amount) external payable;
 
     /**
      * @notice  Mint a free fraktion for the given user
@@ -44,7 +44,7 @@ interface IMinter is IPausable {
      * @param   id  Id of the free fraktion
      * @param   to  Address of the user
      */
-    function mintFreeFraktionForUser(uint256 id, address to) external;
+    function mintFreeFraktionForUser(uint256 id, address to) external payable;
 
     /**
      * @notice  Increase the total supply for the given fraktion id

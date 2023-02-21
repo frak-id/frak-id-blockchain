@@ -1,18 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import {InvalidReward} from "@frak/reward/Rewarder.sol";
 import {NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge} from "@frak/utils/FrakErrors.sol";
-import {FraktionTokens, InsuficiantSupply, SupplyUpdateNotAllowed} from "@frak/tokens/FraktionTokens.sol";
+import {FraktionTokens} from "@frak/tokens/FraktionTokens.sol";
 import {FrakMath} from "@frak/utils/FrakMath.sol";
 import {FrakRoles} from "@frak/utils/FrakRoles.sol";
-import {
-    Minter,
-    InvalidSupply,
-    InvalidAddress,
-    ExpectingOnlyFreeFraktion,
-    AlreadyHaveFreeFraktion
-} from "@frak/minter/Minter.sol";
+import {Minter} from "@frak/minter/Minter.sol";
 import {FrkTokenTestHelper} from "../FrkTokenTestHelper.sol";
 import {
     NotAuthorized,
@@ -93,19 +86,19 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_fail_addContent_InvalidSupply() public prankExecAsDeployer {
-        vm.expectRevert(InvalidSupply.selector);
+        vm.expectRevert(Minter.InvalidSupply.selector);
         minter.addContent(address(1), 0, 1, 1, 1);
 
-        vm.expectRevert(InvalidSupply.selector);
+        vm.expectRevert(Minter.InvalidSupply.selector);
         minter.addContent(address(1), 501, 1, 1, 1);
 
-        vm.expectRevert(InvalidSupply.selector);
+        vm.expectRevert(Minter.InvalidSupply.selector);
         minter.addContent(address(1), 1, 201, 1, 1);
 
-        vm.expectRevert(InvalidSupply.selector);
+        vm.expectRevert(Minter.InvalidSupply.selector);
         minter.addContent(address(1), 1, 1, 51, 1);
 
-        vm.expectRevert(InvalidSupply.selector);
+        vm.expectRevert(Minter.InvalidSupply.selector);
         minter.addContent(address(1), 1, 1, 1, 21);
     }
 
@@ -119,7 +112,10 @@ contract MinterTest is FrkTokenTestHelper {
     function test_mintFractionForUser() public {
         // Add an initial content
         prankDeployer();
-        uint256 contentId = minter.addContent(address(1), 1, 1, 1, 1);
+        uint256 contentId = minter.addContent(address(1), 10, 1, 1, 1);
+        // Ensure the supply is good
+        assertEq(fraktionTokens.supplyOf(contentId.buildCommonNftId()), 10);
+        assertEq(fraktionTokens.supplyOf(contentId.buildDiamondNftId()), 1);
         // Approve the minter for token transfe
         prankDeployer();
         frakToken.mint(address(1), 500 ether);
@@ -128,6 +124,8 @@ contract MinterTest is FrkTokenTestHelper {
         // Launch the buy prcess
         prankDeployer();
         minter.mintFractionForUser(contentId.buildCommonNftId(), address(1), 1);
+        // Ensure the supply is good
+        assertEq(fraktionTokens.supplyOf(contentId.buildCommonNftId()), 9);
     }
 
     function test_fail_mintFractionForUser_ContractPaused() public prankExecAsDeployer {
@@ -152,7 +150,7 @@ contract MinterTest is FrkTokenTestHelper {
         frakToken.approve(address(minter), 500 ether);
         // Launch the buy prcess
         prankDeployer();
-        vm.expectRevert(InsuficiantSupply.selector);
+        vm.expectRevert(FraktionTokens.InsuficiantSupply.selector);
         minter.mintFractionForUser(contentId.buildCommonNftId(), address(1), 2);
     }
 
@@ -197,7 +195,7 @@ contract MinterTest is FrkTokenTestHelper {
     function test_fail_mintFreeFraktionForUser_ExpectingOnlyFreeFraktion() public prankExecAsDeployer {
         // Add an initial content
         uint256 contentId = minter.addContent(address(1), 1, 1, 1, 1);
-        vm.expectRevert(ExpectingOnlyFreeFraktion.selector);
+        vm.expectRevert(Minter.ExpectingOnlyFreeFraktion.selector);
         minter.mintFreeFraktionForUser(contentId.buildCommonNftId(), address(1));
     }
 
@@ -205,7 +203,7 @@ contract MinterTest is FrkTokenTestHelper {
         // Add an initial content
         uint256 contentId = minter.addContent(address(1), 1, 1, 1, 1);
         minter.mintFreeFraktionForUser(contentId.buildFreeNftId(), address(1));
-        vm.expectRevert(AlreadyHaveFreeFraktion.selector);
+        vm.expectRevert(Minter.AlreadyHaveFreeFraktion.selector);
         minter.mintFreeFraktionForUser(contentId.buildFreeNftId(), address(1));
     }
 
@@ -234,10 +232,18 @@ contract MinterTest is FrkTokenTestHelper {
         // Add an initial content
         uint256 contentId = minter.addContent(address(1), 1, 1, 1, 0);
         // Revert cause of free fraktion
-        vm.expectRevert(SupplyUpdateNotAllowed.selector);
+        vm.expectRevert(FraktionTokens.SupplyUpdateNotAllowed.selector);
         minter.increaseSupply(contentId.buildFreeNftId(), 1);
         // Revert cause of nft id
-        vm.expectRevert(SupplyUpdateNotAllowed.selector);
+        vm.expectRevert(FraktionTokens.SupplyUpdateNotAllowed.selector);
         minter.increaseSupply(contentId.buildNftId(), 1);
+    }
+
+    function test_fail_increaseSupply_RemainingSupply() public prankExecAsDeployer {
+        // Add an initial content
+        uint256 contentId = minter.addContent(address(1), 1, 1, 1, 0);
+        // Revert cause of free fraktion
+        vm.expectRevert(Minter.RemainingSupply.selector);
+        minter.increaseSupply(contentId.buildCommonNftId(), 1);
     }
 }

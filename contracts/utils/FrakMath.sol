@@ -25,6 +25,8 @@ library FrakMath {
     uint8 internal constant TOKEN_TYPE_GOLD_MASK = 5;
     /// @dev Diamond Token type mask
     uint8 internal constant TOKEN_TYPE_DIAMOND_MASK = 6;
+    /// @dev If a token type is <= to this value it's not a payed one
+    uint8 internal constant PAYED_TOKEN_TYPE_MAX = 7;
 
     /**
      * @dev Build the id for a S FNT
@@ -38,15 +40,15 @@ library FrakMath {
     /**
      * @dev Build the id for a S FNT
      */
-    function buildSnftIds(uint256 id, uint256[] memory types) internal pure returns (uint256[] memory) {
-        uint256[] memory tokenIds = new uint256[](types.length);
-        for (uint256 i; i < types.length;) {
+    function buildSnftIds(uint256 id, uint256[] memory types) internal pure returns (uint256[] memory tokenIds) {
+        uint256 length = types.length;
+        tokenIds = new uint256[](length);
+        for (uint256 i; i < length;) {
             unchecked {
                 tokenIds[i] = buildSnftId(id, types[i]);
                 ++i;
             }
         }
-        return tokenIds;
     }
 
     /**
@@ -106,28 +108,36 @@ library FrakMath {
     /**
      * @dev Return the id of a content without the token type mask
      * @param id uint256 ID of the token tto exclude the mask of
-     * @return uint256 The id without the type mask
+     * @return contentId uint256 The id without the type mask
      */
-    function extractContentId(uint256 id) internal pure returns (uint256) {
-        return id >> ID_OFFSET;
+    function extractContentId(uint256 id) internal pure returns (uint256 contentId) {
+        assembly {
+            contentId := shr(ID_OFFSET, id)
+        }
     }
 
     /**
      * @dev Return the token type
      * @param id uint256 ID of the token to extract the mask from
-     * @return uint256 The token type
+     * @return tokenType uint256 The token type
      */
-    function extractTokenType(uint256 id) internal pure returns (uint8) {
-        return uint8(id & TYPE_MASK);
+    function extractTokenType(uint256 id) internal pure returns (uint256 tokenType) {
+        assembly {
+            tokenType := and(id, TYPE_MASK)
+        }
     }
 
     /**
      * @dev Return the token type
      * @param id uint256 ID of the token to extract the mask from
-     * @return uint256 The token type
+     * @return contentId uint256 The content id
+     * @return tokenType uint256 The token type
      */
-    function extractContentIdAndTokenType(uint256 id) internal pure returns (uint256, uint8) {
-        return (id >> ID_OFFSET, uint8(id & TYPE_MASK));
+    function extractContentIdAndTokenType(uint256 id) internal pure returns (uint256 contentId, uint256 tokenType) {
+        assembly {
+            contentId := shr(ID_OFFSET, id)
+            tokenType := and(id, TYPE_MASK)
+        }
     }
 
     /**
@@ -136,43 +146,65 @@ library FrakMath {
      * @return bool true if the token is related to a content, false otherwise
      */
     function isContentRelatedToken(uint256 id) internal pure returns (bool) {
-        uint8 tokenType = extractTokenType(id);
+        uint256 tokenType = extractTokenType(id);
         return tokenType > TOKEN_TYPE_NFT_MASK && tokenType <= TOKEN_TYPE_DIAMOND_MASK;
     }
 
     /**
      * @dev Check if the token is payed or not
      */
-    function isPayedTokenToken(uint256 tokenType) internal pure returns (bool) {
-        return tokenType > TOKEN_TYPE_FREE_MASK && tokenType <= TOKEN_TYPE_DIAMOND_MASK;
+    function isPayedTokenToken(uint256 tokenType) internal pure returns (bool isPayed) {
+        assembly {
+            isPayed := and(gt(tokenType, TOKEN_TYPE_FREE_MASK), lt(tokenType, PAYED_TOKEN_TYPE_MAX))
+        }
     }
 
     /**
      * @dev Check if the given token id is a content NFT
      * @param id uint256 ID of the token to check
-     * @return bool true if the token is a content nft, false otherwise
+     * @return isContent bool true if the token is a content nft, false otherwise
      */
-    function isContentNft(uint256 id) internal pure returns (bool) {
-        return extractTokenType(id) == TOKEN_TYPE_NFT_MASK;
+    function isContentNft(uint256 id) internal pure returns (bool isContent) {
+        assembly {
+            isContent := eq(and(id, TYPE_MASK), TOKEN_TYPE_NFT_MASK)
+        }
     }
 
     /**
      * @dev Create a singleton array of the given element
      */
-    function asSingletonArray(uint256 element) internal pure returns (uint256[] memory) {
-        uint256[] memory array = new uint256[](1);
-        array[0] = element;
+    function asSingletonArray(uint256 element) internal pure returns (uint256[] memory array) {
+        assembly {
+            // Get free memory space for our array, and update the free mem space index
+            let memPointer := mload(0x40)
+            mstore(0x40, add(memPointer, 0x40))
 
+            // Store our array (1st = length, 2nd = element)
+            mstore(memPointer, 0x01)
+            mstore(add(memPointer, 0x20), element)
+
+            // Set our array to our mem pointer
+            array := memPointer
+        }
         return array;
     }
 
     /**
      * @dev Create a singleton array of the given element
      */
-    function asSingletonArray(address element) internal pure returns (address[] memory) {
-        address[] memory array = new address[](1);
-        array[0] = element;
+    function asSingletonArray(address element) internal pure returns (address[] memory array) {
+        assembly {
+            // Get free memory space for our array, and update the free mem space index
+            let memPointer := mload(0x40)
+            mstore(0x40, add(memPointer, 0x40))
 
+            // Store our array (1st = length, 2nd = element)
+            mstore(memPointer, 0x01)
+            mstore(add(memPointer, 0x20), element)
+
+            // Set our array to our mem pointer
+            array := memPointer
+        }
         return array;
     }
 }

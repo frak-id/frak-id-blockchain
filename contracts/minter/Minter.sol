@@ -9,19 +9,6 @@ import {FraktionTokens} from "../tokens/FraktionTokens.sol";
 import {FrakToken} from "../tokens/FrakTokenL2.sol";
 import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
 import {InvalidAddress} from "../utils/FrakErrors.sol";
-import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-
-/// @dev Error emitted when the input supply is invalid
-error InvalidSupply();
-
-/// @dev Error emitted when it remain some fraktion supply when wanting to increase it
-error RemainingSupply();
-
-/// @dev Error emitted when we only want to mint a free fraktion, and that's not a free fraktion
-error ExpectingOnlyFreeFraktion();
-
-/// @dev Error emitted when the user already have a free fraktion
-error AlreadyHaveFreeFraktion();
 
 /**
  * @author  @KONFeature
@@ -31,10 +18,62 @@ error AlreadyHaveFreeFraktion();
  * @custom:security-contact contact@frak.id
  */
 contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges {
-    using SafeERC20Upgradeable for FrakToken;
     using FrakMath for uint256;
 
-    //// @dev Reference to the fraktion tokens contract (ERC1155)
+    /* -------------------------------------------------------------------------- */
+    /*                                   Error's                                  */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev Error emitted when the input supply is invalid
+    error InvalidSupply();
+
+    /// @dev Error emitted when it remain some fraktion supply when wanting to increase it
+    error RemainingSupply();
+
+    /// @dev Error emitted when we only want to mint a free fraktion, and that's not a free fraktion
+    error ExpectingOnlyFreeFraktion();
+
+    /// @dev Error emitted when the user already have a free fraktion
+    error AlreadyHaveFreeFraktion();
+
+    /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
+    uint256 private constant _INVALID_ADDRESS_SELECTOR = 0xe6c4247b;
+
+    /// @dev 'bytes4(keccak256(bytes("InvalidSupply()")))'
+    uint256 private constant _INVALID_SUPPLY_SELECTOR = 0x15ae6727;
+
+    /// @dev 'bytes4(keccak256(bytes("RemainingSupply()")))'
+    uint256 private constant _REMAINING_SUPPLY_SELECTOR = 0x0180e6b4;
+
+    /// @dev 'bytes4(keccak256(bytes("ExpectingOnlyFreeFraktion()")))'
+    uint256 private constant _EXPECTING_ONLY_FREE_FRAKTION_SELECTOR = 0x121becbf;
+
+    /// @dev 'bytes4(keccak256(bytes("AlreadyHaveFreeFraktion()")))'
+    uint256 private constant _ALREADY_HAVE_FREE_FRAKTION_SELECTOR = 0xeec398ee;
+
+    /* -------------------------------------------------------------------------- */
+    /*                                   Event's                                  */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev Event emitted when a new content is minted
+    event ContentMinted(uint256 baseId, address indexed owner);
+
+    /// @dev Event emitted when a new fraktion for a content is minted
+    event FractionMinted(uint256 indexed fractionId, address indexed user, uint256 amount, uint256 cost);
+
+    /// @dev 'keccak256(bytes("ContentMinted(uint256,address)"))'
+    uint256 private constant _CONTENT_MINTED_EVENT_SELECTOR =
+        0x660494162a7aab2356c74a0a63c109a0a2ac6ac9d3b95415756bac61af417ecb;
+
+    /// @dev 'keccak256(bytes("FractionMinted(uint256,address,uint256,uint256)"))'
+    uint256 private constant _FRACTION_MINTED_EVENT_SELECTOR =
+        0x660494162a7aab2356c74a0a63c109a0a2ac6ac9d3b95415756bac61af417ecb;
+
+    /* -------------------------------------------------------------------------- */
+    /*                                   Storage                                  */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev Reference to the fraktion tokens contract (ERC1155)
     FraktionTokens private fraktionTokens;
 
     /// @dev Reference to the Frak token contract (ERC20)
@@ -43,11 +82,9 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
     /// @dev Address of our foundation wallet (for fee's payment)
     address private foundationWallet;
 
-    /// @dev Event emitted when a new content is minted
-    event ContentMinted(uint256 baseId, address indexed owner);
-
-    /// @dev Event emitted when a new fraktion for a content is minted
-    event FractionMinted(uint256 indexed fractionId, address indexed user, uint256 amount, uint256 cost);
+    /* -------------------------------------------------------------------------- */
+    /*                                  Function                                  */
+    /* -------------------------------------------------------------------------- */
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -81,6 +118,10 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         _grantRole(FrakRoles.BADGE_UPDATER, msg.sender);
     }
 
+    /* -------------------------------------------------------------------------- */
+    /*                          External write function's                         */
+    /* -------------------------------------------------------------------------- */
+
     /**
      * @notice  Mint a new content to the FrkEcosystem
      * @dev     Will ensure the role and contract state, then the param, and finally call the FraktionTokens contract to mint the new content
@@ -97,27 +138,46 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
         uint256 premiumSupply,
         uint256 goldSupply,
         uint256 diamondSupply
-    ) external override onlyRole(FrakRoles.MINTER) whenNotPaused returns (uint256 contentId) {
-        if (contentOwnerAddress == address(0)) revert InvalidAddress();
-        if (commonSupply == 0 || commonSupply > 500 || premiumSupply > 200 || goldSupply > 50 || diamondSupply > 20) {
-            revert InvalidSupply();
+    ) external payable override onlyRole(FrakRoles.MINTER) whenNotPaused returns (uint256 contentId) {
+        assembly {
+            // Check owner address
+            if iszero(contentOwnerAddress) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+            // Check supplies
+            if or(
+                or(iszero(commonSupply), gt(commonSupply, 500)),
+                or(or(gt(premiumSupply, 200), gt(goldSupply, 50)), gt(diamondSupply, 20))
+            ) {
+                mstore(0x00, _INVALID_SUPPLY_SELECTOR)
+                revert(0x1c, 0x04)
+            }
         }
         // Try to mint the new content
+        // mintNewContent selector : 0xb8fd7b0b
         contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
         // Then set the supply for each token types
         uint256[] memory ids = new uint256[](4);
-        ids[0] = contentId.buildCommonNftId();
-        ids[1] = contentId.buildPremiumNftId();
-        ids[2] = contentId.buildGoldNftId();
-        ids[3] = contentId.buildDiamondNftId();
         uint256[] memory supplies = new uint256[](4);
-        supplies[0] = commonSupply;
-        supplies[1] = premiumSupply;
-        supplies[2] = goldSupply;
-        supplies[3] = diamondSupply;
+        assembly {
+            // Store the ids
+            let shiftedContentId := shl(0x04, contentId)
+            mstore(add(ids, 0x20), or(shiftedContentId, 3))
+            mstore(add(ids, 0x40), or(shiftedContentId, 4))
+            mstore(add(ids, 0x60), or(shiftedContentId, 5))
+            mstore(add(ids, 0x80), or(shiftedContentId, 6))
+            // Store the supplies
+            mstore(add(supplies, 0x20), commonSupply)
+            mstore(add(supplies, 0x40), premiumSupply)
+            mstore(add(supplies, 0x60), goldSupply)
+            mstore(add(supplies, 0x80), diamondSupply)
+            // Emit the content minted event
+            mstore(0, contentId)
+            log2(0, 0x20, _CONTENT_MINTED_EVENT_SELECTOR, contentOwnerAddress)
+        }
+        // Update the supply for each token types
         fraktionTokens.setSupplyBatch(ids, supplies);
-        // Emit the event
-        emit ContentMinted(contentId, contentOwnerAddress);
         // Return the minted content id
         return contentId;
     }
@@ -131,16 +191,21 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
      */
     function mintFractionForUser(uint256 id, address to, uint256 amount)
         external
+        payable
         override
         onlyRole(FrakRoles.MINTER)
         whenNotPaused
     {
         // Get the cost of the fraction
         uint256 totalCost = getCostBadge(id) * amount;
-        // Emit the event
-        emit FractionMinted(id, to, amount, totalCost);
+        assembly {
+            // Emit the event
+            mstore(0, amount)
+            mstore(0x20, totalCost)
+            log3(0, 0x40, _FRACTION_MINTED_EVENT_SELECTOR, id, to)
+        }
         // Transfer the tokens
-        frakToken.safeTransferFrom(to, foundationWallet, totalCost);
+        frakToken.transferFrom(to, foundationWallet, totalCost);
         // Mint his Fraction of NFT
         fraktionTokens.mint(to, id, amount);
     }
@@ -153,17 +218,27 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
      */
     function mintFreeFraktionForUser(uint256 id, address to)
         external
+        payable
         override
         onlyRole(FrakRoles.MINTER)
         whenNotPaused
     {
-        // Ensure it's a free fraktion
-        uint256 tokenType = id.extractTokenType();
-        if (tokenType != FrakMath.TOKEN_TYPE_FREE_MASK) revert ExpectingOnlyFreeFraktion();
+        assembly {
+            // Check if it's a free fraktion
+            if iszero(eq(and(id, 0xF), 0x2)) {
+                mstore(0x00, _EXPECTING_ONLY_FREE_FRAKTION_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
 
-        // Ensure the user doesn't have any free fraktion for this content yet
+        // Check the user balance
         uint256 userBalance = fraktionTokens.balanceOf(to, id);
-        if (userBalance != 0) revert AlreadyHaveFreeFraktion();
+        assembly {
+            if userBalance {
+                mstore(0x00, _ALREADY_HAVE_FREE_FRAKTION_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
 
         // If we are all good, mint the free fraktion to the user
         fraktionTokens.mint(to, id, 1);
@@ -177,11 +252,15 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
      */
     function increaseSupply(uint256 id, uint256 newSupply) external onlyRole(FrakRoles.MINTER) whenNotPaused {
         uint256 currentSupply = fraktionTokens.supplyOf(id);
-        if (currentSupply > 0) revert RemainingSupply();
-        // Compute the supply difference
-        uint256 newRealSupply = currentSupply + newSupply;
-        // Mint his Fraction of NFT
-        fraktionTokens.setSupplyBatch(id.asSingletonArray(), newRealSupply.asSingletonArray());
+        assembly {
+            // Revert if fraktion remain
+            if currentSupply {
+                mstore(0x00, _REMAINING_SUPPLY_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
+        // Update the supply
+        fraktionTokens.setSupplyBatch(id.asSingletonArray(), newSupply.asSingletonArray());
     }
 
     /**

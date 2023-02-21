@@ -12,13 +12,17 @@ import {NativeMetaTransaction} from "../utils/NativeMetaTransaction.sol";
 error CapExceed();
 
 /**
- * Frak token used on polygon L2
+ * @author  @KONFeature
+ * @title   FrakToken
+ * @dev  ERC20 Contract for the FRAK token
+ * @custom:security-contact contact@frak.id
  */
-/// @custom:security-contact contact@frak.id
 contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
+    /// @dev Role used by the polygon bridge to bridge token between L1 <-> L2
     bytes32 internal constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
 
-    uint256 private constant _cap = 3_000_000_000 ether; // 3 billion FRK
+    /// @dev Maximum cap of token, at 3 billion FRK
+    uint256 private constant _cap = 3_000_000_000 ether;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
