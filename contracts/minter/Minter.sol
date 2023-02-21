@@ -63,11 +63,11 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges 
 
     /// @dev 'keccak256(bytes("ContentMinted(uint256,address)"))'
     uint256 private constant _CONTENT_MINTED_EVENT_SELECTOR =
-        0x660494162a7aab2356c74a0a63c109a0a2ac6ac9d3b95415756bac61af417ecb;
+        0x15d512bd00e3acbb8a53b8fd503e98977b1af7618af12cbf83e463aefe880c1b;
 
     /// @dev 'keccak256(bytes("FractionMinted(uint256,address,uint256,uint256)"))'
     uint256 private constant _FRACTION_MINTED_EVENT_SELECTOR =
-        0x660494162a7aab2356c74a0a63c109a0a2ac6ac9d3b95415756bac61af417ecb;
+        0x05941b053f6567cc6c1b84cbbb93a3af6df33035cb6694a8a5ad96208e610ad6;
 
     /* -------------------------------------------------------------------------- */
     /*                                   Storage                                  */
