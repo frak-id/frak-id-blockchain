@@ -52,7 +52,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
 
     /// @dev 'keccak256(bytes("ContentOwnerUpdated(uint256,address)"))'
     uint256 private constant _CONTENT_OWNER_UPDATED_EVENT_SELECTOR =
-        0x93a6136b2908baf16e82828e04e9ee9af54e129f5d10e1ae48a15773b307ede4;
+        0x4d30aa74825efbda2206e0f3ac5b20d3d5806e54280b6684b6f380afcbfc51d2;
 
     /* -------------------------------------------------------------------------- */
     /*                                   Storage                                  */

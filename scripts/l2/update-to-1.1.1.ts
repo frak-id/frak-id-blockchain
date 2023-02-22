@@ -16,7 +16,10 @@ import { updateContracts } from "../utils/updateContracts";
     console.log(signer);
 
     // Update our contracts
-    const nameToAddresses = [{ name: "Minter", address: addresses.minter }];
+    const nameToAddresses = [
+      { name: "Minter", address: addresses.minter },
+      { name: "FraktionTokens", address: addresses.fraktionTokens },
+    ];
     await updateContracts(nameToAddresses);
 
     console.log("Finished to update our contracts to v1.1.1");
