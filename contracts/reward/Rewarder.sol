@@ -13,12 +13,13 @@ import {FrakToken} from "../tokens/FrakTokenL2.sol";
 import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
 import {InvalidAddress, InvalidArray, RewardTooLarge} from "../utils/FrakErrors.sol";
 import {PushPullReward} from "../utils/PushPullReward.sol";
+import {Multicallable} from "solady/src/utils/Multicallable.sol";
 
 /**
  * @dev Represent our rewarder contract
  */
 /// @custom:security-contact contact@frak.id
-contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, ListenerBadges, PushPullReward {
+contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, ListenerBadges, PushPullReward, Multicallable {
     using FrakMath for uint256;
 
     /* -------------------------------------------------------------------------- */

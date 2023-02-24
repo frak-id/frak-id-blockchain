@@ -72,6 +72,7 @@
     "@openzeppelin/contracts": "^4.8.0",
     "@openzeppelin/contracts-upgradeable": "^4.8.0",
     "cpy-cli": "^4.2.0",
+    "solady": "^0.0.78",
     "solmate": "^6.6.1"
   },
   "private": true
