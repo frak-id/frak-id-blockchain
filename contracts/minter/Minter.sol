@@ -9,6 +9,7 @@ import {FraktionTokens} from "../tokens/FraktionTokens.sol";
 import {FrakToken} from "../tokens/FrakTokenL2.sol";
 import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
 import {InvalidAddress} from "../utils/FrakErrors.sol";
+import {Multicallable} from "solady/src/utils/Multicallable.sol";
 
 /**
  * @author  @KONFeature
@@ -17,7 +18,7 @@ import {InvalidAddress} from "../utils/FrakErrors.sol";
  * @dev     Communicate with the FrkToken and FraktionTokens contract to handle minting of content and fraktions
  * @custom:security-contact contact@frak.id
  */
-contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges {
+contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges, Multicallable {
     using FrakMath for uint256;
 
     /* -------------------------------------------------------------------------- */
