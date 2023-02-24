@@ -386,6 +386,14 @@ contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, Lis
         uint256[] memory fraktionTypes,
         TotalRewards memory totalRewards
     ) private {
+        // Ensure we don't exceed the max ccu / content
+        assembly {
+            if gt(listenCount, MAX_CCU_PER_CONTENT) {
+                mstore(0x00, _INVALID_REWARD_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
+
         // Boolean used to know if the user have one paied fraktion
         (uint256 earningFactor, bool hasOnePaidFraktion) = earningFactorForListener(fraktionTypes, listener, contentId);
 
