@@ -99,6 +99,72 @@ contract RewarderTest is RewarderTestHelper {
         rewarder.updateListenerBadge(address(1), 1001 ether);
     }
 
+    /*
+     * ===== TEST : multicall(bytes[] calldata data) =====
+     */
+    function test_multicall_emptyData() public prankExecAsDeployer {
+        // Build our calldata
+        bytes[] memory callingData = new bytes[](0);
+        rewarder.multicall(callingData);
+    }
+
+    function test_multicall_singleData() public prankExecAsDeployer {
+        uint256 contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
+
+        // Build our calldata
+        bytes[] memory callingData = new bytes[](1);
+        callingData[0] = abi.encodeWithSelector(rewarder.updateContentBadge.selector, contentId, 1 ether);
+
+
+        rewarder.multicall(callingData);
+    }
+
+    function test_multicall_multipleData() public prankExecAsDeployer {
+        uint256 contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
+
+        frakToken.mint(address(rewarder), 5 ether);
+
+        // Build our calldata
+        bytes[] memory callingData = new bytes[](4);
+        callingData[0] = abi.encodeWithSelector(rewarder.updateContentBadge.selector, contentId, 1 ether);
+        callingData[1] = abi.encodeWithSelector(rewarder.updateContentBadge.selector, contentId, 2 ether);
+        callingData[2] = abi.encodeWithSelector(rewarder.payUserDirectly.selector, address(1), 2 ether);
+        callingData[3] = abi.encodeWithSelector(rewarder.payUserDirectly.selector, address(2), 3 ether);
+
+
+        rewarder.multicall(callingData);
+
+        // Ensure array is executed in the right order
+        assertEq(rewarder.getContentBadge(contentId), 2 ether);
+        assertEq(frakToken.balanceOf(address(1)), 2 ether);
+        assertEq(frakToken.balanceOf(address(2)), 3 ether);
+    }
+
+    function test_multicall_reallyLargeData() public prankExecAsDeployer {
+        frakToken.mint(address(rewarder), 1000 ether);
+
+        // Build our calldata
+        uint256 length = 1000;
+        bytes[] memory callingData = new bytes[](length);
+        for (uint256 index; index < length; index++) {
+            callingData[index] = abi.encodeWithSelector(rewarder.payUserDirectly.selector, address(1), 1 ether);
+        }
+
+        rewarder.multicall(callingData);
+    }
+
+    function test_fail_multicall_NotAuthorized() public {
+        prankDeployer();
+        uint256 contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
+
+        // Build our calldata
+        bytes[] memory callingData = new bytes[](1);
+        callingData[0] = abi.encodeWithSelector(rewarder.updateContentBadge.selector, contentId, 1 ether);
+
+        vm.expectRevert(NotAuthorized.selector);
+        rewarder.multicall(callingData);
+    }
+
     event Test(bytes4 errorCode);
     event TestBis(bytes32 signature);
     event TestId(uint256 id);
