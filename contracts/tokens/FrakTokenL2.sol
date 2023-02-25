@@ -107,8 +107,8 @@ contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeM
 
     /// @dev EIP 2612, allow the owner to spend the given amount of FRK
     function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
-        public
-        virtual
+        external
+        payable
     {
         if (deadline < block.timestamp) revert PermitDelayExpired();
 

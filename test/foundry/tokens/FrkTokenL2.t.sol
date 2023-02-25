@@ -4,6 +4,7 @@ pragma solidity 0.8.17;
 import {PRBTest} from "@prb/test/PRBTest.sol";
 import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
 import {NotAuthorized} from "@frak/utils/FrakErrors.sol";
+import {NativeMetaTransaction} from "@frak/utils/NativeMetaTransaction.sol";
 import {UUPSTestHelper} from "../UUPSTestHelper.sol";
 
 /// Testing the frak l2 token
@@ -202,5 +203,89 @@ contract FrkTokenL2Test is UUPSTestHelper {
         vm.assume(mintAmount < 3_000_000_000 ether);
         frakToken.mint(address(1), mintAmount);
         assertEq(frakToken.balanceOf(address(1)), mintAmount);
+    }
+
+    /*
+     * ===== TEST : permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) =====
+     */
+
+    bytes32 constant PERMIT_TYPEHASH =
+        keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+
+    function test_permit() public {        
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    frakToken.getDomainSeperator(),
+                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, address(2), 1 ether, 0, block.timestamp))
+                )
+            )
+        );
+
+        frakToken.permit(owner, address(2), 1e18, block.timestamp, v, r, s);
+
+        assertEq(frakToken.allowance(owner, address(2)), 1 ether);
+    }
+
+    function test_fail_permit_InvalidSigner() public {        
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    frakToken.getDomainSeperator(),
+                    keccak256(abi.encode(PERMIT_TYPEHASH, address(1), address(2), 1 ether, 0, block.timestamp))
+                )
+            )
+        );
+
+        vm.expectRevert(NativeMetaTransaction.InvalidSigner.selector);
+        frakToken.permit(owner, address(2), 1 ether, block.timestamp, v, r, s);
+    }
+
+    function test_fail_permit_InvalidAddress() public {        
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    frakToken.getDomainSeperator(),
+                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, address(0), 1 ether, 0, block.timestamp))
+                )
+            )
+        );
+
+        vm.expectRevert("ERC20: approve to the zero address");
+        frakToken.permit(owner, address(0), 1 ether, block.timestamp, v, r, s);
+    }
+
+    function test_fail_permit_PermitDelayExpired() public {        
+        uint256 privateKey = 0xBEEF;
+        address owner = vm.addr(privateKey);
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    frakToken.getDomainSeperator(),
+                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, address(1), 0, 1 ether, block.timestamp - 1))
+                )
+            )
+        );
+
+        vm.expectRevert(FrakToken.PermitDelayExpired.selector);
+        frakToken.permit(owner, address(1), 1 ether, block.timestamp - 1, v, r, s);
     }
 }

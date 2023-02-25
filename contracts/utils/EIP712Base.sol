@@ -35,7 +35,7 @@ contract EIP712Base is Initializable {
     /*                             Public view method                             */
     /* -------------------------------------------------------------------------- */
 
-    function getDomainSeperator() internal view returns (bytes32) {
+    function getDomainSeperator() public view returns (bytes32) {
         return domainSeperator;
     }
 
