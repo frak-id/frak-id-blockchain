@@ -35,11 +35,11 @@ contract EIP712Base is Initializable {
     /*                             Public view method                             */
     /* -------------------------------------------------------------------------- */
 
-    function getDomainSeperator() public view returns (bytes32) {
+    function getDomainSeperator() internal view returns (bytes32) {
         return domainSeperator;
     }
 
-    function getChainId() public view returns (uint256 id) {
+    function getChainId() internal view returns (uint256 id) {
         assembly {
             id := chainid()
         }
@@ -70,6 +70,6 @@ contract EIP712Base is Initializable {
      * "\\x01" is the version byte to make it compatible to EIP-191
      */
     function toTypedMessageHash(bytes32 messageHash) internal view returns (bytes32) {
-        return keccak256(abi.encodePacked("\x19\x01", getDomainSeperator(), messageHash));
+        return keccak256(abi.encodePacked("\x19\x01", domainSeperator, messageHash));
     }
 }

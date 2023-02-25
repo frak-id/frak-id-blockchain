@@ -16,8 +16,10 @@ contract NativeMetaTransaction is EIP712Base {
     /* -------------------------------------------------------------------------- */
     /// @dev error throwned when the signer is invalid
     error InvalidSigner();
+
     /// @dev error throwned when the signer signature isn't valid
     error InvalidSignature();
+
     /// @dev error throwned when the call is in error
     error CallError();
 

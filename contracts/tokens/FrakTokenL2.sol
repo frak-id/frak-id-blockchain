@@ -32,6 +32,9 @@ contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeM
     /// @dev error throwned when the contract cap is exceeded
     error CapExceed();
 
+    /// @dev error throwned when the permit delay is expired
+    error PermitDelayExpired();
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -96,5 +99,47 @@ contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeM
      */
     function withdraw(uint256 amount) external {
         _burn(_msgSender(), amount);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                 Permit logic (greatly inspired by solmate)                 */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev EIP 2612, allow the owner to spend the given amount of FRK
+    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+        public
+        virtual
+    {
+        if (deadline < block.timestamp) revert PermitDelayExpired();
+
+        // Unchecked because the only math done is incrementing
+        // the owner's nonce which cannot realistically overflow.
+        unchecked {
+            address recoveredAddress = ecrecover(
+                toTypedMessageHash(
+                    keccak256(
+                        abi.encode(
+                            keccak256(
+                                "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+                            ),
+                            owner,
+                            spender,
+                            value,
+                            nonces[owner]++,
+                            deadline
+                        )
+                    )
+                ),
+                v,
+                r,
+                s
+            );
+
+            // Don't need to check for 0 address, or send event's, since approve already do it for us
+            if (recoveredAddress != owner) revert InvalidSigner();
+
+            // Approve the token
+            _approve(recoveredAddress, spender, value);
+        }
     }
 }
