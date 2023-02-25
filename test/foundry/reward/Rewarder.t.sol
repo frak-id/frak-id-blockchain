@@ -115,7 +115,6 @@ contract RewarderTest is RewarderTestHelper {
         bytes[] memory callingData = new bytes[](1);
         callingData[0] = abi.encodeWithSelector(rewarder.updateContentBadge.selector, contentId, 1 ether);
 
-
         rewarder.multicall(callingData);
     }
 
@@ -130,7 +129,6 @@ contract RewarderTest is RewarderTestHelper {
         callingData[1] = abi.encodeWithSelector(rewarder.updateContentBadge.selector, contentId, 2 ether);
         callingData[2] = abi.encodeWithSelector(rewarder.payUserDirectly.selector, address(1), 2 ether);
         callingData[3] = abi.encodeWithSelector(rewarder.payUserDirectly.selector, address(2), 3 ether);
-
 
         rewarder.multicall(callingData);
 

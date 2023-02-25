@@ -11,19 +11,44 @@ contract EIP712Base is Initializable {
         bytes32 salt;
     }
 
+    /* -------------------------------------------------------------------------- */
+    /*                                 Constant's                                 */
+    /* -------------------------------------------------------------------------- */
+
     string internal constant ERC712_VERSION = "1";
 
     bytes32 internal constant EIP712_DOMAIN_TYPEHASH =
         keccak256(bytes("EIP712Domain(string name,string version,address verifyingContract,bytes32 salt)"));
 
+    /* -------------------------------------------------------------------------- */
+    /*                                   Storage                                  */
+    /* -------------------------------------------------------------------------- */
+
     bytes32 internal domainSeperator;
 
-    // supposed to be called once while initializing.
-    // one of the contractsa that inherits this contract follows proxy pattern
-    // so it is not possible to do this in a constructor
+    /// @dev init function
     function _initializeEIP712(string memory name) internal onlyInitializing {
         _setDomainSeperator(name);
     }
+
+    /* -------------------------------------------------------------------------- */
+    /*                             Public view method                             */
+    /* -------------------------------------------------------------------------- */
+
+    function getDomainSeperator() public view returns (bytes32) {
+        return domainSeperator;
+    }
+
+    function getChainId() public view returns (uint256 id) {
+        assembly {
+            id := chainid()
+        }
+        return id;
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                             Internal function's                            */
+    /* -------------------------------------------------------------------------- */
 
     function _setDomainSeperator(string memory name) internal {
         domainSeperator = keccak256(
@@ -35,17 +60,6 @@ contract EIP712Base is Initializable {
                 bytes32(getChainId())
             )
         );
-    }
-
-    function getDomainSeperator() public view returns (bytes32) {
-        return domainSeperator;
-    }
-
-    function getChainId() public view returns (uint256 id) {
-        assembly {
-            id := chainid()
-        }
-        return id;
     }
 
     /**

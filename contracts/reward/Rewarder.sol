@@ -19,7 +19,14 @@ import {Multicallable} from "solady/src/utils/Multicallable.sol";
  * @dev Represent our rewarder contract
  */
 /// @custom:security-contact contact@frak.id
-contract Rewarder is IRewarder, FrakAccessControlUpgradeable, ContentBadges, ListenerBadges, PushPullReward, Multicallable {
+contract Rewarder is
+    IRewarder,
+    FrakAccessControlUpgradeable,
+    ContentBadges,
+    ListenerBadges,
+    PushPullReward,
+    Multicallable
+{
     using FrakMath for uint256;
 
     /* -------------------------------------------------------------------------- */

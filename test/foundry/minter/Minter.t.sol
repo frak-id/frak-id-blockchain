@@ -259,7 +259,6 @@ contract MinterTest is FrkTokenTestHelper {
         callingData[3] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
         callingData[4] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
 
-
         minter.multicall(callingData);
     }
 

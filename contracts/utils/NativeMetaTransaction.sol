@@ -3,20 +3,35 @@ pragma solidity 0.8.17;
 
 import {EIP712Base} from "./EIP712Base.sol";
 
-/// @dev error throwned when the signer is invalid
-error InvalidSigner();
-/// @dev error throwned when the signer signature isn't valid
-error InvalidSignature();
-/// @dev error throwned when the call is in error
-error CallError();
-
 contract NativeMetaTransaction is EIP712Base {
+    /* -------------------------------------------------------------------------- */
+    /*                                 Constant's                                 */
+    /* -------------------------------------------------------------------------- */
+
     bytes32 private constant META_TRANSACTION_TYPEHASH =
         keccak256(bytes("MetaTransaction(uint256 nonce,address from,bytes functionSignature)"));
 
+    /* -------------------------------------------------------------------------- */
+    /*                               Custom error's                               */
+    /* -------------------------------------------------------------------------- */
+    /// @dev error throwned when the signer is invalid
+    error InvalidSigner();
+    /// @dev error throwned when the signer signature isn't valid
+    error InvalidSignature();
+    /// @dev error throwned when the call is in error
+    error CallError();
+
+    /* -------------------------------------------------------------------------- */
+    /*                                   Event's                                  */
+    /* -------------------------------------------------------------------------- */
+
     event MetaTransactionExecuted(address userAddress, address relayerAddress, bytes functionSignature);
 
-    mapping(address => uint256) private nonces;
+    /* -------------------------------------------------------------------------- */
+    /*                               Nonces per user                              */
+    /* -------------------------------------------------------------------------- */
+
+    mapping(address => uint256) internal nonces;
 
     /*
      * Meta transaction structure.
@@ -28,6 +43,10 @@ contract NativeMetaTransaction is EIP712Base {
         address from;
         bytes functionSignature;
     }
+
+    /* -------------------------------------------------------------------------- */
+    /*                             External function's                            */
+    /* -------------------------------------------------------------------------- */
 
     function executeMetaTransaction(
         address userAddress,
@@ -53,15 +72,13 @@ contract NativeMetaTransaction is EIP712Base {
         return returnData;
     }
 
-    function hashMetaTransaction(MetaTransaction memory metaTx) internal pure returns (bytes32) {
-        return keccak256(
-            abi.encode(META_TRANSACTION_TYPEHASH, metaTx.nonce, metaTx.from, keccak256(metaTx.functionSignature))
-        );
-    }
-
-    function getNonce(address user) public view returns (uint256 nonce) {
+    function getNonce(address user) external view returns (uint256 nonce) {
         nonce = nonces[user];
     }
+
+    /* -------------------------------------------------------------------------- */
+    /*                      Internal view and pure function's                     */
+    /* -------------------------------------------------------------------------- */
 
     function verify(address signer, MetaTransaction memory metaTx, bytes32 sigR, bytes32 sigS, uint8 sigV)
         internal
@@ -70,5 +87,11 @@ contract NativeMetaTransaction is EIP712Base {
     {
         if (signer == address(0)) revert InvalidSigner();
         return signer == ecrecover(toTypedMessageHash(hashMetaTransaction(metaTx)), sigV, sigR, sigS);
+    }
+
+    function hashMetaTransaction(MetaTransaction memory metaTx) internal pure returns (bytes32) {
+        return keccak256(
+            abi.encode(META_TRANSACTION_TYPEHASH, metaTx.nonce, metaTx.from, keccak256(metaTx.functionSignature))
+        );
     }
 }

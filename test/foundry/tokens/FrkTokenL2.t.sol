@@ -2,7 +2,7 @@
 pragma solidity 0.8.17;
 
 import {PRBTest} from "@prb/test/PRBTest.sol";
-import {FrakToken, CapExceed} from "@frak/tokens/FrakTokenL2.sol";
+import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
 import {NotAuthorized} from "@frak/utils/FrakErrors.sol";
 import {UUPSTestHelper} from "../UUPSTestHelper.sol";
 
@@ -194,7 +194,7 @@ contract FrkTokenL2Test is UUPSTestHelper {
     }
 
     function test_fail_mint_TooLarge() public prankExecAsDeployer {
-        vm.expectRevert(CapExceed.selector);
+        vm.expectRevert(FrakToken.CapExceed.selector);
         frakToken.mint(address(1), 3_000_000_001 ether);
     }
 

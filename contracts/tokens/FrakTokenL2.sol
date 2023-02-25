@@ -7,27 +7,39 @@ import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgr
 import {ContextMixin} from "../utils/ContextMixin.sol";
 import {NativeMetaTransaction} from "../utils/NativeMetaTransaction.sol";
 
-// Error
-/// @dev error throwned when the contract cap is exceeded
-error CapExceed();
-
 /**
  * @author  @KONFeature
  * @title   FrakToken
  * @dev  ERC20 Contract for the FRAK token
+ * @notice Compliant with ERC20 - EIP712 - EIP2612
  * @custom:security-contact contact@frak.id
  */
 contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
+    /* -------------------------------------------------------------------------- */
+    /*                                 Constant's                                 */
+    /* -------------------------------------------------------------------------- */
+
     /// @dev Role used by the polygon bridge to bridge token between L1 <-> L2
     bytes32 internal constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
 
     /// @dev Maximum cap of token, at 3 billion FRK
     uint256 private constant _cap = 3_000_000_000 ether;
 
+    /* -------------------------------------------------------------------------- */
+    /*                               Custom error's                               */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev error throwned when the contract cap is exceeded
+    error CapExceed();
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
+
+    /* -------------------------------------------------------------------------- */
+    /*                          External write function's                         */
+    /* -------------------------------------------------------------------------- */
 
     function initialize(address childChainManager) external initializer {
         string memory name = "Frak";
@@ -44,27 +56,25 @@ contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeM
         return ContextMixin.msgSender();
     }
 
-    /**
-     * @dev Mint some FRK
-     */
+    /// @dev Mint some FRK
     function mint(address to, uint256 amount) external onlyRole(FrakRoles.MINTER) whenNotPaused {
         if (totalSupply() + amount > _cap) revert CapExceed();
         _mint(to, amount);
     }
 
-    /**
-     * @dev Burn some FRK
-     */
+    /// @dev Burn some FRK
     function burn(uint256 amount) external whenNotPaused {
         _burn(_msgSender(), amount);
     }
 
-    /**
-     * @dev Returns the cap on the token's total supply.
-     */
+    /// @dev Returns the cap on the token's total supply.
     function cap() external view virtual returns (uint256) {
         return _cap;
     }
+
+    /* -------------------------------------------------------------------------- */
+    /*                External write function's for Polygon bridge                */
+    /* -------------------------------------------------------------------------- */
 
     /**
      * @notice called when token is deposited on root chain
