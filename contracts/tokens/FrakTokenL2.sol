@@ -35,6 +35,12 @@ contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeM
     /// @dev error throwned when the permit delay is expired
     error PermitDelayExpired();
 
+    /// @dev 'bytes4(keccak256(bytes("PermitDelayExpired()")))'
+    uint256 private constant _PERMIT_DELAYED_EXPIRED_SELECTOR = 0x95fc6e60;
+
+    /// @dev 'bytes4(keccak256(bytes("InvalidSigner()")))'
+    uint256 private constant _INVALID_SIGNER_SELECTOR = 0x815e1d64;
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -110,7 +116,12 @@ contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeM
         external
         payable
     {
-        if (deadline < block.timestamp) revert PermitDelayExpired();
+        assembly {
+            if gt(timestamp(), deadline) {
+                mstore(0x00, _PERMIT_DELAYED_EXPIRED_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
 
         // Unchecked because the only math done is incrementing
         // the owner's nonce which cannot realistically overflow.
