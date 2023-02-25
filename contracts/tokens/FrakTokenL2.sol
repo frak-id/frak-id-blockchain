@@ -5,6 +5,7 @@ import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/
 import {FrakRoles} from "../utils/FrakRoles.sol";
 import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
 import {ContextMixin} from "../utils/ContextMixin.sol";
+import {IFrakToken} from "./IFrakToken.sol";
 import {NativeMetaTransaction} from "../utils/NativeMetaTransaction.sol";
 
 /**
@@ -14,7 +15,13 @@ import {NativeMetaTransaction} from "../utils/NativeMetaTransaction.sol";
  * @notice Compliant with ERC20 - EIP712 - EIP2612
  * @custom:security-contact contact@frak.id
  */
-contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
+contract FrakToken is
+    ERC20Upgradeable,
+    MintingAccessControlUpgradeable,
+    NativeMetaTransaction,
+    ContextMixin,
+    IFrakToken
+{
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
@@ -66,18 +73,18 @@ contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeM
     }
 
     /// @dev Mint some FRK
-    function mint(address to, uint256 amount) external onlyRole(FrakRoles.MINTER) whenNotPaused {
+    function mint(address to, uint256 amount) external override onlyRole(FrakRoles.MINTER) whenNotPaused {
         if (totalSupply() + amount > _cap) revert CapExceed();
         _mint(to, amount);
     }
 
     /// @dev Burn some FRK
-    function burn(uint256 amount) external whenNotPaused {
+    function burn(uint256 amount) external override whenNotPaused {
         _burn(_msgSender(), amount);
     }
 
     /// @dev Returns the cap on the token's total supply.
-    function cap() external view virtual returns (uint256) {
+    function cap() external view virtual override returns (uint256) {
         return _cap;
     }
 
@@ -115,6 +122,7 @@ contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, NativeM
     function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
         external
         payable
+        override
     {
         assembly {
             if gt(timestamp(), deadline) {

@@ -6,7 +6,7 @@ import {FractionCostBadges} from "./badges/FractionCostBadges.sol";
 import {FrakMath} from "../utils/FrakMath.sol";
 import {FrakRoles} from "../utils/FrakRoles.sol";
 import {FraktionTokens} from "../tokens/FraktionTokens.sol";
-import {FrakToken} from "../tokens/FrakTokenL2.sol";
+import {IFrakToken} from "../tokens/IFrakToken.sol";
 import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
 import {InvalidAddress} from "../utils/FrakErrors.sol";
 import {Multicallable} from "solady/src/utils/Multicallable.sol";
@@ -78,7 +78,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
     FraktionTokens private fraktionTokens;
 
     /// @dev Reference to the Frak token contract (ERC20)
-    FrakToken private frakToken;
+    IFrakToken private frakToken;
 
     /// @dev Address of our foundation wallet (for fee's payment)
     address private foundationWallet;
@@ -111,7 +111,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
         __MintingAccessControlUpgradeable_init();
 
         fraktionTokens = FraktionTokens(fraktionTokensAddr);
-        frakToken = FrakToken(frkTokenAddr);
+        frakToken = IFrakToken(frkTokenAddr);
 
         foundationWallet = foundationAddr;
 

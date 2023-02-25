@@ -9,7 +9,7 @@ import {ReferralPool} from "./pool/ReferralPool.sol";
 import {FrakMath} from "../utils/FrakMath.sol";
 import {FrakRoles} from "../utils/FrakRoles.sol";
 import {FraktionTokens} from "../tokens/FraktionTokens.sol";
-import {FrakToken} from "../tokens/FrakTokenL2.sol";
+import {IFrakToken} from "../tokens/IFrakToken.sol";
 import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
 import {InvalidAddress, InvalidArray, RewardTooLarge} from "../utils/FrakErrors.sol";
 import {PushPullReward} from "../utils/PushPullReward.sol";
@@ -110,7 +110,7 @@ contract Rewarder is
      * @dev Access our FRK token
      * @notice WARN This var is now unused, and so, this slot can be reused for other things
      */
-    FrakToken private frakToken;
+    IFrakToken private frakToken;
 
     /// @dev Access our referral system
     ReferralPool private referralPool;
@@ -143,7 +143,7 @@ contract Rewarder is
         __PushPullReward_init(frkTokenAddr);
 
         fraktionTokens = FraktionTokens(fraktionTokensAddr);
-        frakToken = FrakToken(frkTokenAddr);
+        frakToken = IFrakToken(frkTokenAddr);
         contentPool = ContentPool(contentPoolAddr);
         referralPool = ReferralPool(referralAddr);
 
