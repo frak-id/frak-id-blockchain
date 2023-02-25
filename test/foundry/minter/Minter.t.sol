@@ -246,4 +246,33 @@ contract MinterTest is FrkTokenTestHelper {
         vm.expectRevert(Minter.RemainingSupply.selector);
         minter.increaseSupply(contentId.buildCommonNftId(), 1);
     }
+
+    /*
+     * ===== TEST : multicall(bytes[] calldata data) =====
+     */
+    function test_multicall() public prankExecAsDeployer {
+        // Build our calldata
+        bytes[] memory callingData = new bytes[](5);
+        callingData[0] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
+        callingData[1] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
+        callingData[2] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
+        callingData[3] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
+        callingData[4] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
+
+
+        minter.multicall(callingData);
+    }
+
+    function test_fail_multicall_NotAuthorized() public {
+        // Build our calldata
+        bytes[] memory callingData = new bytes[](5);
+        callingData[0] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
+        callingData[1] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
+        callingData[2] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
+        callingData[3] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
+        callingData[4] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
+
+        vm.expectRevert(NotAuthorized.selector);
+        minter.multicall(callingData);
+    }
 }

@@ -185,11 +185,11 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper {
     /*                                    Utils                                   */
     /* -------------------------------------------------------------------------- */
 
-    function baseBatchParam(uint256 amount) private view returns (address[] memory, uint256[] memory) {
+    function baseBatchParam(uint256 amount) private pure returns (address[] memory, uint256[] memory) {
         return baseBatchParam(address(1), amount);
     }
 
-    function baseBatchParam(address addr, uint256 amount) private view returns (address[] memory, uint256[] memory) {
+    function baseBatchParam(address addr, uint256 amount) private pure returns (address[] memory, uint256[] memory) {
         return (addr.asSingletonArray(), uint256(amount).asSingletonArray());
     }
 }
