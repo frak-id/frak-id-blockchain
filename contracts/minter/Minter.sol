@@ -212,6 +212,42 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
     }
 
     /**
+     * @notice  Mint a new fraktion for the given amount and user
+     * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer and mint the fraktion
+     * @param   id  The id of the fraktion to be minted for the user
+     * @param   to  The address on which we will mint the fraktion
+     * @param   amount  The amount of fraktion to be minted for the user
+     * @param   deadline  The deadline for the permit of the allowance tx
+     * @param   v  Signature spec secp256k1
+     * @param   r  Signature spec secp256k1
+     * @param   s  Signature spec secp256k1
+     */
+    function mintFractionForUser(
+        uint256 id,
+        address to,
+        uint256 amount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
+        // Get the cost of the fraction
+        uint256 totalCost = getCostBadge(id) * amount;
+        assembly {
+            // Emit the event
+            mstore(0, amount)
+            mstore(0x20, totalCost)
+            log3(0, 0x40, _FRACTION_MINTED_EVENT_SELECTOR, id, to)
+        }
+        // Call the permit functions
+        frakToken.permit(to, address(this), totalCost, deadline, v, r, s);
+        // Transfer the tokens
+        frakToken.transferFrom(to, foundationWallet, totalCost);
+        // Mint his Fraction of NFT
+        fraktionTokens.mint(to, id, amount);
+    }
+
+    /**
      * @notice  Mint a free fraktion for the given user
      * @dev     Will mint a new free FraktionToken for the user, by first ensuring the user doesn't have any fraktion, only performed when contract not paused and by the right person
      * @param   id  Id of the free fraktion

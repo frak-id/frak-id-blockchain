@@ -14,6 +14,7 @@ import {
     BadgeTooLarge,
     InvalidFraktionType
 } from "@frak/utils/FrakErrors.sol";
+import {NativeMetaTransaction} from "@frak/utils/NativeMetaTransaction.sol";
 
 /// Testing minter contract
 contract MinterTest is FrkTokenTestHelper {
@@ -167,6 +168,90 @@ contract MinterTest is FrkTokenTestHelper {
         prankDeployer();
         vm.expectRevert(InvalidFraktionType.selector);
         minter.mintFractionForUser(contentId.buildFreeNftId(), address(1), 2);
+    }
+
+    /*
+     * ===== TEST : mintFractionForUser(
+        uint256 id,
+        address to,
+        uint256 amount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) =====
+     */
+    bytes32 constant PERMIT_TYPEHASH =
+        keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+
+    function test_mintFractionForUser_autoSign() public {
+        uint256 privateKey = 0xBEEF;
+        address user = vm.addr(privateKey);
+        // Add an initial content
+        prankDeployer();
+        uint256 contentId = minter.addContent(address(1), 10, 1, 1, 1);
+        // Mint some token to our user
+        prankDeployer();
+        frakToken.mint(user, 500 ether);
+
+        // Get the cost of the buy process
+        uint256 fraktionCommonId = contentId.buildCommonNftId();
+        uint256 fraktionAmount = 1;
+        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+
+        // Sign the tx for the user
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    frakToken.getDomainSeperator(),
+                    keccak256(abi.encode(PERMIT_TYPEHASH, user, address(minter), cost, 0, block.timestamp))
+                )
+            )
+        );
+
+        // Launch the buy prcess
+        prankDeployer();
+        minter.mintFractionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
+        // Ensure the supply is good
+        assertEq(fraktionTokens.supplyOf(fraktionCommonId), 9);
+        assertEq(fraktionTokens.balanceOf(user, fraktionCommonId), 1);
+    }
+
+    function test_fail_mintFractionForUser_autoSign_InvalidSigner() public {
+        uint256 privateKey = 0xBEEF;
+        address user = vm.addr(privateKey);
+        // Add an initial content
+        prankDeployer();
+        uint256 contentId = minter.addContent(address(1), 10, 1, 1, 1);
+        // Mint some token to our user
+        prankDeployer();
+        frakToken.mint(user, 500 ether);
+
+        // Get the cost of the buy process
+        uint256 fraktionCommonId = contentId.buildCommonNftId();
+        uint256 fraktionAmount = 1;
+        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+
+        // Sign the tx for the user
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    frakToken.getDomainSeperator(),
+                    keccak256(abi.encode(PERMIT_TYPEHASH, user, address(minter), cost - 1, 0, block.timestamp))
+                )
+            )
+        );
+
+        // Launch the buy prcess
+        prankDeployer();
+        vm.expectRevert(NativeMetaTransaction.InvalidSigner.selector);
+        minter.mintFractionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
+        // Ensure the supply hasn't changed
+        assertEq(fraktionTokens.supplyOf(fraktionCommonId), 10);
     }
 
     /*

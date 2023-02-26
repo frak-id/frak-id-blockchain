@@ -50,6 +50,7 @@ contract NativeMetaTransaction is EIP712Base {
     /*                             External function's                            */
     /* -------------------------------------------------------------------------- */
 
+    /// @dev Execute a meta transaction (from another layer chain for example)
     function executeMetaTransaction(
         address userAddress,
         bytes memory functionSignature,
@@ -74,6 +75,7 @@ contract NativeMetaTransaction is EIP712Base {
         return returnData;
     }
 
+    /// @dev Get the current 'nonce' for the given 'user'
     function getNonce(address user) external view returns (uint256 nonce) {
         nonce = nonces[user];
     }
@@ -82,6 +84,7 @@ contract NativeMetaTransaction is EIP712Base {
     /*                      Internal view and pure function's                     */
     /* -------------------------------------------------------------------------- */
 
+    /// @dev Verify the validity of the given signature
     function verify(address signer, MetaTransaction memory metaTx, bytes32 sigR, bytes32 sigS, uint8 sigV)
         internal
         view
@@ -91,6 +94,7 @@ contract NativeMetaTransaction is EIP712Base {
         return signer == ecrecover(toTypedMessageHash(hashMetaTransaction(metaTx)), sigV, sigR, sigS);
     }
 
+    /// @dev Hash the given meta tx
     function hashMetaTransaction(MetaTransaction memory metaTx) internal pure returns (bytes32) {
         return keccak256(
             abi.encode(META_TRANSACTION_TYPEHASH, metaTx.nonce, metaTx.from, keccak256(metaTx.functionSignature))

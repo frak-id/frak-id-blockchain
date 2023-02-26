@@ -19,6 +19,13 @@ contract FrkTokenL2Test is UUPSTestHelper {
     }
 
     /*
+     * ===== TEST : invariant =====
+     */
+    function invariant_supplyCap() public {
+        assertGt(frakToken.cap(), frakToken.totalSupply());
+    }
+
+    /*
      * ===== TEST : initialize(address childChainManager) =====
      */
     function test_fail_initialize_CantInitTwice() public {
