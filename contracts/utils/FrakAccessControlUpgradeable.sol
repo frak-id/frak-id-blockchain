@@ -160,20 +160,14 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
      * @notice Check that the calling user have the right role
      */
     function _checkRole(bytes32 role) private view {
-        _checkRole(role, _msgSender());
-    }
-
-    /**
-     * @notice Check the given user have the role
-     */
-    function _checkRole(bytes32 role, address account) private view {
+        address sender = _msgSender();
         assembly {
             // Kecak (role, _roles.slot)
             mstore(0, role)
             mstore(0x20, _roles.slot)
             let roleSlote := keccak256(0, 0x40)
             // Kecak (acount, roleSlot)
-            mstore(0, account)
+            mstore(0, sender)
             mstore(0x20, roleSlote)
             let slot := keccak256(0, 0x40)
 
