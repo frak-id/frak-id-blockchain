@@ -104,74 +104,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     /*
-     * ===== TEST : mintFractionForUser(
-        uint256 id,
-        address to,
-        uint256 amount
-    ) =====
-     */
-    function test_mintFractionForUser() public {
-        // Add an initial content
-        prankDeployer();
-        uint256 contentId = minter.addContent(address(1), 10, 1, 1, 1);
-        // Ensure the supply is good
-        assertEq(fraktionTokens.supplyOf(contentId.buildCommonNftId()), 10);
-        assertEq(fraktionTokens.supplyOf(contentId.buildDiamondNftId()), 1);
-        // Approve the minter for token transfe
-        prankDeployer();
-        frakToken.mint(address(1), 500 ether);
-        vm.prank(address(1));
-        frakToken.approve(address(minter), 500 ether);
-        // Launch the buy prcess
-        prankDeployer();
-        minter.mintFractionForUser(contentId.buildCommonNftId(), address(1), 1);
-        // Ensure the supply is good
-        assertEq(fraktionTokens.supplyOf(contentId.buildCommonNftId()), 9);
-    }
-
-    function test_fail_mintFractionForUser_ContractPaused() public prankExecAsDeployer {
-        minter.pause();
-        vm.expectRevert(ContractPaused.selector);
-        minter.mintFractionForUser(1, address(1), 1);
-    }
-
-    function test_fail_mintFractionForUser_NotAuthorized() public {
-        vm.expectRevert(NotAuthorized.selector);
-        minter.mintFractionForUser(1, address(1), 1);
-    }
-
-    function test_fail_mintFractionForUser_InsuficiantSupply() public {
-        // Add an initial content
-        prankDeployer();
-        uint256 contentId = minter.addContent(address(1), 1, 1, 1, 1);
-        // Approve the minter for token transfe
-        prankDeployer();
-        frakToken.mint(address(1), 500 ether);
-        vm.prank(address(1));
-        frakToken.approve(address(minter), 500 ether);
-        // Launch the buy prcess
-        prankDeployer();
-        vm.expectRevert(FraktionTokens.InsuficiantSupply.selector);
-        minter.mintFractionForUser(contentId.buildCommonNftId(), address(1), 2);
-    }
-
-    function test_fail_mintFractionForUser_InvalidFraktionType() public {
-        // Add an initial content
-        prankDeployer();
-        uint256 contentId = minter.addContent(address(1), 1, 1, 1, 1);
-        // Approve the minter for token transfe
-        prankDeployer();
-        frakToken.mint(address(1), 500 ether);
-        vm.prank(address(1));
-        frakToken.approve(address(minter), 500 ether);
-        // Launch the buy prcess
-        prankDeployer();
-        vm.expectRevert(InvalidFraktionType.selector);
-        minter.mintFractionForUser(contentId.buildFreeNftId(), address(1), 2);
-    }
-
-    /*
-     * ===== TEST : mintFractionForUser(
+     * ===== TEST : mintFraktionForUser(
         uint256 id,
         address to,
         uint256 amount,
@@ -184,7 +117,23 @@ contract MinterTest is FrkTokenTestHelper {
     bytes32 constant PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
-    function test_mintFractionForUser_autoSign() public {
+    /// @dev Get permit signature for the given private key and cost
+    function _getSignedPermit(uint256 privateKey, uint256 cost) private view returns (uint8 v, bytes32 r, bytes32 s) {
+        (v, r, s) = vm.sign(
+            privateKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    frakToken.getDomainSeperator(),
+                    keccak256(
+                        abi.encode(PERMIT_TYPEHASH, vm.addr(privateKey), address(minter), cost, 0, block.timestamp)
+                    )
+                )
+            )
+        );
+    }
+
+    function test_mintFraktionForUser() public {
         uint256 privateKey = 0xBEEF;
         address user = vm.addr(privateKey);
         // Add an initial content
@@ -200,26 +149,17 @@ contract MinterTest is FrkTokenTestHelper {
         uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
 
         // Sign the tx for the user
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            privateKey,
-            keccak256(
-                abi.encodePacked(
-                    "\x19\x01",
-                    frakToken.getDomainSeperator(),
-                    keccak256(abi.encode(PERMIT_TYPEHASH, user, address(minter), cost, 0, block.timestamp))
-                )
-            )
-        );
+        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
 
         // Launch the buy prcess
         prankDeployer();
-        minter.mintFractionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
+        minter.mintFraktionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
         // Ensure the supply is good
         assertEq(fraktionTokens.supplyOf(fraktionCommonId), 9);
         assertEq(fraktionTokens.balanceOf(user, fraktionCommonId), 1);
     }
 
-    function test_fail_mintFractionForUser_autoSign_InvalidSigner() public {
+    function test_fail_mintFraktionForUser_ContractPaused() public {
         uint256 privateKey = 0xBEEF;
         address user = vm.addr(privateKey);
         // Add an initial content
@@ -235,23 +175,173 @@ contract MinterTest is FrkTokenTestHelper {
         uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
 
         // Sign the tx for the user
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            privateKey,
-            keccak256(
-                abi.encodePacked(
-                    "\x19\x01",
-                    frakToken.getDomainSeperator(),
-                    keccak256(abi.encode(PERMIT_TYPEHASH, user, address(minter), cost - 1, 0, block.timestamp))
-                )
-            )
-        );
+        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
+
+        // Launch the buy prcess
+        prankDeployer();
+        minter.pause();
+        vm.expectRevert(ContractPaused.selector);
+        prankDeployer();
+        minter.mintFraktionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
+    }
+
+    function test_fail_mintFraktionForUser_NotAuthorized() public {
+        uint256 privateKey = 0xBEEF;
+        address user = vm.addr(privateKey);
+        // Add an initial content
+        prankDeployer();
+        uint256 contentId = minter.addContent(address(1), 10, 1, 1, 1);
+        // Mint some token to our user
+        prankDeployer();
+        frakToken.mint(user, 500 ether);
+
+        // Get the cost of the buy process
+        uint256 fraktionCommonId = contentId.buildCommonNftId();
+        uint256 fraktionAmount = 1;
+        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+
+        // Sign the tx for the user
+        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
+
+        // Launch the buy prcess
+        vm.expectRevert(NotAuthorized.selector);
+        minter.mintFraktionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
+    }
+
+    function test_fail_mintFraktionForUser_InsuficiantSupply() public {
+        uint256 privateKey = 0xBEEF;
+        address user = vm.addr(privateKey);
+        // Add an initial content
+        prankDeployer();
+        uint256 contentId = minter.addContent(address(1), 1, 1, 1, 1);
+        // Mint some token to our user
+        prankDeployer();
+        frakToken.mint(user, 500 ether);
+
+        // Get the cost of the buy process
+        uint256 fraktionCommonId = contentId.buildCommonNftId();
+        uint256 fraktionAmount = 2;
+        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+
+        // Sign the tx for the user
+        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
+
+        // Launch the buy prcess
+        vm.expectRevert(FraktionTokens.InsuficiantSupply.selector);
+        prankDeployer();
+        minter.mintFraktionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
+    }
+
+    function test_fail_mintFraktionForUser_InvalidFraktionType() public {
+        uint256 privateKey = 0xBEEF;
+        address user = vm.addr(privateKey);
+        // Add an initial content
+        prankDeployer();
+        uint256 contentId = minter.addContent(address(1), 1, 1, 1, 1);
+        // Mint some token to our user
+        prankDeployer();
+        frakToken.mint(user, 500 ether);
+
+        // Get the cost of the buy process
+        uint256 fraktionCommonId = contentId.buildCommonNftId();
+        uint256 fraktionAmount = 2;
+        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+
+        // Sign the tx for the user
+        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
+
+        // Launch the buy prcess
+        vm.expectRevert(InvalidFraktionType.selector);
+        prankDeployer();
+        minter.mintFraktionForUser(contentId.buildFreeNftId(), user, fraktionAmount, block.timestamp, v, r, s);
+    }
+
+    function test_fail_mintFractionForUser_InvalidSigner() public {
+        uint256 privateKey = 0xBEEF;
+        address user = vm.addr(privateKey);
+        // Add an initial content
+        prankDeployer();
+        uint256 contentId = minter.addContent(address(1), 10, 1, 1, 1);
+        // Mint some token to our user
+        prankDeployer();
+        frakToken.mint(user, 500 ether);
+
+        // Get the cost of the buy process
+        uint256 fraktionCommonId = contentId.buildCommonNftId();
+        uint256 fraktionAmount = 1;
+        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+
+        // Sign the tx for the user
+        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost - 1);
 
         // Launch the buy prcess
         prankDeployer();
         vm.expectRevert(NativeMetaTransaction.InvalidSigner.selector);
-        minter.mintFractionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
+        minter.mintFraktionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
         // Ensure the supply hasn't changed
         assertEq(fraktionTokens.supplyOf(fraktionCommonId), 10);
+    }
+
+    /*
+     * ===== TEST : mintFraktion(
+        uint256 id,
+        uint256 amount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) =====
+     */    
+    function test_mintFraktion() public {
+        uint256 privateKey = 0xBEEF;
+        address user = vm.addr(privateKey);
+        // Add an initial content
+        prankDeployer();
+        uint256 contentId = minter.addContent(address(1), 10, 1, 1, 1);
+        // Mint some token to our user
+        prankDeployer();
+        frakToken.mint(user, 500 ether);
+
+        // Get the cost of the buy process
+        uint256 fraktionCommonId = contentId.buildCommonNftId();
+        uint256 fraktionAmount = 1;
+        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+
+        // Sign the tx for the user
+        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
+
+        // Launch the buy prcess
+        vm.prank(user);
+        minter.mintFraktion(fraktionCommonId, fraktionAmount, block.timestamp, v, r, s);
+        // Ensure the supply is good
+        assertEq(fraktionTokens.supplyOf(fraktionCommonId), 9);
+        assertEq(fraktionTokens.balanceOf(user, fraktionCommonId), 1);
+    }
+
+    function test_fail_mintFraktion_ContractPaused() public {
+        uint256 privateKey = 0xBEEF;
+        address user = vm.addr(privateKey);
+        // Add an initial content
+        prankDeployer();
+        uint256 contentId = minter.addContent(address(1), 10, 1, 1, 1);
+        // Mint some token to our user
+        prankDeployer();
+        frakToken.mint(user, 500 ether);
+
+        // Get the cost of the buy process
+        uint256 fraktionCommonId = contentId.buildCommonNftId();
+        uint256 fraktionAmount = 1;
+        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+
+        // Sign the tx for the user
+        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
+
+        // Launch the buy prcess
+        prankDeployer();
+        minter.pause();
+        vm.expectRevert(ContractPaused.selector);
+        vm.prank(user);
+        minter.mintFraktion(fraktionCommonId, fraktionAmount, block.timestamp, v, r, s);
     }
 
     /*
