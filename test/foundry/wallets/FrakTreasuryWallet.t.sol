@@ -181,6 +181,29 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper {
         treasuryWallet.transferBatch(addrs, amounts);
     }
 
+    /*
+     * ===== TEST : multicall(bytes[] calldata data) =====
+     */
+    function test_multicall() public prankExecAsDeployer {
+        // Build our calldata
+        bytes[] memory callingData = new bytes[](2);
+        callingData[0] = abi.encodeWithSelector(treasuryWallet.transfer.selector, address(1), 1);
+        callingData[1] = abi.encodeWithSelector(treasuryWallet.transfer.selector, address(1), 2);
+
+
+        treasuryWallet.multicall(callingData);
+    }
+
+    function test_fail_multicall_NotAuthorized() public {
+        // Build our calldata
+        bytes[] memory callingData = new bytes[](2);
+        callingData[0] = abi.encodeWithSelector(treasuryWallet.transfer.selector, address(1), 1);
+        callingData[1] = abi.encodeWithSelector(treasuryWallet.transfer.selector, address(1), 2);
+
+        vm.expectRevert(NotAuthorized.selector);
+        treasuryWallet.multicall(callingData);
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                                    Utils                                   */
     /* -------------------------------------------------------------------------- */

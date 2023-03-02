@@ -16987,7 +16987,7 @@
             "label": "frakToken",
             "offset": 0,
             "slot": "154",
-            "type": "t_contract(FrakToken)7551",
+            "type": "t_contract(FrakToken)7563",
             "contract": "FrakTreasuryWallet",
             "src": "contracts/wallets/FrakTreasuryWallet.sol:64"
           }
@@ -17009,7 +17009,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(FrakToken)7551": {
+          "t_contract(FrakToken)7563": {
             "label": "contract FrakToken",
             "numberOfBytes": "20"
           },
@@ -18389,6 +18389,126 @@
           },
           "t_mapping(t_uint256,t_uint256)": {
             "label": "mapping(uint256 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "b5d16d93aaecdb3c78eace01e35e9dbdc59edcddd705ffaad5d6351e971a9c07": {
+      "address": "0x082274899C8aa9d4A8A7d8bbD326eFf217725Ed1",
+      "txHash": "0x29f2537e4d8bda2e70839e3bd630afd080eb002a3c441e5e304014838e50989e",
+      "layout": {
+        "solcVersion": "0.8.17",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:211"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
+          },
+          {
+            "label": "_paused",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_bool",
+            "contract": "FrakAccessControlUpgradeable",
+            "src": "contracts/utils/FrakAccessControlUpgradeable.sol:56"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_mapping(t_bytes32,t_mapping(t_address,t_bool))",
+            "contract": "FrakAccessControlUpgradeable",
+            "src": "contracts/utils/FrakAccessControlUpgradeable.sol:59"
+          },
+          {
+            "label": "totalFrakMinted",
+            "offset": 0,
+            "slot": "153",
+            "type": "t_uint256",
+            "contract": "FrakTreasuryWallet",
+            "src": "contracts/wallets/FrakTreasuryWallet.sol:62"
+          },
+          {
+            "label": "frakToken",
+            "offset": 0,
+            "slot": "154",
+            "type": "t_contract(FrakToken)1981",
+            "contract": "FrakTreasuryWallet",
+            "src": "contracts/wallets/FrakTreasuryWallet.sol:65"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(FrakToken)1981": {
+            "label": "contract FrakToken",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_mapping(t_address,t_bool))": {
+            "label": "mapping(bytes32 => mapping(address => bool))",
             "numberOfBytes": "32"
           },
           "t_uint256": {

@@ -15,6 +15,7 @@ import { updateContracts } from "../utils/updateContracts";
     const nameToAddresses = [
       { name: "Minter", address: addresses.minter },
       { name: "Rewarder", address: addresses.rewarder },
+      { name: "FrakTreasuryWallet", address: addresses.frakTreasuryWallet },
     ];
     await updateContracts(nameToAddresses);
 
