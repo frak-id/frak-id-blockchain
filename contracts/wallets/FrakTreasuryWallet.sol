@@ -5,11 +5,12 @@ import {FrakToken} from "../tokens/FrakTokenL2.sol";
 import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
 import {FrakRoles} from "../utils/FrakRoles.sol";
 import {InvalidAddress, RewardTooLarge, NoReward} from "../utils/FrakErrors.sol";
+import {Multicallable} from "solady/src/utils/Multicallable.sol";
 
 /// Error thrown when the contract havn't enough found to perform the withdraw
 error NotEnoughTreasury();
 
-contract FrakTreasuryWallet is MintingAccessControlUpgradeable {
+contract FrakTreasuryWallet is MintingAccessControlUpgradeable, Multicallable {
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
@@ -170,22 +171,6 @@ contract FrakTreasuryWallet is MintingAccessControlUpgradeable {
                 ++i;
             }
         }
-
-        // Ensure param are valid
-        /*if (target == address(0)) revert InvalidAddress();
-        if (amount > FRK_MAX_TRANSFER) revert RewardTooLarge();
-        if (amount == 0) revert NoReward();
-
-        // Ensure we got enough founds, and if not, try to mint more and ensure we minted enough
-        uint256 currentBalance = frakToken.balanceOf(address(this));
-        if (amount > currentBalance) {
-            uint256 mintedAmount = _mintNewToken();
-            if (amount > currentBalance + mintedAmount) revert NotEnoughTreasury();
-        }
-
-        // Once we are good, move the token to the given address
-        emit TreasuryTransfer(target, amount);
-        frakToken.transfer(target, amount);*/
     }
 
     /**
