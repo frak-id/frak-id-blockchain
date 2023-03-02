@@ -11,10 +11,6 @@ import { updateContracts } from "../utils/updateContracts";
     const networkName = hre.hardhatArguments.network ?? "local";
     const addresses = networkName === "mumbai" ? deployedAddresses.mumbai : deployedAddresses.polygon;
 
-    // Contract updated to assembly : FrkTokenL2 - FraktionTokens - Rewarder - ContentPool - FrakTreasuryWallet - Minter
-    const signer = await hre.ethers.getSigners();
-    console.log(signer);
-
     // Update our contracts
     const nameToAddresses = [
       { name: "Minter", address: addresses.minter },
