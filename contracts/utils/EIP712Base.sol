@@ -18,7 +18,7 @@ contract EIP712Base is Initializable {
     string internal constant ERC712_VERSION = "1";
 
     bytes32 internal constant EIP712_DOMAIN_TYPEHASH =
-        keccak256(bytes("EIP712Domain(string name,string version,address verifyingContract,bytes32 salt)"));
+        keccak256(bytes("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"));
 
     /* -------------------------------------------------------------------------- */
     /*                                   Storage                                  */
@@ -56,8 +56,8 @@ contract EIP712Base is Initializable {
                 EIP712_DOMAIN_TYPEHASH,
                 keccak256(bytes(name)),
                 keccak256(bytes(ERC712_VERSION)),
-                address(this),
-                bytes32(getChainId())
+                getChainId(),
+                address(this)
             )
         );
     }

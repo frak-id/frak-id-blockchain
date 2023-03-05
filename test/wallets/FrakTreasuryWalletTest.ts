@@ -11,7 +11,7 @@ import { testPauses } from "../utils/test-pauses";
 import { testRoles } from "../utils/test-roles";
 import { address0 } from "../utils/test-utils";
 
-describe.only("FrakTreasuryWallet", () => {
+describe("FrakTreasuryWallet", () => {
   let frakToken: FrakToken;
   let treasuryWallet: FrakTreasuryWallet;
 

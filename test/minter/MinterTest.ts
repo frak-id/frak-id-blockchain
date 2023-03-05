@@ -1,6 +1,7 @@
 // This script can be used to deploy the "PodcastHandler" contract using Web3 library.
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber, BigNumberish } from "ethers";
+import { verifyTypedData } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { deployContract } from "../../scripts/utils/deploy";
@@ -49,7 +50,7 @@ describe("Minter", () => {
   });
 
   describe("User buy fraktion", () => {
-    it("Single fraktion buy", async () => {
+    it.only("Single fraktion buy", async () => {
       // Mint a content and get it's id
       const mintEventTxReceipt = await minter.addContent(addr1.address, 10, 10, 10, 5);
       const mintReceipt = await mintEventTxReceipt.wait();
@@ -64,17 +65,47 @@ describe("Minter", () => {
 
       // Get the cost of the given fraktion
       const cost = await minter.getCostBadge(fraktionId);
-      console.log(`Fraktion cost ${cost}`);
 
       // Mint the token required for our user
       await frakToken.mint(addr2.address, cost);
 
-      // Allow the minter contract to perform the frk token transfer
-      await frakToken.connect(addr2).approve(minter.address, cost);
-      console.log("Transfer approved");
+      // Create the permit hash
+      const userNonce = await frakToken.getNonce(addr2.address);
+      const deadline = Math.floor(Date.now() / 1000 + 60 * 10);
+
+      const domainData = {
+        name: "Frak",
+        version: "1",
+        chainId: 31337,
+        verifyingContract: frakToken.address,
+      };
+      const types = {
+        Permit: [
+          { name: "owner", type: "address" },
+          { name: "spender", type: "address" },
+          { name: "value", type: "uint256" },
+          { name: "nonce", type: "uint256" },
+          { name: "deadline", type: "uint256" },
+        ],
+      };
+      const value = {
+        owner: addr2.address,
+        spender: minter.address,
+        value: cost,
+        nonce: userNonce,
+        deadline: deadline,
+      };
+
+      const signature = await addr2._signTypedData(domainData, types, value);
+
+      // Extract signature part
+      const withoutHexPrefix = signature.substring(2);
+      const r = withoutHexPrefix.substring(0, 64);
+      const s = withoutHexPrefix.substring(64, 128);
+      const v = withoutHexPrefix.substring(128, 130);
 
       // Perform the transfer
-      await minter.mintFractionForUser(fraktionId, addr2.address, 1);
+      await minter.mintFraktionForUser(fraktionId, addr2.address, 1, deadline, `0x${v}`, `0x${r}`, `0x${s}`);
       console.log("Fraktion minted");
     });
   });

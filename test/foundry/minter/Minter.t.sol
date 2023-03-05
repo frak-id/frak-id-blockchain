@@ -291,7 +291,7 @@ contract MinterTest is FrkTokenTestHelper {
         bytes32 r,
         bytes32 s
     ) =====
-     */    
+     */
     function test_mintFraktion() public {
         uint256 privateKey = 0xBEEF;
         address user = vm.addr(privateKey);
