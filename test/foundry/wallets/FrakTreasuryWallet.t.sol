@@ -190,7 +190,6 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper {
         callingData[0] = abi.encodeWithSelector(treasuryWallet.transfer.selector, address(1), 1);
         callingData[1] = abi.encodeWithSelector(treasuryWallet.transfer.selector, address(1), 2);
 
-
         treasuryWallet.multicall(callingData);
     }
 

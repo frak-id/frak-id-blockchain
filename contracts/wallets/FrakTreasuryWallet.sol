@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
-import {FrakToken} from "../tokens/FrakTokenL2.sol";
+import {IFrakToken} from "../tokens/IFrakToken.sol";
 import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
 import {FrakRoles} from "../utils/FrakRoles.sol";
 import {InvalidAddress, RewardTooLarge, NoReward} from "../utils/FrakErrors.sol";
@@ -62,7 +62,7 @@ contract FrakTreasuryWallet is MintingAccessControlUpgradeable, Multicallable {
     uint256 private totalFrakMinted;
 
     /// @dev Access our token
-    FrakToken private frakToken;
+    IFrakToken private frakToken;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -74,7 +74,7 @@ contract FrakTreasuryWallet is MintingAccessControlUpgradeable, Multicallable {
 
         __MintingAccessControlUpgradeable_init();
 
-        frakToken = FrakToken(frkTokenAddr);
+        frakToken = IFrakToken(frkTokenAddr);
     }
 
     /**

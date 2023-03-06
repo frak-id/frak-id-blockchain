@@ -5,6 +5,7 @@ export async function updateContracts(
   contracts: {
     name: string;
     address: string;
+    call?: { fn: string; args?: unknown[] };
   }[],
 ) {
   console.log(" - Start to update our contracts");
@@ -20,6 +21,7 @@ export async function updateContracts(
       const contractFactory = await ethers.getContractFactory(nameToAddress.name);
       const contract = await upgrades.upgradeProxy(nameToAddress.address, contractFactory, {
         unsafeAllowRenames: true,
+        call: nameToAddress.call,
       });
       // Save the deployment promise for further waiting
       deployedPromises.push(contract.deployed());

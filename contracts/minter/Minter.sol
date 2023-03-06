@@ -6,7 +6,7 @@ import {FractionCostBadges} from "./badges/FractionCostBadges.sol";
 import {FrakMath} from "../utils/FrakMath.sol";
 import {FrakRoles} from "../utils/FrakRoles.sol";
 import {FraktionTokens} from "../tokens/FraktionTokens.sol";
-import {FrakToken} from "../tokens/FrakTokenL2.sol";
+import {IFrakToken} from "../tokens/IFrakToken.sol";
 import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
 import {InvalidAddress} from "../utils/FrakErrors.sol";
 import {Multicallable} from "solady/src/utils/Multicallable.sol";
@@ -78,7 +78,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
     FraktionTokens private fraktionTokens;
 
     /// @dev Reference to the Frak token contract (ERC20)
-    FrakToken private frakToken;
+    IFrakToken private frakToken;
 
     /// @dev Address of our foundation wallet (for fee's payment)
     address private foundationWallet;
@@ -111,7 +111,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
         __MintingAccessControlUpgradeable_init();
 
         fraktionTokens = FraktionTokens(fraktionTokensAddr);
-        frakToken = FrakToken(frkTokenAddr);
+        frakToken = IFrakToken(frkTokenAddr);
 
         foundationWallet = foundationAddr;
 
@@ -189,26 +189,39 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
      * @param   id  The id of the fraktion to be minted for the user
      * @param   to  The address on which we will mint the fraktion
      * @param   amount  The amount of fraktion to be minted for the user
+     * @param   deadline  The deadline for the permit of the allowance tx
+     * @param   v  Signature spec secp256k1
+     * @param   r  Signature spec secp256k1
+     * @param   s  Signature spec secp256k1
      */
-    function mintFractionForUser(uint256 id, address to, uint256 amount)
+    function mintFraktionForUser(
+        uint256 id,
+        address to,
+        uint256 amount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
+        _mintFraktionForUser(id, to, amount, deadline, v, r, s);
+    }
+
+    /**
+     * @notice  Mint a new fraktion for the given amount to the caller
+     * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer and mint the fraktion
+     * @param   id  The id of the fraktion to be minted for the user
+     * @param   amount  The amount of fraktion to be minted for the user
+     * @param   deadline  The deadline for the permit of the allowance tx
+     * @param   v  Signature spec secp256k1
+     * @param   r  Signature spec secp256k1
+     * @param   s  Signature spec secp256k1
+     */
+    function mintFraktion(uint256 id, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
         external
         payable
-        override
-        onlyRole(FrakRoles.MINTER)
         whenNotPaused
     {
-        // Get the cost of the fraction
-        uint256 totalCost = getCostBadge(id) * amount;
-        assembly {
-            // Emit the event
-            mstore(0, amount)
-            mstore(0x20, totalCost)
-            log3(0, 0x40, _FRACTION_MINTED_EVENT_SELECTOR, id, to)
-        }
-        // Transfer the tokens
-        frakToken.transferFrom(to, foundationWallet, totalCost);
-        // Mint his Fraction of NFT
-        fraktionTokens.mint(to, id, amount);
+        _mintFraktionForUser(id, _msgSender(), amount, deadline, v, r, s);
     }
 
     /**
@@ -277,5 +290,45 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
         whenNotPaused
     {
         _updateCostBadge(fractionId, badge);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                          Internal write function's                         */
+    /* -------------------------------------------------------------------------- */
+
+    /**
+     * @notice  Mint a new fraktion for the given amount and user
+     * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer and mint the fraktion
+     * @param   id  The id of the fraktion to be minted for the user
+     * @param   to  The address on which we will mint the fraktion
+     * @param   amount  The amount of fraktion to be minted for the user
+     * @param   deadline  The deadline for the permit of the allowance tx
+     * @param   v  Signature spec secp256k1
+     * @param   r  Signature spec secp256k1
+     * @param   s  Signature spec secp256k1
+     */
+    function _mintFraktionForUser(
+        uint256 id,
+        address to,
+        uint256 amount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) private {
+        // Get the cost of the fraction
+        uint256 totalCost = getCostBadge(id) * amount;
+        assembly {
+            // Emit the event
+            mstore(0, amount)
+            mstore(0x20, totalCost)
+            log3(0, 0x40, _FRACTION_MINTED_EVENT_SELECTOR, id, to)
+        }
+        // Call the permit functions
+        frakToken.permit(to, address(this), totalCost, deadline, v, r, s);
+        // Transfer the tokens
+        frakToken.transferFrom(to, foundationWallet, totalCost);
+        // Mint his Fraction of NFT
+        fraktionTokens.mint(to, id, amount);
     }
 }

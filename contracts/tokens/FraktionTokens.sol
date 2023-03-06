@@ -248,6 +248,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         }
 
         // Call our callback
+        // TODO : Assembly pre filtering of the array, only keeping element with type > 2
         if (address(transferCallback) != address(0)) {
             transferCallback.onFraktionsTransferred(from, to, ids, amounts);
         }
