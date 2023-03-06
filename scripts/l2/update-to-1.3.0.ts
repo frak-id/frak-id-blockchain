@@ -15,7 +15,13 @@ import { updateContracts } from "../utils/updateContracts";
     // TODO : FrakToken pending on Polygon
     const nameToAddresses = [
       // { name: "Minter", address: addresses.minter },
-      { name: "FrakToken", address: addresses.frakToken },
+      {
+        name: "FrakToken",
+        address: addresses.frakToken,
+        call: {
+          fn: "initializeV2()",
+        },
+      },
     ];
     await updateContracts(nameToAddresses);
 

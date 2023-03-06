@@ -66,6 +66,10 @@ contract FrakToken is
         _grantRole(DEPOSITOR_ROLE, childChainManager);
     }
 
+    function initializeV2() external reinitializer(2) {
+        _setDomainSeperator("Frak");
+    }
+
     // This is to support Native meta transactions
     // never use msg.sender directly, use _msgSender() instead
     function _msgSender() internal view override returns (address sender) {
