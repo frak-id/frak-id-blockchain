@@ -338,6 +338,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
             if (memParticipant.lastStateIndex == toStateIndex) {
                 // Increase the user pending reward (if needed), and return this amount
                 if (claimable > 0) {
+                    participant.lastStateClaim = uint96(claimable);
                     _addFoundsUnchecked(user, claimable);
                 }
                 return claimable;
