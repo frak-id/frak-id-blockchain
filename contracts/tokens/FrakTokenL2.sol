@@ -64,10 +64,8 @@ contract FrakToken is
         _initializeEIP712(name);
 
         _grantRole(DEPOSITOR_ROLE, childChainManager);
-    }
 
-    function initializeV2() external reinitializer(2) {
-        _setDomainSeperator("Frak");
+        // Current version is 2, since we use a version to reset the domain separator post EIP712 updates
     }
 
     // This is to support Native meta transactions

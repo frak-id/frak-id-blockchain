@@ -124,6 +124,8 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         // Only for v1 deployment
         __FrakAccessControlUpgradeable_init();
         __PushPullReward_init(frkTokenAddr);
+
+        // Current version is 2, since we use a version to reset a user fcked up pending reward
     }
 
     /* -------------------------------------------------------------------------- */
@@ -330,17 +332,19 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
             RewardState memory memCurrentRewardState = contentStates[memParticipant.lastStateIndex];
             uint256 userReward = computeUserReward(memCurrentRewardState, memParticipant);
             claimable = userReward - memParticipant.lastStateClaim;
-            // Then reset his last state claim if needed
-            if (memParticipant.lastStateClaim != 0) {
-                participant.lastStateClaim = 0;
-            }
             // If we don't have more iteration to do, exit directly
             if (memParticipant.lastStateIndex == toStateIndex) {
                 // Increase the user pending reward (if needed), and return this amount
                 if (claimable > 0) {
+                    // Increase the participant last state claim by the new claimable amount
+                    participant.lastStateClaim = uint96(memParticipant.lastStateClaim + claimable);
                     _addFoundsUnchecked(user, claimable);
                 }
                 return claimable;
+            }
+            // Reset his last state claim if needed
+            if (memParticipant.lastStateClaim != 0) {
+                participant.lastStateClaim = 0;
             }
 
             // Then, iterate over all the states from the last states he fetched

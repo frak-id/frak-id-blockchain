@@ -5,7 +5,7 @@ import { updateContracts } from "../utils/updateContracts";
 
 (async () => {
   try {
-    console.log("Start to update our contracts to v1.3.0");
+    console.log("Start to update our contracts to v1.3.1");
 
     // Find the right addresses for our current network
     const networkName = hre.hardhatArguments.network ?? "local";
@@ -13,18 +13,14 @@ import { updateContracts } from "../utils/updateContracts";
 
     // Update our contracts
     const nameToAddresses = [
-      { name: "Minter", address: addresses.minter },
       {
-        name: "FrakToken",
-        address: addresses.frakToken,
-        call: {
-          fn: "initializeV2()",
-        },
+        name: "ContentPool",
+        address: addresses.contentPool,
       },
     ];
     await updateContracts(nameToAddresses);
 
-    console.log("Finished to update our contracts to v1.3.0");
+    console.log("Finished to update our contracts to v1.3.1");
   } catch (e: any) {
     console.log(e.message);
   }
