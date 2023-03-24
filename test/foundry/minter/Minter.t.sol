@@ -3,6 +3,7 @@ pragma solidity 0.8.17;
 
 import {NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge} from "@frak/utils/FrakErrors.sol";
 import {FraktionTokens} from "@frak/tokens/FraktionTokens.sol";
+import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
 import {FrakMath} from "@frak/utils/FrakMath.sol";
 import {FrakRoles} from "@frak/utils/FrakRoles.sol";
 import {Minter} from "@frak/minter/Minter.sol";
@@ -14,7 +15,6 @@ import {
     BadgeTooLarge,
     InvalidFraktionType
 } from "@frak/utils/FrakErrors.sol";
-import {NativeMetaTransaction} from "@frak/utils/NativeMetaTransaction.sol";
 
 /// Testing minter contract
 contract MinterTest is FrkTokenTestHelper {
@@ -134,7 +134,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_mintFraktionForUser() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
@@ -160,7 +160,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_fail_mintFraktionForUser_ContractPaused() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
@@ -186,7 +186,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_fail_mintFraktionForUser_NotAuthorized() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
@@ -209,7 +209,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_fail_mintFraktionForUser_InsuficiantSupply() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
@@ -233,7 +233,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_fail_mintFraktionForUser_InvalidFraktionType() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
@@ -257,7 +257,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_fail_mintFractionForUser_InvalidSigner() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
@@ -276,7 +276,7 @@ contract MinterTest is FrkTokenTestHelper {
 
         // Launch the buy prcess
         prankDeployer();
-        vm.expectRevert(NativeMetaTransaction.InvalidSigner.selector);
+        vm.expectRevert(FrakToken.InvalidSigner.selector);
         minter.mintFraktionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
         // Ensure the supply hasn't changed
         assertEq(fraktionTokens.supplyOf(fraktionCommonId), 10);
@@ -293,7 +293,7 @@ contract MinterTest is FrkTokenTestHelper {
     ) =====
      */
     function test_mintFraktion() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
@@ -319,7 +319,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_fail_mintFraktion_ContractPaused() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();

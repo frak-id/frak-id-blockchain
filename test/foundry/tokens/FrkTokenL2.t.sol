@@ -2,13 +2,13 @@
 pragma solidity 0.8.17;
 
 import {PRBTest} from "@prb/test/PRBTest.sol";
+import {StdUtils} from "@forge-std/StdUtils.sol";
 import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
 import {NotAuthorized} from "@frak/utils/FrakErrors.sol";
-import {NativeMetaTransaction} from "@frak/utils/NativeMetaTransaction.sol";
 import {UUPSTestHelper} from "../UUPSTestHelper.sol";
 
 /// Testing the frak l2 token
-contract FrkTokenL2Test is UUPSTestHelper {
+contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
     FrakToken frakToken;
 
     function setUp() public {
@@ -23,6 +23,12 @@ contract FrkTokenL2Test is UUPSTestHelper {
      */
     function invariant_supplyCap() public {
         assertGt(frakToken.cap(), frakToken.totalSupply());
+    }
+
+    function invariant_metadata() public {
+        assertEq(frakToken.name(), "Frak");
+        assertEq(frakToken.symbol(), "FRK");
+        assertEq(frakToken.decimals(), 18);
     }
 
     /*
@@ -104,7 +110,7 @@ contract FrkTokenL2Test is UUPSTestHelper {
     }
 
     function testFuzz_transfer(address target, uint256 amount) public {
-        vm.assume(target != address(0));
+        vm.assume(target != address(0) && target != address(1));
         vm.assume(amount < 3_000_000_000 ether);
 
         prankDeployer();
@@ -177,6 +183,7 @@ contract FrkTokenL2Test is UUPSTestHelper {
      */
     function test_transferFrom(uint256 amount) public {
         vm.assume(amount < 3_000_000_000 ether);
+
         prankDeployer();
         frakToken.mint(address(1), amount);
 
@@ -220,7 +227,7 @@ contract FrkTokenL2Test is UUPSTestHelper {
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
     function test_permit() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address owner = vm.addr(privateKey);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
@@ -240,7 +247,7 @@ contract FrkTokenL2Test is UUPSTestHelper {
     }
 
     function test_fail_permit_InvalidSigner() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address owner = vm.addr(privateKey);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
@@ -254,12 +261,12 @@ contract FrkTokenL2Test is UUPSTestHelper {
             )
         );
 
-        vm.expectRevert(NativeMetaTransaction.InvalidSigner.selector);
+        vm.expectRevert(FrakToken.InvalidSigner.selector);
         frakToken.permit(owner, address(2), 1 ether, block.timestamp, v, r, s);
     }
 
     function test_fail_permit_InvalidAddress() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address owner = vm.addr(privateKey);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
@@ -278,7 +285,7 @@ contract FrkTokenL2Test is UUPSTestHelper {
     }
 
     function test_fail_permit_PermitDelayExpired() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address owner = vm.addr(privateKey);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(

@@ -24,7 +24,11 @@ contract EIP712Base is Initializable {
     /*                                   Storage                                  */
     /* -------------------------------------------------------------------------- */
 
+    /// @dev The current domain seperator
     bytes32 internal domainSeperator;
+
+    /// @dev Nonces per user
+    mapping(address => uint256) internal nonces;
 
     /// @dev init function
     function _initializeEIP712(string memory name) internal onlyInitializing {
@@ -35,15 +39,14 @@ contract EIP712Base is Initializable {
     /*                             Public view method                             */
     /* -------------------------------------------------------------------------- */
 
+    /// @dev Current domain seperator
     function getDomainSeperator() public view returns (bytes32) {
         return domainSeperator;
     }
 
-    function getChainId() internal view returns (uint256 id) {
-        assembly {
-            id := chainid()
-        }
-        return id;
+    /// @dev Get the current 'nonce' for the given 'user'
+    function getNonce(address user) external view returns (uint256 nonce) {
+        nonce = nonces[user];
     }
 
     /* -------------------------------------------------------------------------- */
@@ -56,7 +59,7 @@ contract EIP712Base is Initializable {
                 EIP712_DOMAIN_TYPEHASH,
                 keccak256(bytes(name)),
                 keccak256(bytes(ERC712_VERSION)),
-                getChainId(),
+                block.chainid,
                 address(this)
             )
         );

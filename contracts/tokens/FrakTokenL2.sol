@@ -6,7 +6,7 @@ import {FrakRoles} from "../utils/FrakRoles.sol";
 import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
 import {ContextMixin} from "../utils/ContextMixin.sol";
 import {IFrakToken} from "./IFrakToken.sol";
-import {NativeMetaTransaction} from "../utils/NativeMetaTransaction.sol";
+import {EIP712Base} from "../utils/EIP712Base.sol";
 
 /**
  * @author  @KONFeature
@@ -15,13 +15,7 @@ import {NativeMetaTransaction} from "../utils/NativeMetaTransaction.sol";
  * @notice Compliant with ERC20 - EIP712 - EIP2612
  * @custom:security-contact contact@frak.id
  */
-contract FrakToken is
-    ERC20Upgradeable,
-    MintingAccessControlUpgradeable,
-    NativeMetaTransaction,
-    ContextMixin,
-    IFrakToken
-{
+contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, EIP712Base, ContextMixin, IFrakToken {
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
@@ -35,6 +29,9 @@ contract FrakToken is
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
+
+    /// @dev error throwned when the signer is invalid
+    error InvalidSigner();
 
     /// @dev error throwned when the contract cap is exceeded
     error CapExceed();
@@ -88,32 +85,6 @@ contract FrakToken is
     /// @dev Returns the cap on the token's total supply.
     function cap() external view virtual override returns (uint256) {
         return _cap;
-    }
-
-    /* -------------------------------------------------------------------------- */
-    /*                External write function's for Polygon bridge                */
-    /* -------------------------------------------------------------------------- */
-
-    /**
-     * @notice called when token is deposited on root chain
-     * @dev Should be callable only by ChildChainManager
-     * Should handle deposit by minting the required amount for user
-     * @param user user address for whom deposit is being done
-     * @param depositData abi encoded amount (required for polygon bridge)
-     */
-    function deposit(address user, bytes calldata depositData) external onlyRole(DEPOSITOR_ROLE) {
-        uint256 amount = abi.decode(depositData, (uint256));
-        if (totalSupply() + amount > _cap) revert CapExceed();
-        _mint(user, amount);
-    }
-
-    /**
-     * @notice called when user wants to withdraw tokens back to root chain
-     * @dev Should burn user's tokens. This transaction will be verified when exiting on root chain
-     * @param amount amount of tokens to withdraw
-     */
-    function withdraw(uint256 amount) external {
-        _burn(_msgSender(), amount);
     }
 
     /* -------------------------------------------------------------------------- */
