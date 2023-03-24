@@ -15,14 +15,7 @@ import {EIP712Base} from "../utils/EIP712Base.sol";
  * @notice Compliant with ERC20 - EIP712 - EIP2612
  * @custom:security-contact contact@frak.id
  */
-contract FrakToken is
-    ERC20Upgradeable,
-    MintingAccessControlUpgradeable,
-    EIP712Base,
-    ContextMixin,
-    IFrakToken
-{
-
+contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, EIP712Base, ContextMixin, IFrakToken {
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */

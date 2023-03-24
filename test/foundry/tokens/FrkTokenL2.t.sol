@@ -25,6 +25,12 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
         assertGt(frakToken.cap(), frakToken.totalSupply());
     }
 
+    function invariant_metadata() public {
+        assertEq(frakToken.name(), "Frak");
+        assertEq(frakToken.symbol(), "FRK");
+        assertEq(frakToken.decimals(), 18);
+    }
+
     /*
      * ===== TEST : initialize(address childChainManager) =====
      */
