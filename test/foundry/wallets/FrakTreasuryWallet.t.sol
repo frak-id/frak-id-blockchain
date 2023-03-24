@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
+import {StdUtils} from "@forge-std/StdUtils.sol";
 import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
 import {FrakMath} from "@frak/utils/FrakMath.sol";
 import {FrakRoles} from "@frak/utils/FrakRoles.sol";
@@ -16,7 +17,7 @@ import {
 } from "@frak/utils/FrakErrors.sol";
 
 /// Testing the frak l2 token
-contract FrakTreasuryWalletTest is FrkTokenTestHelper {
+contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {
     using FrakMath for address;
     using FrakMath for uint256;
 
@@ -56,7 +57,8 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper {
     }
 
     function testFuzz_transfer(address target, uint256 amount) public {
-        vm.assume(amount > 0 && amount < 500_000 ether && target != address(0));
+        vm.assume(target != address(0));
+        amount = bound(amount, 1, 500_000 ether);
 
         prankDeployer();
         treasuryWallet.transfer(target, amount);
@@ -118,7 +120,8 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper {
     }
 
     function testFuzz_transferBatch(address target, uint256 amount) public {
-        vm.assume(amount > 0 && amount < 500_000 ether && target != address(0));
+        vm.assume(target != address(0));
+        amount = bound(amount, 1, 500_000 ether);
 
         prankDeployer();
         (address[] memory addrs, uint256[] memory amounts) = baseBatchParam(target, amount);

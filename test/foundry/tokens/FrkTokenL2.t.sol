@@ -2,13 +2,14 @@
 pragma solidity 0.8.17;
 
 import {PRBTest} from "@prb/test/PRBTest.sol";
+import {StdUtils} from "@forge-std/StdUtils.sol";
 import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
 import {NotAuthorized} from "@frak/utils/FrakErrors.sol";
 import {NativeMetaTransaction} from "@frak/utils/NativeMetaTransaction.sol";
 import {UUPSTestHelper} from "../UUPSTestHelper.sol";
 
 /// Testing the frak l2 token
-contract FrkTokenL2Test is UUPSTestHelper {
+contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
     FrakToken frakToken;
 
     function setUp() public {
@@ -104,7 +105,7 @@ contract FrkTokenL2Test is UUPSTestHelper {
     }
 
     function testFuzz_transfer(address target, uint256 amount) public {
-        vm.assume(target != address(0));
+        vm.assume(target != address(0) && target != address(1));
         vm.assume(amount < 3_000_000_000 ether);
 
         prankDeployer();
@@ -177,6 +178,7 @@ contract FrkTokenL2Test is UUPSTestHelper {
      */
     function test_transferFrom(uint256 amount) public {
         vm.assume(amount < 3_000_000_000 ether);
+
         prankDeployer();
         frakToken.mint(address(1), amount);
 

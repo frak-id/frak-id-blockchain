@@ -1,6 +1,7 @@
 @frak/=contracts/
 
 @prb/test/=lib/prb-test/src/
+@forge-std/=lib/forge-std/src/
 
 @oz/=node_modules/@openzeppelin/contracts/
 @oz-upgrades/=node_modules/@openzeppelin/contracts-upgradeable/

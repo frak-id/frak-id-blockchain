@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.17;
 
+import {StdUtils} from "@forge-std/StdUtils.sol";
 import {Rewarder} from "@frak/reward/Rewarder.sol";
 import {FrakMath} from "@frak/utils/FrakMath.sol";
 import {ContractPaused, NotAuthorized, InvalidArray, InvalidAddress, RewardTooLarge} from "@frak/utils/FrakErrors.sol";
 import {RewarderTestHelper} from "./RewarderTestHelper.sol";
 
 /// Testing the rewarder pay function
-contract RewarderPayTest is RewarderTestHelper {
+contract RewarderPayTest is RewarderTestHelper, StdUtils {
     using FrakMath for uint256;
 
     uint256 contentId;
@@ -124,9 +125,9 @@ contract RewarderPayTest is RewarderTestHelper {
         (uint256[] memory listenCounts, uint256[] memory contentIds) = basePayParam(300);
         rewarder.payUser(address(1), 1, contentIds, listenCounts);
     }
-
+    
     function testFuzz_payUser(uint16 listenCount) public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
-        vm.assume(listenCount < 300 && listenCount > 0);
+        listenCount = uint16(bound(listenCount, 1, 300));
 
         uint256[] memory listenCounts = new uint256[](1);
         listenCounts[0] = listenCount;
@@ -146,7 +147,7 @@ contract RewarderPayTest is RewarderTestHelper {
         withLotFrkToken(rewarderAddr)
         prankExecAsDeployer
     {
-        vm.assume(listenCount < 300 && listenCount > 0);
+        listenCount = uint16(bound(listenCount, 1, 300));
 
         mintFraktions(address(1));
 
@@ -160,7 +161,7 @@ contract RewarderPayTest is RewarderTestHelper {
         withLotFrkToken(rewarderAddr)
         prankExecAsDeployer
     {
-        vm.assume(listenCount < 300 && listenCount > 0);
+        listenCount = uint16(bound(listenCount, 1, 300));
 
         mintFraktions(address(1));
 
@@ -197,7 +198,7 @@ contract RewarderPayTest is RewarderTestHelper {
         withLotFrkToken(rewarderAddr)
         prankExecAsDeployer
     {
-        vm.assume(listenCount < 300 && listenCount > 0);
+        listenCount = uint16(bound(listenCount, 1, 300));
 
         mintFraktions(address(1));
         mintFraktions(address(2));
