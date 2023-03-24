@@ -134,7 +134,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_mintFraktionForUser() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
@@ -160,7 +160,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_fail_mintFraktionForUser_ContractPaused() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
@@ -186,7 +186,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_fail_mintFraktionForUser_NotAuthorized() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
@@ -209,7 +209,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_fail_mintFraktionForUser_InsuficiantSupply() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
@@ -233,7 +233,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_fail_mintFraktionForUser_InvalidFraktionType() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
@@ -257,7 +257,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_fail_mintFractionForUser_InvalidSigner() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
@@ -293,7 +293,7 @@ contract MinterTest is FrkTokenTestHelper {
     ) =====
      */
     function test_mintFraktion() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
@@ -319,7 +319,7 @@ contract MinterTest is FrkTokenTestHelper {
     }
 
     function test_fail_mintFraktion_ContractPaused() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();

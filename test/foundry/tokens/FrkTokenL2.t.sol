@@ -227,7 +227,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
     function test_permit() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address owner = vm.addr(privateKey);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
@@ -247,7 +247,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
     }
 
     function test_fail_permit_InvalidSigner() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address owner = vm.addr(privateKey);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
@@ -266,7 +266,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
     }
 
     function test_fail_permit_InvalidAddress() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address owner = vm.addr(privateKey);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
@@ -285,7 +285,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
     }
 
     function test_fail_permit_PermitDelayExpired() public {
-        uint256 privateKey = 0xBEEF;
+        uint256 privateKey = 0xACAB;
         address owner = vm.addr(privateKey);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(

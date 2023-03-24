@@ -173,8 +173,8 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     }
 
     /// @dev Burn a fraction of a nft
-    function burn(address from, uint256 id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
-        _burn(from, id, amount);
+    function burn(uint256 id, uint256 amount) external payable whenNotPaused {
+        _burn(msg.sender, id, amount);
     }
 
     /* -------------------------------------------------------------------------- */

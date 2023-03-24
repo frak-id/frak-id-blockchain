@@ -36,7 +36,7 @@ contract FraktionTokensTest is UUPSTestHelper, StdUtils {
     }
 
     /*
-     * ===== TEST :  mintNewContent(address ownerAddress) =====
+     * ===== TEST : mintNewContent(address ownerAddress) =====
      */
     function test_mintNewContent() public prankExecAsDeployer {
         uint256 contentId = fraktionTokens.mintNewContent(address(1));
@@ -61,10 +61,26 @@ contract FraktionTokensTest is UUPSTestHelper, StdUtils {
     }
 
     /*
-     * ===== TEST : transferFrom(address from, address to, uint256 amount) =====
+     * ===== TEST : mint(address to, uint256 id, uint256 amount) =====
      */
     function test_mint() public prankExecAsDeployer {
         fraktionTokens.mint(address(1), 1312, 1);
         assertEq(fraktionTokens.balanceOf(address(1), 1312), 1);
+    }
+
+    function test_fail_mint_ContractPaused() public prankExecAsDeployer {
+        fraktionTokens.pause();
+        vm.expectRevert(ContractPaused.selector);
+        fraktionTokens.mint(address(1), 1312, 1);
+    }
+
+    function test_fail_mint_NotAuthorized() public {
+        vm.expectRevert(NotAuthorized.selector);
+        fraktionTokens.mint(address(1), 1312, 1);
+    }
+
+    function test_fail_mint_InvalidAddress() public prankExecAsDeployer {
+        vm.expectRevert("ERC1155: mint to the zero address");
+        fraktionTokens.mint(address(0), 1312, 1);
     }
 }
