@@ -125,7 +125,7 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
         (uint256[] memory listenCounts, uint256[] memory contentIds) = basePayParam(300);
         rewarder.payUser(address(1), 1, contentIds, listenCounts);
     }
-    
+
     function testFuzz_payUser(uint16 listenCount) public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
         listenCount = uint16(bound(listenCount, 1, 300));
 
