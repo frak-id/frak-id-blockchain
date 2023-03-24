@@ -5,7 +5,6 @@ import {PRBTest} from "@prb/test/PRBTest.sol";
 import {StdUtils} from "@forge-std/StdUtils.sol";
 import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
 import {NotAuthorized} from "@frak/utils/FrakErrors.sol";
-import {NativeMetaTransaction} from "@frak/utils/NativeMetaTransaction.sol";
 import {UUPSTestHelper} from "../UUPSTestHelper.sol";
 
 /// Testing the frak l2 token
@@ -256,7 +255,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
             )
         );
 
-        vm.expectRevert(NativeMetaTransaction.InvalidSigner.selector);
+        vm.expectRevert(FrakToken.InvalidSigner.selector);
         frakToken.permit(owner, address(2), 1 ether, block.timestamp, v, r, s);
     }
 

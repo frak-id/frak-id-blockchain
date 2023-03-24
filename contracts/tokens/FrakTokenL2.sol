@@ -6,7 +6,7 @@ import {FrakRoles} from "../utils/FrakRoles.sol";
 import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
 import {ContextMixin} from "../utils/ContextMixin.sol";
 import {IFrakToken} from "./IFrakToken.sol";
-import {NativeMetaTransaction} from "../utils/NativeMetaTransaction.sol";
+import {EIP712Base} from "../utils/EIP712Base.sol";
 
 /**
  * @author  @KONFeature
@@ -18,10 +18,11 @@ import {NativeMetaTransaction} from "../utils/NativeMetaTransaction.sol";
 contract FrakToken is
     ERC20Upgradeable,
     MintingAccessControlUpgradeable,
-    NativeMetaTransaction,
+    EIP712Base,
     ContextMixin,
     IFrakToken
 {
+
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
@@ -35,6 +36,9 @@ contract FrakToken is
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
+
+    /// @dev error throwned when the signer is invalid
+    error InvalidSigner();
 
     /// @dev error throwned when the contract cap is exceeded
     error CapExceed();

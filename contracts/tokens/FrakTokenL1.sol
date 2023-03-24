@@ -5,7 +5,7 @@ import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/
 import {FrakRoles} from "../utils/FrakRoles.sol";
 import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
 import {ContextMixin} from "../utils/ContextMixin.sol";
-import {NativeMetaTransaction} from "../utils/NativeMetaTransaction.sol";
+import {EIP712Base} from "../utils/EIP712Base.sol";
 
 // Error
 /// @dev error throwned when the contract cap is exceeded
@@ -15,7 +15,7 @@ error CapExceed();
  * Frak token on the ethereum mainnet, simpler
  */
 /// @custom:security-contact contact@frak.id
-contract FrakTokenL1 is ERC20Upgradeable, FrakAccessControlUpgradeable, NativeMetaTransaction, ContextMixin {
+contract FrakTokenL1 is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Base, ContextMixin {
     bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
 
     uint256 private constant _cap = 3_000_000_000 ether; // 3 billion FRK
