@@ -524,7 +524,7 @@ contract Rewarder is
 
                 // Increase our offset's
                 currOffset := add(currOffset, 0x20)
-                
+
                 // Exit if we reached the end
                 if iszero(lt(currOffset, offsetEnd)) { break }
             }

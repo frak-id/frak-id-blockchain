@@ -197,14 +197,12 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
             let length := mload(ids)
 
             // Base offset to access array element's
-            let memOffset := 0x20
+            let currOffset := 0x20
+            let offsetEnd := add(currOffset, shl(5, length))
 
-            // Iterate over all the ids and amount
-            let i := 0
-            for {} lt(i, length) { i := add(i, 1) } {
-                let iterationOffset := shl(0x05, i)
-                let id := mload(add(add(ids, memOffset), iterationOffset))
-                let amount := mload(add(add(amounts, memOffset), iterationOffset))
+            // Infinite loop
+            for {} 1 {} {
+                let id := mload(add(ids, currOffset))
 
                 // Get the slot to know if it's supply aware
                 // Kecak (id, _isSupplyAware.slot)
@@ -212,11 +210,13 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 mstore(0x20, _isSupplyAware.slot)
                 let isSupplyAware := sload(keccak256(0, 0x40))
 
-                // Supply awaire code block
+                // Supply aware code block
                 if isSupplyAware {
+                    // Get the amount
+                    let amount := mload(add(amounts, currOffset))
                     // Get the supply slot
                     // Kecak (id, _availableSupplies.slot)
-                    mstore(0, id)
+                    // mstore(0, id) -> Don't needed since we already stored the id before in this mem space
                     mstore(0x20, _availableSupplies.slot)
                     let availableSupplySlot := keccak256(0, 0x40)
                     let availableSupply := sload(availableSupplySlot)
@@ -244,6 +244,12 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                     // Log the event
                     log3(0, 0, _CONTENT_OWNER_UPDATED_EVENT_SELECTOR, contentId, to)
                 }
+
+                // Increase our offset's
+                currOffset := add(currOffset, 0x20)
+
+                // Exit if we reached the end
+                if iszero(lt(currOffset, offsetEnd)) { break }
             }
         }
 
