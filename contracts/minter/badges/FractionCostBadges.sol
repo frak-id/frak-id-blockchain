@@ -14,6 +14,13 @@ import {InvalidFraktionType} from "../../utils/FrakErrors.sol";
  */
 abstract contract FractionCostBadges {
     /* -------------------------------------------------------------------------- */
+    /*                                   Error's                                  */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev 'bytes4(keccak256("InvalidFraktionType()"))'
+    uint256 private constant _INVALID_FRAKTION_TYPE_SELECTOR = 0x3f126a45;
+
+    /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
     /* -------------------------------------------------------------------------- */
 
@@ -22,7 +29,7 @@ abstract contract FractionCostBadges {
      * @param id The id of the updated fraction.
      * @param badge The new badge cost of the fraction in wei.
      */
-    event FractionCostBadgeUpdated(uint256 id, uint96 badge);
+    event FractionCostBadgeUpdated(uint256 indexed id, uint256 badge);
 
     /* -------------------------------------------------------------------------- */
     /*                                   Storage                                  */
@@ -77,7 +84,6 @@ abstract contract FractionCostBadges {
             uint256 tokenType = FrakMath.extractTokenType(fractionId);
             fractionBadge = initialFractionCost(tokenType);
         }
-        return fractionBadge;
     }
 
     /**
@@ -96,8 +102,10 @@ abstract contract FractionCostBadges {
         } else if (tokenType == FrakMath.TOKEN_TYPE_DIAMOND_MASK) {
             initialCost = 3_000 ether; // 3k FRK
         } else {
-            revert InvalidFraktionType();
+            assembly {
+                mstore(0x00, _INVALID_FRAKTION_TYPE_SELECTOR)
+                revert(0x1c, 0x04)
+            }
         }
-        return initialCost;
     }
 }
