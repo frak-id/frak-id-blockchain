@@ -88,13 +88,13 @@ abstract contract FractionCostBadges {
      */
     function initialFractionCost(uint256 tokenType) internal pure returns (uint96 initialCost) {
         if (tokenType == FrakMath.TOKEN_TYPE_COMMON_MASK) {
-            initialCost = 20 ether; // 20 FRK
+            initialCost = 90 ether; // 90 FRK
         } else if (tokenType == FrakMath.TOKEN_TYPE_PREMIUM_MASK) {
-            initialCost = 100 ether; // 100 FRK
+            initialCost = 500 ether; // 500 FRK
         } else if (tokenType == FrakMath.TOKEN_TYPE_GOLD_MASK) {
-            initialCost = 200 ether; // 200 FRK
+            initialCost = 1_200 ether; // 1.2k FRK
         } else if (tokenType == FrakMath.TOKEN_TYPE_DIAMOND_MASK) {
-            initialCost = 400 ether; // 400 FRK
+            initialCost = 3_000 ether; // 3k FRK
         } else {
             revert InvalidFraktionType();
         }
