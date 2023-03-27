@@ -131,11 +131,15 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 revert(0x1c, 0x04)
             }
 
-            // Iterate over all the ids and supplies
-            for { let i := 0 } lt(i, ids.length) { i := add(i, 1) } {
-                let iterationOffset := shl(0x05, i)
-                let id := calldataload(add(ids.offset, iterationOffset))
-                let supply := calldataload(add(supplies.offset, iterationOffset))
+            // Get where our array ends
+            let offsetEnd := shl(5, ids.length)
+            // Current iterator offset
+            let currentOffset := 0
+            // Infinite loop
+            for {} 1 {} {
+                // Get the current id and supply
+                let id := calldataload(add(ids.offset, currentOffset))
+                let supply := calldataload(add(supplies.offset, currentOffset))
 
                 // Ensure the supply update of this token type is allowed
                 let tokenType := and(id, 0xF)
@@ -158,6 +162,11 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 // Emit the supply updated event
                 mstore(0, supply)
                 log2(0, 0x20, _SUPPLY_UPDATED_EVENT_SELECTOR, id)
+
+                // Increase the iterator
+                currentOffset := add(currentOffset, 0x20)
+                // Exit if we reached the end
+                if iszero(lt(currentOffset, offsetEnd)) { break }
             }
         }
     }
