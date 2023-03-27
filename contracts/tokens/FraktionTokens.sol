@@ -267,24 +267,37 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         virtual
         returns (uint256[] memory batchBalances)
     {
-        batchBalances = new uint256[](ids.length);
-        for (uint256 i; i < ids.length;) {
-            uint256 id = ids[i];
-            unchecked {
-                assembly {
-                    // Slot for all the balances of the given id
-                    mstore(0, id)
-                    mstore(0x20, 0xcb) // _balances.slot on the OZ contract
-                    let idSlot := keccak256(0, 0x40)
-                    // Slot for the balance of the given account
-                    mstore(0, account)
-                    mstore(0x20, idSlot)
-                    let balanceSlot := keccak256(0, 0x40)
-                    // Set the balance at the right index
-                    mstore(add(batchBalances, add(mul(i, 0x20), 0x20)), sload(balanceSlot))
-                }
-                ++i;
+        assembly {
+            // Get the free mem pointer for our batch balances
+            batchBalances := mload(0x40)
+            // Store the size of our array
+            mstore(batchBalances, ids.length)
+            // Get where our array ends
+            let end := add(ids.offset, shl(5, ids.length))
+            // Current iterator offset
+            let i := ids.offset
+            // Current balance array offset
+            let balanceOffset := add(batchBalances, 0x20)
+            // Infinite loop
+            for {} 1 {} {
+                // Get the slot for the current id
+                mstore(0, calldataload(i))
+                mstore(0x20, 0xcb) // `_balances.slot` on the OZ contract
+                let idSlot := keccak256(0, 0x40)
+                // Slot for the balance of the given account
+                mstore(0, account)
+                mstore(0x20, idSlot)
+                let balanceSlot := keccak256(0, 0x40)
+                // Set the balance at the right index
+                mstore(balanceOffset, sload(balanceSlot))
+                // Increase the iterator
+                i := add(i, 0x20)
+                balanceOffset := add(balanceOffset, 0x20)
+                // Exit if we reached the end
+                if iszero(lt(i, end)) { break }
             }
+            // Set the new free mem pointer
+            mstore(0x40, balanceOffset)
         }
     }
 
