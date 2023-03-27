@@ -269,9 +269,20 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     {
         batchBalances = new uint256[](ids.length);
         for (uint256 i; i < ids.length;) {
+            uint256 id = ids[i];
             unchecked {
-                // TODO : Find a way to directly check _balances var without the require check
-                batchBalances[i] = balanceOf(account, ids[i]);
+                assembly {
+                    // Slot for all the balances of the given id
+                    mstore(0, id)
+                    mstore(0x20, 0xcb) // _balances.slot on the OZ contract
+                    let idSlot := keccak256(0, 0x40)
+                    // Slot for the balance of the given account
+                    mstore(0, account)
+                    mstore(0x20, idSlot)
+                    let balanceSlot := keccak256(0, 0x40)
+                    // Set the balance at the right index
+                    mstore(add(batchBalances, add(mul(i, 0x20), 0x20)), sload(balanceSlot))
+                }
                 ++i;
             }
         }
