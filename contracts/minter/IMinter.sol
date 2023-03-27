@@ -34,35 +34,25 @@ interface IMinter is IPausable {
      * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer and mint the fraktion
      * @param   id  The id of the fraktion to be minted for the user
      * @param   to  The address on which we will mint the fraktion
-     * @param   amount  The amount of fraktion to be minted for the user
      * @param   deadline  The deadline for the permit of the allowance tx
      * @param   v  Signature spec secp256k1
      * @param   r  Signature spec secp256k1
      * @param   s  Signature spec secp256k1
      */
-    function mintFraktionForUser(
-        uint256 id,
-        address to,
-        uint256 amount,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external payable;
+    function mintFraktionForUser(uint256 id, address to, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+        external
+        payable;
 
     /**
      * @notice  Mint a new fraktion for the given amount to the caller
      * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer and mint the fraktion
      * @param   id  The id of the fraktion to be minted for the user
-     * @param   amount  The amount of fraktion to be minted for the user
      * @param   deadline  The deadline for the permit of the allowance tx
      * @param   v  Signature spec secp256k1
      * @param   r  Signature spec secp256k1
      * @param   s  Signature spec secp256k1
      */
-    function mintFraktion(uint256 id, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
-        external
-        payable;
+    function mintFraktion(uint256 id, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external payable;
 
     /**
      * @notice  Mint a free fraktion for the given user
@@ -71,6 +61,13 @@ interface IMinter is IPausable {
      * @param   to  Address of the user
      */
     function mintFreeFraktionForUser(uint256 id, address to) external payable;
+
+    /**
+     * @notice  Mint a free fraktion for the given user
+     * @dev     Will mint a new free FraktionToken for the user, by first ensuring the user doesn't have any fraktion, only performed when contract not paused and by the right person
+     * @param   id  Id of the free fraktion
+     */
+    function mintFreeFraktion(uint256 id) external payable;
 
     /**
      * @notice  Increase the total supply for the given fraktion id

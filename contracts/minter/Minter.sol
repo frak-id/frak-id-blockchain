@@ -35,7 +35,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
     error ExpectingOnlyFreeFraktion();
 
     /// @dev Error emitted when the user already have a free fraktion
-    error AlreadyHaveFreeFraktion();
+    error AlreadyHaveFraktion();
 
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
     uint256 private constant _INVALID_ADDRESS_SELECTOR = 0xe6c4247b;
@@ -49,8 +49,8 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
     /// @dev 'bytes4(keccak256(bytes("ExpectingOnlyFreeFraktion()")))'
     uint256 private constant _EXPECTING_ONLY_FREE_FRAKTION_SELECTOR = 0x121becbf;
 
-    /// @dev 'bytes4(keccak256(bytes("AlreadyHaveFreeFraktion()")))'
-    uint256 private constant _ALREADY_HAVE_FREE_FRAKTION_SELECTOR = 0xeec398ee;
+    /// @dev 'bytes4(keccak256("AlreadyHaveFraktion()"))'
+    uint256 private constant _ALREADY_HAVE_FRACTION_SELECTOR = 0xaecdd5b7;
 
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
@@ -62,11 +62,11 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
     /// @dev Event emitted when a new fraktion for a content is minted
     event FractionMinted(uint256 indexed fractionId, address indexed user, uint256 amount, uint256 cost);
 
-    /// @dev 'keccak256(bytes("ContentMinted(uint256,address)"))'
+    /// @dev 'keccak256("ContentMinted(uint256,address)")'
     uint256 private constant _CONTENT_MINTED_EVENT_SELECTOR =
         0x15d512bd00e3acbb8a53b8fd503e98977b1af7618af12cbf83e463aefe880c1b;
 
-    /// @dev 'keccak256(bytes("FractionMinted(uint256,address,uint256,uint256)"))'
+    /// @dev 'keccak256("FractionMinted(uint256,address,uint256,uint256)")'
     uint256 private constant _FRACTION_MINTED_EVENT_SELECTOR =
         0x05941b053f6567cc6c1b84cbbb93a3af6df33035cb6694a8a5ad96208e610ad6;
 
@@ -188,40 +188,31 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
      * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer and mint the fraktion
      * @param   id  The id of the fraktion to be minted for the user
      * @param   to  The address on which we will mint the fraktion
-     * @param   amount  The amount of fraktion to be minted for the user
      * @param   deadline  The deadline for the permit of the allowance tx
      * @param   v  Signature spec secp256k1
      * @param   r  Signature spec secp256k1
      * @param   s  Signature spec secp256k1
      */
-    function mintFraktionForUser(
-        uint256 id,
-        address to,
-        uint256 amount,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
-        _mintFraktionForUser(id, to, amount, deadline, v, r, s);
+    function mintFraktionForUser(uint256 id, address to, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+        external
+        payable
+        onlyRole(FrakRoles.MINTER)
+        whenNotPaused
+    {
+        _mintFraktionForUser(id, to, deadline, v, r, s);
     }
 
     /**
      * @notice  Mint a new fraktion for the given amount to the caller
      * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer and mint the fraktion
      * @param   id  The id of the fraktion to be minted for the user
-     * @param   amount  The amount of fraktion to be minted for the user
      * @param   deadline  The deadline for the permit of the allowance tx
      * @param   v  Signature spec secp256k1
      * @param   r  Signature spec secp256k1
      * @param   s  Signature spec secp256k1
      */
-    function mintFraktion(uint256 id, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
-        external
-        payable
-        whenNotPaused
-    {
-        _mintFraktionForUser(id, _msgSender(), amount, deadline, v, r, s);
+    function mintFraktion(uint256 id, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external payable whenNotPaused {
+        _mintFraktionForUser(id, _msgSender(), deadline, v, r, s);
     }
 
     /**
@@ -237,25 +228,16 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
         onlyRole(FrakRoles.MINTER)
         whenNotPaused
     {
-        assembly {
-            // Check if it's a free fraktion
-            if iszero(eq(and(id, 0xF), 0x2)) {
-                mstore(0x00, _EXPECTING_ONLY_FREE_FRAKTION_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-        }
+        _mintFreeFraktionForUser(id, to);
+    }
 
-        // Check the user balance
-        uint256 userBalance = fraktionTokens.balanceOf(to, id);
-        assembly {
-            if userBalance {
-                mstore(0x00, _ALREADY_HAVE_FREE_FRAKTION_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-        }
-
-        // If we are all good, mint the free fraktion to the user
-        fraktionTokens.mint(to, id, 1);
+    /**
+     * @notice  Mint a free fraktion for the given user
+     * @dev     Will mint a new free FraktionToken for the user, by first ensuring the user doesn't have any fraktion, only performed when contract not paused and by the right person
+     * @param   id  Id of the free fraktion
+     */
+    function mintFreeFraktion(uint256 id) external payable override whenNotPaused {
+        _mintFreeFraktionForUser(id, _msgSender());
     }
 
     /**
@@ -301,34 +283,60 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
      * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer and mint the fraktion
      * @param   id  The id of the fraktion to be minted for the user
      * @param   to  The address on which we will mint the fraktion
-     * @param   amount  The amount of fraktion to be minted for the user
      * @param   deadline  The deadline for the permit of the allowance tx
      * @param   v  Signature spec secp256k1
      * @param   r  Signature spec secp256k1
      * @param   s  Signature spec secp256k1
      */
-    function _mintFraktionForUser(
-        uint256 id,
-        address to,
-        uint256 amount,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) private {
+    function _mintFraktionForUser(uint256 id, address to, uint256 deadline, uint8 v, bytes32 r, bytes32 s) private {
+        // Ensure the user don't have a fraktion of this type yet
+        uint256 currentFraktionBalance = fraktionTokens.balanceOf(to, id);
+        assembly {
+            if currentFraktionBalance {
+                mstore(0x00, _ALREADY_HAVE_FRACTION_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
         // Get the cost of the fraction
-        uint256 totalCost = getCostBadge(id) * amount;
+        uint256 cost = getCostBadge(id);
         assembly {
             // Emit the event
-            mstore(0, amount)
-            mstore(0x20, totalCost)
+            mstore(0, 0)
+            mstore(0x20, cost)
             log3(0, 0x40, _FRACTION_MINTED_EVENT_SELECTOR, id, to)
         }
         // Call the permit functions
-        frakToken.permit(to, address(this), totalCost, deadline, v, r, s);
+        frakToken.permit(to, address(this), cost, deadline, v, r, s);
         // Transfer the tokens
-        frakToken.transferFrom(to, foundationWallet, totalCost);
+        frakToken.transferFrom(to, foundationWallet, cost);
         // Mint his Fraction of NFT
-        fraktionTokens.mint(to, id, amount);
+        fraktionTokens.mint(to, id, 1);
+    }
+
+    /**
+     * @notice  Mint a free fraktion for the given user
+     * @dev     Will mint a new free FraktionToken for the user, by first ensuring the user doesn't have any fraktion, only performed when contract not paused and by the right person
+     * @param   id  Id of the free fraktion
+     */
+    function _mintFreeFraktionForUser(uint256 id, address to) private {
+        assembly {
+            // Check if it's a free fraktion
+            if iszero(eq(and(id, 0xF), 0x2)) {
+                mstore(0x00, _EXPECTING_ONLY_FREE_FRAKTION_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
+
+        // Check the user balance
+        uint256 userBalance = fraktionTokens.balanceOf(to, id);
+        assembly {
+            if userBalance {
+                mstore(0x00, _ALREADY_HAVE_FRACTION_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
+
+        // If we are all good, mint the free fraktion to the user
+        fraktionTokens.mint(to, id, 1);
     }
 }

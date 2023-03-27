@@ -145,15 +145,14 @@ contract MinterTest is FrkTokenTestHelper {
 
         // Get the cost of the buy process
         uint256 fraktionCommonId = contentId.buildCommonNftId();
-        uint256 fraktionAmount = 1;
-        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+        uint256 cost = minter.getCostBadge(fraktionCommonId);
 
         // Sign the tx for the user
         (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
 
         // Launch the buy prcess
         prankDeployer();
-        minter.mintFraktionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
+        minter.mintFraktionForUser(fraktionCommonId, user, block.timestamp, v, r, s);
         // Ensure the supply is good
         assertEq(fraktionTokens.supplyOf(fraktionCommonId), 9);
         assertEq(fraktionTokens.balanceOf(user, fraktionCommonId), 1);
@@ -171,8 +170,7 @@ contract MinterTest is FrkTokenTestHelper {
 
         // Get the cost of the buy process
         uint256 fraktionCommonId = contentId.buildCommonNftId();
-        uint256 fraktionAmount = 1;
-        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+        uint256 cost = minter.getCostBadge(fraktionCommonId);
 
         // Sign the tx for the user
         (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
@@ -182,7 +180,7 @@ contract MinterTest is FrkTokenTestHelper {
         minter.pause();
         vm.expectRevert(ContractPaused.selector);
         prankDeployer();
-        minter.mintFraktionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
+        minter.mintFraktionForUser(fraktionCommonId, user, block.timestamp, v, r, s);
     }
 
     function test_fail_mintFraktionForUser_NotAuthorized() public {
@@ -197,15 +195,14 @@ contract MinterTest is FrkTokenTestHelper {
 
         // Get the cost of the buy process
         uint256 fraktionCommonId = contentId.buildCommonNftId();
-        uint256 fraktionAmount = 1;
-        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+        uint256 cost = minter.getCostBadge(fraktionCommonId);
 
         // Sign the tx for the user
         (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
 
         // Launch the buy prcess
         vm.expectRevert(NotAuthorized.selector);
-        minter.mintFraktionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
+        minter.mintFraktionForUser(fraktionCommonId, user, block.timestamp, v, r, s);
     }
 
     function test_fail_mintFraktionForUser_InsuficiantSupply() public {
@@ -213,15 +210,14 @@ contract MinterTest is FrkTokenTestHelper {
         address user = vm.addr(privateKey);
         // Add an initial content
         prankDeployer();
-        uint256 contentId = minter.addContent(address(1), 1, 1, 1, 1);
+        uint256 contentId = minter.addContent(address(1), 1, 0, 1, 1);
         // Mint some token to our user
         prankDeployer();
         frakToken.mint(user, 500 ether);
 
         // Get the cost of the buy process
-        uint256 fraktionCommonId = contentId.buildCommonNftId();
-        uint256 fraktionAmount = 2;
-        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+        uint256 fraktionCommonId = contentId.buildPremiumNftId();
+        uint256 cost = minter.getCostBadge(fraktionCommonId);
 
         // Sign the tx for the user
         (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
@@ -229,7 +225,7 @@ contract MinterTest is FrkTokenTestHelper {
         // Launch the buy prcess
         vm.expectRevert(FraktionTokens.InsuficiantSupply.selector);
         prankDeployer();
-        minter.mintFraktionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
+        minter.mintFraktionForUser(fraktionCommonId, user, block.timestamp, v, r, s);
     }
 
     function test_fail_mintFraktionForUser_InvalidFraktionType() public {
@@ -244,8 +240,7 @@ contract MinterTest is FrkTokenTestHelper {
 
         // Get the cost of the buy process
         uint256 fraktionCommonId = contentId.buildCommonNftId();
-        uint256 fraktionAmount = 2;
-        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+        uint256 cost = minter.getCostBadge(fraktionCommonId);
 
         // Sign the tx for the user
         (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
@@ -253,7 +248,7 @@ contract MinterTest is FrkTokenTestHelper {
         // Launch the buy prcess
         vm.expectRevert(InvalidFraktionType.selector);
         prankDeployer();
-        minter.mintFraktionForUser(contentId.buildFreeNftId(), user, fraktionAmount, block.timestamp, v, r, s);
+        minter.mintFraktionForUser(contentId.buildFreeNftId(), user, block.timestamp, v, r, s);
     }
 
     function test_fail_mintFractionForUser_InvalidSigner() public {
@@ -268,8 +263,7 @@ contract MinterTest is FrkTokenTestHelper {
 
         // Get the cost of the buy process
         uint256 fraktionCommonId = contentId.buildCommonNftId();
-        uint256 fraktionAmount = 1;
-        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+        uint256 cost = minter.getCostBadge(fraktionCommonId);
 
         // Sign the tx for the user
         (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost - 1);
@@ -277,7 +271,7 @@ contract MinterTest is FrkTokenTestHelper {
         // Launch the buy prcess
         prankDeployer();
         vm.expectRevert(FrakToken.InvalidSigner.selector);
-        minter.mintFraktionForUser(fraktionCommonId, user, fraktionAmount, block.timestamp, v, r, s);
+        minter.mintFraktionForUser(fraktionCommonId, user, block.timestamp, v, r, s);
         // Ensure the supply hasn't changed
         assertEq(fraktionTokens.supplyOf(fraktionCommonId), 10);
     }
@@ -304,15 +298,14 @@ contract MinterTest is FrkTokenTestHelper {
 
         // Get the cost of the buy process
         uint256 fraktionCommonId = contentId.buildCommonNftId();
-        uint256 fraktionAmount = 1;
-        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+        uint256 cost = minter.getCostBadge(fraktionCommonId);
 
         // Sign the tx for the user
         (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
 
         // Launch the buy prcess
         vm.prank(user);
-        minter.mintFraktion(fraktionCommonId, fraktionAmount, block.timestamp, v, r, s);
+        minter.mintFraktion(fraktionCommonId, block.timestamp, v, r, s);
         // Ensure the supply is good
         assertEq(fraktionTokens.supplyOf(fraktionCommonId), 9);
         assertEq(fraktionTokens.balanceOf(user, fraktionCommonId), 1);
@@ -330,8 +323,7 @@ contract MinterTest is FrkTokenTestHelper {
 
         // Get the cost of the buy process
         uint256 fraktionCommonId = contentId.buildCommonNftId();
-        uint256 fraktionAmount = 1;
-        uint256 cost = fraktionAmount * minter.getCostBadge(fraktionCommonId);
+        uint256 cost = minter.getCostBadge(fraktionCommonId);
 
         // Sign the tx for the user
         (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
@@ -341,7 +333,7 @@ contract MinterTest is FrkTokenTestHelper {
         minter.pause();
         vm.expectRevert(ContractPaused.selector);
         vm.prank(user);
-        minter.mintFraktion(fraktionCommonId, fraktionAmount, block.timestamp, v, r, s);
+        minter.mintFraktion(fraktionCommonId, block.timestamp, v, r, s);
     }
 
     /*
@@ -378,7 +370,7 @@ contract MinterTest is FrkTokenTestHelper {
         // Add an initial content
         uint256 contentId = minter.addContent(address(1), 1, 1, 1, 1);
         minter.mintFreeFraktionForUser(contentId.buildFreeNftId(), address(1));
-        vm.expectRevert(Minter.AlreadyHaveFreeFraktion.selector);
+        vm.expectRevert(Minter.AlreadyHaveFraktion.selector);
         minter.mintFreeFraktionForUser(contentId.buildFreeNftId(), address(1));
     }
 
