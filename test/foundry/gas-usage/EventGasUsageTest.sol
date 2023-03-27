@@ -15,8 +15,7 @@ contract SampleAssemblyEvent {
     event LogTransfer(address indexed from, address indexed to, uint256 value);
 
     /// @dev 'keccak256("LogTransfer(address,address,uint256")'
-    uint256 private constant _LOG_TRANSFER_SELECTOR =
-        0x3c70bac155b1df6b781842a200c9369a387d8d24e7cb6fafecba18a53e2de32b;
+    uint256 private constant _LOG_TRANSFER_SELECTOR = 0x3c70bac155b1df6b781842a200c9369a387d8d24e7cb6fafecba18a53e2de32b;
 
     function transfer(address to, uint256 value) public {
         assembly {
