@@ -529,19 +529,6 @@ contract Rewarder is
                 if iszero(lt(currOffset, offsetEnd)) { break }
             }
         }
-
-        // Iterate over each balance to compute the earning factor
-        /*for (uint256 balanceIndex; balanceIndex < tokenBalances.length;) {
-            uint256 balance = tokenBalances[balanceIndex];
-            // Check if that was a paid fraktion or not
-            hasOnePaidFraktion = hasOnePaidFraktion || fraktionTypes[balanceIndex].isPayedTokenToken() && balance > 0);
-            // Increase the earning factor
-            unchecked {
-                // On 1e18 decimals
-                earningFactor += balance * baseRewardForTokenType(fraktionTypes[balanceIndex]);
-                ++balanceIndex;
-            }
-        }*/
     }
 
     /* -------------------------------------------------------------------------- */

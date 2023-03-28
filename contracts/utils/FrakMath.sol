@@ -31,15 +31,6 @@ library FrakMath {
     /**
      * @dev Build the id for a S FNT
      */
-    function buildSnftId(uint256 id, uint256 tokenType) internal pure returns (uint256 tokenId) {
-        unchecked {
-            tokenId = (id << ID_OFFSET) | tokenType;
-        }
-    }
-
-    /**
-     * @dev Build the id for a S FNT
-     */
     function buildSnftIds(uint256 id, uint256[] memory types) internal pure returns (uint256[] memory tokenIds) {
         assembly {
             // Create our array from free mem space
@@ -161,52 +152,18 @@ library FrakMath {
     }
 
     /**
-     * @dev Check if the given token exist
-     * @param id uint256 ID of the token to check
-     * @return bool true if the token is related to a content, false otherwise
-     */
-    function isContentRelatedToken(uint256 id) internal pure returns (bool) {
-        uint256 tokenType = extractTokenType(id);
-        return tokenType > TOKEN_TYPE_NFT_MASK && tokenType <= TOKEN_TYPE_DIAMOND_MASK;
-    }
-
-    /**
-     * @dev Check if the token is payed or not
-     */
-    function isPayedTokenToken(uint256 tokenType) internal pure returns (bool isPayed) {
-        assembly {
-            isPayed := and(gt(tokenType, TOKEN_TYPE_FREE_MASK), lt(tokenType, PAYED_TOKEN_TYPE_MAX))
-        }
-    }
-
-    /**
-     * @dev Check if the given token id is a content NFT
-     * @param id uint256 ID of the token to check
-     * @return isContent bool true if the token is a content nft, false otherwise
-     */
-    function isContentNft(uint256 id) internal pure returns (bool isContent) {
-        assembly {
-            isContent := eq(and(id, TYPE_MASK), TOKEN_TYPE_NFT_MASK)
-        }
-    }
-
-    /**
      * @dev Create a singleton array of the given element
      */
     function asSingletonArray(uint256 element) internal pure returns (uint256[] memory array) {
         assembly {
             // Get free memory space for our array, and update the free mem space index
-            let memPointer := mload(0x40)
-            mstore(0x40, add(memPointer, 0x40))
+            array := mload(0x40)
+            mstore(0x40, add(array, 0x40))
 
             // Store our array (1st = length, 2nd = element)
-            mstore(memPointer, 0x01)
-            mstore(add(memPointer, 0x20), element)
-
-            // Set our array to our mem pointer
-            array := memPointer
+            mstore(array, 0x01)
+            mstore(add(array, 0x20), element)
         }
-        return array;
     }
 
     /**
@@ -215,16 +172,12 @@ library FrakMath {
     function asSingletonArray(address element) internal pure returns (address[] memory array) {
         assembly {
             // Get free memory space for our array, and update the free mem space index
-            let memPointer := mload(0x40)
-            mstore(0x40, add(memPointer, 0x40))
+            array := mload(0x40)
+            mstore(0x40, add(array, 0x40))
 
             // Store our array (1st = length, 2nd = element)
-            mstore(memPointer, 0x01)
-            mstore(add(memPointer, 0x20), element)
-
-            // Set our array to our mem pointer
-            array := memPointer
+            mstore(array, 0x01)
+            mstore(add(array, 0x20), element)
         }
-        return array;
     }
 }
