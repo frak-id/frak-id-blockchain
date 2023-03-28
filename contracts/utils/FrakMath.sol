@@ -41,13 +41,28 @@ library FrakMath {
      * @dev Build the id for a S FNT
      */
     function buildSnftIds(uint256 id, uint256[] memory types) internal pure returns (uint256[] memory tokenIds) {
-        uint256 length = types.length;
-        tokenIds = new uint256[](length);
-        for (uint256 i; i < length;) {
-            unchecked {
-                tokenIds[i] = buildSnftId(id, types[i]);
-                ++i;
+        assembly {
+            // Create our array from free mem space
+            tokenIds := mload(0x40)
+            mstore(tokenIds, mload(types))
+            // Current iteration offset
+            let offset := 0x20
+            // End of our iteration
+            let end := add(0x20, shl(5, mload(types)))
+            // Build each nft id's
+            for {} 1 {} {
+                //  Store the token id
+                mstore(add(tokenIds, offset), or(shl(0x04, id), mload(add(types, offset))))
+
+                // Increase our offset's
+                offset := add(offset, 0x20)
+
+                // Exit if we reached the end
+                if iszero(lt(offset, end)) { break }
             }
+
+            // Update our free mem space
+            mstore(0x40, add(tokenIds, offset))
         }
     }
 
@@ -96,13 +111,18 @@ library FrakMath {
     /**
      * @dev Build a list of all the payable token types
      */
-    function payableTokenTypes() internal pure returns (uint256[] memory) {
-        uint256[] memory types = new uint256[](4);
-        types[0] = FrakMath.TOKEN_TYPE_COMMON_MASK;
-        types[1] = FrakMath.TOKEN_TYPE_PREMIUM_MASK;
-        types[2] = FrakMath.TOKEN_TYPE_GOLD_MASK;
-        types[3] = FrakMath.TOKEN_TYPE_DIAMOND_MASK;
-        return types;
+    function payableTokenTypes() internal pure returns (uint256[] memory types) {
+        assembly {
+            // Store each types
+            types := mload(0x40)
+            mstore(types, 4)
+            mstore(add(types, 0x20), 3)
+            mstore(add(types, 0x40), 4)
+            mstore(add(types, 0x60), 5)
+            mstore(add(types, 0x80), 6)
+            // Update our free mem space
+            mstore(0x40, add(types, 0xA0))
+        }
     }
 
     /**
