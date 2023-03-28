@@ -155,32 +155,29 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
                 revert(0x1c, 0x04)
             }
         }
-        // Try to mint the new content
-        // mintNewContent selector : 0xb8fd7b0b
-        contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
         // Then set the supply for each token types
-        uint256[] memory ids = new uint256[](4);
+        uint256[] memory fraktionTypes = new uint256[](4);
         uint256[] memory supplies = new uint256[](4);
         assembly {
-            // Store the ids
-            let shiftedContentId := shl(0x04, contentId)
-            mstore(add(ids, 0x20), or(shiftedContentId, 3))
-            mstore(add(ids, 0x40), or(shiftedContentId, 4))
-            mstore(add(ids, 0x60), or(shiftedContentId, 5))
-            mstore(add(ids, 0x80), or(shiftedContentId, 6))
+            // TODO : Create our array from free mem pointer, any gain?
+            // Store the fraktionTypes
+            mstore(add(fraktionTypes, 0x20), 3)
+            mstore(add(fraktionTypes, 0x40), 4)
+            mstore(add(fraktionTypes, 0x60), 5)
+            mstore(add(fraktionTypes, 0x80), 6)
             // Store the supplies
             mstore(add(supplies, 0x20), commonSupply)
             mstore(add(supplies, 0x40), premiumSupply)
             mstore(add(supplies, 0x60), goldSupply)
             mstore(add(supplies, 0x80), diamondSupply)
+        }
+        // Try to mint the new content
+        contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fraktionTypes, supplies);
+        assembly {
             // Emit the content minted event
             mstore(0, contentId)
             log2(0, 0x20, _CONTENT_MINTED_EVENT_SELECTOR, contentOwnerAddress)
         }
-        // Update the supply for each token types
-        fraktionTokens.setSupplyBatch(ids, supplies);
-        // Return the minted content id
-        return contentId;
     }
 
     /**

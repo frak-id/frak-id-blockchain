@@ -92,17 +92,68 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     /**
      * @dev Mint a new content, return the id of the built content
      */
-    function mintNewContent(address ownerAddress)
+    function mintNewContent(address ownerAddress, uint256[] calldata fraktionTypes, uint256[] calldata supplies)
         external
         payable
         onlyRole(FrakRoles.MINTER)
         whenNotPaused
         returns (uint256 id)
     {
-        // Get the next content id and increment the current content token id
         assembly {
+            // Ensure we got valid data
+            if or(iszero(fraktionTypes.length), iszero(eq(fraktionTypes.length, fraktionTypes.length))) {
+                mstore(0x00, _INVALID_ARRAY_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+
+            // Get the next content id and increment the current content token id
             id := add(sload(_currentContentTokenId.slot), 1)
             sstore(_currentContentTokenId.slot, id)
+
+            // Iterate over each fraktion type, build their id, and set their supply
+            // Get where our offset end
+            let offsetEnd := shl(5, fraktionTypes.length)
+            // Current iterator offset
+            let currentOffset := 0
+            // Infinite loop
+            for {} 1 {} {
+                // Get the current id
+                let fraktionType := calldataload(add(fraktionTypes.offset, currentOffset))
+
+                // Ensure the supply update of this token type is allowed
+                if or(lt(fraktionType, 3), gt(fraktionType, 6)) {
+                    // If token type lower than 3 -> free or owner
+                    mstore(0x00, _SUPPLY_UPDATE_NOT_ALLOWED_SELECTOR)
+                    revert(0x1c, 0x04)
+                }
+
+                // Build the fraktion id
+                let fraktionId := or(shl(0x04, id), fraktionType)
+
+                // Get the supply
+                let supply := calldataload(add(supplies.offset, currentOffset))
+
+                // Get the slot to know if it's supply aware, and store true there
+                // Kecak (id, _isSupplyAware.slot)
+                mstore(0, fraktionId)
+                mstore(0x20, _isSupplyAware.slot)
+                sstore(keccak256(0, 0x40), true)
+                // Get the supply slot and update it
+                // Kecak (id, _availableSupplies.slot)
+                mstore(0, fraktionId)
+                mstore(0x20, _availableSupplies.slot)
+                sstore(keccak256(0, 0x40), supply)
+                // Emit the supply updated event
+                mstore(0, supply)
+                log2(0, 0x20, _SUPPLY_UPDATED_EVENT_SELECTOR, fraktionId)
+
+                // Increase the iterator
+                currentOffset := add(currentOffset, 0x20)
+                // Exit if we reached the end
+                if iszero(lt(currentOffset, offsetEnd)) { break }
+            }
+
+            // TODO : Set the supply aware and available supply for creator nft here also
         }
 
         // Mint the content nft into the content owner wallet directly

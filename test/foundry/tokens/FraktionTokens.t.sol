@@ -20,6 +20,8 @@ contract FraktionTokensTest is UUPSTestHelper, StdUtils {
 
     FraktionTokens fraktionTokens;
 
+    uint256[] internal sampleArray = uint256(3).asSingletonArray();
+
     function setUp() public {
         // Deploy our contract via proxy and set the proxy address
         bytes memory initData = abi.encodeCall(FraktionTokens.initialize, ("test"));
@@ -39,7 +41,7 @@ contract FraktionTokensTest is UUPSTestHelper, StdUtils {
      * ===== TEST : mintNewContent(address ownerAddress) =====
      */
     function test_mintNewContent() public prankExecAsDeployer {
-        uint256 contentId = fraktionTokens.mintNewContent(address(1));
+        uint256 contentId = fraktionTokens.mintNewContent(address(1), sampleArray, sampleArray);
         uint256 nftId = contentId.buildNftId();
         assertEq(fraktionTokens.balanceOf(address(1), nftId), 1);
     }
@@ -47,17 +49,17 @@ contract FraktionTokensTest is UUPSTestHelper, StdUtils {
     function test_fail_mintNewContent_ContractPaused() public prankExecAsDeployer {
         fraktionTokens.pause();
         vm.expectRevert(ContractPaused.selector);
-        fraktionTokens.mintNewContent(address(1));
+        fraktionTokens.mintNewContent(address(1), sampleArray, sampleArray);
     }
 
     function test_fail_mintNewContent_NotAuthorized() public {
         vm.expectRevert(NotAuthorized.selector);
-        fraktionTokens.mintNewContent(address(1));
+        fraktionTokens.mintNewContent(address(1), sampleArray, sampleArray);
     }
 
     function test_fail_mintNewContent_InvalidAddress() public prankExecAsDeployer {
         vm.expectRevert("ERC1155: mint to the zero address");
-        fraktionTokens.mintNewContent(address(0));
+        fraktionTokens.mintNewContent(address(0), sampleArray, sampleArray);
     }
 
     /*
