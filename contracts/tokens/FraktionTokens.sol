@@ -97,6 +97,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
 
     /**
      * @dev Mint a new content, return the id of the built content
+     * We will store in memory -from 0x0 to 0x40 ->
      */
     function mintNewContent(address ownerAddress, uint256[] calldata fraktionTypes, uint256[] calldata supplies)
         external
@@ -253,17 +254,28 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         uint256[] memory amounts,
         bytes memory
     ) internal override whenNotPaused {
+        // Filtered ids and mounts for the callback
+        uint256[] memory filteredIds;
+        uint256[] memory filteredAmounts;
+
         assembly {
-            // Get the length
-            let length := mload(ids)
+            // Get the length of our id's array
+            let offsetLength := shl(5, mload(ids))
 
             // Base offset to access array element's
             let currOffset := 0x20
-            let offsetEnd := add(currOffset, shl(5, length))
+            let offsetEnd := add(currOffset, offsetLength)
+
+            let filteredArrayOffset := 0x20
+            filteredIds := mload(0x40)
+            filteredAmounts := add(filteredIds, add(offsetLength, 0x20)) // Max possible size is at id's length
+            mstore(0x40, add(filteredAmounts, add(offsetLength, 0x20)))
 
             // Infinite loop
             for {} 1 {} {
+                // Get the id and amount
                 let id := mload(add(ids, currOffset))
+                let amount := mload(add(amounts, currOffset))
 
                 // Get the slot to know if it's supply aware
                 // Kecak (id, _isSupplyAware.slot)
@@ -273,8 +285,6 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
 
                 // Supply aware code block
                 if isSupplyAware {
-                    // Get the amount
-                    let amount := mload(add(amounts, currOffset))
                     // Get the supply slot
                     // Kecak (id, _availableSupplies.slot)
                     // mstore(0, id) -> Don't needed since we already stored the id before in this mem space
@@ -306,19 +316,33 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                     log3(0, 0, _CONTENT_OWNER_UPDATED_EVENT_SELECTOR, contentId, to)
                 }
 
+                // Check if we need to include this in our filtered ids array
+                let fraktionType := and(id, 0xF)
+                if or(gt(fraktionType, 2), lt(fraktionType, 7)) {
+                    mstore(add(filteredIds, filteredArrayOffset), id)
+                    mstore(add(filteredAmounts, filteredArrayOffset), amount)
+                    filteredArrayOffset := add(filteredArrayOffset, 0x20)
+                }
+
                 // Increase our offset's
                 currOffset := add(currOffset, 0x20)
 
                 // Exit if we reached the end
                 if iszero(lt(currOffset, offsetEnd)) { break }
             }
+
+            // If empty filtered array, exit directly
+            if iszero(filteredArrayOffset) { return(0, 0x20) }
+            // If empty callback address, exit directly
+            if iszero(sload(transferCallback.slot)) { return(0, 0x20) }
+
+            // Otherwise, set the final length of our filtered array's
+            mstore(filteredIds, shr(5, filteredArrayOffset))
+            mstore(filteredAmounts, shr(5, filteredArrayOffset))
         }
 
         // Call our callback
-        // TODO : Assembly pre filtering of the array, only keeping element with type > 2
-        if (address(transferCallback) != address(0)) {
-            transferCallback.onFraktionsTransferred(from, to, ids, amounts);
-        }
+        transferCallback.onFraktionsTransferred(from, to, filteredIds, filteredAmounts);
     }
 
     /* -------------------------------------------------------------------------- */
