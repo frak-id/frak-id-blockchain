@@ -410,7 +410,7 @@ contract MinterTest is FrkTokenTestHelper {
         // Add an initial content
         uint256 contentId = minter.addContent(address(1), 1, 1, 1, 0);
         // Revert cause of free fraktion
-        vm.expectRevert(Minter.RemainingSupply.selector);
+        vm.expectRevert(FraktionTokens.RemainingSupply.selector);
         minter.increaseSupply(contentId.buildCommonNftId(), 1);
     }
 

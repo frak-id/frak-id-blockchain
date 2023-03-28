@@ -279,14 +279,18 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
     }
 
     function mintFraktions(address target, uint256 amount) private {
-        uint256[] memory fraktionIds = contentId.buildSnftIds(FrakMath.payableTokenTypes());
-        uint256[] memory amounts = new uint256[](fraktionIds.length);
-        for (uint256 i = 0; i < fraktionIds.length; i++) {
+        // Build the param for our new content mint, and mint it
+        uint256[] memory fTypeArray = FrakMath.payableTokenTypes();
+        uint256[] memory amounts = new uint256[](fTypeArray.length);
+        for (uint256 i = 0; i < fTypeArray.length; i++) {
             amounts[i] = amount;
         }
-        fraktionTokens.setSupplyBatch(fraktionIds, amounts);
-        for (uint256 i = 0; i < fraktionIds.length; i++) {
-            fraktionTokens.mint(target, fraktionIds[i], amount);
+        contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, amounts);
+
+
+        uint256[] memory fIds = contentId.buildSnftIds(fTypeArray);
+        for (uint256 i = 0; i < fIds.length; i++) {
+            fraktionTokens.mint(target, fIds[i], amount);
         }
     }
 }

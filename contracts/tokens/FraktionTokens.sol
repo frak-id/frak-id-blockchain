@@ -27,6 +27,9 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     /// @dev Error throwned when we try to update the supply of a non supply aware token
     error SupplyUpdateNotAllowed();
 
+    /// @dev Error emitted when it remain some fraktion supply when wanting to increase it
+    error RemainingSupply();
+
     /// @dev 'bytes4(keccak256(bytes("InsuficiantSupply()")))'
     uint256 private constant _INSUFICIENT_SUPPLY_SELECTOR = 0xa24b545a;
 
@@ -35,6 +38,9 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
 
     /// @dev 'bytes4(keccak256(bytes("SupplyUpdateNotAllowed()")))'
     uint256 private constant _SUPPLY_UPDATE_NOT_ALLOWED_SELECTOR = 0x48385ebd;
+
+    /// @dev 'bytes4(keccak256(bytes("RemainingSupply()")))'
+    uint256 private constant _REMAINING_SUPPLY_SELECTOR = 0x0180e6b4;
 
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
@@ -159,7 +165,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
             }
 
             // Update creator supply now
-            creatorTokenId :=  or(shiftedId, 1)
+            creatorTokenId := or(shiftedId, 1)
             // Get the slot to know if it's supply aware, and store true there
             mstore(0, creatorTokenId)
             mstore(0x20, _isSupplyAware.slot)
@@ -177,58 +183,43 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     }
 
     /**
-     * @dev Set the supply for each token ids
+     * @dev Set the supply for the given token id
      */
-    function setSupplyBatch(uint256[] calldata ids, uint256[] calldata supplies)
-        external
-        payable
-        onlyRole(FrakRoles.MINTER)
-        whenNotPaused
-    {
+    function setSupply(uint256 id, uint256 supply) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
         assembly {
             // Ensure we got valid data
-            if or(iszero(ids.length), iszero(eq(ids.length, supplies.length))) {
+            if iszero(supply) {
                 mstore(0x00, _INVALID_ARRAY_SELECTOR)
                 revert(0x1c, 0x04)
             }
-
-            // Get where our array ends
-            let offsetEnd := shl(5, ids.length)
-            // Current iterator offset
-            let currentOffset := 0
-            // Infinite loop
-            for {} 1 {} {
-                // Get the current id and supply
-                let id := calldataload(add(ids.offset, currentOffset))
-                let supply := calldataload(add(supplies.offset, currentOffset))
-
-                // Ensure the supply update of this token type is allowed
-                let tokenType := and(id, 0xF)
-                if lt(tokenType, 3) {
-                    // If token type lower than 3 -> free or owner
-                    mstore(0x00, _SUPPLY_UPDATE_NOT_ALLOWED_SELECTOR)
-                    revert(0x1c, 0x04)
-                }
-
-                // Get the slot to know if it's supply aware, and store true there
-                // Kecak (id, _isSupplyAware.slot)
-                mstore(0, id)
-                mstore(0x20, _isSupplyAware.slot)
-                sstore(keccak256(0, 0x40), true)
-                // Get the supply slot and update it
-                // Kecak (id, _availableSupplies.slot)
-                mstore(0, id)
-                mstore(0x20, _availableSupplies.slot)
-                sstore(keccak256(0, 0x40), supply)
-                // Emit the supply updated event
-                mstore(0, supply)
-                log2(0, 0x20, _SUPPLY_UPDATED_EVENT_SELECTOR, id)
-
-                // Increase the iterator
-                currentOffset := add(currentOffset, 0x20)
-                // Exit if we reached the end
-                if iszero(lt(currentOffset, offsetEnd)) { break }
+            // Ensure the supply update of this token type is allowed
+            let fraktionType := and(id, 0xF)
+            if or(lt(fraktionType, 3), gt(fraktionType, 6)) {
+                // If token type lower than 3 -> free or owner, if greater than 6 -> not a content
+                mstore(0x00, _SUPPLY_UPDATE_NOT_ALLOWED_SELECTOR)
+                revert(0x1c, 0x04)
             }
+            // Kecak (id, _availableSupplies.slot)
+            mstore(0, id)
+            mstore(0x20, _availableSupplies.slot)
+            let supplySlot := keccak256(0, 0x40)
+            // Ensure all the supply has been sold
+            let currentSupply := sload(supplySlot)
+            if currentSupply {
+                mstore(0x00, _REMAINING_SUPPLY_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+
+            // Get the slot to know if it's supply aware, and store true there
+            // Kecak (id, _isSupplyAware.slot)
+            mstore(0, id)
+            mstore(0x20, _isSupplyAware.slot)
+            sstore(keccak256(0, 0x40), true)
+            // Get the supply slot and update it
+            sstore(supplySlot, supply)
+            // Emit the supply updated event
+            mstore(0, supply)
+            log2(0, 0x20, _SUPPLY_UPDATED_EVENT_SELECTOR, id)
         }
     }
 
@@ -239,7 +230,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
 
     /// @dev Mint a new fraction of a nft
     function mint(address to, uint256 id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
-        _mint(to, id, amount, new bytes(0x0));
+        _mint(to, id, amount, "");
     }
 
     /// @dev Burn a fraction of a nft

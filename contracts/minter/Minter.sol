@@ -28,9 +28,6 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
     /// @dev Error emitted when the input supply is invalid
     error InvalidSupply();
 
-    /// @dev Error emitted when it remain some fraktion supply when wanting to increase it
-    error RemainingSupply();
-
     /// @dev Error emitted when we only want to mint a free fraktion, and that's not a free fraktion
     error ExpectingOnlyFreeFraktion();
 
@@ -42,9 +39,6 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
 
     /// @dev 'bytes4(keccak256(bytes("InvalidSupply()")))'
     uint256 private constant _INVALID_SUPPLY_SELECTOR = 0x15ae6727;
-
-    /// @dev 'bytes4(keccak256(bytes("RemainingSupply()")))'
-    uint256 private constant _REMAINING_SUPPLY_SELECTOR = 0x0180e6b4;
 
     /// @dev 'bytes4(keccak256(bytes("ExpectingOnlyFreeFraktion()")))'
     uint256 private constant _EXPECTING_ONLY_FREE_FRAKTION_SELECTOR = 0x121becbf;
@@ -251,16 +245,8 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
      * @param   newSupply  The supply we wan't to append for this fraktion
      */
     function increaseSupply(uint256 id, uint256 newSupply) external onlyRole(FrakRoles.MINTER) whenNotPaused {
-        uint256 currentSupply = fraktionTokens.supplyOf(id);
-        assembly {
-            // Revert if fraktion remain
-            if currentSupply {
-                mstore(0x00, _REMAINING_SUPPLY_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-        }
         // Update the supply
-        fraktionTokens.setSupplyBatch(id.asSingletonArray(), newSupply.asSingletonArray());
+        fraktionTokens.setSupply(id, newSupply);
     }
 
     /**
