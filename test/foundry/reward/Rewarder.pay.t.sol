@@ -287,7 +287,6 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
         }
         contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, amounts);
 
-
         uint256[] memory fIds = contentId.buildSnftIds(fTypeArray);
         for (uint256 i = 0; i < fIds.length; i++) {
             fraktionTokens.mint(target, fIds[i], amount);

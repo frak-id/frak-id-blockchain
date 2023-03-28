@@ -254,10 +254,6 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         uint256[] memory amounts,
         bytes memory
     ) internal override whenNotPaused {
-        // Filtered ids and mounts for the callback
-        uint256[] memory filteredIds;
-        uint256[] memory filteredAmounts;
-
         assembly {
             // Get the length of our id's array
             let offsetLength := shl(5, mload(ids))
@@ -266,10 +262,8 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
             let currOffset := 0x20
             let offsetEnd := add(currOffset, offsetLength)
 
-            let filteredArrayOffset := 0x20
-            filteredIds := mload(0x40)
-            filteredAmounts := add(filteredIds, add(offsetLength, 0x20)) // Max possible size is at id's length
-            mstore(0x40, add(filteredAmounts, add(offsetLength, 0x20)))
+            // Check if we got at least one fraktion needing callback (one that is higher than creator or free)
+            let hasOneFraktionForCallback := false
 
             // Infinite loop
             for {} 1 {} {
@@ -281,10 +275,9 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 // Kecak (id, _isSupplyAware.slot)
                 mstore(0, id)
                 mstore(0x20, _isSupplyAware.slot)
-                let isSupplyAware := sload(keccak256(0, 0x40))
 
                 // Supply aware code block
-                if isSupplyAware {
+                if sload(keccak256(0, 0x40)) {
                     // Get the supply slot
                     // Kecak (id, _availableSupplies.slot)
                     // mstore(0, id) -> Don't needed since we already stored the id before in this mem space
@@ -303,8 +296,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 }
 
                 // Content owner migration code block
-                let isOwnerNft := eq(and(id, 0xF), 1)
-                if isOwnerNft {
+                if eq(and(id, 0xF), 1) {
                     let contentId := shr(0x04, id)
                     // Get the owner slot
                     // Kecak (contentId, owners.slot)
@@ -317,12 +309,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 }
 
                 // Check if we need to include this in our filtered ids array
-                let fraktionType := and(id, 0xF)
-                if or(gt(fraktionType, 2), lt(fraktionType, 7)) {
-                    mstore(add(filteredIds, filteredArrayOffset), id)
-                    mstore(add(filteredAmounts, filteredArrayOffset), amount)
-                    filteredArrayOffset := add(filteredArrayOffset, 0x20)
-                }
+                if gt(and(id, 0xF), 2) { hasOneFraktionForCallback := true }
 
                 // Increase our offset's
                 currOffset := add(currOffset, 0x20)
@@ -331,18 +318,14 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 if iszero(lt(currOffset, offsetEnd)) { break }
             }
 
-            // If empty filtered array, exit directly
-            if iszero(filteredArrayOffset) { return(0, 0x20) }
+            // If no fraktion needing callback, exit directly
+            if iszero(hasOneFraktionForCallback) { return(0, 0x20) }
             // If empty callback address, exit directly
             if iszero(sload(transferCallback.slot)) { return(0, 0x20) }
-
-            // Otherwise, set the final length of our filtered array's
-            mstore(filteredIds, shr(5, filteredArrayOffset))
-            mstore(filteredAmounts, shr(5, filteredArrayOffset))
         }
 
         // Call our callback
-        transferCallback.onFraktionsTransferred(from, to, filteredIds, filteredAmounts);
+        transferCallback.onFraktionsTransferred(from, to, ids, amounts);
     }
 
     /* -------------------------------------------------------------------------- */
