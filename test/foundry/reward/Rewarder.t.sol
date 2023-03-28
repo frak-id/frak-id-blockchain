@@ -8,7 +8,7 @@ import {NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge} from "@fra
 /// Testing the rewarder
 contract RewarderTest is RewarderTestHelper {
     using FrakMath for uint256;
-    
+
     uint256[] fTypeArray = uint256(3).asSingletonArray();
 
     function setUp() public {

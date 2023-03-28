@@ -156,10 +156,17 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
             }
         }
         // Then set the supply for each token types
-        uint256[] memory fraktionTypes = new uint256[](4);
-        uint256[] memory supplies = new uint256[](4);
+        uint256[] memory fraktionTypes;
+        uint256[] memory supplies;
         assembly {
-            // TODO : Create our array from free mem pointer, any gain?
+            // Init our array's
+            fraktionTypes := mload(0x40)
+            supplies := add(fraktionTypes, 0x100) // 0x100 Since -> 0 length, then 4 * 32 bytes for each uint256
+            // Init our array's length
+            mstore(fraktionTypes, 4)
+            mstore(supplies, 4)
+            // Update our free mem pointer
+            mstore(0x40, add(supplies, 0x100))
             // Store the fraktionTypes
             mstore(add(fraktionTypes, 0x20), 3)
             mstore(add(fraktionTypes, 0x40), 4)

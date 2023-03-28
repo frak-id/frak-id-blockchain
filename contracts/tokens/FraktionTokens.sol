@@ -99,9 +99,10 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         whenNotPaused
         returns (uint256 id)
     {
+        uint256 creatorTokenId;
         assembly {
             // Ensure we got valid data
-            if or(iszero(fraktionTypes.length), iszero(eq(fraktionTypes.length, fraktionTypes.length))) {
+            if or(iszero(fraktionTypes.length), iszero(eq(fraktionTypes.length, supplies.length))) {
                 mstore(0x00, _INVALID_ARRAY_SELECTOR)
                 revert(0x1c, 0x04)
             }
@@ -109,6 +110,9 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
             // Get the next content id and increment the current content token id
             id := add(sload(_currentContentTokenId.slot), 1)
             sstore(_currentContentTokenId.slot, id)
+
+            // Get the shifted id, to ease the fraktion id creation
+            let shiftedId := shl(0x04, id)
 
             // Iterate over each fraktion type, build their id, and set their supply
             // Get where our offset end
@@ -128,7 +132,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 }
 
                 // Build the fraktion id
-                let fraktionId := or(shl(0x04, id), fraktionType)
+                let fraktionId := or(shiftedId, fraktionType)
 
                 // Get the supply
                 let supply := calldataload(add(supplies.offset, currentOffset))
@@ -138,9 +142,10 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 mstore(0, fraktionId)
                 mstore(0x20, _isSupplyAware.slot)
                 sstore(keccak256(0, 0x40), true)
+
                 // Get the supply slot and update it
                 // Kecak (id, _availableSupplies.slot)
-                mstore(0, fraktionId)
+                // `mstore(0, fraktionId)` -> Not needed since alreaded store on the 0 slot before
                 mstore(0x20, _availableSupplies.slot)
                 sstore(keccak256(0, 0x40), supply)
                 // Emit the supply updated event
@@ -153,14 +158,19 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 if iszero(lt(currentOffset, offsetEnd)) { break }
             }
 
-            // TODO : Set the supply aware and available supply for creator nft here also
+            // Update creator supply now
+            creatorTokenId :=  or(shiftedId, 1)
+            // Get the slot to know if it's supply aware, and store true there
+            mstore(0, creatorTokenId)
+            mstore(0x20, _isSupplyAware.slot)
+            sstore(keccak256(0, 0x40), true)
+            // Then store the available supply of 1 (since only one creator nft is possible)
+            mstore(0x20, _availableSupplies.slot)
+            sstore(keccak256(0, 0x40), 1)
         }
 
         // Mint the content nft into the content owner wallet directly
-        uint256 nftId = id.buildNftId();
-        _isSupplyAware[nftId] = true;
-        _availableSupplies[nftId] = 1;
-        _mint(ownerAddress, nftId, 1, new bytes(0x0));
+        _mint(ownerAddress, creatorTokenId, 1, "");
 
         // Return the content id
         return id;
