@@ -127,7 +127,9 @@ contract MinterTest is FrkTokenTestHelper {
                     "\x19\x01",
                     frakToken.getDomainSeperator(),
                     keccak256(
-                        abi.encode(PERMIT_TYPEHASH, user, address(minter), cost, frakToken.getNonce(user), block.timestamp)
+                        abi.encode(
+                            PERMIT_TYPEHASH, user, address(minter), cost, frakToken.getNonce(user), block.timestamp
+                        )
                     )
                 )
             )
