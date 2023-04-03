@@ -80,6 +80,7 @@ contract RewarderTestHelper is FrkTokenTestHelper {
 
     function mintAContent() public returns (uint256) {
         prankDeployer();
-        return fraktionTokens.mintNewContent(contentOwnerAddress);
+        uint256[] memory fTypeArray = uint256(3).asSingletonArray();
+        return fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
     }
 }

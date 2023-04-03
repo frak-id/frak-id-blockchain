@@ -495,18 +495,15 @@ contract Rewarder is
             // Init our earning factor to a single free fraktion (more isn't taken in account) - 0.01 eth
             earningFactor := 10000000000000000
 
-            // Get the length
-            let length := mload(tokenBalances)
-
             // Load the offset for each one of our storage pointer
-            let tokenBalancesOffset := add(tokenBalances, 0x20)
-            let fraktionTypeOffset := add(fraktionTypes, 0x20)
+            let currOffset := 0x20
+            let offsetEnd := add(0x20, shl(0x05, mload(fraktionIds)))
 
-            // Iterate over each one of them
-            for { let i := 0 } lt(i, length) { i := add(i, 1) } {
+            // Infinite loop
+            for {} 1 {} {
                 // Get balance and fraktion type
-                let tokenBalance := mload(add(tokenBalancesOffset, mul(0x20, i)))
-                let fraktionType := mload(add(fraktionTypeOffset, mul(0x20, i)))
+                let tokenBalance := mload(add(tokenBalances, currOffset))
+                let fraktionType := mload(add(fraktionTypes, currOffset))
 
                 // Update the one paid fraktion value
                 if not(hasOnePaidFraktion) {
@@ -515,34 +512,23 @@ contract Rewarder is
                 }
 
                 // Get base reward for the fraktion type (only payed one, since free is handled on init of the var)
-                let addedReward := 0
                 switch fraktionType
                 // common - 0.1
-                case 3 { addedReward := mul(100000000000000000, tokenBalance) }
+                case 3 { earningFactor := add(mul(100000000000000000, tokenBalance), earningFactor) }
                 // premium - 0.5
-                case 4 { addedReward := mul(500000000000000000, tokenBalance) }
+                case 4 { earningFactor := add(mul(500000000000000000, tokenBalance), earningFactor) }
                 // gold - 1
-                case 5 { addedReward := mul(1000000000000000000, tokenBalance) }
+                case 5 { earningFactor := add(mul(1000000000000000000, tokenBalance), earningFactor) }
                 // diamond - 2
-                case 6 { addedReward := mul(2000000000000000000, tokenBalance) }
+                case 6 { earningFactor := add(mul(2000000000000000000, tokenBalance), earningFactor) }
 
-                // Update the earning factor if balance are present
-                earningFactor := add(earningFactor, addedReward)
+                // Increase our offset's
+                currOffset := add(currOffset, 0x20)
+
+                // Exit if we reached the end
+                if iszero(lt(currOffset, offsetEnd)) { break }
             }
         }
-
-        // Iterate over each balance to compute the earning factor
-        /*for (uint256 balanceIndex; balanceIndex < tokenBalances.length;) {
-            uint256 balance = tokenBalances[balanceIndex];
-            // Check if that was a paid fraktion or not
-            hasOnePaidFraktion = hasOnePaidFraktion || fraktionTypes[balanceIndex].isPayedTokenToken() && balance > 0);
-            // Increase the earning factor
-            unchecked {
-                // On 1e18 decimals
-                earningFactor += balance * baseRewardForTokenType(fraktionTypes[balanceIndex]);
-                ++balanceIndex;
-            }
-        }*/
     }
 
     /* -------------------------------------------------------------------------- */

@@ -28,9 +28,6 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
     /// @dev Error emitted when the input supply is invalid
     error InvalidSupply();
 
-    /// @dev Error emitted when it remain some fraktion supply when wanting to increase it
-    error RemainingSupply();
-
     /// @dev Error emitted when we only want to mint a free fraktion, and that's not a free fraktion
     error ExpectingOnlyFreeFraktion();
 
@@ -42,9 +39,6 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
 
     /// @dev 'bytes4(keccak256(bytes("InvalidSupply()")))'
     uint256 private constant _INVALID_SUPPLY_SELECTOR = 0x15ae6727;
-
-    /// @dev 'bytes4(keccak256(bytes("RemainingSupply()")))'
-    uint256 private constant _REMAINING_SUPPLY_SELECTOR = 0x0180e6b4;
 
     /// @dev 'bytes4(keccak256(bytes("ExpectingOnlyFreeFraktion()")))'
     uint256 private constant _EXPECTING_ONLY_FREE_FRAKTION_SELECTOR = 0x121becbf;
@@ -155,32 +149,36 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
                 revert(0x1c, 0x04)
             }
         }
-        // Try to mint the new content
-        // mintNewContent selector : 0xb8fd7b0b
-        contentId = fraktionTokens.mintNewContent(contentOwnerAddress);
         // Then set the supply for each token types
-        uint256[] memory ids = new uint256[](4);
-        uint256[] memory supplies = new uint256[](4);
+        uint256[] memory fraktionTypes;
+        uint256[] memory supplies;
         assembly {
-            // Store the ids
-            let shiftedContentId := shl(0x04, contentId)
-            mstore(add(ids, 0x20), or(shiftedContentId, 3))
-            mstore(add(ids, 0x40), or(shiftedContentId, 4))
-            mstore(add(ids, 0x60), or(shiftedContentId, 5))
-            mstore(add(ids, 0x80), or(shiftedContentId, 6))
+            // Init our array's
+            fraktionTypes := mload(0x40)
+            supplies := add(fraktionTypes, 0x100) // 0x100 Since -> 0 length, then 4 * 32 bytes for each uint256
+            // Init our array's length
+            mstore(fraktionTypes, 4)
+            mstore(supplies, 4)
+            // Update our free mem pointer
+            mstore(0x40, add(supplies, 0x100))
+            // Store the fraktionTypes
+            mstore(add(fraktionTypes, 0x20), 3)
+            mstore(add(fraktionTypes, 0x40), 4)
+            mstore(add(fraktionTypes, 0x60), 5)
+            mstore(add(fraktionTypes, 0x80), 6)
             // Store the supplies
             mstore(add(supplies, 0x20), commonSupply)
             mstore(add(supplies, 0x40), premiumSupply)
             mstore(add(supplies, 0x60), goldSupply)
             mstore(add(supplies, 0x80), diamondSupply)
+        }
+        // Try to mint the new content
+        contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fraktionTypes, supplies);
+        assembly {
             // Emit the content minted event
             mstore(0, contentId)
             log2(0, 0x20, _CONTENT_MINTED_EVENT_SELECTOR, contentOwnerAddress)
         }
-        // Update the supply for each token types
-        fraktionTokens.setSupplyBatch(ids, supplies);
-        // Return the minted content id
-        return contentId;
     }
 
     /**
@@ -247,16 +245,8 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
      * @param   newSupply  The supply we wan't to append for this fraktion
      */
     function increaseSupply(uint256 id, uint256 newSupply) external onlyRole(FrakRoles.MINTER) whenNotPaused {
-        uint256 currentSupply = fraktionTokens.supplyOf(id);
-        assembly {
-            // Revert if fraktion remain
-            if currentSupply {
-                mstore(0x00, _REMAINING_SUPPLY_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-        }
         // Update the supply
-        fraktionTokens.setSupplyBatch(id.asSingletonArray(), newSupply.asSingletonArray());
+        fraktionTokens.setSupply(id, newSupply);
     }
 
     /**
