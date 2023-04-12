@@ -22,7 +22,6 @@ export default {
           optimizer: {
             enabled: true,
             runs: 100000,
-            viaIr: true,
             details: {
               peephole: true,
               inliner: true,
