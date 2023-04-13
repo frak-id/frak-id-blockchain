@@ -74,7 +74,7 @@ describe("Rewarder", () => {
 
       // Set the supply for each tokens
       for (const tokenType of BUYABLE_TOKEN_TYPES) {
-        await fraktionTokens.setSupplyBatch([buildFractionId(mintedTokenId, tokenType)], [100000]);
+        await fraktionTokens.setSupply(buildFractionId(mintedTokenId, tokenType), 100000);
       }
     }
   });
