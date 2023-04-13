@@ -50,7 +50,7 @@ describe("Minter", () => {
   });
 
   describe("User buy fraktion", () => {
-    it.only("Single fraktion buy", async () => {
+    it("Single fraktion buy", async () => {
       // Mint a content and get it's id
       const mintEventTxReceipt = await minter.addContent(addr1.address, 10, 10, 10, 5);
       const mintReceipt = await mintEventTxReceipt.wait();
@@ -105,7 +105,7 @@ describe("Minter", () => {
       const v = withoutHexPrefix.substring(128, 130);
 
       // Perform the transfer
-      await minter.mintFraktionForUser(fraktionId, addr2.address, 1, deadline, `0x${v}`, `0x${r}`, `0x${s}`);
+      await minter.mintFraktionForUser(fraktionId, addr2.address, deadline, `0x${v}`, `0x${r}`, `0x${s}`);
       console.log("Fraktion minted");
     });
   });

@@ -30,17 +30,23 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     /// @dev Error emitted when it remain some fraktion supply when wanting to increase it
     error RemainingSupply();
 
-    /// @dev 'bytes4(keccak256(bytes("InsuficiantSupply()")))'
+    /// @dev Error emitted when the have more than one fraktions of the given type
+    error TooManyFraktion();
+
+    /// @dev 'bytes4(keccak256("InsuficiantSupply()"))'
     uint256 private constant _INSUFICIENT_SUPPLY_SELECTOR = 0xa24b545a;
 
-    /// @dev 'bytes4(keccak256(bytes("InvalidArray()")))'
+    /// @dev 'bytes4(keccak256("InvalidArray()"))'
     uint256 private constant _INVALID_ARRAY_SELECTOR = 0x1ec5aa51;
 
-    /// @dev 'bytes4(keccak256(bytes("SupplyUpdateNotAllowed()")))'
+    /// @dev 'bytes4(keccak256("SupplyUpdateNotAllowed()"))'
     uint256 private constant _SUPPLY_UPDATE_NOT_ALLOWED_SELECTOR = 0x48385ebd;
 
-    /// @dev 'bytes4(keccak256(bytes("RemainingSupply()")))'
+    /// @dev 'bytes4(keccak256("RemainingSupply()"))'
     uint256 private constant _REMAINING_SUPPLY_SELECTOR = 0x0180e6b4;
+
+    /// @dev 'bytes4(keccak256("TooManyFraktion()"))'
+    uint256 private constant _TOO_MANY_FRAKTION_SELECTOR = 0xaa37c4ae;
 
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
@@ -246,24 +252,18 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     /**
      * @dev Handle the transfer token (so update the content investor, change the owner of some content etc)
      */
-    function _afterTokenTransfer(
+    function _beforeTokenTransfer(
         address,
         address from,
         address to,
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory
-    ) internal override whenNotPaused {
+    ) internal override {
         assembly {
-            // Get the length of our id's array
-            let offsetLength := shl(5, mload(ids))
-
             // Base offset to access array element's
             let currOffset := 0x20
-            let offsetEnd := add(currOffset, offsetLength)
-
-            // Check if we got at least one fraktion needing callback (one that is higher than creator or free)
-            let hasOneFraktionForCallback := false
+            let offsetEnd := add(currOffset, shl(5, mload(ids)))
 
             // Infinite loop
             for {} 1 {} {
@@ -295,6 +295,61 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                     sstore(availableSupplySlot, availableSupply)
                 }
 
+                // Check if the recipient don't already have one fraktion of this type
+                if to {
+                    // If the amount is greater than 1, abort
+                    if gt(amount, 1) {
+                        mstore(0, _TOO_MANY_FRAKTION_SELECTOR)
+                        revert(0x1c, 0x04)
+                    }
+                    // Get the slot for the current id
+                    mstore(0, id)
+                    mstore(0x20, 0xcb) // `_balances.slot` on the OZ contract
+                    let idSlot := keccak256(0, 0x40)
+                    // Slot for the balance of the given account
+                    mstore(0, to)
+                    mstore(0x20, idSlot)
+                    let balanceSlot := keccak256(0, 0x40)
+                    // If the recipient already have a balance for this id, exit directly
+                    if sload(balanceSlot) {
+                        mstore(0, _TOO_MANY_FRAKTION_SELECTOR)
+                        revert(0x1c, 0x04)
+                    }
+                }
+
+                // Increase our offset's
+                currOffset := add(currOffset, 0x20)
+
+                // Exit if we reached the end
+                if iszero(lt(currOffset, offsetEnd)) { break }
+            }
+        }
+    }
+
+    /**
+     * @dev Handle the transfer token (so update the content investor, change the owner of some content etc)
+     */
+    function _afterTokenTransfer(
+        address,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory
+    ) internal override whenNotPaused {
+        assembly {
+            // Base offset to access array element's
+            let currOffset := 0x20
+            let offsetEnd := add(currOffset, shl(5, mload(ids)))
+
+            // Check if we got at least one fraktion needing callback (one that is higher than creator or free)
+            let hasOneFraktionForCallback := false
+
+            // Infinite loop
+            for {} 1 {} {
+                // Get the id and amount
+                let id := mload(add(ids, currOffset))
+
                 // Content owner migration code block
                 if eq(and(id, 0xF), 1) {
                     let contentId := shr(0x04, id)
@@ -309,7 +364,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 }
 
                 // Check if we need to include this in our filtered ids array
-                if gt(and(id, 0xF), 2) { hasOneFraktionForCallback := true }
+                hasOneFraktionForCallback := or(hasOneFraktionForCallback, gt(and(id, 0xF), 2))
 
                 // Increase our offset's
                 currOffset := add(currOffset, 0x20)

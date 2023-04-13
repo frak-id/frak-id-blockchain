@@ -119,6 +119,7 @@ contract MinterTest is FrkTokenTestHelper {
 
     /// @dev Get permit signature for the given private key and cost
     function _getSignedPermit(uint256 privateKey, uint256 cost) private view returns (uint8 v, bytes32 r, bytes32 s) {
+        address user = vm.addr(privateKey);
         (v, r, s) = vm.sign(
             privateKey,
             keccak256(
@@ -126,7 +127,9 @@ contract MinterTest is FrkTokenTestHelper {
                     "\x19\x01",
                     frakToken.getDomainSeperator(),
                     keccak256(
-                        abi.encode(PERMIT_TYPEHASH, vm.addr(privateKey), address(minter), cost, 0, block.timestamp)
+                        abi.encode(
+                            PERMIT_TYPEHASH, user, address(minter), cost, frakToken.getNonce(user), block.timestamp
+                        )
                     )
                 )
             )
@@ -336,6 +339,36 @@ contract MinterTest is FrkTokenTestHelper {
         minter.mintFraktion(fraktionCommonId, block.timestamp, v, r, s);
     }
 
+    function test_fail_mintFraktion_TooManyFraktion() public {
+        uint256 privateKey = 0xACAB;
+        address user = vm.addr(privateKey);
+        // Add an initial content
+        prankDeployer();
+        uint256 contentId = minter.addContent(address(1), 10, 1, 1, 1);
+        // Mint some token to our user
+        prankDeployer();
+        frakToken.mint(user, 500 ether);
+
+        // Get the cost of the buy process
+        uint256 fraktionCommonId = contentId.buildCommonNftId();
+        uint256 cost = minter.getCostBadge(fraktionCommonId);
+
+        // Sign the tx for the user
+        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
+
+        // Launch the first buy process
+        vm.prank(user);
+        minter.mintFraktion(fraktionCommonId, block.timestamp, v, r, s);
+
+        // Sign the tx for the user
+        (v, r, s) = _getSignedPermit(privateKey, cost);
+
+        // Launch the second buy process
+        vm.expectRevert(FraktionTokens.TooManyFraktion.selector);
+        vm.prank(user);
+        minter.mintFraktion(fraktionCommonId, block.timestamp, v, r, s);
+    }
+
     /*
      * ===== TEST : mintFreeFraktionForUser(
         uint256 id,
@@ -370,7 +403,7 @@ contract MinterTest is FrkTokenTestHelper {
         // Add an initial content
         uint256 contentId = minter.addContent(address(1), 1, 1, 1, 1);
         minter.mintFreeFraktionForUser(contentId.buildFreeNftId(), address(1));
-        vm.expectRevert(Minter.AlreadyHaveFraktion.selector);
+        vm.expectRevert(FraktionTokens.TooManyFraktion.selector);
         minter.mintFreeFraktionForUser(contentId.buildFreeNftId(), address(1));
     }
 

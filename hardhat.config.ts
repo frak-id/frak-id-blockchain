@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";
 
+
 dotenv.config();
 
 // You need to export an object to set up your config
@@ -20,7 +21,7 @@ export default {
           viaIR: true, // Gain a lot on contract size, performance impact ?
           optimizer: {
             enabled: true,
-            runs: 1000000,
+            runs: 100000,
             details: {
               peephole: true,
               inliner: true,

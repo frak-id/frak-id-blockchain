@@ -31,9 +31,6 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
     /// @dev Error emitted when we only want to mint a free fraktion, and that's not a free fraktion
     error ExpectingOnlyFreeFraktion();
 
-    /// @dev Error emitted when the user already have a free fraktion
-    error AlreadyHaveFraktion();
-
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
     uint256 private constant _INVALID_ADDRESS_SELECTOR = 0xe6c4247b;
 
@@ -42,9 +39,6 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
 
     /// @dev 'bytes4(keccak256(bytes("ExpectingOnlyFreeFraktion()")))'
     uint256 private constant _EXPECTING_ONLY_FREE_FRAKTION_SELECTOR = 0x121becbf;
-
-    /// @dev 'bytes4(keccak256("AlreadyHaveFraktion()"))'
-    uint256 private constant _ALREADY_HAVE_FRACTION_SELECTOR = 0xaecdd5b7;
 
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
@@ -279,19 +273,11 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
      * @param   s  Signature spec secp256k1
      */
     function _mintFraktionForUser(uint256 id, address to, uint256 deadline, uint8 v, bytes32 r, bytes32 s) private {
-        // Ensure the user don't have a fraktion of this type yet
-        uint256 currentFraktionBalance = fraktionTokens.balanceOf(to, id);
-        assembly {
-            if currentFraktionBalance {
-                mstore(0x00, _ALREADY_HAVE_FRACTION_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-        }
         // Get the cost of the fraction
         uint256 cost = getCostBadge(id);
         assembly {
             // Emit the event
-            mstore(0, 0)
+            mstore(0, 1)
             mstore(0x20, cost)
             log3(0, 0x40, _FRACTION_MINTED_EVENT_SELECTOR, id, to)
         }
@@ -313,15 +299,6 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
             // Check if it's a free fraktion
             if iszero(eq(and(id, 0xF), 0x2)) {
                 mstore(0x00, _EXPECTING_ONLY_FREE_FRAKTION_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-        }
-
-        // Check the user balance
-        uint256 userBalance = fraktionTokens.balanceOf(to, id);
-        assembly {
-            if userBalance {
-                mstore(0x00, _ALREADY_HAVE_FRACTION_SELECTOR)
                 revert(0x1c, 0x04)
             }
         }

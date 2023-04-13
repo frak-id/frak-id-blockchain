@@ -223,4 +223,17 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
         vm.expectRevert(InvalidArray.selector);
         vestingWallets.createVestBatch(addresses, uint256(10).asSingletonArray(), 10, uint48(block.timestamp + 1));
     }
+
+    /*
+     * ===== TEST : transfer(address to, uint24 vestingId) =====
+     */
+    function test_transfer() public withFrkToken(multiVestingAddr) {
+        // Ask to transfer the available reserve
+        prankDeployer();
+        vestingWallets.createVest(address(1), 10, 10, uint48(block.timestamp + 1));
+        assertEq(vestingWallets.balanceOf(address(1)), 10);
+        // Ask to transfer the vesting
+        vm.prank(address(1));
+        vestingWallets.transfer(address(2), 0);
+    }
 }

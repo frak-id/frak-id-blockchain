@@ -243,16 +243,6 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
         rewarder.payUser(address(1), 1, contentIds, listenCounts);
     }
 
-    function test_fail_payUser_RewardTooLarge() public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
-        // Mint tokens for the user
-        mintFraktions(address(1), 100);
-
-        // Then try to pay him
-        (uint256[] memory listenCounts, uint256[] memory contentIds) = basePayParam(300);
-        vm.expectRevert(RewardTooLarge.selector);
-        rewarder.payUser(address(1), 1, contentIds, listenCounts);
-    }
-
     function test_fail_payUser_InexistantContent() public withFrkToken(rewarderAddr) prankExecAsDeployer {
         // Then try to pay him
         (uint256[] memory listenCounts,) = basePayParam();
@@ -289,7 +279,7 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
 
         uint256[] memory fIds = contentId.buildSnftIds(fTypeArray);
         for (uint256 i = 0; i < fIds.length; i++) {
-            fraktionTokens.mint(target, fIds[i], amount);
+            fraktionTokens.mint(target, fIds[i], 1);
         }
     }
 }
