@@ -321,7 +321,9 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
             Participant memory memParticipant = participant;
 
             // Ensure the state target is not already claimed, and that we don't have too many state to fetched
-            if (toStateIndex < memParticipant.lastStateIndex) revert PoolStateAlreadyClaimed();
+            if (toStateIndex < memParticipant.lastStateIndex) {
+                revert PoolStateAlreadyClaimed();
+            }
             // Check the participant got some shares
             if (memParticipant.shares == 0) {
                 // If not, just increase the last iterated index and return
@@ -510,9 +512,8 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /**
      * @dev Get the current reward state for the given content
      */
-    function getCurrentRewardState(uint256 contentId) external view returns (RewardState memory rewardState) {
-        RewardState[] storage contentStates = rewardStates[contentId];
-        rewardState = contentStates[contentStates.length - 1];
+    function getAllRewardStates(uint256 contentId) external view returns (RewardState[] memory _rewardStates) {
+        _rewardStates = rewardStates[contentId];
     }
 
     /**
