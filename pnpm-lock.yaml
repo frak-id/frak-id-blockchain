@@ -1775,7 +1775,7 @@ packages:
       source-map: 0.6.1
       vue-template-es2015-compiler: 1.9.1
     optionalDependencies:
-      prettier: 2.7.1
+      prettier: 2.8.8
     transitivePeerDependencies:
       - arc-templates
       - atpl
