@@ -1,8 +1,9 @@
-name: Test smart contracts
+name: ⛷ Smart contract tests
 
 on:
   push:
     branches: ["main"]
+  pull_request:
 
 env:
   MUMBAI_PROVIDER: ${{ secrets.MUMBAI_PROVIDER }}
@@ -18,17 +19,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: '🔨 Checkout'
         uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Install node
+      - name: '🔨 Install node'
         uses: actions/setup-node@v3
         with:
           node-version: "18.x"
 
-      - name: Cache node modules
+      - name: '💾 Cache node modules'
         id: cache-npm
         uses: actions/cache@v3
         env:
@@ -42,14 +43,34 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - name: Install dependencies
+      - name: '🔨 Install dependencies'
         run: npm i
     
-      - name: Install Foundry
+      - name: '🔨 Install Foundry'
         uses: foundry-rs/foundry-toolchain@v1
 
-      - name: Run tests
-        run: forge test -vvv
+      - name: '🧪 Run tests'
+        run: forge test --gas-report > gasreport.ansi 
+        env:
+          # make fuzzing semi-deterministic to avoid noisy gas cost estimation
+          # due to non-deterministic fuzzing (but still use pseudo-random fuzzing seeds)
+          FOUNDRY_FUZZ_SEED: 0x${{ github.event.pull_request.base.sha || github.sha }}
 
-      - name: Run snapshot
+      - name: '📈 Compare gas reports'
+        uses: Rubilmax/foundry-gas-diff@v3.15
+        with:
+          summaryQuantile: 0.9 # only display the 10% most significant gas diffs in the summary (defaults to 20%)
+          sortCriteria: avg,max # sort diff rows by criteria
+          sortOrders: desc,asc # and directions
+        id: gas_diff
+
+      - name: '📝 Add gas diff to sticky comment'
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          # delete the comment in case changes no longer impact gas costs
+          delete: ${{ !steps.gas_diff.outputs.markdown }}
+          message: ${{ steps.gas_diff.outputs.markdown }}
+
+      - name: '📈 Run snapshot'
         run: forge snapshot
