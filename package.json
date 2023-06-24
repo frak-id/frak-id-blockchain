@@ -11,6 +11,7 @@
     "url": "https://github.com/frak-id/frak-id-blockchain"
   },
   "scripts": {
+    "preinstall": "npx only-allow pnpm", 
     "clean": "hardhat clean",
     "build": "hardhat compile --concurrency 4",
     "test": "hardhat test",
@@ -71,5 +72,9 @@
     "solady": "^0.0.78",
     "solmate": "^6.6.1"
   },
-  "private": true
+  "private": true,
+  "engines": {
+    "node": "^18.16.0"
+  },
+  "packageManager": "pnpm@8.6.1"
 }

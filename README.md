@@ -31,11 +31,12 @@ To install and build with [**Hardhat**](https://github.com/nomiclabs/hardhat) :
 # Install
 git clone https://github.com/frak-id/frak-id-blockchain.git
 cd frak-id-blockchain/
-npm i
+pnpm i
 # Build
-npm run build
+pnpm run build
 # Test
-npm run test
+pnpm run test
+forge test
 ```
 
 To install with [**Foundry**](https://github.com/gakonst/foundry):

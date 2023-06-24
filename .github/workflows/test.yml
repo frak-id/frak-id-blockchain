@@ -19,15 +19,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: '🔨 Checkout'
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: '🔨 Install node'
+      - uses: pnpm/action-setup@v2.2.3
+      
+      - name: '🔨 Setup Node.js'
+        id: setup-node
         uses: actions/setup-node@v3
         with:
-          node-version: "18.x"
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
 
       - name: '🔨 Install dependencies'
         run: npm i
