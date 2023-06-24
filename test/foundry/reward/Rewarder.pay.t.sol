@@ -159,8 +159,8 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
     function testFuzz_payUser_WithFraktions_ClaimRewards(uint16 listenCount)
         public
         withLotFrkToken(rewarderAddr)
-        prankExecAsDeployer
     {
+        vm.startPrank(deployer);
         listenCount = uint16(bound(listenCount, 1, 300));
 
         mintFraktions(address(1));
