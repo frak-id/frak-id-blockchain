@@ -1,3 +1,6 @@
 [submodule "lib/prb-test"]
 path = lib/prb-test
 url = https://github.com/paulrberg/prb-test
+[submodule "lib/forge-std"]
+path = lib/forge-std
+url = https://github.com/lib/forge-std
