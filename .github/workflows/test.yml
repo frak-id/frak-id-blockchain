@@ -4,7 +4,14 @@ on:
   push:
     branches: ["main"]
   pull_request:
+    types: [opened, synchronize, reopened]
 
+# cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+# ll the env required for hardhat
 env:
   MUMBAI_PROVIDER: ${{ secrets.MUMBAI_PROVIDER }}
   GOERLI_PROVIDER: ${{ secrets.GOERLI_PROVIDER }}
@@ -23,7 +30,11 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: pnpm/action-setup@v2.2.3
+      - name: '🔨 Setup pnpm'
+        uses: pnpm/action-setup@v2
+        with:
+          run_install: |
+            - recursive: true
       
       - name: '🔨 Setup Node.js'
         id: setup-node
