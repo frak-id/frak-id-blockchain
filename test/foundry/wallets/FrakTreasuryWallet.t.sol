@@ -56,15 +56,22 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {
         assertEq(frakToken.balanceOf(treasuryWalletAddr) > 0, true);
     }
 
-    /*function testFuzz_transfer(address target, uint256 amount) public {
+    function testFuzz_transfer(address target, uint96 amount) public {
         vm.assume(target != address(0));
-        amount = bound(amount, 1, 500_000 ether);
+        amount = uint96(bound(amount, 1, 500_000 ether));
+
+        // Get the previous balance
+        uint256 prevBalance = frakToken.balanceOf(target);
 
         prankDeployer();
-        treasuryWallet.transfer(target, amount);
+        treasuryWallet.transfer(target, uint256(amount));
 
-        assertEq(frakToken.balanceOf(target), amount);
-    }*/
+        // Get the balance diff
+        uint256 newBalance = frakToken.balanceOf(target);
+        uint256 balanceDiff = newBalance - prevBalance;
+
+        assertEq(balanceDiff, uint256(amount));
+    }
 
     function test_fail_transfer_NotMinter() public {
         vm.expectRevert(NotAuthorized.selector);
@@ -119,16 +126,23 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {
         assertEq(frakToken.balanceOf(treasuryWalletAddr) > 0, true);
     }
 
-    /*function testFuzz_transferBatch(address target, uint256 amount) public {
+   function testFuzz_transferBatch(address target, uint96 amount) public {
         vm.assume(target != address(0));
-        amount = bound(amount, 1, 500_000 ether);
+        amount = uint96(bound(amount, 1, 500_000 ether));
+
+        // Get the previous balance
+        uint256 prevBalance = frakToken.balanceOf(target);
 
         prankDeployer();
-        (address[] memory addrs, uint256[] memory amounts) = baseBatchParam(target, amount);
+        (address[] memory addrs, uint256[] memory amounts) = baseBatchParam(target, uint256(amount));
         treasuryWallet.transferBatch(addrs, amounts);
 
-        assertEq(frakToken.balanceOf(target), amount);
-    }*/
+        // Get the balance diff
+        uint256 newBalance = frakToken.balanceOf(target);
+        uint256 balanceDiff = newBalance - prevBalance;
+
+        assertEq(balanceDiff, uint256(amount));
+    }
 
     function test_fail_transferBatch_NotMinter() public {
         vm.expectRevert(NotAuthorized.selector);

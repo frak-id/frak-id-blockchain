@@ -5,7 +5,7 @@ To have a gas fee estimation when running the unit test, be sure to have the **g
 ## Run all the unit test locally
 
 ```shell
-npm run test
+forge test -vv
 ```
 
 ## Setup EC2 for tools testing
