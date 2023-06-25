@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 // Pause error (Throwned when contract is or isn't paused and shouldn't be)
 error ContractPaused();

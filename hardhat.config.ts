@@ -16,7 +16,7 @@ export default {
   solidity: {
     compilers: [
       {
-        version: "0.8.17",
+        version: "0.8.20",
         settings: {
           viaIR: true, // Gain a lot on contract size, performance impact ?
           optimizer: {
