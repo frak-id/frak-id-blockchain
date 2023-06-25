@@ -32,9 +32,6 @@ jobs:
 
       - name: '🔨 Setup pnpm'
         uses: pnpm/action-setup@v2
-        with:
-          run_install: |
-            - recursive: true
       
       - name: '🔨 Setup Node.js'
         id: setup-node
@@ -44,7 +41,7 @@ jobs:
           cache: 'pnpm'
 
       - name: '🔨 Install dependencies'
-        run: npm i
+        run: pnpm install --frozen-lockfile
     
       - name: '🔨 Install Foundry'
         uses: foundry-rs/foundry-toolchain@v1
