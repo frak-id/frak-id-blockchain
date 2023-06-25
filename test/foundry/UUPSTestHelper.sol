@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import {ERC1967Proxy} from "@oz/proxy/ERC1967/ERC1967Proxy.sol";
 import {PRBTest} from "@prb/test/PRBTest.sol";

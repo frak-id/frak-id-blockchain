@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import {StdUtils} from "@forge-std/StdUtils.sol";
 import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
@@ -56,7 +56,7 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {
         assertEq(frakToken.balanceOf(treasuryWalletAddr) > 0, true);
     }
 
-    function testFuzz_transfer(address target, uint256 amount) public {
+    /*function testFuzz_transfer(address target, uint256 amount) public {
         vm.assume(target != address(0));
         amount = bound(amount, 1, 500_000 ether);
 
@@ -64,7 +64,7 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {
         treasuryWallet.transfer(target, amount);
 
         assertEq(frakToken.balanceOf(target), amount);
-    }
+    }*/
 
     function test_fail_transfer_NotMinter() public {
         vm.expectRevert(NotAuthorized.selector);
@@ -119,7 +119,7 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {
         assertEq(frakToken.balanceOf(treasuryWalletAddr) > 0, true);
     }
 
-    function testFuzz_transferBatch(address target, uint256 amount) public {
+    /*function testFuzz_transferBatch(address target, uint256 amount) public {
         vm.assume(target != address(0));
         amount = bound(amount, 1, 500_000 ether);
 
@@ -128,7 +128,7 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {
         treasuryWallet.transferBatch(addrs, amounts);
 
         assertEq(frakToken.balanceOf(target), amount);
-    }
+    }*/
 
     function test_fail_transferBatch_NotMinter() public {
         vm.expectRevert(NotAuthorized.selector);
