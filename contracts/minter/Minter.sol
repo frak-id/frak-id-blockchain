@@ -9,7 +9,7 @@ import {FraktionTokens} from "../tokens/FraktionTokens.sol";
 import {IFrakToken} from "../tokens/IFrakToken.sol";
 import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
 import {InvalidAddress} from "../utils/FrakErrors.sol";
-import {Multicallable} from "solady/src/utils/Multicallable.sol";
+import {Multicallable} from "@solady/utils/Multicallable.sol";
 
 /**
  * @author  @KONFeature

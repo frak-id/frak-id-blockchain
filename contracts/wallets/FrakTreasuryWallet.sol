@@ -5,7 +5,7 @@ import {IFrakToken} from "../tokens/IFrakToken.sol";
 import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
 import {FrakRoles} from "../utils/FrakRoles.sol";
 import {InvalidAddress, RewardTooLarge, NoReward} from "../utils/FrakErrors.sol";
-import {Multicallable} from "solady/src/utils/Multicallable.sol";
+import {Multicallable} from "@solady/utils/Multicallable.sol";
 
 /// Error thrown when the contract havn't enough found to perform the withdraw
 error NotEnoughTreasury();

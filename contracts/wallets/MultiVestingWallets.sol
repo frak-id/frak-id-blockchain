@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.20;
 
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {EnumerableSet} from "@oz/utils/structs/EnumerableSet.sol";
+import {SafeERC20Upgradeable} from "@oz-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {IERC20Upgradeable} from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
 import {FrakRoles} from "../utils/FrakRoles.sol";
 import {NotAuthorized, InvalidArray, InvalidAddress, NoReward, RewardTooLarge} from "../utils/FrakErrors.sol";

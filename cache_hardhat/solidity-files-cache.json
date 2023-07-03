@@ -1,0 +1,2656 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/minter/IMinter.sol": {
+      "lastModificationDate": 1688373392489,
+      "contentHash": "0f35ac865bfc7a260731b781efe1aa70",
+      "sourceName": "contracts/minter/IMinter.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/IPausable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "IMinter"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/utils/IPausable.sol": {
+      "lastModificationDate": 1688373392485,
+      "contentHash": "e939abb10cc3dee18a121f3416a9346e",
+      "sourceName": "contracts/utils/IPausable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "IPausable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/minter/Minter.sol": {
+      "lastModificationDate": 1688376835281,
+      "contentHash": "67d7c39ec681d40a13c28aee789083af",
+      "sourceName": "contracts/minter/Minter.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IMinter.sol",
+        "./badges/FractionCostBadges.sol",
+        "../utils/FrakMath.sol",
+        "../utils/FrakRoles.sol",
+        "../tokens/FraktionTokens.sol",
+        "../tokens/IFrakToken.sol",
+        "../utils/MintingAccessControlUpgradeable.sol",
+        "../utils/FrakErrors.sol",
+        "solady/src/utils/Multicallable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "Minter"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/utils/FrakMath.sol": {
+      "lastModificationDate": 1688373392483,
+      "contentHash": "d422e4c7a769fd6c25386b3b686e31f9",
+      "sourceName": "contracts/utils/FrakMath.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "FrakMath"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/utils/FrakRoles.sol": {
+      "lastModificationDate": 1688373392484,
+      "contentHash": "b5ab594c37e7bb68b5d6f88905b96602",
+      "sourceName": "contracts/utils/FrakRoles.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "FrakRoles"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/tokens/FraktionTokens.sol": {
+      "lastModificationDate": 1688377458247,
+      "contentHash": "bace6b48daa1008394f3e5ba6eb61974",
+      "sourceName": "contracts/tokens/FraktionTokens.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/ERC1155Upgradeable.sol",
+        "./FraktionTransferCallback.sol",
+        "../utils/FrakMath.sol",
+        "../utils/FrakRoles.sol",
+        "../utils/MintingAccessControlUpgradeable.sol",
+        "../utils/FrakErrors.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "FraktionTokens"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/tokens/IFrakToken.sol": {
+      "lastModificationDate": 1688377458250,
+      "contentHash": "d6d39912b19daad86af5286cd56618e3",
+      "sourceName": "contracts/tokens/IFrakToken.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "IFrakToken"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/utils/MintingAccessControlUpgradeable.sol": {
+      "lastModificationDate": 1688373392484,
+      "contentHash": "4840ce94579ae87a16969d533b1a8e07",
+      "sourceName": "contracts/utils/MintingAccessControlUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "./FrakAccessControlUpgradeable.sol",
+        "../utils/FrakRoles.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "MintingAccessControlUpgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/utils/FrakErrors.sol": {
+      "lastModificationDate": 1688373392483,
+      "contentHash": "bc3d8ec8515093139f671f1675adacd6",
+      "sourceName": "contracts/utils/FrakErrors.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": []
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/minter/badges/FractionCostBadges.sol": {
+      "lastModificationDate": 1688373392486,
+      "contentHash": "d46b61bc43ce275cbe5669df9b0d2393",
+      "sourceName": "contracts/minter/badges/FractionCostBadges.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../utils/FrakMath.sol",
+        "../../utils/FrakRoles.sol",
+        "../../utils/FrakErrors.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "FractionCostBadges"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/node_modules/.pnpm/solady@0.0.78/node_modules/solady/src/utils/Multicallable.sol": {
+      "lastModificationDate": 1687646673971,
+      "contentHash": "298339fc0b660c8237bea4cc9bfe10fd",
+      "sourceName": "solady/src/utils/Multicallable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "Multicallable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/tokens/FraktionTransferCallback.sol": {
+      "lastModificationDate": 1688373392482,
+      "contentHash": "5c1578dad0abf4fc5858073e44047cc8",
+      "sourceName": "contracts/tokens/FraktionTransferCallback.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "FraktionTransferCallback"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/ERC1155Upgradeable.sol": {
+      "lastModificationDate": 1688378807694,
+      "contentHash": "5187bf78bbb054d9d4f5121232d5398b",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/ERC1155Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC1155Upgradeable.sol",
+        "./IERC1155ReceiverUpgradeable.sol",
+        "./extensions/IERC1155MetadataURIUpgradeable.sol",
+        "../../utils/AddressUpgradeable.sol",
+        "../../utils/ContextUpgradeable.sol",
+        "../../utils/introspection/ERC165Upgradeable.sol",
+        "../../proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC1155Upgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/utils/FrakAccessControlUpgradeable.sol": {
+      "lastModificationDate": 1688377458234,
+      "contentHash": "1bbacf0478e61d1ae90b5b62f5a01731",
+      "sourceName": "contracts/utils/FrakAccessControlUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol",
+        "./IPausable.sol",
+        "./FrakRoles.sol",
+        "./FrakErrors.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "FrakAccessControlUpgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol": {
+      "lastModificationDate": 1688378807703,
+      "contentHash": "6200b84950eb05b4a92a39fd1d6e0f9b",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ContextUpgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol": {
+      "lastModificationDate": 1688378807693,
+      "contentHash": "52ef5d6c909d6f8ef3077445d3328eca",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../interfaces/draft-IERC1822Upgradeable.sol",
+        "../ERC1967/ERC1967UpgradeUpgradeable.sol",
+        "./Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "UUPSUpgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
+      "lastModificationDate": 1688378807693,
+      "contentHash": "b0970a564d121abf9adfff8d1a01eb16",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../utils/AddressUpgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.2"
+      ],
+      "artifacts": [
+        "Initializable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol": {
+      "lastModificationDate": 1688378807702,
+      "contentHash": "c30c805386fda8a42ff515da963d3a95",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.1"
+      ],
+      "artifacts": [
+        "AddressUpgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/interfaces/draft-IERC1822Upgradeable.sol": {
+      "lastModificationDate": 1688378807678,
+      "contentHash": "a6883cfd85607b16c121a02728369eb3",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/interfaces/draft-IERC1822Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC1822ProxiableUpgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol": {
+      "lastModificationDate": 1688378807693,
+      "contentHash": "2587366284baa690cce0accaca1a20f9",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../beacon/IBeaconUpgradeable.sol",
+        "../../interfaces/IERC1967Upgradeable.sol",
+        "../../interfaces/draft-IERC1822Upgradeable.sol",
+        "../../utils/AddressUpgradeable.sol",
+        "../../utils/StorageSlotUpgradeable.sol",
+        "../utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.2"
+      ],
+      "artifacts": [
+        "ERC1967UpgradeUpgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/proxy/beacon/IBeaconUpgradeable.sol": {
+      "lastModificationDate": 1688378807693,
+      "contentHash": "21bffd733b4ca013e125a0ffe2e52254",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/beacon/IBeaconUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IBeaconUpgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/interfaces/IERC1967Upgradeable.sol": {
+      "lastModificationDate": 1688378807676,
+      "contentHash": "a5421a5e611067b9202e83329fbf6fc7",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/interfaces/IERC1967Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC1967Upgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/utils/StorageSlotUpgradeable.sol": {
+      "lastModificationDate": 1688378807704,
+      "contentHash": "02cf959b00ba5c650708472f195f8b29",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/utils/StorageSlotUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "StorageSlotUpgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/ERC165Upgradeable.sol": {
+      "lastModificationDate": 1688378807705,
+      "contentHash": "5f2d8b81c0ff5bd2047b4846c20b998d",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/ERC165Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC165Upgradeable.sol",
+        "../../proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC165Upgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/IERC1155Upgradeable.sol": {
+      "lastModificationDate": 1688378807694,
+      "contentHash": "5712a8d74dc6ae8d66b65cdfac95846b",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/IERC1155Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../utils/introspection/IERC165Upgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC1155Upgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/IERC1155ReceiverUpgradeable.sol": {
+      "lastModificationDate": 1688378807694,
+      "contentHash": "eb51ed084f6f7fd2c7098715c5690285",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/IERC1155ReceiverUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../utils/introspection/IERC165Upgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC1155ReceiverUpgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/extensions/IERC1155MetadataURIUpgradeable.sol": {
+      "lastModificationDate": 1688378807695,
+      "contentHash": "8b7e95c747e2dab3b5444b37410a8315",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC1155/extensions/IERC1155MetadataURIUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC1155Upgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC1155MetadataURIUpgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/IERC165Upgradeable.sol": {
+      "lastModificationDate": 1688378807705,
+      "contentHash": "d6ecf203a5e72c845be9bbf2f304a289",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/utils/introspection/IERC165Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC165Upgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol": {
+      "lastModificationDate": 1688378807696,
+      "contentHash": "9a9398a7dbda9d014f04d5eb0fb581fd",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC20Upgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/wallets/FrakTreasuryWallet.sol": {
+      "lastModificationDate": 1688373392492,
+      "contentHash": "cf35463f9fa9c3937e47566f65a0e34d",
+      "sourceName": "contracts/wallets/FrakTreasuryWallet.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../tokens/IFrakToken.sol",
+        "../utils/MintingAccessControlUpgradeable.sol",
+        "../utils/FrakRoles.sol",
+        "../utils/FrakErrors.sol",
+        "solady/src/utils/Multicallable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "FrakTreasuryWallet"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/wallets/VestingWalletFactory.sol": {
+      "lastModificationDate": 1688377458247,
+      "contentHash": "3faafaa2af15534e4b8e3e4ff801abe2",
+      "sourceName": "contracts/wallets/VestingWalletFactory.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+        "./MultiVestingWallets.sol",
+        "../utils/FrakAccessControlUpgradeable.sol",
+        "../utils/FrakRoles.sol",
+        "../utils/FrakErrors.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "VestingWalletFactory"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/wallets/MultiVestingWallets.sol": {
+      "lastModificationDate": 1688377468186,
+      "contentHash": "8290e6d914382bd4011db675d3913b58",
+      "sourceName": "contracts/wallets/MultiVestingWallets.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+        "../utils/FrakAccessControlUpgradeable.sol",
+        "../utils/FrakRoles.sol",
+        "../utils/FrakErrors.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "MultiVestingWallets"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol": {
+      "lastModificationDate": 1688378771354,
+      "contentHash": "e029f029abc1fd2d85d54fd69086f076",
+      "sourceName": "lib/openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "EnumerableSet"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol": {
+      "lastModificationDate": 1688378807699,
+      "contentHash": "aeacbe7315b287fd31acd3cfbeb926ad",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC20Upgradeable.sol",
+        "../extensions/IERC20PermitUpgradeable.sol",
+        "../../../utils/AddressUpgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "SafeERC20Upgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20PermitUpgradeable.sol": {
+      "lastModificationDate": 1688378807698,
+      "contentHash": "30ef13e9a1b22e74e5e4ce5ab2a247e4",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20PermitUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC20PermitUpgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol": {
+      "lastModificationDate": 1688378807698,
+      "contentHash": "9efcd5467a7f0bf533910ee8a267adb2",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC20Upgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC20MetadataUpgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol": {
+      "lastModificationDate": 1688378807696,
+      "contentHash": "569edd57f8c6c7f5f750a3da1ed9c4c7",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC20Upgradeable.sol",
+        "./extensions/IERC20MetadataUpgradeable.sol",
+        "../../utils/ContextUpgradeable.sol",
+        "../../proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC20Upgradeable"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/reward/pool/ContentPool.sol": {
+      "lastModificationDate": 1688377468191,
+      "contentHash": "1002991a03bad10ace916fd006e68061",
+      "sourceName": "contracts/reward/pool/ContentPool.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../utils/FrakMath.sol",
+        "../../utils/FrakRoles.sol",
+        "../../tokens/FraktionTokens.sol",
+        "../../tokens/FraktionTransferCallback.sol",
+        "../../utils/PushPullReward.sol",
+        "../../utils/FrakAccessControlUpgradeable.sol",
+        "../../utils/FrakErrors.sol",
+        "lib/openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "ContentPool"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/utils/PushPullReward.sol": {
+      "lastModificationDate": 1688377458234,
+      "contentHash": "9104512fd2eeb089d537277d86c7a17f",
+      "sourceName": "contracts/utils/PushPullReward.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+        "./FrakAccessControlUpgradeable.sol",
+        "./FrakErrors.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "PushPullReward"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/reward/pool/ReferralPool.sol": {
+      "lastModificationDate": 1688373392489,
+      "contentHash": "7ad3f12034df942816bd54fa67945cc0",
+      "sourceName": "contracts/reward/pool/ReferralPool.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../utils/FrakMath.sol",
+        "../../utils/FrakRoles.sol",
+        "../../tokens/FraktionTokens.sol",
+        "../../utils/PushPullReward.sol",
+        "../../utils/FrakAccessControlUpgradeable.sol",
+        "../../utils/FrakErrors.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "ReferralPool"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/tokens/FrakTokenL2.sol": {
+      "lastModificationDate": 1688377458247,
+      "contentHash": "8ba717730340acd004c698056e07f196",
+      "sourceName": "contracts/tokens/FrakTokenL2.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol",
+        "../utils/FrakRoles.sol",
+        "../utils/MintingAccessControlUpgradeable.sol",
+        "../utils/ContextMixin.sol",
+        "./IFrakToken.sol",
+        "../utils/EIP712Base.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "FrakToken"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/utils/ContextMixin.sol": {
+      "lastModificationDate": 1688373392485,
+      "contentHash": "0cf03d3eb8b217d86bd96fdaf19e41fd",
+      "sourceName": "contracts/utils/ContextMixin.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "ContextMixin"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/utils/EIP712Base.sol": {
+      "lastModificationDate": 1688377458234,
+      "contentHash": "27e72ff4552c69fc1468df75a87ac85e",
+      "sourceName": "contracts/utils/EIP712Base.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "EIP712Base"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/reward/Rewarder.sol": {
+      "lastModificationDate": 1688373392498,
+      "contentHash": "66b249ee4ee023cfd4f882f55de4b4db",
+      "sourceName": "contracts/reward/Rewarder.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IRewarder.sol",
+        "./badges/ContentBadges.sol",
+        "./badges/ListenerBadges.sol",
+        "./pool/ContentPool.sol",
+        "./pool/ReferralPool.sol",
+        "../utils/FrakMath.sol",
+        "../utils/FrakRoles.sol",
+        "../tokens/FraktionTokens.sol",
+        "../tokens/IFrakToken.sol",
+        "../utils/FrakAccessControlUpgradeable.sol",
+        "../utils/FrakErrors.sol",
+        "../utils/PushPullReward.sol",
+        "solady/src/utils/Multicallable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "Rewarder"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/reward/badges/ListenerBadges.sol": {
+      "lastModificationDate": 1688373392487,
+      "contentHash": "5184813f1a0310941950be617dbd05ec",
+      "sourceName": "contracts/reward/badges/ListenerBadges.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../utils/FrakMath.sol",
+        "../../utils/FrakRoles.sol",
+        "../../utils/FrakErrors.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "ListenerBadges"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/reward/IRewarder.sol": {
+      "lastModificationDate": 1688373392486,
+      "contentHash": "bcc86920c6eb66fa9566ad932ed1fa79",
+      "sourceName": "contracts/reward/IRewarder.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/IPausable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "IRewarder"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/reward/badges/ContentBadges.sol": {
+      "lastModificationDate": 1688373392484,
+      "contentHash": "b8f0b92b83fd44121625630d8b211820",
+      "sourceName": "contracts/reward/badges/ContentBadges.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../utils/FrakMath.sol",
+        "../../utils/FrakRoles.sol",
+        "../../utils/FrakErrors.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "ContentBadges"
+      ]
+    },
+    "/Users/quentin/Workspace/Frak/frak-id-blockchain/contracts/tokens/FrakTokenL1.sol": {
+      "lastModificationDate": 1688377458247,
+      "contentHash": "39c6ab0aa8295da99a9a4ebb2725b4fc",
+      "sourceName": "contracts/tokens/FrakTokenL1.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 100000,
+            "details": {
+              "peephole": true,
+              "inliner": true,
+              "jumpdestRemover": true,
+              "deduplicate": true,
+              "orderLiterals": true,
+              "constantOptimizer": true,
+              "cse": true,
+              "yul": true
+            }
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363838333738393832393438"
+            }
+          }
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol",
+        "../utils/FrakRoles.sol",
+        "../utils/FrakAccessControlUpgradeable.sol",
+        "../utils/ContextMixin.sol",
+        "../utils/EIP712Base.sol"
+      ],
+      "versionPragmas": [
+        "0.8.20"
+      ],
+      "artifacts": [
+        "FrakTokenL1"
+      ]
+    }
+  }
+}

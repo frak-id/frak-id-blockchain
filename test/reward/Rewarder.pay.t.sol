@@ -156,10 +156,7 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
         rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
     }
 
-    function testFuzz_payUser_WithFraktions_ClaimRewards(uint16 listenCount)
-        public
-        withLotFrkToken(rewarderAddr)
-    {
+    function testFuzz_payUser_WithFraktions_ClaimRewards(uint16 listenCount) public withLotFrkToken(rewarderAddr) {
         vm.startPrank(deployer);
         listenCount = uint16(bound(listenCount, 1, 300));
 

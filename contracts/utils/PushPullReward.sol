@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.20;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {Initializable} from "@oz-upgradeable/proxy/utils/Initializable.sol";
+import {IERC20Upgradeable} from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {FrakAccessControlUpgradeable} from "./FrakAccessControlUpgradeable.sol";
 import {NoReward, InvalidAddress, RewardTooLarge} from "./FrakErrors.sol";
 

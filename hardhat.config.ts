@@ -6,14 +6,36 @@ import "@typechain/hardhat";
 import dotenv from "dotenv";
 import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";
-
+import fs from "fs";
+import "hardhat-preprocessor";
+import { HardhatUserConfig } from "hardhat/config";
+import "@foundry-rs/hardhat-forge";
 
 dotenv.config();
 
+/**
+ * Get the remappings from the remappings.txt file
+ * @returns 
+ */
+function getRemappings() {
+  return fs
+    .readFileSync("remappings.txt", "utf8")
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => line.trim().split("="));
+}
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
-export default {
+const config: HardhatUserConfig = {
   solidity: {
+    settings: {
+      outputSelection: {
+        '*': {
+          '*': ['storageLayout'],
+        },
+      },
+    },
     compilers: [
       {
         version: "0.8.20",
@@ -39,14 +61,8 @@ export default {
   },
   paths: {
     sources: "./contracts",
-    tests: "./test",
-    cache: "./cache",
+    cache: "./cache_hardhat",
     artifacts: "./artifacts",
-  },
-  docgen: {
-    path: "./docs",
-    clear: true,
-    runOnCompile: true,
   },
   compilerOptions: {
     target: "es2018",
@@ -59,7 +75,7 @@ export default {
   networks: {
     mumbai: {
       url: process.env.MUMBAI_PROVIDER,
-      accounts: [process.env.FRAK_DEPLOY_PRIV_KEY],
+      accounts: [process.env.SYBEL_DEPLOY_PRIV_KEY],
     },
     polygon: {
       url: process.env.POLYGON_PROVIDER,
@@ -77,29 +93,23 @@ export default {
       goerli: process.env.ETHER_SCAN_API_KEY,
     },
   },
-  contractSizer: {
-    runOnCompile: true,
-  },
   include: ["./scripts", "./test", "./typechain-types"],
   files: ["./hardhat.config.ts"],
-  typechain: {
-    outDir: "./types",
-  },
-  gasReporter: {
-    currency: "EUR",
-    token: "MATIC",
-    gasPriceApi: "https://api.polygonscan.com/api?module=proxy&action=eth_gasPrice",
-    enabled: false,
-    excludeContracts: [],
-    src: "./contracts",
-    coinmarketcap: process.env.COIN_MARKET_CAP_API_KEY,
-  },
-  abiExporter: {
-    path: "./abi",
-    runOnCompile: true,
-    clear: true,
-    flat: true,
-    format: "json",
-    pretty: false,
+  // This fully resolves paths for imports in the ./lib directory for Hardhat
+  preprocess: {
+    eachLine: (hre) => ({
+      transform: (line: string) => {
+        if (line.match(/^\s*import /i)) {
+          getRemappings().forEach(([find, replace]) => {
+            if (line.match(find)) {
+              line = line.replace(find, replace);
+            }
+          });
+        }
+        return line;
+      },
+    }),
   },
 };
+
+export default config;

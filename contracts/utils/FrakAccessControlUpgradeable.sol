@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.20;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import {Initializable} from "@oz-upgradeable/proxy/utils/Initializable.sol";
+import {UUPSUpgradeable} from "@oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {ContextUpgradeable} from "@oz-upgradeable/utils/ContextUpgradeable.sol";
 import {IPausable} from "./IPausable.sol";
 import {FrakRoles} from "./FrakRoles.sol";
 import {NotAuthorized, ContractPaused, ContractNotPaused, RenounceForCallerOnly} from "./FrakErrors.sol";

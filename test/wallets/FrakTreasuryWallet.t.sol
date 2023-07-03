@@ -126,7 +126,7 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {
         assertEq(frakToken.balanceOf(treasuryWalletAddr) > 0, true);
     }
 
-   function testFuzz_transferBatch(address target, uint96 amount) public {
+    function testFuzz_transferBatch(address target, uint96 amount) public {
         vm.assume(target != address(0));
         amount = uint96(bound(amount, 1, 500_000 ether));
 
