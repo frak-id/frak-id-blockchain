@@ -55,6 +55,9 @@ devDependencies:
   '@openzeppelin/hardhat-upgrades':
     specifier: ^1.28.0
     version: 1.28.0(@nomiclabs/hardhat-ethers@2.2.3)(@nomiclabs/hardhat-etherscan@3.1.7)(ethers@5.7.2)(hardhat@2.16.0)
+  '@openzeppelin/upgrades-core':
+    specifier: ^1.27.1
+    version: 1.27.1
   '@trivago/prettier-plugin-sort-imports':
     specifier: ^3.4.0
     version: 3.4.0(prettier@2.8.8)

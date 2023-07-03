@@ -7,6 +7,10 @@ cache_path = 'forge-cache'
 # extra_output = ["ir", "irOptimized"]
 # extra_output = ["irOptimized"]
 
+# For OZ upgrades checks
+build_info = true
+extra_output = ["storageLayout"]
+
 # Optimizer config
 optimizer = true
 optimizer_runs = 100_000
