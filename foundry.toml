@@ -1,7 +1,7 @@
 [profile.default]
 src = 'contracts'
 out = 'out'
-libs = ['node_modules', 'lib']
+libs = ['lib']
 test = 'test'
 cache_path = 'forge-cache'
 # extra_output = ["ir", "irOptimized"]
@@ -45,4 +45,15 @@ dictionary_weight = 80
 include_storage = true
 include_push_bytes = true
 
-# See more config options https://github.com/foundry-rs/foundry/tree/master/config
+# Config for deployment
+[rpc_endpoints]
+goerli = "${GOERLI_RPC_URL}"
+polygonMumbai = "${MUMBAI_RPC_URL}"
+polygon = "${POLYGON_RPC_URL}"
+
+# Config for verification
+[etherscan]
+polygonMumbai = { key = "${POLYGON_SCAN_API_KEY}", url = "https://api-testnet.polygonscan.com/api" }
+polygon = { key = "${POLYGON_SCAN_API_KEY}", url = "https://api.polygonscan.com/api" }
+goerli = {key = "${ETHERSCAN_SCAN_API_KEY}", url = "https://api-goerli.etherscan.io/api"}
+mainnet = {key = "${ETHERSCAN_SCAN_API_KEY}"}
