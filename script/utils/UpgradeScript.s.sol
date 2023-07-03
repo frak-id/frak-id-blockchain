@@ -2,7 +2,7 @@
 pragma solidity 0.8.20;
 
 import "forge-std/Script.sol";
-import {UUPSUpgradeable} from "@oz/proxy/utils/UUPSUpgradeable.sol";
+import {UUPSUpgradeable} from "@oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ERC1967Proxy} from "@oz/proxy/ERC1967/ERC1967Proxy.sol";
 
 /**

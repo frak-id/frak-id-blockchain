@@ -28,50 +28,6 @@ function getRemappings() {
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 const config: HardhatUserConfig = {
-  solidity: {
-    settings: {
-      outputSelection: {
-        '*': {
-          '*': ['storageLayout'],
-        },
-      },
-    },
-    compilers: [
-      {
-        version: "0.8.20",
-        settings: {
-          viaIR: true, // Gain a lot on contract size, performance impact ?
-          optimizer: {
-            enabled: true,
-            runs: 100000,
-            details: {
-              peephole: true,
-              inliner: true,
-              jumpdestRemover: true,
-              deduplicate: true,
-              orderLiterals: true,
-              constantOptimizer: true,
-              cse: true,
-              yul: true,
-            },
-          },
-        },
-      },
-    ],
-  },
-  paths: {
-    sources: "./contracts",
-    cache: "./cache_hardhat",
-    artifacts: "./artifacts",
-  },
-  compilerOptions: {
-    target: "es2018",
-    module: "commonjs",
-    strict: true,
-    esModuleInterop: true,
-    outDir: "dist",
-    resolveJsonModule: true,
-  },
   networks: {
     mumbai: {
       url: process.env.MUMBAI_PROVIDER,
@@ -86,14 +42,6 @@ const config: HardhatUserConfig = {
       accounts: [process.env.FRAK_DEPLOY_PRIV_KEY],
     },
   },
-  etherscan: {
-    apiKey: {
-      polygonMumbai: process.env.POLYGON_SCAN_API_KEY,
-      polygon: process.env.POLYGON_SCAN_API_KEY,
-      goerli: process.env.ETHER_SCAN_API_KEY,
-    },
-  },
-  include: ["./scripts", "./test", "./typechain-types"],
   files: ["./hardhat.config.ts"],
   // This fully resolves paths for imports in the ./lib directory for Hardhat
   preprocess: {
