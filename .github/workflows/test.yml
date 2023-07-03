@@ -62,7 +62,13 @@ jobs:
             out
           key: ${{ github.base_ref || github.ref_name }}-foundry
           
-      - name: '🧪 Run tests'
+      - name: '📦️ Build contracts'
+        run: forge clean && forge build 
+          
+      - name: '🧪 Run storage tests'
+        run: pnpm run test:storage 
+          
+      - name: '🧪 Run forge tests'
         run: forge test --gas-report > gasreport.ansi 
 
       - name: '📈 Compare gas reports'

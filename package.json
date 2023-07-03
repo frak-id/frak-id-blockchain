@@ -12,14 +12,12 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "clean": "hardhat clean",
-    "build": "hardhat compile --concurrency 4",
+    "clean": "forge clean",
+    "build": "forge build",
     "test": "pnpm test:forge && pnpm test:storage",
     "test:forge": "forge test",
-    "test:hardhat": "hardhat test",
     "test:storage": "npx @openzeppelin/upgrades-core validate out/build-info",
-    "coverage": "hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"test/**/*.ts\" && npm typechain",
-    "size": "hardhat size-contracts --concurrency 4",
+    "coverage": "forge coverage",
     "generate": "wagmi generate"
   },
   "devDependencies": {

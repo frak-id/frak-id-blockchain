@@ -7,6 +7,12 @@ cache_path = 'forge-cache'
 # extra_output = ["ir", "irOptimized"]
 # extra_output = ["irOptimized"]
 
+# Remove bytecode hash at the end of compiled bytecode
+bytecode_hash = "none"
+
+# Allow read/write permission on current path
+fs_permissions = [{ access = "read-write", path = "./" }]
+
 # For OZ upgrades checks
 build_info = true
 extra_output = ["storageLayout"]
