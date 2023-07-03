@@ -1,4 +1,4 @@
-name: ⛷ Smart contract tests
+name: 🧪 Smart contract tests
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 # cancel previous runs on the same PR
 concurrency:
-  group: ${{ github.ref }}
+  group: ${{ github.ref }}-tests
   cancel-in-progress: true
 
 # ll the env required for hardhat
