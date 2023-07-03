@@ -1,0 +1,101 @@
+name: 🗃️ Smart storage tests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.ref }}-storage
+  cancel-in-progress: true
+
+jobs:
+  storage-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: '🔨 Setup pnpm'
+        uses: pnpm/action-setup@v2
+      
+      - name: '🔨 Setup Node.js'
+        id: setup-node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: '🔨 Install dependencies'
+        run: pnpm install --frozen-lockfile
+          
+      - name: '🔨 Install Foundry'
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+      
+      - name: '💾 Foundry fork cache'
+        uses: actions/cache@v3
+        with:
+          path: "~/.foundry/cache"
+          key: foundry-${{ hashFiles('Makefile', 'foundry.toml') }} # where fork block numbers & RPC are stored
+      
+      - name: '💾 Foundry compilation cache'
+        uses: actions/cache@v3
+        with:
+          path: |
+            cache
+            out
+          key: ${{ github.base_ref || github.ref_name }}-foundry
+          
+      - name: '🧪 Check FRK Token storage'
+        uses: Rubilmax/foundry-storage-check@v3.5
+        with:
+            contract: contracts/tokens/FrakTokenL2.sol:FrakToken
+            rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
+            address: "0x6261E4a478C98419EaFa6289509C49058D21Df8c"
+            failOnRemoval: true
+          
+      - name: '🧪 Check Fraktion Token storage'
+        uses: Rubilmax/foundry-storage-check@v3.5
+        with:
+            contract: contracts/tokens/FraktionTokens.sol:FraktionTokens
+            rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
+            address: "0x4B1611803687Ab821E1b670fE94CB93303D94F8a"
+            failOnRemoval: true
+
+      - name: '🧪 Check content pool storage'
+        uses: Rubilmax/foundry-storage-check@v3.5
+        with:
+            contract: contracts/reward/pool/ContentPool.sol:ContentPool
+            rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
+            address: "0xDCB34659B83C4F8708fd7AcAA3755547BF8BBcA0"
+            failOnRemoval: true
+    
+      - name: '🧪 Check referral pool storage'
+        uses: Rubilmax/foundry-storage-check@v3.5
+        with:
+            contract: contracts/reward/pool/ReferralPool.sol:ReferralPool
+            rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
+            address: "0x166d8CFEe1919bC2e8c7AdBB34F1613194e9C599"
+            failOnRemoval: true
+
+      - name: '🧪 Check rewarder storage'
+        uses: Rubilmax/foundry-storage-check@v3.5
+        with:
+            contract: contracts/reward/Rewarder.sol:Rewarder
+            rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
+            address: "0x8D9fa601DA1416b087E9db6B6EaD63D4920A4528"
+            failOnRemoval: true
+
+      - name: '🧪 Check minter storage'
+        uses: Rubilmax/foundry-storage-check@v3.5
+        with:
+            contract: contracts/minter/Minter.sol:Minter
+            rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
+            address: "0x1adc8CAaA35551730eCd82e0eEA683Aa90dB6cf0"
+            failOnRemoval: true
