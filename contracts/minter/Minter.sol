@@ -62,14 +62,14 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
     /*                                   Storage                                  */
     /* -------------------------------------------------------------------------- */
 
+    /// @dev Address of our foundation wallet (for fee's payment)
+    address private foundationWallet;
+
     /// @dev Reference to the fraktion tokens contract (ERC1155)
     FraktionTokens private fraktionTokens;
 
     /// @dev Reference to the Frak token contract (ERC20)
     IFrakToken private frakToken;
-
-    /// @dev Address of our foundation wallet (for fee's payment)
-    address private foundationWallet;
 
     /* -------------------------------------------------------------------------- */
     /*                                  Function                                  */
