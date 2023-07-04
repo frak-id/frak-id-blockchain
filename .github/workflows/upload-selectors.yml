@@ -1,0 +1,49 @@
+name: 🗃️ Upload selectors
+
+on:
+  push:
+    branches: ["main"]
+
+# cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.ref }}-selector-upload
+  cancel-in-progress: true
+
+jobs:
+  storage-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: '🔨 Setup pnpm'
+        uses: pnpm/action-setup@v2
+      
+      - name: '🔨 Setup Node.js'
+        id: setup-node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: '🔨 Install dependencies'
+        run: pnpm install --frozen-lockfile
+          
+      - name: '🔨 Install Foundry'
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: '💾 Foundry compilation cache'
+        uses: actions/cache@v3
+        with:
+          path: |
+            cache
+            out
+          key: ${{ github.base_ref || github.ref_name }}-foundry
+          
+      - name: '🗃️ Upload contracts selectors'
+        run: forge selectors up --all
+            

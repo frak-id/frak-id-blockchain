@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.20;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {Initializable} from "@oz-upgradeable/proxy/utils/Initializable.sol";
 
 contract EIP712Base is Initializable {
     struct EIP712Domain {

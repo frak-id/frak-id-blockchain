@@ -13,13 +13,11 @@ concurrency:
 
 # ll the env required for hardhat
 env:
-  MUMBAI_PROVIDER: ${{ secrets.MUMBAI_PROVIDER }}
-  GOERLI_PROVIDER: ${{ secrets.GOERLI_PROVIDER }}
-  POLYGON_PROVIDER: ${{ secrets.POLYGON_PROVIDER }}
-  FRAK_DEPLOY_PRIV_KEY: ${{ secrets.SYBEL_DEPLOY_PRIVATE_KEY }}
+  MUMBAI_RPC_URL: ${{ secrets.MUMBAI_PROVIDER }}
+  GOERLI_RPC_URL: ${{ secrets.GOERLI_PROVIDER }}
+  POLYGON_RPC_URL: ${{ secrets.POLYGON_PROVIDER }}
   POLYGON_SCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
-  ETHER_SCAN_API_KEY: ${{ secrets.ETHER_SCAN_API_KEY }}
-  COIN_MARKET_CAP_API_KEY: ${{ secrets.COIN_MARKET_CAP_API_KEY }}
+  ETHERSCAN_SCAN_API_KEY: ${{ secrets.ETHER_SCAN_API_KEY }}
 
 jobs:
   test:
@@ -62,7 +60,13 @@ jobs:
             out
           key: ${{ github.base_ref || github.ref_name }}-foundry
           
-      - name: '🧪 Run tests'
+      - name: '📦️ Build contracts'
+        run: forge clean && forge build 
+          
+      - name: '🧪 Run storage tests'
+        run: pnpm run test:storage 
+          
+      - name: '🧪 Run forge tests'
         run: forge test --gas-report > gasreport.ansi 
 
       - name: '📈 Compare gas reports'

@@ -13,7 +13,7 @@ import {IFrakToken} from "../tokens/IFrakToken.sol";
 import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
 import {InvalidAddress, InvalidArray, RewardTooLarge} from "../utils/FrakErrors.sol";
 import {PushPullReward} from "../utils/PushPullReward.sol";
-import {Multicallable} from "solady/src/utils/Multicallable.sol";
+import {Multicallable} from "@solady/utils/Multicallable.sol";
 
 /**
  * @dev Represent our rewarder contract

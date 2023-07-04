@@ -3,5 +3,6 @@
 @prb/test/=lib/prb-test/src/
 @forge-std/=lib/forge-std/src/
 
-@oz/=node_modules/@openzeppelin/contracts/
-@oz-upgrades/=node_modules/@openzeppelin/contracts-upgradeable/
+@oz/=lib/openzeppelin-contracts/contracts/
+@oz-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
+@solady/=lib/solady/src/
