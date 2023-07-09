@@ -8,7 +8,7 @@ import {FraktionTransferCallback} from "../../tokens/FraktionTransferCallback.so
 import {PushPullReward} from "../../utils/PushPullReward.sol";
 import {FrakAccessControlUpgradeable} from "../../utils/FrakAccessControlUpgradeable.sol";
 import {InvalidAddress, NoReward} from "../../utils/FrakErrors.sol";
-import {EnumerableSet} from "@oz/utils/structs/EnumerableSet.sol";
+import {EnumerableSet} from "openzeppelin/utils/structs/EnumerableSet.sol";
 
 /**
  * @author  @KONFeature

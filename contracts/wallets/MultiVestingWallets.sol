@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.20;
 
-import {EnumerableSet} from "@oz/utils/structs/EnumerableSet.sol";
+import {EnumerableSet} from "openzeppelin/utils/structs/EnumerableSet.sol";
 import {SafeERC20Upgradeable} from "@oz-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {IERC20Upgradeable} from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
