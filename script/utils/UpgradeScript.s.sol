@@ -46,7 +46,7 @@ abstract contract UpgradeScript is Script {
             rewarder: 0x8D9fa601DA1416b087E9db6B6EaD63D4920A4528,
             minter: 0x1adc8CAaA35551730eCd82e0eEA683Aa90dB6cf0,
             frakTreasuryWallet: 0x7053f61CEA3B7C3b5f0e14de6eEdB01cA1850408,
-            swapPool: 0x01 // TODO: Not deployed yet
+            swapPool: address(1) // TODO: Not deployed yet
         });
         // Mumbai proxy address
         contractAddresses[80001] = ContractProxyAddresses({
@@ -59,7 +59,7 @@ abstract contract UpgradeScript is Script {
             rewarder: 0x0bD2a225E2c6173b42b907Cc4424076327D90F6F,
             minter: 0x8964e2Ed5fF27358c62a761f23957bd2b5165779,
             frakTreasuryWallet: 0x7CC62E1ecd246153DF4997352ec9C5fF172EE08C,
-            swapPool: 0xe4AF7F707E9BC6082f35c8cDc7567015CA2dBbec
+            swapPool: 0x117dCA88E744968db0589542aa4C1fe804d086d7
         });
     }
 

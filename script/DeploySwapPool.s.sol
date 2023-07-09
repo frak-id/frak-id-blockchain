@@ -6,7 +6,7 @@ import "forge-std/console.sol";
 import {UpgradeScript} from "./utils/UpgradeScript.s.sol";
 import {MonoTokenPool} from "singleton-swapper/MonoTokenPool.sol";
 
-contract FakeRewardScript is UpgradeScript {
+contract DeploySwapPool is UpgradeScript {
     /// @dev The basis point for the pool to deploy (on 1e4)
     uint256 private constant BPS = 0.05e4;
 
