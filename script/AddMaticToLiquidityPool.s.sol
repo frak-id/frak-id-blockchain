@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
@@ -66,7 +66,8 @@ contract AddMaticToLiquidityPool is UpgradeScript {
 
         // Build the programm
         // forgefmt: disable-next-item
-        program = BaseEncoderLib.init(4)
+        program = BaseEncoderLib
+            .init(4)
             .appendAddLiquidity(wmatic, owner, frkToDeposit, maticAmount)
             .appendReceive(wmatic, maticAmount, true)
             .appendPullAll(frkToken)

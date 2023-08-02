@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
 import {FrakMath} from "../../utils/FrakMath.sol";
 import {FrakRoles} from "../../utils/FrakRoles.sol";
@@ -60,7 +60,9 @@ contract ReferralPool is FrakAccessControlUpgradeable, PushPullReward {
         onlyRole(FrakRoles.ADMIN)
         whenNotPaused
     {
-        if (user == address(0) || referer == address(0) || user == referer) revert InvalidAddress();
+        if (user == address(0) || referer == address(0) || user == referer) {
+            revert InvalidAddress();
+        }
         // Get our content referer chain (to prevent multi kecack hash each time we access it)
         mapping(address => address) storage contentRefererChain = contentIdToRefereeToReferer[contentId];
 

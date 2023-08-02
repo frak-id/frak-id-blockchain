@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
@@ -89,7 +89,8 @@ contract PerformMaticFrkSwap is UpgradeScript {
     {
         // Build the program
         // forgefmt: disable-next-item
-        program = BaseEncoderLib.init(4)
+        program = BaseEncoderLib
+            .init(4)
             .appendSwap(wmatic, false, maticAmount)
             .appendReceive(wmatic, maticAmount, true)
             .appendSendAll(frkToken, user)
@@ -123,7 +124,8 @@ contract PerformMaticFrkSwap is UpgradeScript {
 
         // Build the program
         // forgefmt: disable-next-item
-        program = BaseEncoderLib.init(4)
+        program = BaseEncoderLib
+            .init(4)
             .appendSwap(wmatic, true, frkAmount)
             .appendPermitViaSig(address(frkToken), frkAmount, deadline, v, r, s)
             .appendPullAll(address(frkToken))

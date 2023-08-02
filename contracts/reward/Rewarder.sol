@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
 import {IRewarder} from "./IRewarder.sol";
 import {ContentBadges} from "./badges/ContentBadges.sol";
