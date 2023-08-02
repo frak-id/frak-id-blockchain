@@ -7,6 +7,7 @@ import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgr
 import {ContextMixin} from "../utils/ContextMixin.sol";
 import {IFrakToken} from "./IFrakToken.sol";
 import {EIP712Base} from "../utils/EIP712Base.sol";
+import {ECDSA} from "solady/utils/ECDSA.sol";
 
 /**
  * @author  @KONFeature
@@ -107,7 +108,7 @@ contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, EIP712B
         // Unchecked because the only math done is incrementing
         // the owner's nonce which cannot realistically overflow.
         unchecked {
-            address recoveredAddress = ecrecover(
+            address recoveredAddress = ECDSA.recover(
                 toTypedMessageHash(
                     keccak256(
                         abi.encode(
