@@ -114,6 +114,11 @@ abstract contract UpgradeScript is Script {
         vm.label(proxyAddress, label);
     }
 
+    /// @dev Get the deployer private key
+    function _deployerPrivateKey() internal view returns (uint256) {
+        return vm.envUint("DEPLOY_PRIV_KEY");
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                           Internal read method's                           */
     /* -------------------------------------------------------------------------- */
@@ -141,7 +146,7 @@ abstract contract UpgradeScript is Script {
     /* -------------------------------------------------------------------------- */
 
     modifier deployerBroadcast() {
-        uint256 deployerPrivateKey = vm.envUint("DEPLOY_PRIV_KEY");
+        uint256 deployerPrivateKey = _deployerPrivateKey();
         vm.startBroadcast(deployerPrivateKey);
         _;
         vm.stopBroadcast();

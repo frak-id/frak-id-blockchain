@@ -50,8 +50,6 @@ contract AddMaticToLiquidityPool is UpgradeScript {
         console.log("wMatic address: %s", wmatic);
         console.log("Frk to deposit: %s", frkToDeposit);
         console.log("Matic to deposit: %s", maticAmount);
-        // 14000000000000000000
-        // 1000000000000000000
 
         // Execute the command
         _executeAddLiquidity(pool, addLiquidityCommand, addresses.frakToken, frkToDeposit, maticAmount);
