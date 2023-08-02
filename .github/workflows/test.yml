@@ -60,6 +60,9 @@ jobs:
             out
           key: ${{ github.base_ref || github.ref_name }}-foundry
           
+      - name: '🎨 Run lint tests'
+        run: forge fmt --check 
+          
       - name: '📦️ Build contracts'
         run: forge clean && forge build 
           
