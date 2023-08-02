@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
 import {IERC20Upgradeable} from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {MultiVestingWallets} from "./MultiVestingWallets.sol";
@@ -76,7 +76,9 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
      */
     function _addVestingGroup(uint8 id, uint96 rewardCap, uint32 duration) private whenNotPaused {
         if (rewardCap == 0) revert NoReward();
-        if (duration == 0 || rewardCap + totalGroupCap > FRK_VESTING_CAP) revert InvalidCreationParam();
+        if (duration == 0 || rewardCap + totalGroupCap > FRK_VESTING_CAP) {
+            revert InvalidCreationParam();
+        }
         if (vestingGroup[id].rewardCap != 0) revert AlreadyUsedId();
         // Increase the total group supply
         totalGroupCap += rewardCap;
@@ -96,7 +98,9 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
     {
         // Ensure the group as enough supply
         VestingGroup storage initialGroup = _getSafeVestingGroup(initialId);
-        if (initialGroup.supply > initialGroup.rewardCap - amount) revert InsuficiantGroupSupply();
+        if (initialGroup.supply > initialGroup.rewardCap - amount) {
+            revert InsuficiantGroupSupply();
+        }
         VestingGroup storage targetGroup = _getSafeVestingGroup(targetId);
 
         // Transfer the founds
@@ -156,7 +160,9 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
         uint48 startDate
     ) external onlyRole(FrakRoles.VESTING_CREATOR) whenNotPaused {
         // Ensure all the param are correct
-        if (beneficiaries.length == 0 || beneficiaries.length != rewards.length) revert InvalidArray();
+        if (beneficiaries.length == 0 || beneficiaries.length != rewards.length) {
+            revert InvalidArray();
+        }
 
         // Find the group and check basic properties
         VestingGroup storage group = _getSafeVestingGroup(groupId);
@@ -173,7 +179,9 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
         }
 
         // Ensure we don't exceed the caps
-        if (group.supply + totalReward > group.rewardCap) revert RewardTooLarge();
+        if (group.supply + totalReward > group.rewardCap) {
+            revert RewardTooLarge();
+        }
 
         // Update the group supply
         group.supply += uint96(totalReward);

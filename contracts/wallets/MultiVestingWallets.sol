@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
-import {EnumerableSet} from "@oz/utils/structs/EnumerableSet.sol";
+import {EnumerableSet} from "openzeppelin/utils/structs/EnumerableSet.sol";
 import {SafeERC20Upgradeable} from "@oz-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {IERC20Upgradeable} from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
@@ -155,7 +155,9 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
         uint32 duration,
         uint48 startDate
     ) external whenNotPaused onlyRole(FrakRoles.VESTING_MANAGER) {
-        if (beneficiaries.length == 0 || beneficiaries.length != amounts.length) revert InvalidArray();
+        if (beneficiaries.length == 0 || beneficiaries.length != amounts.length) {
+            revert InvalidArray();
+        }
         _requireVestInputs(duration, startDate);
 
         uint256 freeReserve = availableReserve();
@@ -177,7 +179,9 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
      */
     function _requireVestInputs(uint32 duration, uint48 startDate) internal view {
         if (duration == 0) revert InvalidDuration();
-        if (block.timestamp > startDate || startDate > MAX_TIMESTAMP) revert InvalidDate();
+        if (block.timestamp > startDate || startDate > MAX_TIMESTAMP) {
+            revert InvalidDate();
+        }
     }
 
     /**

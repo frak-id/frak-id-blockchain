@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
 import "forge-std/Script.sol";
 import {UUPSUpgradeable} from "@oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {ERC1967Proxy} from "@oz/proxy/ERC1967/ERC1967Proxy.sol";
+import {ERC1967Proxy} from "openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
 
 /**
  * @author @KONFeature
@@ -24,6 +24,7 @@ abstract contract UpgradeScript is Script {
         address rewarder;
         address minter;
         address frakTreasuryWallet;
+        address swapPool;
     }
 
     /// @dev Mapping of chainId -> proxy addresses
@@ -44,7 +45,8 @@ abstract contract UpgradeScript is Script {
             contentPool: 0xDCB34659B83C4F8708fd7AcAA3755547BF8BBcA0,
             rewarder: 0x8D9fa601DA1416b087E9db6B6EaD63D4920A4528,
             minter: 0x1adc8CAaA35551730eCd82e0eEA683Aa90dB6cf0,
-            frakTreasuryWallet: 0x7053f61CEA3B7C3b5f0e14de6eEdB01cA1850408
+            frakTreasuryWallet: 0x7053f61CEA3B7C3b5f0e14de6eEdB01cA1850408,
+            swapPool: address(1) // TODO: Not deployed yet
         });
         // Mumbai proxy address
         contractAddresses[80001] = ContractProxyAddresses({
@@ -56,7 +58,8 @@ abstract contract UpgradeScript is Script {
             contentPool: 0xf10eF8435FD583B7007C5984DB27462B4401F380,
             rewarder: 0x0bD2a225E2c6173b42b907Cc4424076327D90F6F,
             minter: 0x8964e2Ed5fF27358c62a761f23957bd2b5165779,
-            frakTreasuryWallet: 0x7CC62E1ecd246153DF4997352ec9C5fF172EE08C
+            frakTreasuryWallet: 0x7CC62E1ecd246153DF4997352ec9C5fF172EE08C,
+            swapPool: 0x117dCA88E744968db0589542aa4C1fe804d086d7
         });
     }
 
@@ -111,6 +114,11 @@ abstract contract UpgradeScript is Script {
         vm.label(proxyAddress, label);
     }
 
+    /// @dev Get the deployer private key
+    function _deployerPrivateKey() internal view returns (uint256) {
+        return vm.envUint("DEPLOY_PRIV_KEY");
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                           Internal read method's                           */
     /* -------------------------------------------------------------------------- */
@@ -138,7 +146,7 @@ abstract contract UpgradeScript is Script {
     /* -------------------------------------------------------------------------- */
 
     modifier deployerBroadcast() {
-        uint256 deployerPrivateKey = vm.envUint("DEPLOY_PRIV_KEY");
+        uint256 deployerPrivateKey = _deployerPrivateKey();
         vm.startBroadcast(deployerPrivateKey);
         _;
         vm.stopBroadcast();

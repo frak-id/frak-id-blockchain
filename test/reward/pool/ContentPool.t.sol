@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
 import {ContentPool} from "@frak/reward/pool/ContentPool.sol";
 import {FrakMath} from "@frak/utils/FrakMath.sol";

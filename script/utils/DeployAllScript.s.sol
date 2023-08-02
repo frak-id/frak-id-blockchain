@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
 import {UpgradeScript} from "./UpgradeScript.s.sol";
 import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
@@ -12,6 +12,7 @@ import {Minter} from "@frak/minter/Minter.sol";
 import {ContentPool} from "@frak/reward/pool/ContentPool.sol";
 import {Rewarder} from "@frak/reward/Rewarder.sol";
 import {FrakRoles} from "@frak/utils/FrakRoles.sol";
+import {MonoTokenPool} from "singleton-swapper/MonoTokenPool.sol";
 
 contract DeployAllScript is UpgradeScript {
     constructor() {}
@@ -38,6 +39,9 @@ contract DeployAllScript is UpgradeScript {
         // Grant each roles
         _grantEcosystemRole(rewarder, contentPool, referralPool, fraktionTokens, minter);
 
+        // Deploy the initial pool
+        address swapPool = _deploySwapPool(frkToken, 1e3);
+
         // Once all set, save each address
         UpgradeScript.ContractProxyAddresses memory addresses = UpgradeScript.ContractProxyAddresses({
             frakToken: frkToken,
@@ -48,7 +52,8 @@ contract DeployAllScript is UpgradeScript {
             contentPool: contentPool,
             rewarder: rewarder,
             minter: minter,
-            frakTreasuryWallet: treasuryWallet
+            frakTreasuryWallet: treasuryWallet,
+            swapPool: swapPool
         });
         _setProxyAddresses(addresses);
     }
@@ -200,5 +205,10 @@ contract DeployAllScript is UpgradeScript {
 
         // Grant the mint role to the minter
         FraktionTokens(fraktionTokens).grantRole(FrakRoles.MINTER, minter);
+    }
+
+    function _deploySwapPool(address frkToken, uint256 bps) private returns (address poolAddress) {
+        MonoTokenPool pool = new MonoTokenPool(frkToken, bps);
+        poolAddress = address(pool);
     }
 }

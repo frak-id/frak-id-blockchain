@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
 import {StdUtils} from "@forge-std/StdUtils.sol";
 import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";

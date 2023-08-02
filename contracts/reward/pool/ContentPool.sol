@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
 import {FrakMath} from "../../utils/FrakMath.sol";
 import {FrakRoles} from "../../utils/FrakRoles.sol";
@@ -8,7 +8,7 @@ import {FraktionTransferCallback} from "../../tokens/FraktionTransferCallback.so
 import {PushPullReward} from "../../utils/PushPullReward.sol";
 import {FrakAccessControlUpgradeable} from "../../utils/FrakAccessControlUpgradeable.sol";
 import {InvalidAddress, NoReward} from "../../utils/FrakErrors.sol";
-import {EnumerableSet} from "@oz/utils/structs/EnumerableSet.sol";
+import {EnumerableSet} from "openzeppelin/utils/structs/EnumerableSet.sol";
 
 /**
  * @author  @KONFeature

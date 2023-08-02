@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
 import {IRewarder} from "./IRewarder.sol";
 import {ContentBadges} from "./badges/ContentBadges.sol";
@@ -13,7 +13,7 @@ import {IFrakToken} from "../tokens/IFrakToken.sol";
 import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
 import {InvalidAddress, InvalidArray, RewardTooLarge} from "../utils/FrakErrors.sol";
 import {PushPullReward} from "../utils/PushPullReward.sol";
-import {Multicallable} from "@solady/utils/Multicallable.sol";
+import {Multicallable} from "solady/utils/Multicallable.sol";
 
 /**
  * @dev Represent our rewarder contract

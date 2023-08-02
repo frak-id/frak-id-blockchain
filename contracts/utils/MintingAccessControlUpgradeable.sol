@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
 import {FrakAccessControlUpgradeable} from "./FrakAccessControlUpgradeable.sol";
 import {FrakRoles} from "../utils/FrakRoles.sol";
