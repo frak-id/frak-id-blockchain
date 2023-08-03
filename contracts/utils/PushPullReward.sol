@@ -162,7 +162,6 @@ abstract contract PushPullReward is Initializable {
      * @dev Core logic of the withdraw method
      */
     function _tryWithdraw(address user) internal {
-        uint256 userAmount;
         assembly {
             // Check input params
             if iszero(user) {
@@ -171,7 +170,7 @@ abstract contract PushPullReward is Initializable {
             }
         }
         // Get current reward, and exit directly if none present
-        userAmount = _pendingRewards[user];
+        uint256 userAmount = _pendingRewards[user];
         if (userAmount == 0) {
             return;
         }
