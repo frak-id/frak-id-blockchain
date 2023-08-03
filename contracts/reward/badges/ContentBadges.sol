@@ -39,9 +39,8 @@ abstract contract ContentBadges {
             // Kecak (contentId, _contentBadges.slot)
             mstore(0, contentId)
             mstore(0x20, _contentBadges.slot)
-            let badgeSlot := keccak256(0, 0x40)
             // Load it
-            badge := sload(badgeSlot)
+            badge := sload(keccak256(0, 0x40))
             // If null, set it to 1 ether by default
             if iszero(badge) { badge := 1000000000000000000 }
         }

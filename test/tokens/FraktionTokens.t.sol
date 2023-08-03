@@ -100,7 +100,7 @@ contract FraktionTokensTest is UUPSTestHelper, StdUtils {
         // Ensure we can transfer all the assets to the target address
         vm.prank(address(1));
         fraktionTokens.safeTransferFrom(address(1), address(13), 1312, 1, "");
-        
+
         vm.prank(address(2));
         fraktionTokens.safeTransferFrom(address(2), address(13), 1312, 1, "");
 

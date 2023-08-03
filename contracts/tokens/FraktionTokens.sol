@@ -384,13 +384,12 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 // Get the slot for the current id
                 mstore(0, calldataload(i))
                 mstore(0x20, 0xcb) // `_balances.slot` on the OZ contract
-                let idSlot := keccak256(0, 0x40)
+                // Store it as destination for the account balance we will check
+                mstore(0x20, keccak256(0, 0x40))
                 // Slot for the balance of the given account
                 mstore(0, account)
-                mstore(0x20, idSlot)
-                let balanceSlot := keccak256(0, 0x40)
                 // Set the balance at the right index
-                mstore(balanceOffset, sload(balanceSlot))
+                mstore(balanceOffset, sload(keccak256(0, 0x40)))
                 // Increase the iterator
                 i := add(i, 0x20)
                 balanceOffset := add(balanceOffset, 0x20)
