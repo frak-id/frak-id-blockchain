@@ -195,7 +195,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
      */
     function withdrawFounds() external virtual override whenNotPaused {
         _computeAndSaveAllForUser(msg.sender);
-        _withdraw(msg.sender);
+        _tryWithdraw(msg.sender);
     }
 
     /**
@@ -203,7 +203,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
      */
     function withdrawFounds(address user) external virtual override onlyRole(FrakRoles.ADMIN) whenNotPaused {
         _computeAndSaveAllForUser(user);
-        _withdraw(user);
+        _tryWithdraw(user);
     }
 
     /* -------------------------------------------------------------------------- */

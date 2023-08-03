@@ -159,6 +159,33 @@ abstract contract PushPullReward is Initializable {
     }
 
     /**
+     * @dev Core logic of the withdraw method
+     */
+    function _tryWithdraw(address user) internal {
+        uint256 userAmount;
+        assembly {
+            // Check input params
+            if iszero(user) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
+        // Get current reward, and exit directly if none present
+        userAmount = _pendingRewards[user];
+        if (userAmount == 0) {
+            return;
+        }
+
+        // Emit the witdraw event
+        emit RewardWithdrawed(user, userAmount, 0);
+
+        // Reset his reward
+        _pendingRewards[user] = 0;
+        // Perform the transfer of the founds
+        token.transfer(user, userAmount);
+    }
+
+    /**
      * @dev Core logic of the withdraw method, but with fee this time
      * @notice If that's the fee recipient performing the call, withdraw without fee's (otherwise, infinite loop required to get all the frk foundation fee's)
      */
