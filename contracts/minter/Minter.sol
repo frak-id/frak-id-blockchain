@@ -31,6 +31,9 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
     /// @dev Error emitted when we only want to mint a free fraktion, and that's not a free fraktion
     error ExpectingOnlyFreeFraktion();
 
+    /// @dev Error emitted when the have more than one fraktions of the given type
+    error TooManyFraktion();
+
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
     uint256 private constant _INVALID_ADDRESS_SELECTOR = 0xe6c4247b;
 
@@ -39,6 +42,9 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
 
     /// @dev 'bytes4(keccak256(bytes("ExpectingOnlyFreeFraktion()")))'
     uint256 private constant _EXPECTING_ONLY_FREE_FRAKTION_SELECTOR = 0x121becbf;
+
+    /// @dev 'bytes4(keccak256("TooManyFraktion()"))'
+    uint256 private constant _TOO_MANY_FRAKTION_SELECTOR = 0xaa37c4ae;
 
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
@@ -273,6 +279,11 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
      * @param   s  Signature spec secp256k1
      */
     function _mintFraktionForUser(uint256 id, address to, uint256 deadline, uint8 v, bytes32 r, bytes32 s) private {
+        // Get the current user balance, and exit if he already got a fraktion of this type
+        uint256 balance = fraktionTokens.balanceOf(to, id);
+        if (balance != 0) {
+            revert TooManyFraktion();
+        }
         // Get the cost of the fraction
         uint256 cost = getCostBadge(id);
         assembly {
@@ -301,6 +312,12 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
                 mstore(0x00, _EXPECTING_ONLY_FREE_FRAKTION_SELECTOR)
                 revert(0x1c, 0x04)
             }
+        }
+
+        // Get the current user balance, and exit if he already got a fraktion of this type
+        uint256 balance = fraktionTokens.balanceOf(to, id);
+        if (balance != 0) {
+            revert TooManyFraktion();
         }
 
         // If we are all good, mint the free fraktion to the user

@@ -364,7 +364,7 @@ contract MinterTest is FrkTokenTestHelper {
         (v, r, s) = _getSignedPermit(privateKey, cost);
 
         // Launch the second buy process
-        vm.expectRevert(FraktionTokens.TooManyFraktion.selector);
+        vm.expectRevert(Minter.TooManyFraktion.selector);
         vm.prank(user);
         minter.mintFraktion(fraktionCommonId, block.timestamp, v, r, s);
     }
@@ -403,7 +403,7 @@ contract MinterTest is FrkTokenTestHelper {
         // Add an initial content
         uint256 contentId = minter.addContent(address(1), 1, 1, 1, 1);
         minter.mintFreeFraktionForUser(contentId.buildFreeNftId(), address(1));
-        vm.expectRevert(FraktionTokens.TooManyFraktion.selector);
+        vm.expectRevert(Minter.TooManyFraktion.selector);
         minter.mintFreeFraktionForUser(contentId.buildFreeNftId(), address(1));
     }
 

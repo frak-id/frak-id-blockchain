@@ -30,9 +30,6 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     /// @dev Error emitted when it remain some fraktion supply when wanting to increase it
     error RemainingSupply();
 
-    /// @dev Error emitted when the have more than one fraktions of the given type
-    error TooManyFraktion();
-
     /// @dev 'bytes4(keccak256("InsuficiantSupply()"))'
     uint256 private constant _INSUFICIENT_SUPPLY_SELECTOR = 0xa24b545a;
 
@@ -44,9 +41,6 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
 
     /// @dev 'bytes4(keccak256("RemainingSupply()"))'
     uint256 private constant _REMAINING_SUPPLY_SELECTOR = 0x0180e6b4;
-
-    /// @dev 'bytes4(keccak256("TooManyFraktion()"))'
-    uint256 private constant _TOO_MANY_FRAKTION_SELECTOR = 0xaa37c4ae;
 
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
@@ -293,28 +287,6 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                     if iszero(from) { availableSupply := sub(availableSupply, amount) }
                     if iszero(to) { availableSupply := add(availableSupply, amount) }
                     sstore(availableSupplySlot, availableSupply)
-                }
-
-                // Check if the recipient don't already have one fraktion of this type
-                if to {
-                    // If the amount is greater than 1, abort
-                    if gt(amount, 1) {
-                        mstore(0, _TOO_MANY_FRAKTION_SELECTOR)
-                        revert(0x1c, 0x04)
-                    }
-                    // Get the slot for the current id
-                    mstore(0, id)
-                    mstore(0x20, 0xcb) // `_balances.slot` on the OZ contract
-                    let idSlot := keccak256(0, 0x40)
-                    // Slot for the balance of the given account
-                    mstore(0, to)
-                    mstore(0x20, idSlot)
-                    let balanceSlot := keccak256(0, 0x40)
-                    // If the recipient already have a balance for this id, exit directly
-                    if sload(balanceSlot) {
-                        mstore(0, _TOO_MANY_FRAKTION_SELECTOR)
-                        revert(0x1c, 0x04)
-                    }
                 }
 
                 // Increase our offset's
