@@ -2,7 +2,6 @@
 pragma solidity 0.8.21;
 
 import {FrakMath} from "../../utils/FrakMath.sol";
-import {FrakRoles} from "../../utils/FrakRoles.sol";
 import {InvalidFraktionType} from "../../utils/FrakErrors.sol";
 
 /**

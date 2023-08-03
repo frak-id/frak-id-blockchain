@@ -3,7 +3,6 @@ pragma solidity 0.8.21;
 
 import {Initializable} from "@oz-upgradeable/proxy/utils/Initializable.sol";
 import {IERC20Upgradeable} from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import {FrakAccessControlUpgradeable} from "./FrakAccessControlUpgradeable.sol";
 import {NoReward, InvalidAddress, RewardTooLarge} from "./FrakErrors.sol";
 
 /**

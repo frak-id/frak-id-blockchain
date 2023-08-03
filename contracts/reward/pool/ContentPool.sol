@@ -3,7 +3,6 @@ pragma solidity 0.8.21;
 
 import {FrakMath} from "../../utils/FrakMath.sol";
 import {FrakRoles} from "../../utils/FrakRoles.sol";
-import {FraktionTokens} from "../../tokens/FraktionTokens.sol";
 import {FraktionTransferCallback} from "../../tokens/FraktionTransferCallback.sol";
 import {PushPullReward} from "../../utils/PushPullReward.sol";
 import {FrakAccessControlUpgradeable} from "../../utils/FrakAccessControlUpgradeable.sol";
@@ -94,6 +93,22 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         uint96 lastStateClaim; // The last state amount claimed, pos : 0x0F + 0x0C -> 0x0F <-> 0x1B
         // Second storage slot
         uint256 lastStateIndex; // What was the last state index he claimed in the pool ? -> TODO : 0x20 or Ox1B -> (0x0F + 0x0C)
+    }
+
+    /**
+     * @dev Represent the participant state in a pool
+     * @dev Only used for view function! Heavy object that shouldn't be stored in storage
+     */
+    struct ParticipantInPoolState {
+        // Pool info's
+        uint256 poolId;
+        uint256 totalShares; // The total shares of the pool at the last state
+        uint256 poolState; // The index of the current pool state
+        // Participant info's
+        uint256 shares;
+        uint256 lastStateClaimed; // The last state amount claimed for the given pool
+        uint256 lastStateIndex; // The index of the last state a participant claimed in a pool
+        uint256 lastStateClaimable; // The claimable amount for the participant in the given pool
     }
 
     /* -------------------------------------------------------------------------- */
@@ -433,10 +448,6 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         }
     }
 
-    /* -------------------------------------------------------------------------- */
-    /*                          Internal view function's                          */
-    /* -------------------------------------------------------------------------- */
-
     /**
      * @dev Find only the last reward state for the given content
      */
@@ -522,5 +533,56 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         returns (Participant memory participant)
     {
         participant = participants[contentId][user];
+    }
+
+    /**
+     * @dev Get all the user pools with the current state
+     */
+    function getParticipantStates(address user)
+        external
+        view
+        returns (ParticipantInPoolState[] memory participantStateInPool)
+    {
+        // Get all the user pool
+        EnumerableSet.UintSet storage contentPoolIds = userContentPools[user];
+        uint256[] memory _poolsIds = userContentPools[user].values();
+
+        // Cache the array length
+        uint256 length = _poolsIds.length;
+
+        // Init our return array
+        participantStateInPool = new ParticipantInPoolState[](_poolsIds.length);
+
+        for (uint256 index = 0; index < length;) {
+            // Get the content pool id and the participant and last pool id
+            uint256 contentId = contentPoolIds.at(index);
+            Participant storage participant = participants[contentId][user];
+
+            // Get our content states, and the target length
+            RewardState[] storage contentStates = rewardStates[contentId];
+            uint256 lastPoolIndex = contentStates.length - 1;
+
+            // Compute the amount the user can claim on this pool state
+            uint256 lastStateClaimable = computeUserReward(contentStates[lastPoolIndex], participant);
+            if (lastPoolIndex == participant.lastStateIndex) {
+                lastStateClaimable -= participant.lastStateClaim;
+            }
+
+            // Push the infos for the pool
+            participantStateInPool[index] = ParticipantInPoolState({
+                poolId: contentId,
+                totalShares: contentStates[lastPoolIndex].totalShares,
+                poolState: lastPoolIndex,
+                shares: participant.shares,
+                lastStateClaimed: participant.lastStateClaim,
+                lastStateIndex: participant.lastStateIndex,
+                lastStateClaimable: lastStateClaimable
+            });
+
+            // Compute and save the reward for this pool
+            unchecked {
+                ++index;
+            }
+        }
     }
 }

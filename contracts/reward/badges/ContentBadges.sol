@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {FrakMath} from "../../utils/FrakMath.sol";
-import {FrakRoles} from "../../utils/FrakRoles.sol";
 import {BadgeTooLarge} from "../../utils/FrakErrors.sol";
 
 /**
