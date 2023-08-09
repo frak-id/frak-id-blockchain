@@ -412,9 +412,9 @@ contract Rewarder is
         uint256 contentPoolReward;
         assembly {
             // Compute the total reward
-            let loadedTpu := sload(tokenGenerationFactor.slot)
             // Div by 1e18 since earning factor and token generation factor are on 1e18
-            let totalReward := div(mul(mul(listenCount, earningFactor), loadedTpu), 1000000000000000000)
+            let totalReward :=
+                div(mul(mul(listenCount, earningFactor), sload(tokenGenerationFactor.slot)), 1000000000000000000)
             totalReward :=
                 div(
                     mul(mul(totalReward, contentBadge), rewardForContentType), mul(1000000000000000000, 1000000000000000000)

@@ -85,4 +85,28 @@ contract FraktionTokensTest is UUPSTestHelper, StdUtils {
         vm.expectRevert("ERC1155: mint to the zero address");
         fraktionTokens.mint(address(0), 1312, 1);
     }
+
+    /*
+     * ===== TEST : safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes calldata data) =====
+     */
+    function test_transfer() public {
+        // Mint a few initial tokens to different address
+        vm.startPrank(deployer);
+        fraktionTokens.mint(address(1), 1312, 1);
+        fraktionTokens.mint(address(2), 1312, 1);
+        fraktionTokens.mint(address(3), 1312, 1);
+        vm.stopPrank();
+
+        // Ensure we can transfer all the assets to the target address
+        vm.prank(address(1));
+        fraktionTokens.safeTransferFrom(address(1), address(13), 1312, 1, "");
+
+        vm.prank(address(2));
+        fraktionTokens.safeTransferFrom(address(2), address(13), 1312, 1, "");
+
+        vm.prank(address(3));
+        fraktionTokens.safeTransferFrom(address(3), address(13), 1312, 1, "");
+
+        assertEq(fraktionTokens.balanceOf(address(13), 1312), 3);
+    }
 }

@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {FrakMath} from "../../utils/FrakMath.sol";
-import {FrakRoles} from "../../utils/FrakRoles.sol";
 import {BadgeTooLarge} from "../../utils/FrakErrors.sol";
 
 /**
@@ -39,9 +37,8 @@ abstract contract ListenerBadges {
             // Kecak (listener, _listenerBadges.slot)
             mstore(0, listener)
             mstore(0x20, _listenerBadges.slot)
-            let badgeSlot := keccak256(0, 0x40)
             // Load it
-            listenerBadge := sload(badgeSlot)
+            listenerBadge := sload(keccak256(0, 0x40))
             // If null, set it to 1 ether by default
             if iszero(listenerBadge) { listenerBadge := 1000000000000000000 }
         }

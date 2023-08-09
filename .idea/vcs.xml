@@ -15,7 +15,13 @@
     <mapping directory="$PROJECT_DIR$/lib/prb-test" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/singleton-swapper" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/singleton-swapper/lib/forge-std" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/singleton-swapper/lib/forge-std/lib/ds-test" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/singleton-swapper/lib/openzeppelin-contracts" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/singleton-swapper/lib/openzeppelin-contracts/lib/erc4626-tests" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/singleton-swapper/lib/openzeppelin-contracts/lib/forge-std" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/singleton-swapper/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/singleton-swapper/lib/solady" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/singleton-swapper/lib/solady/lib/ds-test" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/solady" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/solady/lib/ds-test" vcs="Git" />
   </component>

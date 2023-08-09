@@ -3,7 +3,6 @@ pragma solidity 0.8.21;
 
 import {Initializable} from "@oz-upgradeable/proxy/utils/Initializable.sol";
 import {IERC20Upgradeable} from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import {FrakAccessControlUpgradeable} from "./FrakAccessControlUpgradeable.sol";
 import {NoReward, InvalidAddress, RewardTooLarge} from "./FrakErrors.sol";
 
 /**
@@ -154,6 +153,32 @@ abstract contract PushPullReward is Initializable {
             // Reset his reward
             sstore(rewardSlot, 0)
         }
+        // Perform the transfer of the founds
+        token.transfer(user, userAmount);
+    }
+
+    /**
+     * @dev Core logic of the withdraw method
+     */
+    function _tryWithdraw(address user) internal {
+        assembly {
+            // Check input params
+            if iszero(user) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
+        // Get current reward, and exit directly if none present
+        uint256 userAmount = _pendingRewards[user];
+        if (userAmount == 0) {
+            return;
+        }
+
+        // Emit the witdraw event
+        emit RewardWithdrawed(user, userAmount, 0);
+
+        // Reset his reward
+        _pendingRewards[user] = 0;
         // Perform the transfer of the founds
         token.transfer(user, userAmount);
     }
