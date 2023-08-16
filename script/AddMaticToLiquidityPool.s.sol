@@ -28,13 +28,13 @@ contract AddMaticToLiquidityPool is UpgradeScript {
         address poolOwner = address(0x7caF754C934710D7C73bc453654552BEcA38223F);
 
         // Amount of matic to deposit
-        uint256 maticAmount = 1e18;
+        uint256 maticAmount = 5 ether;
 
         // Build the command
         (uint256 frkToDeposit, bytes memory addLiquidityCommand) = _buildAddLiquidityCommand(poolOwner, maticAmount);
 
-        console.log("Frk to deposit: %s", frkToDeposit);
-        console.log("Matic to deposit: %s", maticAmount);
+        console.log("Will deposit Frk  : %s", frkToDeposit);
+        console.log("Will deposit Matic: %s", maticAmount);
 
         // Execute the command
         _executeAddLiquidity(pool, addLiquidityCommand, addresses.frakToken, frkToDeposit, maticAmount);
@@ -46,8 +46,8 @@ contract AddMaticToLiquidityPool is UpgradeScript {
         pure
         returns (uint256 frkToDeposit, bytes memory program)
     {
-        // Compute the ration between matic & frak (matic is at 0,68$ and FRK at 0,048)
-        frkToDeposit = maticAmount * (uint256(0.68e18) / uint256(0.048e18));
+        // Compute the ration between matic & frak (ration at 13.72)
+        frkToDeposit = (maticAmount * 13_720) / 1000;
 
         // Build the programm
         // forgefmt: disable-next-item

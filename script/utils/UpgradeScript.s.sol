@@ -59,7 +59,7 @@ abstract contract UpgradeScript is Script {
             rewarder: 0x0bD2a225E2c6173b42b907Cc4424076327D90F6F,
             minter: 0x8964e2Ed5fF27358c62a761f23957bd2b5165779,
             frakTreasuryWallet: 0x7CC62E1ecd246153DF4997352ec9C5fF172EE08C,
-            swapPool: 0x117dCA88E744968db0589542aa4C1fe804d086d7
+            swapPool: 0x93cF648ec27605C4Ec3C8972837B832EcC1550a1
         });
     }
 

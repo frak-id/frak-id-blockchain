@@ -14,6 +14,8 @@ contract DeploySwapPool is UpgradeScript {
         // Get the current addresses
         UpgradeScript.ContractProxyAddresses memory addresses = _currentProxyAddresses();
 
+        console.log("Deploying to chain: %s", block.chainid);
+
         // Get the wmatic address
         address wmatic;
         if (block.chainid == 80001) {
