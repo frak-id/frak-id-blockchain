@@ -49,7 +49,7 @@ contract DeployAllScript is UpgradeScript {
             rewarder: rewarder,
             minter: minter,
             frakTreasuryWallet: treasuryWallet,
-            swapPool: address(0)
+            swapPool: address(1)
         });
         _setProxyAddresses(addresses);
     }

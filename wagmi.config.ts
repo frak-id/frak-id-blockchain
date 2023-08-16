@@ -20,7 +20,8 @@ export default defineConfig({
                 'Multicallable.json',
                 'PushPullReward.json',
                 'ReferralPool.json',
-                'Rewarder.json'
+                'Rewarder.json',
+                'MonoPool.json'
             ]
         }),
     ],
