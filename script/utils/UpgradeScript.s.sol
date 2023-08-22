@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
+import "forge-std/console.sol";
 import "forge-std/Script.sol";
 import {UUPSUpgradeable} from "@oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ERC1967Proxy} from "openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
@@ -59,7 +60,7 @@ abstract contract UpgradeScript is Script {
             rewarder: 0x0bD2a225E2c6173b42b907Cc4424076327D90F6F,
             minter: 0x8964e2Ed5fF27358c62a761f23957bd2b5165779,
             frakTreasuryWallet: 0x7CC62E1ecd246153DF4997352ec9C5fF172EE08C,
-            swapPool: 0x93cF648ec27605C4Ec3C8972837B832EcC1550a1
+            swapPool: 0xf48312A6fa5d04dc81C8BA45ee544960e0F886DB
         });
     }
 
@@ -147,6 +148,7 @@ abstract contract UpgradeScript is Script {
 
     modifier deployerBroadcast() {
         uint256 deployerPrivateKey = _deployerPrivateKey();
+        console.log("Deployer address %s", vm.addr(deployerPrivateKey));
         vm.startBroadcast(deployerPrivateKey);
         _;
         vm.stopBroadcast();

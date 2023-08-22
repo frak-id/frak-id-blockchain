@@ -38,7 +38,7 @@ contract PerformMaticFrkSwap is UpgradeScript {
 
         // Build the swap matic command
         console.log("=== Matic->frk swap ===");
-        uint256 maticAmount = 0.5e18;
+        uint256 maticAmount = 0.05 ether;
         bytes memory swapMaticCommand = _buildSwapMaticToFrkCommand(maticAmount, swapUser);
 
         console.log("Matic to swap: %s", maticAmount);
@@ -51,7 +51,7 @@ contract PerformMaticFrkSwap is UpgradeScript {
 
         // Build the swap frk command
         console.log("=== Frk->matic swap ===");
-        uint256 frkAmount = 3e18;
+        uint256 frkAmount = 5 ether;
         bytes memory swapFrkCommand =
             _buildSwapFrkToMaticCommand(FrakToken(addresses.frakToken), address(pool), frkAmount, _deployerPrivateKey());
 
@@ -91,14 +91,15 @@ contract PerformMaticFrkSwap is UpgradeScript {
         (uint256 deadline, uint8 v, bytes32 r, bytes32 s) =
             _generatePermitSignature(SignatureParams(frkToken, pool, frkAmount, privateKey));
 
+        AppendPermitSignature memory permitParams =
+            AppendPermitSignature(vm.addr(privateKey), frkAmount, deadline, v, r, s);
+
         // Build the program
         // forgefmt: disable-next-item
         program = EncoderLib
             .init()
             .appendSwap(true, frkAmount);
-
-        return _appendPermitSignature(program, AppendPermitSignature(vm.addr(privateKey), frkAmount, deadline, v, r, s))
-            .done();
+        return _appendPermitSignature(program, permitParams).done();
     }
 
     struct AppendPermitSignature {

@@ -18,7 +18,8 @@
     "test:forge": "forge test",
     "test:storage": "npx @openzeppelin/upgrades-core validate out/build-info",
     "coverage": "forge coverage",
-    "generate": "wagmi generate"
+    "generate": "wagmi generate",
+    "generate:react": "wagmi generate -c ./wagmi-react.config.ts"
   },
   "devDependencies": {
     "@openzeppelin/upgrades-core": "^1.28.0",
