@@ -24,14 +24,11 @@ contract AddMaticToLiquidityPool is UpgradeScript {
         // Find the mono token pool
         MonoPool pool = MonoPool(payable(addresses.swapPool));
 
-        // Address of the pool owner
-        address poolOwner = address(0x7caF754C934710D7C73bc453654552BEcA38223F);
-
         // Amount of matic to deposit
         uint256 maticAmount = 5 ether;
 
         // Build the command
-        (uint256 frkToDeposit, bytes memory addLiquidityCommand) = _buildAddLiquidityCommand(poolOwner, maticAmount);
+        (uint256 frkToDeposit, bytes memory addLiquidityCommand) = _buildAddLiquidityCommand(maticAmount);
 
         console.log("Will deposit Frk  : %s", frkToDeposit);
         console.log("Will deposit Matic: %s", maticAmount);
@@ -41,7 +38,7 @@ contract AddMaticToLiquidityPool is UpgradeScript {
     }
 
     /// @dev Build the add liquidity command
-    function _buildAddLiquidityCommand(address owner, uint256 maticAmount)
+    function _buildAddLiquidityCommand(uint256 maticAmount)
         private
         pure
         returns (uint256 frkToDeposit, bytes memory program)
@@ -53,7 +50,7 @@ contract AddMaticToLiquidityPool is UpgradeScript {
         // forgefmt: disable-next-item
         program = EncoderLib
             .init()
-            .appendAddLiquidity(owner, frkToDeposit, maticAmount)
+            .appendAddLiquidity(frkToDeposit, maticAmount)
             .appendReceive(false, maticAmount, true)
             .appendReceiveAll(true)
             .done();
