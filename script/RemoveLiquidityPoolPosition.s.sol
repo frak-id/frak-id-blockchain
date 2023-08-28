@@ -5,6 +5,7 @@ import "forge-std/Script.sol";
 import "forge-std/console.sol";
 import {UpgradeScript} from "./utils/UpgradeScript.s.sol";
 import {MonoPool} from "swap-pool/MonoPool.sol";
+import {Token} from "swap-pool/libs/TokenLib.sol";
 import {EncoderLib} from "swap-pool/encoder/EncoderLib.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 
@@ -25,17 +26,17 @@ contract RemoveLiquidityPoolPosition is UpgradeScript {
         MonoPool pool = MonoPool(payable(addresses.swapPool));
 
         // Address of the pool owner
-        address poolOwner = address(0x7caF754C934710D7C73bc453654552BEcA38223F);
+        address poolOwner = _deployerAddress();
 
         // Get the position
         uint256 position = pool.getPosition(poolOwner);
-        (address token0, address token1) = pool.getTokens();
+        (Token token0, Token token1) = pool.getTokens();
         console.log("Pool position : %s", position);
-        console.log("Pool token0 : %s", token0);
-        console.log("Pool token1 : %s", token1);
+        console.log("Pool token0 : %s", Token.unwrap(token0));
+        console.log("Pool token1 : %s", Token.unwrap(token1));
 
         // Build the command
-        bytes memory program = _builRemoveLiquidityCommand(poolOwner, position);
+        bytes memory program = _builRemoveLiquidityAndClaimFeesCommand(poolOwner, position);
 
         // Execute the command
         _executeRemoveLiquidity(pool, program);
@@ -48,9 +49,31 @@ contract RemoveLiquidityPoolPosition is UpgradeScript {
         program = EncoderLib
             .init()
             .appendRemoveLiquidity(position)
-            .appendSendAll(true, owner, false)
-            .appendSendAll(false, owner, true)
+            .appendSendAll(true, owner)
+            .appendSendAll(false, owner)
             .done();
+    }
+
+    /// @dev Build the add liquidity command
+    function _builRemoveLiquidityAndClaimFeesCommand(address owner, uint256 position)
+        private
+        pure
+        returns (bytes memory program)
+    {
+        // Build the programm
+        // forgefmt: disable-next-item
+        program = EncoderLib
+            .init()
+            .appendClaimFees()
+            .appendRemoveLiquidity(position)
+            .appendSendAll(true, owner)
+            .appendSendAll(false, owner)
+            .done();
+    }
+
+    /// @dev Transfer the fees ownership
+    function _transferFeesOwnership(MonoPool pool, address newOwner) private deployerBroadcast {
+        pool.updateFeeReceiver(newOwner, 100);
     }
 
     /// @dev Execute the remove liquidity command

@@ -34,7 +34,7 @@ contract PerformMaticFrkSwap is UpgradeScript {
         _postPoolReserveLog(pool);
 
         // Address of the pool owner
-        address swapUser = address(0x7caF754C934710D7C73bc453654552BEcA38223F);
+        address swapUser = _deployerAddress();
 
         // Build the swap matic command
         console.log("=== Matic->frk swap ===");
@@ -76,8 +76,8 @@ contract PerformMaticFrkSwap is UpgradeScript {
         program = EncoderLib
             .init()
             .appendSwap(false, maticAmount)
-            .appendReceive(false, maticAmount, true)
-            .appendSendAll(true, user, false)
+            .appendReceive(false, maticAmount)
+            .appendSendAll(true, user)
             .done();
     }
 
@@ -120,7 +120,7 @@ contract PerformMaticFrkSwap is UpgradeScript {
         return program
         .appendPermitViaSig(true, params.frkAmount, params.deadline, params.v, params.r, params.s)
         .appendReceiveAll(true)
-        .appendSendAll(false, params.user, true);
+        .appendSendAll(false, params.user);
     }
 
     struct SignatureParams {
