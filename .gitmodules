@@ -13,6 +13,6 @@ url = https://github.com/foundry-rs/forge-std
 [submodule "lib/solady"]
 	path = lib/solady
 	url = https://github.com/vectorized/solady
-[submodule "lib/singleton-swapper"]
-	path = lib/singleton-swapper
-	url = https://github.com/frak-id/singleton-swapper
+[submodule "lib/swap-pool"]
+	path = lib/swap-pool
+	url = https://github.com/frak-id/swap-pool

@@ -111,6 +111,16 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         uint256 lastStateClaimable; // The claimable amount for the participant in the given pool
     }
 
+    /**
+     * @dev In memory accounter for the balance claimable update post transfer
+     */
+    struct FraktionTransferAccounter {
+        address from;
+        uint256 deltaFrom;
+        address to;
+        uint256 deltaTo;
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                                   Storage                                  */
     /* -------------------------------------------------------------------------- */
@@ -147,42 +157,48 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /*                          External write funtion's                          */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Add a reward inside a content pool
-     */
+    /// @dev Add a new `rewardAmount` to the pool for the content `contentId`
     function addReward(uint256 contentId, uint256 rewardAmount)
         external
         payable
         onlyRole(FrakRoles.REWARDER)
         whenNotPaused
     {
-        assembly {
+        // Ensure reward is specified
+        assembly ("memory-safe") {
             if or(iszero(rewardAmount), gt(rewardAmount, MAX_REWARD)) {
                 mstore(0x00, _NO_REWARD_SELECTOR)
                 revert(0x1c, 0x04)
             }
         }
+        // Get the current state
         RewardState storage currentState = lastContentState(contentId);
         if (!currentState.open) revert PoolStateClosed();
+
+        // Increase the reward
         unchecked {
             currentState.currentPoolReward += uint96(rewardAmount);
         }
+
+        // Send the event
         emit PoolRewardAdded(contentId, rewardAmount);
     }
 
-    /**
-     * @dev called when new fraktions are transfered
-     */
+    /// @dev Callback from the erc1155 tokens when fraktion are transfered
     function onFraktionsTransferred(address from, address to, uint256[] memory ids, uint256[] memory amount)
         external
         payable
         override
         onlyRole(FrakRoles.TOKEN_CONTRACT)
     {
+        // Create our update accounter
+        FraktionTransferAccounter memory accounter =
+            FraktionTransferAccounter({from: from, deltaFrom: 0, to: to, deltaTo: 0});
+
         if (from != address(0) && to != address(0)) {
             // Handle share transfer between participant, with no update on the total pool rewards
             for (uint256 index; index < ids.length;) {
-                updateParticipants(from, to, ids[index], amount[index]);
+                updateParticipants(accounter, ids[index], amount[index]);
                 unchecked {
                     ++index;
                 }
@@ -190,32 +206,34 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         } else {
             // Otherwise (in case of mined or burned token), also update the pool
             for (uint256 index; index < ids.length;) {
-                updateParticipantAndPool(from, to, ids[index], amount[index]);
+                updateParticipantAndPool(accounter, ids[index], amount[index]);
                 unchecked {
                     ++index;
                 }
             }
         }
+
+        // Save the founds update if needed
+        if (accounter.deltaFrom > 0) {
+            _addFounds(from, accounter.deltaFrom);
+        }
+        if (accounter.deltaTo > 0) {
+            _addFounds(to, accounter.deltaTo);
+        }
     }
 
-    /**
-     * @dev Compute all the reward for the given user
-     */
+    /// @dev Compute all the pools balance of the user
     function computeAllPoolsBalance(address user) external payable onlyRole(FrakRoles.ADMIN) whenNotPaused {
         _computeAndSaveAllForUser(user);
     }
 
-    /**
-     * @dev Withdraw the pending founds for the caller
-     */
+    /// @dev Withdraw the pending founds for the current caller
     function withdrawFounds() external virtual override whenNotPaused {
         _computeAndSaveAllForUser(msg.sender);
         _tryWithdraw(msg.sender);
     }
 
-    /**
-     * @dev Withdraw the pending founds for a user
-     */
+    /// @dev Withdraw the pending founds for a `user`
     function withdrawFounds(address user) external virtual override onlyRole(FrakRoles.ADMIN) whenNotPaused {
         _computeAndSaveAllForUser(user);
         _tryWithdraw(user);
@@ -228,39 +246,53 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /**
      * @dev Update the participants of a pool after fraktion transfer
      */
-    function updateParticipants(address from, address to, uint256 fraktionId, uint256 amountMoved) private {
+    function updateParticipants(FraktionTransferAccounter memory accounter, uint256 fraktionId, uint256 amountMoved)
+        private
+    {
         unchecked {
             // Extract content id and token type from this tx
             (uint256 contentId, uint256 tokenType) = FrakMath.extractContentIdAndTokenType(fraktionId);
+
             // Get the initial share value of this token
             uint256 sharesValue = getSharesForTokenType(tokenType);
             if (sharesValue == 0) return; // Jump this iteration if this fraktions doesn't count for any shares
+
             // Get the last state index
             RewardState[] storage contentStates = rewardStates[contentId];
             uint256 lastContentIndex = contentStates.length - 1;
+
             // Get the total shares moved
             uint256 totalShares = sharesValue * amountMoved;
+
             // Warm up the access to this content participants
             mapping(address => Participant) storage contentParticipants = participants[contentId];
 
             // Get the previous participant and compute his reward for this content
-            Participant storage sender = contentParticipants[from];
-            computeAndSaveReward(contentStates, from, sender, lastContentIndex);
+            Participant storage sender = contentParticipants[accounter.from];
+            uint256 delta = _computeAllPendingParticipantStates(contentStates, sender, lastContentIndex);
+            accounter.deltaFrom += delta;
 
-            // Do the same thing for the receiver
-            Participant storage receiver = contentParticipants[to];
-            computeAndSaveReward(contentStates, to, receiver, lastContentIndex);
+            // TODO: Find a way to compute the delta from the receiver, taking in account the edge case where the receiver has multiple content pool
+            // TODO: In memory hashmap of the shares movement per content id?
+            Participant storage receiver = contentParticipants[accounter.to];
 
             // Then update the shares for each one of them
-            _increaseParticipantShare(contentId, receiver, to, uint120(totalShares));
-            _decreaseParticipantShare(contentId, sender, from, uint120(totalShares));
+            _decreaseParticipantShare(contentId, sender, accounter.from, uint120(totalShares));
+            _increaseParticipantShare(contentId, receiver, accounter.to, uint120(totalShares));
+
+            // Reset the receiver status
+            _resetParticipantState(contentStates, receiver);
         }
     }
 
     /**
      * @dev Update participant and pool after fraktion transfer
      */
-    function updateParticipantAndPool(address from, address to, uint256 fraktionId, uint256 amountMoved) private {
+    function updateParticipantAndPool(
+        FraktionTransferAccounter memory accounter,
+        uint256 fraktionId,
+        uint256 amountMoved
+    ) private {
         unchecked {
             // Extract content id and token type from this tx
             (uint256 contentId, uint256 tokenType) = FrakMath.extractContentIdAndTokenType(fraktionId);
@@ -285,22 +317,22 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
             currentState.open = false;
             // Then update the states and participant, and save the new total shares
             uint256 newTotalShares;
-            if (to != address(0)) {
+            if (accounter.to != address(0)) {
                 // In case of fraktions mint
                 // Get the previous participant and compute his reward for this content
-                Participant storage receiver = contentParticipants[to];
-                computeAndSaveReward(contentRewardStates, to, receiver, stateIndex);
+                Participant storage receiver = contentParticipants[accounter.to];
+                accounter.deltaTo += _computeAllPendingParticipantStates(contentRewardStates, receiver, stateIndex);
                 // Update his shares
-                _increaseParticipantShare(contentId, receiver, to, uint120(sharesMoved));
+                _increaseParticipantShare(contentId, receiver, accounter.to, uint120(sharesMoved));
                 // Update the new total shares
                 newTotalShares = currentState.totalShares + sharesMoved;
-            } else if (from != address(0)) {
+            } else if (accounter.from != address(0)) {
                 // In case of fraktions burn
                 // Get the previous participant and compute his reward for this content
-                Participant storage sender = contentParticipants[from];
-                computeAndSaveReward(contentRewardStates, from, sender, stateIndex);
+                Participant storage sender = contentParticipants[accounter.from];
+                accounter.deltaFrom += _computeAllPendingParticipantStates(contentRewardStates, sender, stateIndex);
                 // Update his shares
-                _decreaseParticipantShare(contentId, sender, from, uint120(sharesMoved));
+                _decreaseParticipantShare(contentId, sender, accounter.from, uint120(sharesMoved));
                 // Update the new total shares
                 newTotalShares = currentState.totalShares - sharesMoved;
             }
@@ -316,82 +348,86 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
                 RewardState storage newState = contentRewardStates.push();
                 newState.totalShares = uint128(newTotalShares);
                 newState.open = true;
+                // And we reset users states
+                if (accounter.to != address(0)) {
+                    _resetParticipantState(contentRewardStates, contentParticipants[accounter.to]);
+                } else if (accounter.from != address(0)) {
+                    _resetParticipantState(contentRewardStates, contentParticipants[accounter.from]);
+                }
             }
+
             // Emit the pool update event
             emit PoolSharesUpdated(contentId, stateIndex, newTotalShares);
         }
     }
 
-    /**
-     * @dev Compute and save the user reward to the given state
-     */
-    function computeAndSaveReward(
+    /// @dev Compute all the pending participant states
+    /// @dev Will compute all the pending states for a participant and update his last state claimed
+    /// @param contentStates The reward states of the content
+    /// @param participant The participant to compute the states for
+    /// @param toStateIndex The index of the last state to compute
+    /// @return claimable The total amount of claimable tokens
+    function _computeAllPendingParticipantStates(
         RewardState[] storage contentStates,
-        address user,
         Participant storage participant,
         uint256 toStateIndex
     ) internal returns (uint256 claimable) {
-        unchecked {
-            // Replicate our participant to memory
-            Participant memory memParticipant = participant;
+        // Replicate our participant to memory
+        Participant memory memParticipant = participant;
 
-            // Ensure the state target is not already claimed, and that we don't have too many state to fetched
-            if (toStateIndex < memParticipant.lastStateIndex) {
-                revert PoolStateAlreadyClaimed();
-            }
-            // Check the participant got some shares
-            if (memParticipant.shares == 0) {
-                // If not, just increase the last iterated index and return
-                participant.lastStateIndex = toStateIndex;
-                return 0;
-            }
-            // Check if he got some more reward to claim on the last state he fetched, and init our claimable reward with that
-            RewardState memory memCurrentRewardState = contentStates[memParticipant.lastStateIndex];
-            uint256 userReward = computeUserReward(memCurrentRewardState, memParticipant);
-            claimable = userReward - memParticipant.lastStateClaim;
-            // If we don't have more iteration to do, exit directly
-            if (memParticipant.lastStateIndex == toStateIndex) {
-                // Increase the user pending reward (if needed), and return this amount
-                if (claimable > 0) {
-                    // Increase the participant last state claim by the new claimable amount
-                    participant.lastStateClaim = uint96(memParticipant.lastStateClaim + claimable);
-                    _addFoundsUnchecked(user, claimable);
-                }
-                return claimable;
-            }
-            // Reset his last state claim if needed
-            if (memParticipant.lastStateClaim != 0) {
-                participant.lastStateClaim = 0;
-            }
+        // Ensure we are targetting a state that exist after the last state claimed by the user
+        if (memParticipant.lastStateIndex > toStateIndex) {
+            revert PoolStateAlreadyClaimed();
+        }
 
-            // Then, iterate over all the states from the last states he fetched
-            for (uint256 stateIndex = memParticipant.lastStateIndex + 1; stateIndex <= toStateIndex;) {
-                // Get the reward state
-                memCurrentRewardState = contentStates[stateIndex];
-                // If we are on the last iteration, save the reward for the user
-                if (stateIndex == toStateIndex) {
-                    uint256 stateReward = computeUserReward(memCurrentRewardState, memParticipant);
-                    claimable += stateReward;
-                    // Backup his participant reward
-                    participant.lastStateClaim = uint96(stateReward);
-                } else {
-                    // Otherwise, just compute the total reward tor this user in this state
-                    claimable += computeUserReward(memCurrentRewardState, memParticipant);
-                }
-                ++stateIndex;
-            }
-            // Update the participant last state checked, and increase his pending reward
+        // If the participant has no shares currently, update his last state claimed and exit directly
+        if (memParticipant.shares == 0) {
             participant.lastStateIndex = toStateIndex;
-            // Update the participant claimable reward
-            _addFoundsUnchecked(user, claimable);
-            // Return the added claimable reward
-            return claimable;
+            participant.lastStateClaim = 0;
+            return 0;
+        }
+
+        // The state we will check
+        RewardState memory memCurrentRewardState;
+
+        // Iterate over every state from the last one claimed by the user to the targetted one
+        for (uint256 i = memParticipant.lastStateIndex; i <= toStateIndex;) {
+            // Get the current state
+            memCurrentRewardState = contentStates[i];
+            // Compute the user reward for this state
+            uint256 userReward = computeUserReward(memCurrentRewardState, memParticipant);
+
+            // If we are on the last iteration, set the user last state claim to the current state reward
+            if (i == toStateIndex && memParticipant.lastStateClaim < userReward) {
+                participant.lastStateClaim = uint96(userReward);
+            }
+
+            // If we are on the last state that was claimed, deduce the last claim from the user reward
+            if (i == memParticipant.lastStateIndex && memParticipant.lastStateClaim > 0) {
+                if (userReward > memParticipant.lastStateClaim) {
+                    // If the reward is greater than the last claim, we can deduce it
+                    // @warning: Since we are using the memory participant, it doesn't has been updated with the value on top, so we decrease only the last claim if we are in the case of lastIndextoClaim == lastParticipantIndex
+                    userReward -= memParticipant.lastStateClaim;
+                } else {
+                    // Otherwise, the user has already claimed this state, so we can set the reward to 0
+                    userReward = 0;
+                }
+            }
+
+            // Update the user claimable reward
+            unchecked {
+                claimable += userReward;
+                ++i;
+            }
+        }
+
+        // Update the participant last state checked, and increase his pending reward
+        unchecked {
+            participant.lastStateIndex = toStateIndex;
         }
     }
 
-    /**
-     * @dev Increase the share the user got in a pool
-     */
+    /// @dev Increase the share the `user` got in a pool of `contentId`by `amount`
     function _increaseParticipantShare(uint256 contentId, Participant storage participant, address user, uint120 amount)
         private
     {
@@ -407,9 +443,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         emit ParticipantShareUpdated(user, contentId, participant.shares);
     }
 
-    /**
-     * @dev Decrease the share the user got in a pool
-     */
+    /// @dev Decrease the share the `user` got in a pool of `contentId`by `amount`
     function _decreaseParticipantShare(uint256 contentId, Participant storage participant, address user, uint120 amount)
         private
     {
@@ -425,14 +459,13 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         emit ParticipantShareUpdated(user, contentId, participant.shares);
     }
 
-    /**
-     * @dev Compute all the reward for the given user
-     */
+    /// @dev Compute all the reward for the given `user`
     function _computeAndSaveAllForUser(address user) internal {
         EnumerableSet.UintSet storage contentPoolIds = userContentPools[user];
         uint256[] memory _poolsIds = userContentPools[user].values();
 
         uint256 length = _poolsIds.length;
+        uint256 totalClaimable;
         for (uint256 index = 0; index < length;) {
             // Get the content pool id and the participant and last pool id
             uint256 contentId = contentPoolIds.at(index);
@@ -441,23 +474,31 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
             RewardState[] storage contentStates = rewardStates[contentId];
             uint256 lastPoolIndex = contentStates.length - 1;
             // Compute and save the reward for this pool
-            computeAndSaveReward(contentStates, user, participant, lastPoolIndex);
+            totalClaimable += _computeAllPendingParticipantStates(contentStates, participant, lastPoolIndex);
             unchecked {
                 ++index;
             }
         }
+
+        // Add the computed founds
+        _addFoundsUnchecked(user, totalClaimable);
     }
 
-    /**
-     * @dev Find only the last reward state for the given content
-     */
+    /// @dev Reset a participant state to the last reward state
+    function _resetParticipantState(RewardState[] storage contentStates, Participant storage participant) private {
+        // Get the last content state index
+        uint256 lastContentStateIndex = contentStates.length - 1;
+        // Reset the participant state
+        participant.lastStateIndex = lastContentStateIndex;
+        participant.lastStateClaim = uint96(computeUserReward(contentStates[lastContentStateIndex], participant));
+    }
+
+    /// @dev Get the latest content `state` for the given `contentId`
     function lastContentState(uint256 contentId) private returns (RewardState storage state) {
         (state,) = lastContentStateWithIndex(contentId);
     }
 
-    /**
-     * @dev Find the last reward state, with it's index for the given content
-     */
+    /// @dev Get the latest content `state` and `index` for the given `contentId`
     function lastContentStateWithIndex(uint256 contentId)
         private
         returns (RewardState storage state, uint256 rewardIndex)
@@ -490,6 +531,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         // Directly exit if this state doesn't have a total share
         uint256 totalShares = state.totalShares;
         if (totalShares == 0) return 0;
+
         // We can safely do an unchecked operation here since the pool reward, participant shares and total shares are all verified before being stored
         unchecked {
             stateReward = (state.currentPoolReward * participant.shares) / totalShares;

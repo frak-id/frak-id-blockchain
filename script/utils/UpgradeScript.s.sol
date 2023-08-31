@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
+import "forge-std/console.sol";
 import "forge-std/Script.sol";
 import {UUPSUpgradeable} from "@oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ERC1967Proxy} from "openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
@@ -46,8 +47,9 @@ abstract contract UpgradeScript is Script {
             rewarder: 0x8D9fa601DA1416b087E9db6B6EaD63D4920A4528,
             minter: 0x1adc8CAaA35551730eCd82e0eEA683Aa90dB6cf0,
             frakTreasuryWallet: 0x7053f61CEA3B7C3b5f0e14de6eEdB01cA1850408,
-            swapPool: address(1) // TODO: Not deployed yet
+            swapPool: 0x8a67c75F8C0bF37a06d92938e9C9e841506D37B0
         });
+        // forge verify-contract --chain polygon 0x8a67c75F8C0bF37a06d92938e9C9e841506D37B0 MonoPool  --constructor-args $(cast abi-encode "constructor(address,address,uint256,address,uint256)" 0x6261E4a478C98419EaFa6289509C49058D21Df8c 0x0000000000000000000000000000000000000000 100 0x517ecFa01E2F9A6955d8DD04867613E41309213d 100)
         // Mumbai proxy address
         contractAddresses[80001] = ContractProxyAddresses({
             frakToken: 0xbCeE0E1C02E91EAFaEd69eD2B1DC5199789575df,
@@ -59,7 +61,7 @@ abstract contract UpgradeScript is Script {
             rewarder: 0x0bD2a225E2c6173b42b907Cc4424076327D90F6F,
             minter: 0x8964e2Ed5fF27358c62a761f23957bd2b5165779,
             frakTreasuryWallet: 0x7CC62E1ecd246153DF4997352ec9C5fF172EE08C,
-            swapPool: 0x117dCA88E744968db0589542aa4C1fe804d086d7
+            swapPool: 0x78aF1a6A3233d446Dbd230f91DF3e259129b433C
         });
     }
 
@@ -117,6 +119,11 @@ abstract contract UpgradeScript is Script {
     /// @dev Get the deployer private key
     function _deployerPrivateKey() internal view returns (uint256) {
         return vm.envUint("DEPLOY_PRIV_KEY");
+    }
+
+    /// @dev Get the current deployer address
+    function _deployerAddress() internal view returns (address) {
+        return vm.addr(_deployerPrivateKey());
     }
 
     /* -------------------------------------------------------------------------- */

@@ -12,7 +12,6 @@ import {Minter} from "@frak/minter/Minter.sol";
 import {ContentPool} from "@frak/reward/pool/ContentPool.sol";
 import {Rewarder} from "@frak/reward/Rewarder.sol";
 import {FrakRoles} from "@frak/utils/FrakRoles.sol";
-import {MonoTokenPool} from "singleton-swapper/MonoTokenPool.sol";
 
 contract DeployAllScript is UpgradeScript {
     constructor() {}
@@ -39,9 +38,6 @@ contract DeployAllScript is UpgradeScript {
         // Grant each roles
         _grantEcosystemRole(rewarder, contentPool, referralPool, fraktionTokens, minter);
 
-        // Deploy the initial pool
-        address swapPool = _deploySwapPool(frkToken, 1e3);
-
         // Once all set, save each address
         UpgradeScript.ContractProxyAddresses memory addresses = UpgradeScript.ContractProxyAddresses({
             frakToken: frkToken,
@@ -53,7 +49,7 @@ contract DeployAllScript is UpgradeScript {
             rewarder: rewarder,
             minter: minter,
             frakTreasuryWallet: treasuryWallet,
-            swapPool: swapPool
+            swapPool: address(1)
         });
         _setProxyAddresses(addresses);
     }
@@ -205,10 +201,5 @@ contract DeployAllScript is UpgradeScript {
 
         // Grant the mint role to the minter
         FraktionTokens(fraktionTokens).grantRole(FrakRoles.MINTER, minter);
-    }
-
-    function _deploySwapPool(address frkToken, uint256 bps) private returns (address poolAddress) {
-        MonoTokenPool pool = new MonoTokenPool(frkToken, bps);
-        poolAddress = address(pool);
     }
 }

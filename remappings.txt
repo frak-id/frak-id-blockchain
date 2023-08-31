@@ -6,5 +6,5 @@
 openzeppelin/=lib/openzeppelin-contracts/contracts/
 @oz-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
 
-@swapper/=singleton-swapper/src/
+swap-pool/=lib/swap-pool/src/
 solady/=lib/solady/src/
