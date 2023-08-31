@@ -564,32 +564,6 @@ contract Rewarder is
     /* -------------------------------------------------------------------------- */
 
     /**
-     * @dev Get the base reward to the given token type
-     * We use a pure function instead of a mapping to economise on storage read,
-     * and since this reawrd shouldn't evolve really fast
-     */
-    function baseRewardForTokenType(uint256 tokenType) private pure returns (uint256 reward) {
-        if (tokenType == FrakMath.TOKEN_TYPE_FREE_MASK) {
-            // 0.01 FRK
-            reward = 0.01 ether;
-        } else if (tokenType == FrakMath.TOKEN_TYPE_COMMON_MASK) {
-            // 0.1 FRK
-            reward = 0.1 ether;
-        } else if (tokenType == FrakMath.TOKEN_TYPE_PREMIUM_MASK) {
-            // 0.5 FRK
-            reward = 0.5 ether;
-        } else if (tokenType == FrakMath.TOKEN_TYPE_GOLD_MASK) {
-            // 1 FRK
-            reward = 1 ether;
-        } else if (tokenType == FrakMath.TOKEN_TYPE_DIAMOND_MASK) {
-            // 2 FRK
-            reward = 2 ether;
-        } else {
-            reward = 0;
-        }
-    }
-
-    /**
      * @dev Get the base reward to the given content type
      */
     function baseRewardForContentType(uint256 contentType) private pure returns (uint256 reward) {

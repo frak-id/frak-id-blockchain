@@ -35,16 +35,19 @@ contract RewarderTestHelper is FrkTokenTestHelper {
         bytes memory initData = abi.encodeCall(FraktionTokens.initialize, ("test_url"));
         address fraktionProxyAddr = deployContract(address(new FraktionTokens()), initData);
         fraktionTokens = FraktionTokens(fraktionProxyAddr);
+        vm.label(fraktionProxyAddr, "FraktionTokens");
 
         // Deploy content pool
         initData = abi.encodeCall(ContentPool.initialize, (address(frakToken)));
         address contentPoolProxyAddr = deployContract(address(new ContentPool()), initData);
         contentPool = ContentPool(contentPoolProxyAddr);
+        vm.label(contentPoolProxyAddr, "ContentPool");
 
         // Deploy referral pool
         initData = abi.encodeCall(ReferralPool.initialize, (address(frakToken)));
         address referralProxyAddr = deployContract(address(new ReferralPool()), initData);
         referralPool = ReferralPool(referralProxyAddr);
+        vm.label(referralProxyAddr, "ReferralPool");
 
         // Deploy rewarder contract
         initData = abi.encodeCall(
@@ -53,6 +56,7 @@ contract RewarderTestHelper is FrkTokenTestHelper {
         );
         rewarderAddr = deployContract(address(new Rewarder()), initData);
         rewarder = Rewarder(rewarderAddr);
+        vm.label(rewarderAddr, "Rewarder");
 
         // Link our content pool to the fraktion token
         prankDeployer();

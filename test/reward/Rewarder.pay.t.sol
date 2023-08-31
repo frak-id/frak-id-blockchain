@@ -247,6 +247,57 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
         rewarder.payUser(address(1), 1, uint256(13).asSingletonArray(), listenCounts);
     }
 
+    function test_payUser_NoReward_ContentTypeNotKnown() public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
+        (uint256[] memory listenCounts, uint256[] memory contentIds) = basePayParam();
+
+        // Get the previous claimable balance
+        uint256 claimableBalance = rewarder.getAvailableFounds(address(1));
+        uint256 frakMinted = rewarder.getFrkMinted();
+        // Launch the pay
+        rewarder.payUser(address(1), 0, contentIds, listenCounts);
+        // Ensure the claimable balance is the same
+        assertEq(rewarder.getAvailableFounds(address(1)), claimableBalance);
+        assertEq(rewarder.getFrkMinted(), frakMinted);
+    }
+
+    function test_payUser_ContentTypeImpactReward() public withLotFrkToken(rewarderAddr) prankExecAsDeployer {
+        (uint256[] memory listenCounts, uint256[] memory contentIds) = basePayParam();
+
+        // Get the previous claimable balance
+        uint256 claimableBalance = rewarder.getAvailableFounds(address(1));
+
+        // Launch the pay with content type 3 (music, lowest one)
+        rewarder.payUser(address(1), 3, contentIds, listenCounts);
+        // Ensure the claimable diff is greater than 0
+        uint256 claimableDiff = rewarder.getAvailableFounds(address(1)) - claimableBalance;
+        claimableBalance = rewarder.getAvailableFounds(address(1));
+        assertGt(claimableDiff, 0);
+
+        // Launch the pay with content type 2 (podcast, middle one)
+        rewarder.payUser(address(1), 2, contentIds, listenCounts);
+        // Ensure the claimable diff is greater
+        uint256 newClaimableDiff = rewarder.getAvailableFounds(address(1)) - claimableBalance;
+        assertGt(newClaimableDiff, claimableDiff);
+        claimableDiff = newClaimableDiff;
+        claimableBalance = rewarder.getAvailableFounds(address(1));
+
+        // Launch the pay with content type 4 (streaming, middle one)
+        rewarder.payUser(address(1), 4, contentIds, listenCounts);
+        // Ensure the claimable diff is greater
+        newClaimableDiff = rewarder.getAvailableFounds(address(1)) - claimableBalance;
+        assertEq(newClaimableDiff, claimableDiff);
+        claimableDiff = newClaimableDiff;
+        claimableBalance = rewarder.getAvailableFounds(address(1));
+
+        // Launch the pay with content type 1 (video, highest one)
+        rewarder.payUser(address(1), 1, contentIds, listenCounts);
+        // Ensure the claimable diff is greater
+        newClaimableDiff = rewarder.getAvailableFounds(address(1)) - claimableBalance;
+        assertGt(newClaimableDiff, claimableDiff);
+        claimableDiff = newClaimableDiff;
+        claimableBalance = rewarder.getAvailableFounds(address(1));
+    }
+
     /*
      * ===== UTILS=====
      */
