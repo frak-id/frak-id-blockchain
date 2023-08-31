@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {IERC20Upgradeable} from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import {MultiVestingWallets} from "./MultiVestingWallets.sol";
-import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
-import {FrakRoles} from "../utils/FrakRoles.sol";
-import {InvalidArray, InvalidAddress, NoReward, RewardTooLarge} from "../utils/FrakErrors.sol";
+import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import { MultiVestingWallets } from "./MultiVestingWallets.sol";
+import { FrakAccessControlUpgradeable } from "../utils/FrakAccessControlUpgradeable.sol";
+import { FrakRoles } from "../utils/FrakRoles.sol";
+import { InvalidArray, InvalidAddress, NoReward, RewardTooLarge } from "../utils/FrakErrors.sol";
 
 /// @dev error throwned when the creation param are invalid
 error InvalidCreationParam();
@@ -83,7 +83,7 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
         // Increase the total group supply
         totalGroupCap += rewardCap;
         // Build and save this group
-        vestingGroup[id] = VestingGroup({rewardCap: rewardCap, supply: 0, duration: duration});
+        vestingGroup[id] = VestingGroup({ rewardCap: rewardCap, supply: 0, duration: duration });
         // Emit the event
         emit GroupAdded(id, rewardCap, duration);
     }
@@ -91,7 +91,11 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
     /**
      * @notice Transfer a group reserve to another one
      */
-    function transferGroupReserve(uint8 initialId, uint8 targetId, uint96 amount)
+    function transferGroupReserve(
+        uint8 initialId,
+        uint8 targetId,
+        uint96 amount
+    )
         external
         whenNotPaused
         onlyRole(FrakRoles.ADMIN)
@@ -128,7 +132,12 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
     /**
      * @dev Create a new vesting wallet
      */
-    function addVestingWallet(address beneficiary, uint256 reward, uint8 groupId, uint48 startDate)
+    function addVestingWallet(
+        address beneficiary,
+        uint256 reward,
+        uint8 groupId,
+        uint48 startDate
+    )
         external
         onlyRole(FrakRoles.VESTING_CREATOR)
         whenNotPaused
@@ -158,7 +167,11 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
         uint256[] calldata rewards,
         uint8 groupId,
         uint48 startDate
-    ) external onlyRole(FrakRoles.VESTING_CREATOR) whenNotPaused {
+    )
+        external
+        onlyRole(FrakRoles.VESTING_CREATOR)
+        whenNotPaused
+    {
         // Ensure all the param are correct
         if (beneficiaries.length == 0 || beneficiaries.length != rewards.length) {
             revert InvalidArray();

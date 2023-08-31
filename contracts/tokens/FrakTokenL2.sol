@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {ERC20Upgradeable} from "@oz-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import {FrakRoles} from "../utils/FrakRoles.sol";
-import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
-import {ContextMixin} from "../utils/ContextMixin.sol";
-import {IFrakToken} from "./IFrakToken.sol";
-import {EIP712Base} from "../utils/EIP712Base.sol";
-import {ECDSA} from "solady/utils/ECDSA.sol";
+import { ERC20Upgradeable } from "@oz-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import { FrakRoles } from "../utils/FrakRoles.sol";
+import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
+import { ContextMixin } from "../utils/ContextMixin.sol";
+import { IFrakToken } from "./IFrakToken.sol";
+import { EIP712Base } from "../utils/EIP712Base.sol";
+import { ECDSA } from "solady/utils/ECDSA.sol";
 
 /**
  * @author  @KONFeature
@@ -93,7 +93,15 @@ contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, EIP712B
     /* -------------------------------------------------------------------------- */
 
     /// @dev EIP 2612, allow the owner to spend the given amount of FRK
-    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+    function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
         external
         payable
         override

@@ -3,11 +3,11 @@ pragma solidity 0.8.21;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
-import {UpgradeScript} from "./utils/UpgradeScript.s.sol";
-import {MonoPool} from "swap-pool/MonoPool.sol";
-import {Token} from "swap-pool/libs/TokenLib.sol";
-import {EncoderLib} from "swap-pool/encoder/EncoderLib.sol";
-import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
+import { UpgradeScript } from "./utils/UpgradeScript.s.sol";
+import { MonoPool } from "swap-pool/MonoPool.sol";
+import { Token } from "swap-pool/libs/TokenLib.sol";
+import { EncoderLib } from "swap-pool/encoder/EncoderLib.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 
 contract RemoveLiquidityPoolPosition is UpgradeScript {
     using SafeTransferLib for address;
@@ -55,7 +55,10 @@ contract RemoveLiquidityPoolPosition is UpgradeScript {
     }
 
     /// @dev Build the add liquidity command
-    function _builRemoveLiquidityAndClaimFeesCommand(address owner, uint256 position)
+    function _builRemoveLiquidityAndClaimFeesCommand(
+        address owner,
+        uint256 position
+    )
         private
         pure
         returns (bytes memory program)

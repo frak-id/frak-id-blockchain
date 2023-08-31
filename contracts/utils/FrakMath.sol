@@ -41,7 +41,7 @@ library FrakMath {
             // End of our iteration
             let end := add(0x20, shl(5, mload(types)))
             // Build each nft id's
-            for {} 1 {} {
+            for { } 1 { } {
                 //  Store the token id
                 mstore(add(tokenIds, offset), or(shl(0x04, id), mload(add(types, offset))))
 

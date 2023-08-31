@@ -3,8 +3,8 @@ name: 🧪 Smart contract tests
 on:
   push:
     branches: ["main"]
+  workflow_dispatch:
   pull_request:
-    types: [opened, synchronize, reopened]
 
 # cancel previous runs on the same PR
 concurrency:
@@ -13,11 +13,11 @@ concurrency:
 
 # ll the env required for hardhat
 env:
-  MUMBAI_RPC_URL: ${{ secrets.MUMBAI_PROVIDER }}
-  GOERLI_RPC_URL: ${{ secrets.GOERLI_PROVIDER }}
-  POLYGON_RPC_URL: ${{ secrets.POLYGON_PROVIDER }}
-  POLYGON_SCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
-  ETHERSCAN_SCAN_API_KEY: ${{ secrets.ETHER_SCAN_API_KEY }}
+  FOUNDRY_PROFILE: "ci"
+  API_KEY_ALCHEMY_MAINNET: ${{ secrets.API_KEY_ALCHEMY_MAINNET }}
+  API_KEY_ALCHEMY_GOERLI: ${{ secrets.API_KEY_ALCHEMY_GOERLI }}
+  API_KEY_ALCHEMY_POLYGON: ${{ secrets.API_KEY_ALCHEMY_POLYGON }}
+  API_KEY_ALCHEMY_MUMBAI: ${{ secrets.API_KEY_ALCHEMY_MUMBAI }}
 
 jobs:
   test:
@@ -50,7 +50,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: "~/.foundry/cache"
-          key: foundry-${{ hashFiles('Makefile', 'foundry.toml') }} # where fork block numbers & RPC are stored
+          key: foundry-${{ hashFiles('foundry.toml') }} # where fork block numbers & RPC are stored
       
       - name: '💾 Foundry compilation cache'
         uses: actions/cache@v3
@@ -58,7 +58,7 @@ jobs:
           path: |
             cache
             out
-          key: ${{ github.base_ref || github.ref_name }}-foundry
+          key: foundry-${{ github.repository_id }}-${{ hashFiles('foundry.toml') }}
           
       - name: '🎨 Run lint tests'
         run: forge fmt --check 

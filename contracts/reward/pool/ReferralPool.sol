@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {FrakMath} from "../../utils/FrakMath.sol";
-import {FrakRoles} from "../../utils/FrakRoles.sol";
-import {PushPullReward} from "../../utils/PushPullReward.sol";
-import {FrakAccessControlUpgradeable} from "../../utils/FrakAccessControlUpgradeable.sol";
-import {InvalidAddress, NoReward} from "../../utils/FrakErrors.sol";
+import { FrakMath } from "../../utils/FrakMath.sol";
+import { FrakRoles } from "../../utils/FrakRoles.sol";
+import { PushPullReward } from "../../utils/PushPullReward.sol";
+import { FrakAccessControlUpgradeable } from "../../utils/FrakAccessControlUpgradeable.sol";
+import { InvalidAddress, NoReward } from "../../utils/FrakErrors.sol";
 
 /// @dev Exception throwned when the user already got a referer
 error AlreadyGotAReferer();
@@ -53,7 +53,11 @@ contract ReferralPool is FrakAccessControlUpgradeable, PushPullReward {
     /**
      * @dev Update the listener snft amount
      */
-    function userReferred(uint256 contentId, address user, address referer)
+    function userReferred(
+        uint256 contentId,
+        address user,
+        address referer
+    )
         external
         payable
         onlyRole(FrakRoles.ADMIN)
@@ -84,7 +88,11 @@ contract ReferralPool is FrakAccessControlUpgradeable, PushPullReward {
     /**
      * Pay all the user referer, and return the amount paid
      */
-    function payAllReferer(uint256 contentId, address user, uint256 amount)
+    function payAllReferer(
+        uint256 contentId,
+        address user,
+        uint256 amount
+    )
         public
         payable
         onlyRole(FrakRoles.REWARDER)

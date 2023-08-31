@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {IMinter} from "./IMinter.sol";
-import {FractionCostBadges} from "./badges/FractionCostBadges.sol";
-import {FrakMath} from "../utils/FrakMath.sol";
-import {FrakRoles} from "../utils/FrakRoles.sol";
-import {FraktionTokens} from "../tokens/FraktionTokens.sol";
-import {IFrakToken} from "../tokens/IFrakToken.sol";
-import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
-import {InvalidAddress} from "../utils/FrakErrors.sol";
-import {Multicallable} from "solady/utils/Multicallable.sol";
+import { IMinter } from "./IMinter.sol";
+import { FractionCostBadges } from "./badges/FractionCostBadges.sol";
+import { FrakMath } from "../utils/FrakMath.sol";
+import { FrakRoles } from "../utils/FrakRoles.sol";
+import { FraktionTokens } from "../tokens/FraktionTokens.sol";
+import { IFrakToken } from "../tokens/IFrakToken.sol";
+import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
+import { InvalidAddress } from "../utils/FrakErrors.sol";
+import { Multicallable } from "solady/utils/Multicallable.sol";
 
 /**
  * @author  @KONFeature
@@ -93,7 +93,11 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
      * @param   fraktionTokensAddr  The address of the FraktionTokens contract
      * @param   foundationAddr  The foundation wallet address
      */
-    function initialize(address frkTokenAddr, address fraktionTokensAddr, address foundationAddr)
+    function initialize(
+        address frkTokenAddr,
+        address fraktionTokensAddr,
+        address foundationAddr
+    )
         external
         initializer
     {
@@ -119,7 +123,8 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
 
     /**
      * @notice  Mint a new content to the FrkEcosystem
-     * @dev     Will ensure the role and contract state, then the param, and finally call the FraktionTokens contract to mint the new content
+     * @dev     Will ensure the role and contract state, then the param, and finally call the FraktionTokens contract to
+     * mint the new content
      * @param   contentOwnerAddress  The address of the owner of the given content
      * @param   commonSupply  The supply desired for each common fraktion of this content
      * @param   premiumSupply  The supply desired for each premium fraktion of this content
@@ -133,7 +138,14 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
         uint256 premiumSupply,
         uint256 goldSupply,
         uint256 diamondSupply
-    ) external payable override onlyRole(FrakRoles.MINTER) whenNotPaused returns (uint256 contentId) {
+    )
+        external
+        payable
+        override
+        onlyRole(FrakRoles.MINTER)
+        whenNotPaused
+        returns (uint256 contentId)
+    {
         assembly {
             // Check owner address
             if iszero(contentOwnerAddress) {
@@ -183,7 +195,8 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
 
     /**
      * @notice  Mint a new fraktion for the given amount and user
-     * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer and mint the fraktion
+     * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer
+     * and mint the fraktion
      * @param   id  The id of the fraktion to be minted for the user
      * @param   to  The address on which we will mint the fraktion
      * @param   deadline  The deadline for the permit of the allowance tx
@@ -191,7 +204,14 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
      * @param   r  Signature spec secp256k1
      * @param   s  Signature spec secp256k1
      */
-    function mintFraktionForUser(uint256 id, address to, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+    function mintFraktionForUser(
+        uint256 id,
+        address to,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
         external
         payable
         onlyRole(FrakRoles.MINTER)
@@ -202,7 +222,8 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
 
     /**
      * @notice  Mint a new fraktion for the given amount to the caller
-     * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer and mint the fraktion
+     * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer
+     * and mint the fraktion
      * @param   id  The id of the fraktion to be minted for the user
      * @param   deadline  The deadline for the permit of the allowance tx
      * @param   v  Signature spec secp256k1
@@ -215,11 +236,15 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
 
     /**
      * @notice  Mint a free fraktion for the given user
-     * @dev     Will mint a new free FraktionToken for the user, by first ensuring the user doesn't have any fraktion, only performed when contract not paused and by the right person
+     * @dev     Will mint a new free FraktionToken for the user, by first ensuring the user doesn't have any fraktion,
+     * only performed when contract not paused and by the right person
      * @param   id  Id of the free fraktion
      * @param   to  Address of the user
      */
-    function mintFreeFraktionForUser(uint256 id, address to)
+    function mintFreeFraktionForUser(
+        uint256 id,
+        address to
+    )
         external
         payable
         override
@@ -231,7 +256,8 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
 
     /**
      * @notice  Mint a free fraktion for the given user
-     * @dev     Will mint a new free FraktionToken for the user, by first ensuring the user doesn't have any fraktion, only performed when contract not paused and by the right person
+     * @dev     Will mint a new free FraktionToken for the user, by first ensuring the user doesn't have any fraktion,
+     * only performed when contract not paused and by the right person
      * @param   id  Id of the free fraktion
      */
     function mintFreeFraktion(uint256 id) external payable override whenNotPaused {
@@ -240,7 +266,8 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
 
     /**
      * @notice  Increase the total supply for the given fraktion id
-     * @dev     Will call our FraktionTokens contract and increase the supply for the given fraktion, only if all of it have been minted
+     * @dev     Will call our FraktionTokens contract and increase the supply for the given fraktion, only if all of it
+     * have been minted
      * @param   id  The id of the fraktion for which we want to increase the supply
      * @param   newSupply  The supply we wan't to append for this fraktion
      */
@@ -251,11 +278,15 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
 
     /**
      * @notice  Update the cost badge for the given fraktion
-     * @dev     Call to the FraktionCostBadges subclass to update the cost badge, need the right role and contract unpaused
+     * @dev     Call to the FraktionCostBadges subclass to update the cost badge, need the right role and contract
+     * unpaused
      * @param   fractionId The id of the fraktion we will update the badge
      * @param   badge The new badge for the fraktion
      */
-    function updateCostBadge(uint256 fractionId, uint96 badge)
+    function updateCostBadge(
+        uint256 fractionId,
+        uint96 badge
+    )
         external
         override
         onlyRole(FrakRoles.BADGE_UPDATER)
@@ -270,7 +301,8 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
 
     /**
      * @notice  Mint a new fraktion for the given amount and user
-     * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer and mint the fraktion
+     * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer
+     * and mint the fraktion
      * @param   id  The id of the fraktion to be minted for the user
      * @param   to  The address on which we will mint the fraktion
      * @param   deadline  The deadline for the permit of the allowance tx
@@ -302,7 +334,8 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
 
     /**
      * @notice  Mint a free fraktion for the given user
-     * @dev     Will mint a new free FraktionToken for the user, by first ensuring the user doesn't have any fraktion, only performed when contract not paused and by the right person
+     * @dev     Will mint a new free FraktionToken for the user, by first ensuring the user doesn't have any fraktion,
+     * only performed when contract not paused and by the right person
      * @param   id  Id of the free fraktion
      */
     function _mintFreeFraktionForUser(uint256 id, address to) private {

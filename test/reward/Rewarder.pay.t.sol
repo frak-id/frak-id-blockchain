@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {StdUtils} from "@forge-std/StdUtils.sol";
-import {Rewarder} from "@frak/reward/Rewarder.sol";
-import {FrakMath} from "@frak/utils/FrakMath.sol";
-import {ContractPaused, NotAuthorized, InvalidArray, InvalidAddress, RewardTooLarge} from "@frak/utils/FrakErrors.sol";
-import {RewarderTestHelper} from "./RewarderTestHelper.sol";
+import { StdUtils } from "@forge-std/StdUtils.sol";
+import { Rewarder } from "@frak/reward/Rewarder.sol";
+import { FrakMath } from "@frak/utils/FrakMath.sol";
+import { ContractPaused, NotAuthorized, InvalidArray, InvalidAddress, RewardTooLarge } from "@frak/utils/FrakErrors.sol";
+import { RewarderTestHelper } from "./RewarderTestHelper.sol";
 
 /// Testing the rewarder pay function
 contract RewarderPayTest is RewarderTestHelper, StdUtils {

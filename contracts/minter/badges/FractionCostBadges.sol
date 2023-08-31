@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {FrakMath} from "../../utils/FrakMath.sol";
-import {InvalidFraktionType} from "../../utils/FrakErrors.sol";
+import { FrakMath } from "../../utils/FrakMath.sol";
+import { InvalidFraktionType } from "../../utils/FrakErrors.sol";
 
 /**
  * @author  @KONFeature
  * @title   FractionCostBadges
  * @dev Abstract contract for managing the badge costs of fractions.
- * @notice This contract contains methods and variables for initializing, updating, and getting the badge costs of fractions.
+ * @notice This contract contains methods and variables for initializing, updating, and getting the badge costs of
+ * fractions.
  * @custom:security-contact contact@frak.id
  */
 abstract contract FractionCostBadges {
@@ -97,9 +98,9 @@ abstract contract FractionCostBadges {
         } else if (tokenType == FrakMath.TOKEN_TYPE_PREMIUM_MASK) {
             initialCost = 500 ether; // 500 FRK
         } else if (tokenType == FrakMath.TOKEN_TYPE_GOLD_MASK) {
-            initialCost = 1_200 ether; // 1.2k FRK
+            initialCost = 1200 ether; // 1.2k FRK
         } else if (tokenType == FrakMath.TOKEN_TYPE_DIAMOND_MASK) {
-            initialCost = 3_000 ether; // 3k FRK
+            initialCost = 3000 ether; // 3k FRK
         } else {
             assembly {
                 mstore(0x00, _INVALID_FRAKTION_TYPE_SELECTOR)

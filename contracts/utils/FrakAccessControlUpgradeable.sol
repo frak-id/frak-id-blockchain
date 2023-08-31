@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {Initializable} from "@oz-upgradeable/proxy/utils/Initializable.sol";
-import {UUPSUpgradeable} from "@oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {ContextUpgradeable} from "@oz-upgradeable/utils/ContextUpgradeable.sol";
-import {IPausable} from "./IPausable.sol";
-import {FrakRoles} from "./FrakRoles.sol";
-import {NotAuthorized, ContractPaused, ContractNotPaused, RenounceForCallerOnly} from "./FrakErrors.sol";
+import { Initializable } from "@oz-upgradeable/proxy/utils/Initializable.sol";
+import { UUPSUpgradeable } from "@oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { ContextUpgradeable } from "@oz-upgradeable/utils/ContextUpgradeable.sol";
+import { IPausable } from "./IPausable.sol";
+import { FrakRoles } from "./FrakRoles.sol";
+import { NotAuthorized, ContractPaused, ContractNotPaused, RenounceForCallerOnly } from "./FrakErrors.sol";
 
 /**
  * @author @KONFeature
@@ -214,5 +214,5 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     /**
      * @notice Authorize the upgrade of this contract
      */
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(FrakRoles.UPGRADER) {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(FrakRoles.UPGRADER) { }
 }

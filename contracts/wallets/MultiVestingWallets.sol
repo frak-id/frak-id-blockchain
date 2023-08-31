@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {EnumerableSet} from "openzeppelin/utils/structs/EnumerableSet.sol";
-import {SafeERC20Upgradeable} from "@oz-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import {IERC20Upgradeable} from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
-import {FrakRoles} from "../utils/FrakRoles.sol";
-import {NotAuthorized, InvalidArray, InvalidAddress, NoReward, RewardTooLarge} from "../utils/FrakErrors.sol";
+import { EnumerableSet } from "openzeppelin/utils/structs/EnumerableSet.sol";
+import { SafeERC20Upgradeable } from "@oz-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import { FrakAccessControlUpgradeable } from "../utils/FrakAccessControlUpgradeable.sol";
+import { FrakRoles } from "../utils/FrakRoles.sol";
+import { NotAuthorized, InvalidArray, InvalidAddress, NoReward, RewardTooLarge } from "../utils/FrakErrors.sol";
 
 /// @dev error emitted when the contract doesn't have enough founds
 error NotEnoughFounds();
@@ -136,7 +136,12 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     /**
      * @notice Create a new vesting.
      */
-    function createVest(address beneficiary, uint256 amount, uint32 duration, uint48 startDate)
+    function createVest(
+        address beneficiary,
+        uint256 amount,
+        uint32 duration,
+        uint48 startDate
+    )
         external
         whenNotPaused
         onlyRole(FrakRoles.VESTING_MANAGER)
@@ -154,7 +159,11 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
         uint256[] calldata amounts,
         uint32 duration,
         uint48 startDate
-    ) external whenNotPaused onlyRole(FrakRoles.VESTING_MANAGER) {
+    )
+        external
+        whenNotPaused
+        onlyRole(FrakRoles.VESTING_MANAGER)
+    {
         if (beneficiaries.length == 0 || beneficiaries.length != amounts.length) {
             revert InvalidArray();
         }
@@ -422,7 +431,10 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
      * @param beneficiary Address to get it from.
      * @return vesting struct stored in the storage.
      */
-    function _getVestingForBeneficiary(uint24 vestingId, address beneficiary)
+    function _getVestingForBeneficiary(
+        uint24 vestingId,
+        address beneficiary
+    )
         internal
         view
         returns (Vesting storage vesting)

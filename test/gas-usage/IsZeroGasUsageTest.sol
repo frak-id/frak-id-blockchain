@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {PRBTest} from "@prb/test/PRBTest.sol";
+import { PRBTest } from "@prb/test/PRBTest.sol";
 
 contract IsZero {
     function sample(address addr) external pure returns (bool) {

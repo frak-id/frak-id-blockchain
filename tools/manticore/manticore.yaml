@@ -1,5 +1,0 @@
-core:
-  compress_states: false
-cli:
-  solc_remaps: '@openzeppelin=node_modules/@openzeppelin'
-  config: tools/manticore/manticore.yaml

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {BadgeTooLarge} from "../../utils/FrakErrors.sol";
+import { BadgeTooLarge } from "../../utils/FrakErrors.sol";
 
 /**
  * @author  @KONFeature
@@ -12,7 +12,7 @@ import {BadgeTooLarge} from "../../utils/FrakErrors.sol";
  */
 abstract contract ContentBadges {
     /// @dev Max badge possible for the content
-    uint256 private constant MAX_CONTENT_BADGE = 1_000 ether;
+    uint256 private constant MAX_CONTENT_BADGE = 1000 ether;
 
     /// @dev Event emitted when a badge is updated
     event ContentBadgeUpdated(uint256 indexed id, uint256 badge);

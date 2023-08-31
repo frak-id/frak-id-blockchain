@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {IFrakToken} from "../tokens/IFrakToken.sol";
-import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
-import {FrakRoles} from "../utils/FrakRoles.sol";
-import {InvalidAddress, RewardTooLarge, NoReward} from "../utils/FrakErrors.sol";
-import {Multicallable} from "solady/utils/Multicallable.sol";
+import { IFrakToken } from "../tokens/IFrakToken.sol";
+import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
+import { FrakRoles } from "../utils/FrakRoles.sol";
+import { InvalidAddress, RewardTooLarge, NoReward } from "../utils/FrakErrors.sol";
+import { Multicallable } from "solady/utils/Multicallable.sol";
 
 /// Error thrown when the contract havn't enough found to perform the withdraw
 error NotEnoughTreasury();
@@ -114,7 +114,10 @@ contract FrakTreasuryWallet is MintingAccessControlUpgradeable, Multicallable {
     /**
      * @dev Transfer the given number of token to the user
      */
-    function transferBatch(address[] calldata targets, uint256[] calldata amounts)
+    function transferBatch(
+        address[] calldata targets,
+        uint256[] calldata amounts
+    )
         external
         whenNotPaused
         onlyRole(FrakRoles.MINTER)

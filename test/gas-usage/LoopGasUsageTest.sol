@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {PRBTest} from "@prb/test/PRBTest.sol";
+import { PRBTest } from "@prb/test/PRBTest.sol";
 
 // Deployment cost : 116_565
 contract SolidityLoop {
@@ -9,7 +9,7 @@ contract SolidityLoop {
     function sample(uint256[] calldata values) external pure returns (uint256[] memory transformed) {
         unchecked {
             transformed = new uint256[](values.length);
-            for (uint256 i = 0; i < values.length; i++) {}
+            for (uint256 i = 0; i < values.length; i++) { }
         }
     }
 }
@@ -56,7 +56,7 @@ contract AssemblyInfiniteForLoop {
             let valuesEnd := add(valuesOffset, shl(5, values.length))
 
             // Infinite loop
-            for {} 1 {} {
+            for { } 1 { } {
                 // Load value from calldata
                 let value := calldataload(valuesOffset)
                 // Build transformed value

@@ -2,11 +2,11 @@
 pragma solidity 0.8.21;
 
 import "forge-std/console.sol";
-import {ContentPool} from "@frak/reward/pool/ContentPool.sol";
-import {FrakMath} from "@frak/utils/FrakMath.sol";
-import {FrakRoles} from "@frak/utils/FrakRoles.sol";
-import {NotAuthorized, InvalidAddress, ContractPaused, NoReward} from "@frak/utils/FrakErrors.sol";
-import {FrkTokenTestHelper} from "../../FrkTokenTestHelper.sol";
+import { ContentPool } from "@frak/reward/pool/ContentPool.sol";
+import { FrakMath } from "@frak/utils/FrakMath.sol";
+import { FrakRoles } from "@frak/utils/FrakRoles.sol";
+import { NotAuthorized, InvalidAddress, ContractPaused, NoReward } from "@frak/utils/FrakErrors.sol";
+import { FrkTokenTestHelper } from "../../FrkTokenTestHelper.sol";
 
 /// Testing the content pool
 contract ContentPoolTest is FrkTokenTestHelper {
@@ -23,7 +23,7 @@ contract ContentPoolTest is FrkTokenTestHelper {
         contentPool = ContentPool(contentPoolProxyAddr);
 
         prankDeployer();
-        frakToken.mint(address(contentPool), 1_000 ether);
+        frakToken.mint(address(contentPool), 1000 ether);
 
         prankDeployer();
         contentPool.grantRole(FrakRoles.REWARDER, deployer);

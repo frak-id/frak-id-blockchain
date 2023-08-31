@@ -3,10 +3,10 @@ pragma solidity 0.8.21;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
-import {UpgradeScript} from "./utils/UpgradeScript.s.sol";
-import {MonoPool} from "swap-pool/MonoPool.sol";
-import {EncoderLib} from "swap-pool/encoder/EncoderLib.sol";
-import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
+import { UpgradeScript } from "./utils/UpgradeScript.s.sol";
+import { MonoPool } from "swap-pool/MonoPool.sol";
+import { EncoderLib } from "swap-pool/encoder/EncoderLib.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 
 contract AddMaticToLiquidityPool is UpgradeScript {
     using SafeTransferLib for address;
@@ -39,7 +39,10 @@ contract AddMaticToLiquidityPool is UpgradeScript {
     }
 
     /// @dev Build the add liquidity command
-    function _buildAddLiquidityCommand(uint256 frkToDeposit, uint256 maticAmount)
+    function _buildAddLiquidityCommand(
+        uint256 frkToDeposit,
+        uint256 maticAmount
+    )
         private
         pure
         returns (bytes memory program)
@@ -61,11 +64,14 @@ contract AddMaticToLiquidityPool is UpgradeScript {
         address frkToken,
         uint256 frkAmount,
         uint256 maticAmount
-    ) private deployerBroadcast {
+    )
+        private
+        deployerBroadcast
+    {
         // Approve the pool to spend the frk
         frkToken.safeApprove(address(pool), frkAmount);
 
         // Execute the command
-        pool.execute{value: maticAmount}(program);
+        pool.execute{ value: maticAmount }(program);
     }
 }

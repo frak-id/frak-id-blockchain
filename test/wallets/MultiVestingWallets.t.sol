@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
-import {FrakMath} from "@frak/utils/FrakMath.sol";
+import { FrakToken } from "@frak/tokens/FrakTokenL2.sol";
+import { FrakMath } from "@frak/utils/FrakMath.sol";
 import {
     MultiVestingWallets, NotEnoughFounds, InvalidDuration, InvalidDate
 } from "@frak/wallets/MultiVestingWallets.sol";
-import {FrkTokenTestHelper} from "../FrkTokenTestHelper.sol";
+import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
 import {
     NotAuthorized,
     InvalidArray,

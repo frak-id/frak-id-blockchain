@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {IRewarder} from "./IRewarder.sol";
-import {ContentBadges} from "./badges/ContentBadges.sol";
-import {ListenerBadges} from "./badges/ListenerBadges.sol";
-import {ContentPool} from "./pool/ContentPool.sol";
-import {ReferralPool} from "./pool/ReferralPool.sol";
-import {FrakMath} from "../utils/FrakMath.sol";
-import {FrakRoles} from "../utils/FrakRoles.sol";
-import {FraktionTokens} from "../tokens/FraktionTokens.sol";
-import {IFrakToken} from "../tokens/IFrakToken.sol";
-import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
-import {InvalidAddress, InvalidArray, RewardTooLarge} from "../utils/FrakErrors.sol";
-import {PushPullReward} from "../utils/PushPullReward.sol";
-import {Multicallable} from "solady/utils/Multicallable.sol";
+import { IRewarder } from "./IRewarder.sol";
+import { ContentBadges } from "./badges/ContentBadges.sol";
+import { ListenerBadges } from "./badges/ListenerBadges.sol";
+import { ContentPool } from "./pool/ContentPool.sol";
+import { ReferralPool } from "./pool/ReferralPool.sol";
+import { FrakMath } from "../utils/FrakMath.sol";
+import { FrakRoles } from "../utils/FrakRoles.sol";
+import { FraktionTokens } from "../tokens/FraktionTokens.sol";
+import { IFrakToken } from "../tokens/IFrakToken.sol";
+import { FrakAccessControlUpgradeable } from "../utils/FrakAccessControlUpgradeable.sol";
+import { InvalidAddress, InvalidArray, RewardTooLarge } from "../utils/FrakErrors.sol";
+import { PushPullReward } from "../utils/PushPullReward.sol";
+import { Multicallable } from "solady/utils/Multicallable.sol";
 
 /**
  * @dev Represent our rewarder contract
@@ -132,7 +132,10 @@ contract Rewarder is
         address contentPoolAddr,
         address referralAddr,
         address foundationAddr
-    ) external initializer {
+    )
+        external
+        initializer
+    {
         if (
             frkTokenAddr == address(0) || fraktionTokensAddr == address(0) || contentPoolAddr == address(0)
                 || referralAddr == address(0) || foundationAddr == address(0)
@@ -164,7 +167,10 @@ contract Rewarder is
     /**
      * @dev Directly pay a user for the given frk amount (used for offchain to onchain wallet migration)
      */
-    function payUserDirectly(address listener, uint256 amount)
+    function payUserDirectly(
+        address listener,
+        uint256 amount
+    )
         external
         payable
         onlyRole(FrakRoles.REWARDER)
@@ -196,9 +202,13 @@ contract Rewarder is
     }
 
     /**
-     * @notice Directly pay all the creator for the given frk amount (used for offchain reward created by the user, that is sent to the creator)
+     * @notice Directly pay all the creator for the given frk amount (used for offchain reward created by the user, that
+     * is sent to the creator)
      */
-    function payCreatorDirectlyBatch(uint256[] calldata contentIds, uint256[] calldata amounts)
+    function payCreatorDirectlyBatch(
+        uint256[] calldata contentIds,
+        uint256[] calldata amounts
+    )
         external
         payable
         onlyRole(FrakRoles.REWARDER)
@@ -259,7 +269,12 @@ contract Rewarder is
         uint256 contentType,
         uint256[] calldata contentIds,
         uint256[] calldata listenCounts
-    ) external payable onlyRole(FrakRoles.REWARDER) whenNotPaused {
+    )
+        external
+        payable
+        onlyRole(FrakRoles.REWARDER)
+        whenNotPaused
+    {
         // Ensure we got valid data
         assembly {
             if iszero(listener) {
@@ -346,7 +361,10 @@ contract Rewarder is
     }
 
     /// @dev Update the 'contentId' 'badge'
-    function updateContentBadge(uint256 contentId, uint256 badge)
+    function updateContentBadge(
+        uint256 contentId,
+        uint256 badge
+    )
         external
         override
         onlyRole(FrakRoles.BADGE_UPDATER)
@@ -356,7 +374,10 @@ contract Rewarder is
     }
 
     /// @dev Update the 'listener' 'badge'
-    function updateListenerBadge(address listener, uint256 badge)
+    function updateListenerBadge(
+        address listener,
+        uint256 badge
+    )
         external
         override
         onlyRole(FrakRoles.BADGE_UPDATER)
@@ -393,7 +414,9 @@ contract Rewarder is
         address listener,
         uint256[] memory fraktionTypes,
         TotalRewards memory totalRewards
-    ) private {
+    )
+        private
+    {
         // Ensure we don't exceed the max ccu / content
         assembly {
             if gt(listenCount, MAX_CCU_PER_CONTENT) {
@@ -482,12 +505,17 @@ contract Rewarder is
     /**
      * @dev Compute the earning factor for a listener on a given content
      */
-    function earningFactorForListener(uint256[] memory fraktionTypes, address listener, uint256 contentId)
+    function earningFactorForListener(
+        uint256[] memory fraktionTypes,
+        address listener,
+        uint256 contentId
+    )
         private
         view
         returns (uint256 earningFactor, bool hasOnePaidFraktion)
     {
-        // Build the ids for eachs fraktion that can generate reward, and get the user balance for each one if this fraktions
+        // Build the ids for eachs fraktion that can generate reward, and get the user balance for each one if this
+        // fraktions
         uint256[] memory fraktionIds = contentId.buildSnftIds(fraktionTypes);
         uint256[] memory tokenBalances = fraktionTokens.balanceOfIdsBatch(listener, fraktionIds);
 
@@ -500,7 +528,7 @@ contract Rewarder is
             let offsetEnd := add(0x20, shl(0x05, mload(fraktionIds)))
 
             // Infinite loop
-            for {} 1 {} {
+            for { } 1 { } {
                 // Get balance and fraktion type
                 let tokenBalance := mload(add(tokenBalances, currOffset))
                 let fraktionType := mload(add(fraktionTypes, currOffset))

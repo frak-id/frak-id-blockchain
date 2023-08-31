@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {Initializable} from "@oz-upgradeable/proxy/utils/Initializable.sol";
-import {IERC20Upgradeable} from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import {NoReward, InvalidAddress, RewardTooLarge} from "./FrakErrors.sol";
+import { Initializable } from "@oz-upgradeable/proxy/utils/Initializable.sol";
+import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import { NoReward, InvalidAddress, RewardTooLarge } from "./FrakErrors.sol";
 
 /**
  * @dev Abstraction for contract that give a push / pull reward, address based
@@ -107,7 +107,8 @@ abstract contract PushPullReward is Initializable {
     }
 
     /**
-     * @dev Add founds for the given user, without checking the operation (gas gain, usefull when founds are checked before)
+     * @dev Add founds for the given user, without checking the operation (gas gain, usefull when founds are checked
+     * before)
      */
     function _addFoundsUnchecked(address user, uint256 founds) internal {
         assembly {
@@ -185,7 +186,8 @@ abstract contract PushPullReward is Initializable {
 
     /**
      * @dev Core logic of the withdraw method, but with fee this time
-     * @notice If that's the fee recipient performing the call, withdraw without fee's (otherwise, infinite loop required to get all the frk foundation fee's)
+     * @notice If that's the fee recipient performing the call, withdraw without fee's (otherwise, infinite loop
+     * required to get all the frk foundation fee's)
      */
     function _withdrawWithFee(address user, uint256 feePercent, address feeRecipient) internal {
         uint256 feesAmount;

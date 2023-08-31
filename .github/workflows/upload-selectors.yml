@@ -1,13 +1,7 @@
 name: 🗃 Upload selectors
 
 on:
-  push:
-    branches: ["main"]
-
-# cancel previous runs on the same PR
-concurrency:
-  group: ${{ github.ref }}-selector-upload
-  cancel-in-progress: true
+  workflow_dispatch:
 
 jobs:
   storage-check:
@@ -17,19 +11,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
-
-      - name: '🔨 Setup pnpm'
-        uses: pnpm/action-setup@v2
-      
-      - name: '🔨 Setup Node.js'
-        id: setup-node
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-
-      - name: '🔨 Install dependencies'
-        run: pnpm install --frozen-lockfile
           
       - name: '🔨 Install Foundry'
         uses: foundry-rs/foundry-toolchain@v1

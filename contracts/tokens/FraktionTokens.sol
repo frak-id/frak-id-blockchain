@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {ERC1155Upgradeable} from "@oz-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
-import {FraktionTransferCallback} from "./FraktionTransferCallback.sol";
-import {FrakMath} from "../utils/FrakMath.sol";
-import {FrakRoles} from "../utils/FrakRoles.sol";
-import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
-import {InvalidArray} from "../utils/FrakErrors.sol";
+import { ERC1155Upgradeable } from "@oz-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import { FraktionTransferCallback } from "./FraktionTransferCallback.sol";
+import { FrakMath } from "../utils/FrakMath.sol";
+import { FrakRoles } from "../utils/FrakRoles.sol";
+import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
+import { InvalidArray } from "../utils/FrakErrors.sol";
 
 /**
  * @author  @KONFeature
@@ -99,7 +99,11 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
      * @dev Mint a new content, return the id of the built content
      * We will store in memory -from 0x0 to 0x40 ->
      */
-    function mintNewContent(address ownerAddress, uint256[] calldata fraktionTypes, uint256[] calldata supplies)
+    function mintNewContent(
+        address ownerAddress,
+        uint256[] calldata fraktionTypes,
+        uint256[] calldata supplies
+    )
         external
         payable
         onlyRole(FrakRoles.MINTER)
@@ -127,7 +131,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
             // Current iterator offset
             let currentOffset := 0
             // Infinite loop
-            for {} 1 {} {
+            for { } 1 { } {
                 // Get the current id
                 let fraktionType := calldataload(add(fraktionTypes.offset, currentOffset))
 
@@ -253,14 +257,17 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory
-    ) internal override {
+    )
+        internal
+        override
+    {
         assembly {
             // Base offset to access array element's
             let currOffset := 0x20
             let offsetEnd := add(currOffset, shl(5, mload(ids)))
 
             // Infinite loop
-            for {} 1 {} {
+            for { } 1 { } {
                 // Get the id and amount
                 let id := mload(add(ids, currOffset))
                 let amount := mload(add(amounts, currOffset))
@@ -308,7 +315,11 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory
-    ) internal override whenNotPaused {
+    )
+        internal
+        override
+        whenNotPaused
+    {
         assembly {
             // Base offset to access array element's
             let currOffset := 0x20
@@ -318,7 +329,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
             let hasOneFraktionForCallback := false
 
             // Infinite loop
-            for {} 1 {} {
+            for { } 1 { } {
                 // Get the id and amount
                 let id := mload(add(ids, currOffset))
 
@@ -362,7 +373,10 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     /**
      * @dev Batch balance of for single address
      */
-    function balanceOfIdsBatch(address account, uint256[] calldata ids)
+    function balanceOfIdsBatch(
+        address account,
+        uint256[] calldata ids
+    )
         public
         view
         virtual
@@ -380,7 +394,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
             // Current balance array offset
             let balanceOffset := add(batchBalances, 0x20)
             // Infinite loop
-            for {} 1 {} {
+            for { } 1 { } {
                 // Get the slot for the current id
                 mstore(0, calldataload(i))
                 mstore(0x20, 0xcb) // `_balances.slot` on the OZ contract

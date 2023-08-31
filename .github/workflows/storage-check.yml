@@ -4,7 +4,6 @@ on:
   push:
     branches: ["main"]
   pull_request:
-    types: [opened, synchronize, reopened]
 
 # cancel previous runs on the same PR
 concurrency:
@@ -42,7 +41,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: "~/.foundry/cache"
-          key: foundry-${{ hashFiles('Makefile', 'foundry.toml') }} # where fork block numbers & RPC are stored
+          key: foundry-${{ hashFiles('foundry.toml') }} # where fork block numbers & RPC are stored
       
       - name: '💾 Foundry compilation cache'
         uses: actions/cache@v3
@@ -50,7 +49,7 @@ jobs:
           path: |
             cache
             out
-          key: ${{ github.base_ref || github.ref_name }}-foundry
+          key: foundry-${{ github.repository_id }}-${{ hashFiles('foundry.toml') }}
           
       - name: '🧪 Check FRK Token storage'
         uses: Rubilmax/foundry-storage-check@v3.5

@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge} from "@frak/utils/FrakErrors.sol";
-import {FraktionTokens} from "@frak/tokens/FraktionTokens.sol";
-import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
-import {FrakMath} from "@frak/utils/FrakMath.sol";
-import {FrakRoles} from "@frak/utils/FrakRoles.sol";
-import {Minter} from "@frak/minter/Minter.sol";
-import {FrkTokenTestHelper} from "../FrkTokenTestHelper.sol";
+import { NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge } from "@frak/utils/FrakErrors.sol";
+import { FraktionTokens } from "@frak/tokens/FraktionTokens.sol";
+import { FrakToken } from "@frak/tokens/FrakTokenL2.sol";
+import { FrakMath } from "@frak/utils/FrakMath.sol";
+import { FrakRoles } from "@frak/utils/FrakRoles.sol";
+import { Minter } from "@frak/minter/Minter.sol";
+import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
 import {
     NotAuthorized,
     InvalidAddress,

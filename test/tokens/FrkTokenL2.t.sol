@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {PRBTest} from "@prb/test/PRBTest.sol";
-import {StdUtils} from "@forge-std/StdUtils.sol";
-import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
-import {NotAuthorized} from "@frak/utils/FrakErrors.sol";
-import {UUPSTestHelper} from "../UUPSTestHelper.sol";
+import { PRBTest } from "@prb/test/PRBTest.sol";
+import { StdUtils } from "@forge-std/StdUtils.sol";
+import { FrakToken } from "@frak/tokens/FrakTokenL2.sol";
+import { NotAuthorized } from "@frak/utils/FrakErrors.sol";
+import { UUPSTestHelper } from "../UUPSTestHelper.sol";
 
 /// Testing the frak l2 token
 contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
@@ -220,7 +220,8 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
     }
 
     /*
-     * ===== TEST : permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) =====
+    * ===== TEST : permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32
+    s) =====
      */
 
     bytes32 constant PERMIT_TYPEHASH =
