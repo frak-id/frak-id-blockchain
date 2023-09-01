@@ -3,7 +3,7 @@ pragma solidity 0.8.21;
 
 import { ERC20Upgradeable } from "@oz-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
-import { MintingAccessControlUpgradeable } from "../roles/MintingAccessControlUpgradeable.sol";
+import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { IFrakToken } from "./IFrakToken.sol";
 import { EIP712Base } from "./EIP712Base.sol";
 import { ECDSA } from "solady/utils/ECDSA.sol";
@@ -13,7 +13,7 @@ import { ECDSA } from "solady/utils/ECDSA.sol";
 /// @notice ERC20 Contract for the FRAK token
 /// @dev Compliant with ERC20 - EIP712 - EIP2612
 /// @custom:security-contact contact@frak.id
-contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, EIP712Base, IFrakToken {
+contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Base, IFrakToken {
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
@@ -43,7 +43,7 @@ contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, EIP712B
     function initialize() external initializer {
         string memory name = "Frak";
         __ERC20_init(name, "FRK");
-        __MintingAccessControlUpgradeable_init();
+        __FrakAccessControlUpgradeable_Minter_init();
         _initializeEIP712(name);
 
         // Current version is 2, since we use a version to reset the domain separator post EIP712 updates

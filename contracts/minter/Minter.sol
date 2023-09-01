@@ -7,7 +7,7 @@ import { FrakMath } from "../utils/FrakMath.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { FraktionTokens } from "../fraktions/FraktionTokens.sol";
 import { IFrakToken } from "../tokens/IFrakToken.sol";
-import { MintingAccessControlUpgradeable } from "../roles/MintingAccessControlUpgradeable.sol";
+import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { InvalidAddress } from "../utils/FrakErrors.sol";
 import { Multicallable } from "solady/utils/Multicallable.sol";
 
@@ -15,7 +15,7 @@ import { Multicallable } from "solady/utils/Multicallable.sol";
 /// @title Minter
 /// @notice This contract will mint new content on the ecosytem, and mint fraktions for the user
 /// @custom:security-contact contact@frak.id
-contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges, Multicallable {
+contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Multicallable {
     using FrakMath for uint256;
 
     /* -------------------------------------------------------------------------- */
@@ -88,7 +88,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
         }
 
         // Only for v1 deployment
-        __MintingAccessControlUpgradeable_init();
+        __FrakAccessControlUpgradeable_Minter_init();
 
         fraktionTokens = FraktionTokens(fraktionTokensAddr);
         frakToken = IFrakToken(frkTokenAddr);
@@ -213,7 +213,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
      * @param   s  Signature spec secp256k1
      */
     function mintFraktion(uint256 id, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external payable whenNotPaused {
-        _mintFraktionForUser(id, _msgSender(), deadline, v, r, s);
+        _mintFraktionForUser(id, msg.sender, deadline, v, r, s);
     }
 
     /**
@@ -243,7 +243,7 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
      * @param   id  Id of the free fraktion
      */
     function mintFreeFraktion(uint256 id) external payable override whenNotPaused {
-        _mintFreeFraktionForUser(id, _msgSender());
+        _mintFreeFraktionForUser(id, msg.sender);
     }
 
     /**

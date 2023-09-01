@@ -5,14 +5,14 @@ import { ERC1155Upgradeable } from "@oz-upgradeable/token/ERC1155/ERC1155Upgrade
 import { FraktionTransferCallback } from "./FraktionTransferCallback.sol";
 import { FrakMath } from "../utils/FrakMath.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
-import { MintingAccessControlUpgradeable } from "../roles/MintingAccessControlUpgradeable.sol";
+import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { InvalidArray } from "../utils/FrakErrors.sol";
 
 /// @author @KONFeature
 /// @title FraktionTokens
 /// @notice ERC1155 for the Frak Fraktions tokens, used as ownership proof for a content, or investisment proof
 /// @custom:security-contact contact@frak.id
-contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
+contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     using FrakMath for uint256;
 
     /* -------------------------------------------------------------------------- */
@@ -84,7 +84,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
 
     function initialize(string calldata metadatalUrl) external initializer {
         __ERC1155_init(metadatalUrl);
-        __MintingAccessControlUpgradeable_init();
+        __FrakAccessControlUpgradeable_Minter_init();
         // Set the initial content id
         _currentContentTokenId = 1;
     }

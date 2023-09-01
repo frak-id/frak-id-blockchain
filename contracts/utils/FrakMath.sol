@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-/**
- * @author  @KONFeature
- * @title   FrakMath
- * @notice  Contain some math utils for the Frak ecosystem (token ids, type extractor etc)
- * @custom:security-contact contact@frak.id
- */
+/// @author @KONFeature
+/// @title FrakMath
+/// @notice Library for the Math inside Frak ecosystem
+/// @custom:security-contact contact@frak.id
 library FrakMath {
     /// @dev The offset of the id we use to store the token type
     uint8 internal constant ID_OFFSET = 4;
@@ -28,9 +26,7 @@ library FrakMath {
     /// @dev If a token type is <= to this value it's not a payed one
     uint8 internal constant PAYED_TOKEN_TYPE_MAX = 7;
 
-    /**
-     * @dev Build the id for a S FNT
-     */
+     /// @dev Build all the id of `types` for the given token `id`
     function buildSnftIds(uint256 id, uint256[] memory types) internal pure returns (uint256[] memory tokenIds) {
         assembly {
             // Create our array from free mem space

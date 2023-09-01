@@ -2,7 +2,7 @@
 pragma solidity 0.8.21;
 
 import { IFrakToken } from "../tokens/IFrakToken.sol";
-import { MintingAccessControlUpgradeable } from "../roles/MintingAccessControlUpgradeable.sol";
+import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { InvalidAddress, RewardTooLarge, NoReward } from "../utils/FrakErrors.sol";
 import { Multicallable } from "solady/utils/Multicallable.sol";
@@ -10,7 +10,7 @@ import { Multicallable } from "solady/utils/Multicallable.sol";
 /// Error thrown when the contract havn't enough found to perform the withdraw
 error NotEnoughTreasury();
 
-contract FrakTreasuryWallet is MintingAccessControlUpgradeable, Multicallable {
+contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
@@ -72,7 +72,7 @@ contract FrakTreasuryWallet is MintingAccessControlUpgradeable, Multicallable {
     function initialize(address frkTokenAddr) external initializer {
         if (frkTokenAddr == address(0)) revert InvalidAddress();
 
-        __MintingAccessControlUpgradeable_init();
+        __FrakAccessControlUpgradeable_Minter_init();
 
         frakToken = IFrakToken(frkTokenAddr);
     }
