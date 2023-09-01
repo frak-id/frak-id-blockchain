@@ -3,13 +3,10 @@ pragma solidity 0.8.21;
 
 import { BadgeTooLarge } from "../../utils/FrakErrors.sol";
 
-/**
- * @author  @KONFeature
- * @title   ContentBadges
- * @dev Abstract contract for managing the content badge use as multiplier for earnings.
- * @notice This contract contains methods and variables for initializing, updating, and getting the content badges.
- * @custom:security-contact contact@frak.id
- */
+/// @author @KONFeature
+/// @title ContentBadges
+/// @notice Abstract contract for managing the content badge use as multiplier for earnings.
+/// @custom:security-contact contact@frak.id
 abstract contract ContentBadges {
     /// @dev Max badge possible for the content
     uint256 private constant MAX_CONTENT_BADGE = 1000 ether;
@@ -18,7 +15,7 @@ abstract contract ContentBadges {
     event ContentBadgeUpdated(uint256 indexed id, uint256 badge);
 
     /// @dev Mapping of content id to content badge
-    mapping(uint256 => uint256) private _contentBadges;
+    mapping(uint256 contentId => uint256 badge) private _contentBadges;
 
     /// @dev external function used to update the content badges
     function updateContentBadge(uint256 contentId, uint256 badge) external virtual;

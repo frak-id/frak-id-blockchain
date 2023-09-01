@@ -3,6 +3,7 @@ pragma solidity 0.8.21;
 
 import { StdUtils } from "@forge-std/StdUtils.sol";
 import { Rewarder } from "@frak/reward/Rewarder.sol";
+import { IRewarder } from "@frak/reward/IRewarder.sol";
 import { FrakMath } from "@frak/utils/FrakMath.sol";
 import { ContractPaused, NotAuthorized, InvalidArray, InvalidAddress, RewardTooLarge } from "@frak/utils/FrakErrors.sol";
 import { RewarderTestHelper } from "./RewarderTestHelper.sol";
@@ -43,12 +44,12 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
     }
 
     function test_fail_payUserDirectly_InvalidReward() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        vm.expectRevert(Rewarder.InvalidReward.selector);
+        vm.expectRevert(IRewarder.InvalidReward.selector);
         rewarder.payUserDirectly(address(1), 0);
     }
 
     function test_fail_payUserDirectly_TooLargeReward() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        vm.expectRevert(Rewarder.InvalidReward.selector);
+        vm.expectRevert(IRewarder.InvalidReward.selector);
         rewarder.payUserDirectly(address(1), 1_000_001 ether);
     }
 
@@ -93,7 +94,7 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
     }
 
     function test_fail_payCreatorDirectlyBatch_EmptyAmount() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        vm.expectRevert(Rewarder.InvalidReward.selector);
+        vm.expectRevert(IRewarder.InvalidReward.selector);
         rewarder.payCreatorDirectlyBatch(contentId.asSingletonArray(), uint256(0).asSingletonArray());
     }
 
@@ -102,7 +103,7 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
         withLotFrkToken(rewarderAddr)
         prankExecAsDeployer
     {
-        vm.expectRevert(Rewarder.InvalidReward.selector);
+        vm.expectRevert(IRewarder.InvalidReward.selector);
         rewarder.payCreatorDirectlyBatch(contentId.asSingletonArray(), uint256(1_000_001 ether).asSingletonArray());
     }
 

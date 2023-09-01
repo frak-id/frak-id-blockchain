@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-/**
- * @author  @KONFeature
- * @title   FrakRoles
- * @notice  Contain all the roles for the Frak ecosystem
- * @custom:security-contact contact@frak.id
- */
+/// @author @KONFeature
+/// @title FrakRoles
+/// @notice All the roles of the frak ecosystem
+/// @custom:security-contact contact@frak.id
 library FrakRoles {
     /// @dev Administrator role of a contra
     bytes32 internal constant ADMIN = 0x00;

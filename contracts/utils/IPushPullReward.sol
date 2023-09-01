@@ -5,9 +5,9 @@ import { Initializable } from "@oz-upgradeable/proxy/utils/Initializable.sol";
 import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import { NoReward, InvalidAddress, RewardTooLarge } from "./FrakErrors.sol";
 
-/**
- * @dev Abstraction for contract that give a push / pull reward, address based
- */
+/// @author @KONFeature
+/// @title IPushPullReward
+/// @notice Interface for the push pull reward contracts
 /// @custom:security-contact contact@frak.id
 interface IPushPullReward {
     /* -------------------------------------------------------------------------- */

@@ -11,28 +11,16 @@ import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUp
 import { InvalidAddress } from "../utils/FrakErrors.sol";
 import { Multicallable } from "solady/utils/Multicallable.sol";
 
-/**
- * @author  @KONFeature
- * @title   Minter
- * @notice  This contract will mint new content on the ecosytem, and mint fraktions for the user
- * @dev     Communicate with the FrkToken and FraktionTokens contract to handle minting of content and fraktions
- * @custom:security-contact contact@frak.id
- */
+/// @author @KONFeature
+/// @title Minter
+/// @notice This contract will mint new content on the ecosytem, and mint fraktions for the user
+/// @custom:security-contact contact@frak.id
 contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges, Multicallable {
     using FrakMath for uint256;
 
     /* -------------------------------------------------------------------------- */
     /*                                   Error's                                  */
     /* -------------------------------------------------------------------------- */
-
-    /// @dev Error emitted when the input supply is invalid
-    error InvalidSupply();
-
-    /// @dev Error emitted when we only want to mint a free fraktion, and that's not a free fraktion
-    error ExpectingOnlyFreeFraktion();
-
-    /// @dev Error emitted when the have more than one fraktions of the given type
-    error TooManyFraktion();
 
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
     uint256 private constant _INVALID_ADDRESS_SELECTOR = 0xe6c4247b;
@@ -49,12 +37,6 @@ contract Minter is IMinter, MintingAccessControlUpgradeable, FractionCostBadges,
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
     /* -------------------------------------------------------------------------- */
-
-    /// @dev Event emitted when a new content is minted
-    event ContentMinted(uint256 baseId, address indexed owner);
-
-    /// @dev Event emitted when a new fraktion for a content is minted
-    event FractionMinted(uint256 indexed fractionId, address indexed user, uint256 amount, uint256 cost);
 
     /// @dev 'keccak256("ContentMinted(uint256,address)")'
     uint256 private constant _CONTENT_MINTED_EVENT_SELECTOR =

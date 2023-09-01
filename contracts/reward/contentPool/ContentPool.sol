@@ -9,12 +9,10 @@ import { InvalidAddress, NoReward } from "../../utils/FrakErrors.sol";
 import { EnumerableSet } from "openzeppelin/utils/structs/EnumerableSet.sol";
 import { IContentPool } from "./IContentPool.sol";
 
-/**
- * @author  @KONFeature
- * @title   ContentPool
- * @dev     Represent our content pool contract
- * @custom:security-contact contact@frak.id
- */
+/// @author @KONFeature
+/// @title ContentPool
+/// @notice Contract in charge of managing the content pool
+/// @custom:security-contact contact@frak.id
 contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullReward {
     // Add the library methods
     using EnumerableSet for EnumerableSet.UintSet;
@@ -65,13 +63,13 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     mapping(uint256 => uint256) private currentStateIndex;
 
     /// @dev All the different reward states per content id
-    mapping(uint256 => RewardState[]) private rewardStates;
+    mapping(uint256 contentId => RewardState[] states) private rewardStates;
 
     /// @dev Mapping between content id, to address to participant
-    mapping(uint256 => mapping(address => Participant)) private participants;
+    mapping(uint256 contentId => mapping(address user => Participant participant)) private participants;
 
     /// @dev User address to list of content pool he is in
-    mapping(address => EnumerableSet.UintSet) private userContentPools;
+    mapping(address user => EnumerableSet.UintSet contentPoolIds) private userContentPools;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -186,9 +184,11 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     /*                          Internal write function's                         */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Update the participants of a pool after fraktion transfer
-     */
+    /// @dev Update the participants of a pool after fraktion transfer
+    /// @dev Will only update the participants of a pool after a fraktion transfer
+    /// @param accounter The accounter to use to update the participants
+    /// @param fraktionId The fraktion id that was transfered
+    /// @param amountMoved The amount of fraktion that was transfered
     function updateParticipants(
         FraktionTransferAccounter memory accounter,
         uint256 fraktionId,
@@ -233,9 +233,11 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
         }
     }
 
-    /**
-     * @dev Update participant and pool after fraktion transfer
-     */
+    /// @dev Update participant and pool after fraktion transfer
+    /// @dev Will update the participants of a pool after a fraktion transfer, and update the pool state
+    /// @param accounter The accounter to use to update the participants
+    /// @param fraktionId The fraktion id that was transfered
+    /// @param amountMoved The amount of fraktion that was transfered
     function updateParticipantAndPool(
         FraktionTransferAccounter memory accounter,
         uint256 fraktionId,

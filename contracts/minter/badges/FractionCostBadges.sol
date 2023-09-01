@@ -4,14 +4,10 @@ pragma solidity 0.8.21;
 import { FrakMath } from "../../utils/FrakMath.sol";
 import { InvalidFraktionType } from "../../utils/FrakErrors.sol";
 
-/**
- * @author  @KONFeature
- * @title   FractionCostBadges
- * @dev Abstract contract for managing the badge costs of fractions.
- * @notice This contract contains methods and variables for initializing, updating, and getting the badge costs of
- * fractions.
- * @custom:security-contact contact@frak.id
- */
+/// @author @KONFeature
+/// @title FractionCostBadges
+/// @notice Abstract contract for managing the badge costs of fractions.
+/// @custom:security-contact contact@frak.id
 abstract contract FractionCostBadges {
     /* -------------------------------------------------------------------------- */
     /*                                   Error's                                  */
@@ -39,7 +35,7 @@ abstract contract FractionCostBadges {
      * @dev Map f nft id to cost badge.
      * @notice This variable is private and can only be accessed by the current contract.
      */
-    mapping(uint256 => uint96) private fractionBadges;
+    mapping(uint256 frakionId => uint96 cost) private fractionBadges;
 
     /* -------------------------------------------------------------------------- */
     /*                             Abstract function's                            */

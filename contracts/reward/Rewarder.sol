@@ -5,7 +5,7 @@ import { IRewarder } from "./IRewarder.sol";
 import { ContentBadges } from "./badges/ContentBadges.sol";
 import { ListenerBadges } from "./badges/ListenerBadges.sol";
 import { IContentPool } from "./contentPool/IContentPool.sol";
-import { ReferralPool } from "./pool/ReferralPool.sol";
+import { IReferralPool } from "./referralPool/IReferralPool.sol";
 import { FrakMath } from "../utils/FrakMath.sol";
 import { FrakRoles } from "../utils/FrakRoles.sol";
 import { FraktionTokens } from "../tokens/FraktionTokens.sol";
@@ -15,9 +15,9 @@ import { InvalidAddress, InvalidArray, RewardTooLarge } from "../utils/FrakError
 import { PushPullReward } from "../utils/PushPullReward.sol";
 import { Multicallable } from "solady/utils/Multicallable.sol";
 
-/**
- * @dev Represent our rewarder contract
- */
+/// @author @KONFeature
+/// @title Rewarder
+/// @notice Contract in charge of managing the reward for the user / creator
 /// @custom:security-contact contact@frak.id
 contract Rewarder is
     IRewarder,
@@ -55,9 +55,6 @@ contract Rewarder is
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
 
-    /// @dev Error throwned when the reward is invalid
-    error InvalidReward();
-
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
     uint256 private constant _INVALID_ADDRESS_SELECTOR = 0xe6c4247b;
 
@@ -74,24 +71,9 @@ contract Rewarder is
     /*                                   Event's                                  */
     /* -------------------------------------------------------------------------- */
 
-    /// @dev Event emitted when a user is rewarded for his listen
-    event RewardOnContent(
-        address indexed user, uint256 indexed contentId, uint256 baseUserReward, uint256 earningFactor
-    );
-
     /// @dev 'keccak256(bytes("RewardOnContent(address,uint256,uint256,uint256"))'
     uint256 private constant _REWARD_ON_CONTENT_EVENT_SELECTOR =
         0x6396a2d965d9d843b0159912a8413f069bcce1830e320cd0b6cd5dc03d11eddf;
-
-    /* -------------------------------------------------------------------------- */
-    /*                                  Struct's                                  */
-    /* -------------------------------------------------------------------------- */
-
-    struct TotalRewards {
-        uint256 user;
-        uint256 owners;
-        uint256 content;
-    }
 
     /* -------------------------------------------------------------------------- */
     /*                                   Storage                                  */
@@ -113,7 +95,7 @@ contract Rewarder is
     IFrakToken private frakToken;
 
     /// @dev Access our referral system
-    ReferralPool private referralPool;
+    IReferralPool private referralPool;
 
     /// @dev Access our content pool
     IContentPool private contentPool;
@@ -148,7 +130,7 @@ contract Rewarder is
         fraktionTokens = FraktionTokens(fraktionTokensAddr);
         frakToken = IFrakToken(frkTokenAddr);
         contentPool = IContentPool(contentPoolAddr);
-        referralPool = ReferralPool(referralAddr);
+        referralPool = IReferralPool(referralAddr);
 
         foundationWallet = foundationAddr;
 
@@ -164,9 +146,7 @@ contract Rewarder is
     /*                          External write function's                         */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Directly pay a user for the given frk amount (used for offchain to onchain wallet migration)
-     */
+    /// @dev Directly pay a `listener` for the given frk `amount` (used for offchain to onchain wallet migration)
     function payUserDirectly(
         address listener,
         uint256 amount
@@ -201,10 +181,8 @@ contract Rewarder is
         token.transfer(listener, amount);
     }
 
-    /**
-     * @notice Directly pay all the creator for the given frk amount (used for offchain reward created by the user, that
-     * is sent to the creator)
-     */
+    /// @dev Directly pay all the creators owner of `contentIds` for each given frk `amounts` (used for offchain reward
+    /// created by the user, thatis sent to the creator)
     function payCreatorDirectlyBatch(
         uint256[] calldata contentIds,
         uint256[] calldata amounts
@@ -261,9 +239,8 @@ contract Rewarder is
         }
     }
 
-    /**
-     * @dev Compute the reward for a user, given the content and listens, and pay him and the owner
-     */
+    /// @dev Compute the reward for a `listener`, given the `contentType`, `contentIds` and `listenCounts`, and pay him
+    /// and the owner
     function payUser(
         address listener,
         uint256 contentType,
@@ -343,14 +320,12 @@ contract Rewarder is
         }*/
     }
 
-    /**
-     * @dev Withdraw my pending founds
-     */
+    /// @dev Withdraw the pending founds of the caller
     function withdrawFounds() external override whenNotPaused {
         _withdrawWithFee(msg.sender, FEE_PERCENT, foundationWallet);
     }
 
-    /// @dev Withdraw the pending founds for 'user'
+    /// @dev Withdraw the pending founds of `user`
     function withdrawFounds(address user) external override onlyRole(FrakRoles.ADMIN) whenNotPaused {
         _withdrawWithFee(user, FEE_PERCENT, foundationWallet);
     }
@@ -404,9 +379,13 @@ contract Rewarder is
     /*                          Internal write function's                         */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Compute the user and owner reward for the given content
-     */
+    /// @dev Compute the reward of the given content
+    /// @param contentId The id of the content
+    /// @param listenCount The number of listen for the given content
+    /// @param rewardForContentType The base reward for the given content type
+    /// @param listener The listener address
+    /// @param fraktionTypes The fraktion types
+    /// @param totalRewards The current total rewards in memory accounting (that will be updated)
     function computeRewardForContent(
         uint256 contentId,
         uint256 listenCount,
@@ -502,9 +481,10 @@ contract Rewarder is
     /*                          Internal view function's                          */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Compute the earning factor for a listener on a given content
-     */
+    /// @dev Compute the earning factor for the given listener
+    /// @param fraktionTypes The fraktion types
+    /// @param listener The listener address
+    /// @param contentId The content id
     function earningFactorForListener(
         uint256[] memory fraktionTypes,
         address listener,
@@ -563,9 +543,7 @@ contract Rewarder is
     /*                          Internal pure function's                          */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Get the base reward to the given content type
-     */
+    /// @dev Compute the base reward for the given `contentType`
     function baseRewardForContentType(uint256 contentType) private pure returns (uint256 reward) {
         if (contentType == CONTENT_TYPE_VIDEO) {
             reward = 2 ether;

@@ -56,7 +56,7 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     bool private _paused;
 
     /// @dev Mapping of roles -> user -> hasTheRight
-    mapping(bytes32 => mapping(address => bool)) private _roles;
+    mapping(bytes32 roles => mapping(address user => bool isAllowed)) private _roles;
 
     /**
      * @notice Initializes the contract, granting the ADMIN, PAUSER, and UPGRADER roles to the msg.sender.

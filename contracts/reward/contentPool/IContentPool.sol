@@ -3,12 +3,10 @@ pragma solidity 0.8.21;
 
 import { FraktionTransferCallback } from "../../tokens/FraktionTransferCallback.sol";
 
-/**
- * @author  @KONFeature
- * @title   IContentPool
- * @dev     Represent our content pool contract
- * @custom:security-contact contact@frak.id
- */
+/// @author @KONFeature
+/// @title IContentPool
+/// @notice Interface for the content pool contract
+/// @custom:security-contact contact@frak.id
 interface IContentPool is FraktionTransferCallback {
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */

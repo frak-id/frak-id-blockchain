@@ -3,14 +3,34 @@ pragma solidity 0.8.21;
 
 import { IPausable } from "../utils/IPausable.sol";
 
-/**
- * @author  @KONFeature
- * @title   Minter interface
- * @notice  This contract describe the method exposed by the Minter contract
- * @dev     Just an interface to ease the development and upgradeability
- * @custom:security-contact contact@frak.id
- */
+/// @author @KONFeature
+/// @title IMinter
+/// @notice Interface for the Minter contract
+/// @custom:security-contact contact@frak.id
 interface IMinter is IPausable {
+    /* -------------------------------------------------------------------------- */
+    /*                                   Error's                                  */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev Error emitted when the input supply is invalid
+    error InvalidSupply();
+
+    /// @dev Error emitted when we only want to mint a free fraktion, and that's not a free fraktion
+    error ExpectingOnlyFreeFraktion();
+
+    /// @dev Error emitted when the have more than one fraktions of the given type
+    error TooManyFraktion();
+
+    /* -------------------------------------------------------------------------- */
+    /*                                   Event's                                  */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev Event emitted when a new content is minted
+    event ContentMinted(uint256 baseId, address indexed owner);
+
+    /// @dev Event emitted when a new fraktion for a content is minted
+    event FractionMinted(uint256 indexed fractionId, address indexed user, uint256 amount, uint256 cost);
+
     /**
      * @notice  Mint a new content to the FrkEcosystem
      * @dev     Will ensure the role and contract state, then the param, and finally call the FraktionTokens contract to

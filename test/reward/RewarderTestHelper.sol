@@ -4,7 +4,7 @@ pragma solidity 0.8.21;
 import { FrakToken } from "@frak/tokens/FrakTokenL2.sol";
 import { FraktionTokens } from "@frak/tokens/FraktionTokens.sol";
 import { ContentPool } from "@frak/reward/contentPool/ContentPool.sol";
-import { ReferralPool } from "@frak/reward/pool/ReferralPool.sol";
+import { ReferralPool } from "@frak/reward/referralPool/ReferralPool.sol";
 import { Rewarder } from "@frak/reward/Rewarder.sol";
 import { FraktionTokens } from "@frak/tokens/FraktionTokens.sol";
 import { FrakMath } from "@frak/utils/FrakMath.sol";

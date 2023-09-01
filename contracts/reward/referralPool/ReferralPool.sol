@@ -6,37 +6,21 @@ import { FrakRoles } from "../../utils/FrakRoles.sol";
 import { PushPullReward } from "../../utils/PushPullReward.sol";
 import { FrakAccessControlUpgradeable } from "../../utils/FrakAccessControlUpgradeable.sol";
 import { InvalidAddress, NoReward } from "../../utils/FrakErrors.sol";
+import { IReferralPool } from "./IReferralPool.sol";
 
-/// @dev Exception throwned when the user already got a referer
-error AlreadyGotAReferer();
-/// @dev Exception throwned when the user is already in the referer chain
-error AlreadyInRefererChain();
-
-/**
- * @dev Represent our referral contract
- */
+/// @author @KONFeature
+/// @title ReferralPool
+/// @notice Contract in charge of managing the referral program
 /// @custom:security-contact contact@frak.id
-contract ReferralPool is FrakAccessControlUpgradeable, PushPullReward {
-    // The minimum reward is 1 mwei, to prevent iteration on really small amount
+contract ReferralPool is IReferralPool, FrakAccessControlUpgradeable, PushPullReward {
+    /// @dev The minimum reward is 1 mwei, to prevent iteration on really small amount
     uint256 internal constant MINIMUM_REWARD = 1_000_000;
 
-    // The maximal referal depth we can pay
+    /// &dev The maximal referal depth we can pay
     uint256 internal constant MAX_DEPTH = 10;
 
-    /**
-     * @dev Event emitted when a user is rewarded for his listen
-     */
-    event UserReferred(uint256 indexed contentId, address indexed referer, address indexed referee);
-
-    /**
-     * @dev Event emitted when a user is rewarded by the referral program
-     */
-    event ReferralReward(uint256 contentId, address user, uint256 amount);
-
-    /**
-     * Mapping of content id to referee to referer
-     */
-    mapping(uint256 => mapping(address => address)) private contentIdToRefereeToReferer;
+    /// @dev Mapping of content id, to referee, to referer
+    mapping(uint256 contentId => mapping(address referee => address referrer)) private contentIdToRefereeToReferer;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -93,7 +77,7 @@ contract ReferralPool is FrakAccessControlUpgradeable, PushPullReward {
         address user,
         uint256 amount
     )
-        public
+        external
         payable
         onlyRole(FrakRoles.REWARDER)
         whenNotPaused
