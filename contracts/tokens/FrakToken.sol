@@ -4,7 +4,6 @@ pragma solidity 0.8.21;
 import { ERC20Upgradeable } from "@oz-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { MintingAccessControlUpgradeable } from "../roles/MintingAccessControlUpgradeable.sol";
-import { ContextMixin } from "./ContextMixin.sol";
 import { IFrakToken } from "./IFrakToken.sol";
 import { EIP712Base } from "./EIP712Base.sol";
 import { ECDSA } from "solady/utils/ECDSA.sol";
@@ -14,13 +13,10 @@ import { ECDSA } from "solady/utils/ECDSA.sol";
 /// @notice ERC20 Contract for the FRAK token
 /// @dev Compliant with ERC20 - EIP712 - EIP2612
 /// @custom:security-contact contact@frak.id
-contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, EIP712Base, ContextMixin, IFrakToken {
+contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, EIP712Base, IFrakToken {
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
-
-    /// @dev Role used by the polygon bridge to bridge token between L1 <-> L2
-    bytes32 internal constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
 
     /// @dev Maximum cap of token, at 3 billion FRK
     uint256 private constant _cap = 3_000_000_000 ether;
@@ -44,21 +40,13 @@ contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, EIP712B
     /*                          External write function's                         */
     /* -------------------------------------------------------------------------- */
 
-    function initialize(address childChainManager) external initializer {
+    function initialize() external initializer {
         string memory name = "Frak";
         __ERC20_init(name, "FRK");
         __MintingAccessControlUpgradeable_init();
         _initializeEIP712(name);
 
-        _grantRole(DEPOSITOR_ROLE, childChainManager);
-
         // Current version is 2, since we use a version to reset the domain separator post EIP712 updates
-    }
-
-    // This is to support Native meta transactions
-    // never use msg.sender directly, use _msgSender() instead
-    function _msgSender() internal view override returns (address sender) {
-        return ContextMixin.msgSender();
     }
 
     /// @dev Mint some FRK
@@ -69,7 +57,7 @@ contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, EIP712B
 
     /// @dev Burn some FRK
     function burn(uint256 amount) external override whenNotPaused {
-        _burn(_msgSender(), amount);
+        _burn(msg.sender, amount);
     }
 
     /// @dev Returns the cap on the token's total supply.

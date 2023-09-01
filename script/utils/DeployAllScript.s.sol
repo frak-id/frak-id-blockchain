@@ -63,7 +63,7 @@ contract DeployAllScript is UpgradeScript {
         // Deploy the initial frk token
         FrakToken implementation = new FrakToken();
         vm.label(address(implementation), "FrkToken");
-        bytes memory initData = abi.encodeCall(FrakToken.initialize, (address(this)));
+        bytes memory initData = abi.encodeCall(FrakToken.initialize, ());
         // Deploy the proxy
         proxy = _deployProxy(address(implementation), initData, "FrkToken");
     }

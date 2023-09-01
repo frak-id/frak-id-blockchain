@@ -10,7 +10,7 @@ contract FrkTokenTestHelper is UUPSTestHelper {
 
     function _setupFrkToken() internal {
         // Deploy frak token
-        bytes memory initData = abi.encodeCall(FrakToken.initialize, (address(this)));
+        bytes memory initData = abi.encodeCall(FrakToken.initialize, ());
         address frkProxyAddr = deployContract(address(new FrakToken()), initData);
         frakToken = FrakToken(frkProxyAddr);
     }

@@ -14,7 +14,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
 
     function setUp() public {
         // Deploy our contract via proxy and set the proxy address
-        bytes memory initData = abi.encodeCall(FrakToken.initialize, (address(this)));
+        bytes memory initData = abi.encodeCall(FrakToken.initialize, ());
         address proxyAddress = deployContract(address(new FrakToken()), initData);
         frakToken = FrakToken(proxyAddress);
     }
@@ -37,7 +37,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
      */
     function test_fail_initialize_CantInitTwice() public {
         vm.expectRevert("Initializable: contract is already initialized");
-        frakToken.initialize(address(0));
+        frakToken.initialize();
     }
 
     /*
