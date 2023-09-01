@@ -4,7 +4,7 @@ pragma solidity 0.8.21;
 import { IRewarder } from "./IRewarder.sol";
 import { ContentBadges } from "./badges/ContentBadges.sol";
 import { ListenerBadges } from "./badges/ListenerBadges.sol";
-import { ContentPool } from "./pool/ContentPool.sol";
+import { IContentPool } from "./contentPool/IContentPool.sol";
 import { ReferralPool } from "./pool/ReferralPool.sol";
 import { FrakMath } from "../utils/FrakMath.sol";
 import { FrakRoles } from "../utils/FrakRoles.sol";
@@ -116,7 +116,7 @@ contract Rewarder is
     ReferralPool private referralPool;
 
     /// @dev Access our content pool
-    ContentPool private contentPool;
+    IContentPool private contentPool;
 
     /// @dev Address of the foundation wallet
     address private foundationWallet;
@@ -147,7 +147,7 @@ contract Rewarder is
 
         fraktionTokens = FraktionTokens(fraktionTokensAddr);
         frakToken = IFrakToken(frkTokenAddr);
-        contentPool = ContentPool(contentPoolAddr);
+        contentPool = IContentPool(contentPoolAddr);
         referralPool = ReferralPool(referralAddr);
 
         foundationWallet = foundationAddr;

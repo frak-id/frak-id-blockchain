@@ -4,12 +4,13 @@ pragma solidity 0.8.21;
 import { Initializable } from "@oz-upgradeable/proxy/utils/Initializable.sol";
 import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import { NoReward, InvalidAddress, RewardTooLarge } from "./FrakErrors.sol";
+import { IPushPullReward } from "./IPushPullReward.sol";
 
 /**
  * @dev Abstraction for contract that give a push / pull reward, address based
  */
 /// @custom:security-contact contact@frak.id
-abstract contract PushPullReward is Initializable {
+abstract contract PushPullReward is IPushPullReward, Initializable {
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
@@ -26,12 +27,6 @@ abstract contract PushPullReward is Initializable {
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
     /* -------------------------------------------------------------------------- */
-
-    /// @dev Event emitted when a reward is added
-    event RewardAdded(address indexed user, uint256 amount);
-
-    /// @dev Event emitted when a user withdraw his pending reward
-    event RewardWithdrawed(address indexed user, uint256 amount, uint256 fees);
 
     /// @dev 'keccak256(bytes("RewardAdded(address,uint256)"))'
     uint256 private constant _REWARD_ADDED_EVENT_SELECTOR =
