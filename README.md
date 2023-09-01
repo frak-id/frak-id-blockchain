@@ -84,7 +84,7 @@ utils
 
 | Contract name                                                      | Status    | Audited | Deployment                                                                          |
 | ------------------------------------------------------------------ | --------- | ------- | ----------------------------------------------------------------------------------- |
-| [FrakToken](contracts/tokens/FrakTokenL2.sol)                      | Finalized | [^1]    | [Proxy](https://polygonscan.com/token/0x6261E4a478C98419EaFa6289509C49058D21Df8c)   |
+| [FrakToken](contracts/tokens/FrakToken.sol)                      | Finalized | [^1]    | [Proxy](https://polygonscan.com/token/0x6261E4a478C98419EaFa6289509C49058D21Df8c)   |
 | [FraktionTokens](contracts/tokens/FraktionTokens.sol)              | Finalized | [^2]    | [Proxy](https://polygonscan.com/token/0x4B1611803687Ab821E1b670fE94CB93303D94F8a)   |
 | [VestingWalletFactory](contracts/wallets/VestingWalletFactory.sol) | Finalized | [^2]    | [Proxy](https://polygonscan.com/address/0xb8D79C7Bca3994dd5B4A80AD1c088CEBCd01f7F6) |
 | [MultiVestingWallets](contracts/wallets/MultiVestingWallets.sol)   | Finalized | [^2]    | [Proxy](https://polygonscan.com/address/0x4B1611803687Ab821E1b670fE94CB93303D94F8a) |

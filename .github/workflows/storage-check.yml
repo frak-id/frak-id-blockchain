@@ -54,7 +54,7 @@ jobs:
       - name: '🧪 Check FRK Token storage'
         uses: Rubilmax/foundry-storage-check@v3.5
         with:
-            contract: contracts/tokens/FrakTokenL2.sol:FrakToken
+            contract: contracts/tokens/FrakToken.sol:FrakToken
             rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
             address: "0x6261E4a478C98419EaFa6289509C49058D21Df8c"
             failOnRemoval: true
@@ -62,7 +62,7 @@ jobs:
       - name: '🧪 Check Fraktion Token storage'
         uses: Rubilmax/foundry-storage-check@v3.5
         with:
-            contract: contracts/tokens/FraktionTokens.sol:FraktionTokens
+            contract: contracts/fraktions/FraktionTokens.sol:FraktionTokens
             rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
             address: "0x4B1611803687Ab821E1b670fE94CB93303D94F8a"
             failOnRemoval: true
@@ -70,7 +70,7 @@ jobs:
       - name: '🧪 Check content pool storage'
         uses: Rubilmax/foundry-storage-check@v3.5
         with:
-            contract: contracts/reward/pool/ContentPool.sol:ContentPool
+            contract: contracts/reward/contentPool/ContentPool.sol:ContentPool
             rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
             address: "0xDCB34659B83C4F8708fd7AcAA3755547BF8BBcA0"
             failOnRemoval: true
@@ -78,7 +78,7 @@ jobs:
       - name: '🧪 Check referral pool storage'
         uses: Rubilmax/foundry-storage-check@v3.5
         with:
-            contract: contracts/reward/pool/ReferralPool.sol:ReferralPool
+            contract: contracts/reward/referralPool/ReferralPool.sol:ReferralPool
             rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
             address: "0x166d8CFEe1919bC2e8c7AdBB34F1613194e9C599"
             failOnRemoval: true

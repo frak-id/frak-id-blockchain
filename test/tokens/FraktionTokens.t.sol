@@ -3,7 +3,7 @@ pragma solidity 0.8.21;
 
 import { PRBTest } from "@prb/test/PRBTest.sol";
 import { StdUtils } from "@forge-std/StdUtils.sol";
-import { FraktionTokens } from "@frak/tokens/FraktionTokens.sol";
+import { FraktionTokens } from "@frak/fraktions/FraktionTokens.sol";
 import { UUPSTestHelper } from "../UUPSTestHelper.sol";
 import { FrakMath } from "@frak/utils/FrakMath.sol";
 import {

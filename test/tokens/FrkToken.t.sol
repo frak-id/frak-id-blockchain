@@ -3,7 +3,8 @@ pragma solidity 0.8.21;
 
 import { PRBTest } from "@prb/test/PRBTest.sol";
 import { StdUtils } from "@forge-std/StdUtils.sol";
-import { FrakToken } from "@frak/tokens/FrakTokenL2.sol";
+import { FrakToken } from "@frak/tokens/FrakToken.sol";
+import { IFrakToken } from "@frak/tokens/FrakToken.sol";
 import { NotAuthorized } from "@frak/utils/FrakErrors.sol";
 import { UUPSTestHelper } from "../UUPSTestHelper.sol";
 
@@ -209,7 +210,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
     }
 
     function test_fail_mint_TooLarge() public prankExecAsDeployer {
-        vm.expectRevert(FrakToken.CapExceed.selector);
+        vm.expectRevert(IFrakToken.CapExceed.selector);
         frakToken.mint(address(1), 3_000_000_001 ether);
     }
 
@@ -262,7 +263,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
             )
         );
 
-        vm.expectRevert(FrakToken.InvalidSigner.selector);
+        vm.expectRevert(IFrakToken.InvalidSigner.selector);
         frakToken.permit(owner, address(2), 1 ether, block.timestamp, v, r, s);
     }
 
@@ -300,7 +301,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
             )
         );
 
-        vm.expectRevert(FrakToken.PermitDelayExpired.selector);
+        vm.expectRevert(IFrakToken.PermitDelayExpired.selector);
         frakToken.permit(owner, address(1), 1 ether, block.timestamp - 1, v, r, s);
     }
 }

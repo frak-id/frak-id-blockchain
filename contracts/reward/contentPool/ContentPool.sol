@@ -2,9 +2,9 @@
 pragma solidity 0.8.21;
 
 import { FrakMath } from "../../utils/FrakMath.sol";
-import { FrakRoles } from "../../utils/FrakRoles.sol";
+import { FrakRoles } from "../../roles/FrakRoles.sol";
 import { PushPullReward } from "../../utils/PushPullReward.sol";
-import { FrakAccessControlUpgradeable } from "../../utils/FrakAccessControlUpgradeable.sol";
+import { FrakAccessControlUpgradeable } from "../../roles/FrakAccessControlUpgradeable.sol";
 import { InvalidAddress, NoReward } from "../../utils/FrakErrors.sol";
 import { EnumerableSet } from "openzeppelin/utils/structs/EnumerableSet.sol";
 import { IContentPool } from "./IContentPool.sol";

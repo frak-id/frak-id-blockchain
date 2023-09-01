@@ -7,7 +7,7 @@ import { UpgradeScript } from "./utils/UpgradeScript.s.sol";
 import { MonoPool } from "swap-pool/MonoPool.sol";
 import { EncoderLib } from "swap-pool/encoder/EncoderLib.sol";
 import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
-import { FrakToken } from "contracts/tokens/FrakTokenL2.sol";
+import { FrakToken } from "contracts/tokens/FrakToken.sol";
 
 contract PerformMaticFrkSwap is UpgradeScript {
     using SafeTransferLib for address;

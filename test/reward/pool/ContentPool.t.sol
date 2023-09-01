@@ -4,7 +4,7 @@ pragma solidity 0.8.21;
 import "forge-std/console.sol";
 import { ContentPool } from "@frak/reward/contentPool/ContentPool.sol";
 import { FrakMath } from "@frak/utils/FrakMath.sol";
-import { FrakRoles } from "@frak/utils/FrakRoles.sol";
+import { FrakRoles } from "@frak/roles/FrakRoles.sol";
 import { NotAuthorized, InvalidAddress, ContractPaused, NoReward } from "@frak/utils/FrakErrors.sol";
 import { FrkTokenTestHelper } from "../../FrkTokenTestHelper.sol";
 

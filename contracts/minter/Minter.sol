@@ -4,10 +4,10 @@ pragma solidity 0.8.21;
 import { IMinter } from "./IMinter.sol";
 import { FractionCostBadges } from "./badges/FractionCostBadges.sol";
 import { FrakMath } from "../utils/FrakMath.sol";
-import { FrakRoles } from "../utils/FrakRoles.sol";
-import { FraktionTokens } from "../tokens/FraktionTokens.sol";
+import { FrakRoles } from "../roles/FrakRoles.sol";
+import { FraktionTokens } from "../fraktions/FraktionTokens.sol";
 import { IFrakToken } from "../tokens/IFrakToken.sol";
-import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
+import { MintingAccessControlUpgradeable } from "../roles/MintingAccessControlUpgradeable.sol";
 import { InvalidAddress } from "../utils/FrakErrors.sol";
 import { Multicallable } from "solady/utils/Multicallable.sol";
 

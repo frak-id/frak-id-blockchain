@@ -2,8 +2,8 @@
 pragma solidity 0.8.21;
 
 import { UpgradeScript } from "./UpgradeScript.s.sol";
-import { FrakToken } from "@frak/tokens/FrakTokenL2.sol";
-import { FraktionTokens } from "@frak/tokens/FraktionTokens.sol";
+import { FrakToken } from "@frak/tokens/FrakToken.sol";
+import { FraktionTokens } from "@frak/fraktions/FraktionTokens.sol";
 import { MultiVestingWallets } from "@frak/wallets/MultiVestingWallets.sol";
 import { VestingWalletFactory } from "@frak/wallets/VestingWalletFactory.sol";
 import { FrakTreasuryWallet } from "@frak/wallets/FrakTreasuryWallet.sol";
@@ -11,7 +11,7 @@ import { ReferralPool } from "@frak/reward/referralPool/ReferralPool.sol";
 import { Minter } from "@frak/minter/Minter.sol";
 import { ContentPool } from "@frak/reward/contentPool/ContentPool.sol";
 import { Rewarder } from "@frak/reward/Rewarder.sol";
-import { FrakRoles } from "@frak/utils/FrakRoles.sol";
+import { FrakRoles } from "@frak/roles/FrakRoles.sol";
 
 contract DeployAllScript is UpgradeScript {
     constructor() { }

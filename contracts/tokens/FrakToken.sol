@@ -2,20 +2,18 @@
 pragma solidity 0.8.21;
 
 import { ERC20Upgradeable } from "@oz-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import { FrakRoles } from "../utils/FrakRoles.sol";
-import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
-import { ContextMixin } from "../utils/ContextMixin.sol";
+import { FrakRoles } from "../roles/FrakRoles.sol";
+import { MintingAccessControlUpgradeable } from "../roles/MintingAccessControlUpgradeable.sol";
+import { ContextMixin } from "./ContextMixin.sol";
 import { IFrakToken } from "./IFrakToken.sol";
-import { EIP712Base } from "../utils/EIP712Base.sol";
+import { EIP712Base } from "./EIP712Base.sol";
 import { ECDSA } from "solady/utils/ECDSA.sol";
 
-/**
- * @author  @KONFeature
- * @title   FrakToken
- * @dev  ERC20 Contract for the FRAK token
- * @notice Compliant with ERC20 - EIP712 - EIP2612
- * @custom:security-contact contact@frak.id
- */
+/// @author @KONFeature
+/// @title FrakToken
+/// @notice ERC20 Contract for the FRAK token
+/// @dev Compliant with ERC20 - EIP712 - EIP2612
+/// @custom:security-contact contact@frak.id
 contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, EIP712Base, ContextMixin, IFrakToken {
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
@@ -30,15 +28,6 @@ contract FrakToken is ERC20Upgradeable, MintingAccessControlUpgradeable, EIP712B
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
-
-    /// @dev error throwned when the signer is invalid
-    error InvalidSigner();
-
-    /// @dev error throwned when the contract cap is exceeded
-    error CapExceed();
-
-    /// @dev error throwned when the permit delay is expired
-    error PermitDelayExpired();
 
     /// @dev 'bytes4(keccak256(bytes("PermitDelayExpired()")))'
     uint256 private constant _PERMIT_DELAYED_EXPIRED_SELECTOR = 0x95fc6e60;

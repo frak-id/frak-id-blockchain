@@ -3,8 +3,8 @@ pragma solidity 0.8.21;
 
 import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import { MultiVestingWallets } from "./MultiVestingWallets.sol";
-import { FrakAccessControlUpgradeable } from "../utils/FrakAccessControlUpgradeable.sol";
-import { FrakRoles } from "../utils/FrakRoles.sol";
+import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
+import { FrakRoles } from "../roles/FrakRoles.sol";
 import { InvalidArray, InvalidAddress, NoReward, RewardTooLarge } from "../utils/FrakErrors.sol";
 
 /// @dev error throwned when the creation param are invalid

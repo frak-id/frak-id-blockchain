@@ -2,8 +2,8 @@
 pragma solidity 0.8.21;
 
 import { IFrakToken } from "../tokens/IFrakToken.sol";
-import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
-import { FrakRoles } from "../utils/FrakRoles.sol";
+import { MintingAccessControlUpgradeable } from "../roles/MintingAccessControlUpgradeable.sol";
+import { FrakRoles } from "../roles/FrakRoles.sol";
 import { InvalidAddress, RewardTooLarge, NoReward } from "../utils/FrakErrors.sol";
 import { Multicallable } from "solady/utils/Multicallable.sol";
 

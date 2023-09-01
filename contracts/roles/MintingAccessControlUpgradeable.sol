@@ -2,8 +2,11 @@
 pragma solidity 0.8.21;
 
 import { FrakAccessControlUpgradeable } from "./FrakAccessControlUpgradeable.sol";
-import { FrakRoles } from "../utils/FrakRoles.sol";
+import { FrakRoles } from "../roles/FrakRoles.sol";
 
+/// @author @KONFeature
+/// @title MintingAccessControlUpgradeable
+/// @notice This contract provides an upgradeable access control framework, with roles and pausing functionality.
 /// @custom:security-contact contact@frak.id
 abstract contract MintingAccessControlUpgradeable is FrakAccessControlUpgradeable {
     function __MintingAccessControlUpgradeable_init() internal onlyInitializing {

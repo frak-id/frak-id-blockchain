@@ -4,9 +4,9 @@ pragma solidity 0.8.21;
 import { Initializable } from "@oz-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { ContextUpgradeable } from "@oz-upgradeable/utils/ContextUpgradeable.sol";
-import { IPausable } from "./IPausable.sol";
+import { IPausable } from "../utils/IPausable.sol";
 import { FrakRoles } from "./FrakRoles.sol";
-import { NotAuthorized, ContractPaused, ContractNotPaused, RenounceForCallerOnly } from "./FrakErrors.sol";
+import { NotAuthorized, ContractPaused, ContractNotPaused, RenounceForCallerOnly } from "../utils/FrakErrors.sol";
 
 /**
  * @author @KONFeature

@@ -4,8 +4,8 @@ pragma solidity 0.8.21;
 import { EnumerableSet } from "openzeppelin/utils/structs/EnumerableSet.sol";
 import { SafeERC20Upgradeable } from "@oz-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import { FrakAccessControlUpgradeable } from "../utils/FrakAccessControlUpgradeable.sol";
-import { FrakRoles } from "../utils/FrakRoles.sol";
+import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
+import { FrakRoles } from "../roles/FrakRoles.sol";
 import { NotAuthorized, InvalidArray, InvalidAddress, NoReward, RewardTooLarge } from "../utils/FrakErrors.sol";
 
 /// @dev error emitted when the contract doesn't have enough founds

@@ -4,16 +4,14 @@ pragma solidity 0.8.21;
 import { ERC1155Upgradeable } from "@oz-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import { FraktionTransferCallback } from "./FraktionTransferCallback.sol";
 import { FrakMath } from "../utils/FrakMath.sol";
-import { FrakRoles } from "../utils/FrakRoles.sol";
-import { MintingAccessControlUpgradeable } from "../utils/MintingAccessControlUpgradeable.sol";
+import { FrakRoles } from "../roles/FrakRoles.sol";
+import { MintingAccessControlUpgradeable } from "../roles/MintingAccessControlUpgradeable.sol";
 import { InvalidArray } from "../utils/FrakErrors.sol";
 
-/**
- * @author  @KONFeature
- * @title   FraktionTokens
- * @dev  ERC1155 for the Frak Fraktions tokens, used as ownership proof for a content, or investisment proof
- * @custom:security-contact contact@frak.id
- */
+/// @author @KONFeature
+/// @title FraktionTokens
+/// @notice ERC1155 for the Frak Fraktions tokens, used as ownership proof for a content, or investisment proof
+/// @custom:security-contact contact@frak.id
 contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     using FrakMath for uint256;
 

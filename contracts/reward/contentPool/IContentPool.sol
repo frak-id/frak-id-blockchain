@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { FraktionTransferCallback } from "../../tokens/FraktionTransferCallback.sol";
+import { FraktionTransferCallback } from "../../fraktions/FraktionTransferCallback.sol";
 
 /// @author @KONFeature
 /// @title IContentPool
