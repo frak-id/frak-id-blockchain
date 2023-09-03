@@ -2,7 +2,7 @@
 pragma solidity 0.8.21;
 
 import { FrakToken } from "@frak/tokens/FrakToken.sol";
-import { FrakMath } from "@frak/utils/FrakMath.sol";
+import { FrakMath } from "@frak/lib/FrakMath.sol";
 import {
     MultiVestingWallets, NotEnoughFounds, InvalidDuration, InvalidDate
 } from "@frak/wallets/MultiVestingWallets.sol";

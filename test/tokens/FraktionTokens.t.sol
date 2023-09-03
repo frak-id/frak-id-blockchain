@@ -5,7 +5,9 @@ import { PRBTest } from "@prb/test/PRBTest.sol";
 import { StdUtils } from "@forge-std/StdUtils.sol";
 import { FraktionTokens } from "@frak/fraktions/FraktionTokens.sol";
 import { UUPSTestHelper } from "../UUPSTestHelper.sol";
-import { FrakMath } from "@frak/utils/FrakMath.sol";
+import { FrakMath } from "@frak/lib/FrakMath.sol";
+import { ContentId } from "@frak/lib/ContentId.sol";
+import { FraktionId } from "@frak/lib/FraktionId.sol";
 import {
     NotAuthorized,
     InvalidAddress,
@@ -41,9 +43,9 @@ contract FraktionTokensTest is UUPSTestHelper, StdUtils {
      * ===== TEST : mintNewContent(address ownerAddress) =====
      */
     function test_mintNewContent() public prankExecAsDeployer {
-        uint256 contentId = fraktionTokens.mintNewContent(address(1), sampleArray, sampleArray);
-        uint256 nftId = contentId.buildNftId();
-        assertEq(fraktionTokens.balanceOf(address(1), nftId), 1);
+        ContentId contentId = fraktionTokens.mintNewContent(address(1), sampleArray, sampleArray);
+        FraktionId nftId = contentId.creatorFraktionId();
+        assertEq(fraktionTokens.balanceOf(address(1), FraktionId.unwrap(nftId)), 1);
     }
 
     function test_fail_mintNewContent_ContractPaused() public prankExecAsDeployer {

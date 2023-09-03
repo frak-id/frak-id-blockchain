@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { FrakMath } from "../../utils/FrakMath.sol";
+import { FrakMath } from "../../lib/FrakMath.sol";
+import { FraktionId } from "../../lib/FraktionId.sol";
+import { ContentId, ContentIdLib } from "../../lib/ContentId.sol";
 import { FrakRoles } from "../../roles/FrakRoles.sol";
 import { PushPullReward } from "../../utils/PushPullReward.sol";
 import { FrakAccessControlUpgradeable } from "../../roles/FrakAccessControlUpgradeable.sol";
@@ -92,7 +94,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
 
     /// @dev Add a new `rewardAmount` to the pool for the content `contentId`
     function addReward(
-        uint256 contentId,
+        ContentId contentId,
         uint256 rewardAmount
     )
         external
@@ -108,7 +110,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
             }
         }
         // Get the current state
-        RewardState storage currentState = lastContentState(contentId);
+        RewardState storage currentState = lastContentState(ContentId.unwrap(contentId));
         if (!currentState.open) revert PoolStateClosed();
 
         // Increase the reward
@@ -117,14 +119,14 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
         }
 
         // Send the event
-        emit PoolRewardAdded(contentId, rewardAmount);
+        emit PoolRewardAdded(ContentId.unwrap(contentId), rewardAmount);
     }
 
     /// @dev Callback from the erc1155 tokens when fraktion are transfered
     function onFraktionsTransferred(
         address from,
         address to,
-        uint256[] memory ids,
+        FraktionId[] memory ids,
         uint256[] memory amount
     )
         external
@@ -191,14 +193,14 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     /// @param amountMoved The amount of fraktion that was transfered
     function updateParticipants(
         FraktionTransferAccounter memory accounter,
-        uint256 fraktionId,
+        FraktionId fraktionId,
         uint256 amountMoved
     )
         private
     {
         unchecked {
             // Extract content id and token type from this tx
-            (uint256 contentId, uint256 tokenType) = FrakMath.extractContentIdAndTokenType(fraktionId);
+            (uint256 contentId, uint256 tokenType) = fraktionId.extractAll();
 
             // Get the initial share value of this token
             uint256 sharesValue = getSharesForTokenType(tokenType);
@@ -240,14 +242,14 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     /// @param amountMoved The amount of fraktion that was transfered
     function updateParticipantAndPool(
         FraktionTransferAccounter memory accounter,
-        uint256 fraktionId,
+        FraktionId fraktionId,
         uint256 amountMoved
     )
         private
     {
         unchecked {
             // Extract content id and token type from this tx
-            (uint256 contentId, uint256 tokenType) = FrakMath.extractContentIdAndTokenType(fraktionId);
+            (uint256 contentId, uint256 tokenType) = fraktionId.extractAll();
             // Get the total shares moved
             uint256 sharesMoved = getSharesForTokenType(tokenType) * amountMoved;
             if (sharesMoved == 0) return; // Jump this iteration if this fraktions doesn't count for any shares
@@ -515,13 +517,13 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
      * and since this reawrd shouldn't evolve really fast
      */
     function getSharesForTokenType(uint256 tokenType) private pure returns (uint256 shares) {
-        if (tokenType == FrakMath.TOKEN_TYPE_COMMON_MASK) {
+        if (tokenType == ContentIdLib.FRAKTION_TYPE_COMMON) {
             shares = 10;
-        } else if (tokenType == FrakMath.TOKEN_TYPE_PREMIUM_MASK) {
+        } else if (tokenType == ContentIdLib.FRAKTION_TYPE_PREMIUM) {
             shares = 50;
-        } else if (tokenType == FrakMath.TOKEN_TYPE_GOLD_MASK) {
+        } else if (tokenType == ContentIdLib.FRAKTION_TYPE_GOLD) {
             shares = 100;
-        } else if (tokenType == FrakMath.TOKEN_TYPE_DIAMOND_MASK) {
+        } else if (tokenType == ContentIdLib.FRAKTION_TYPE_DIAMOND) {
             shares = 200;
         }
     }

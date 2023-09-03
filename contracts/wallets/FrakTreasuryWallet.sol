@@ -10,6 +10,10 @@ import { Multicallable } from "solady/utils/Multicallable.sol";
 /// Error thrown when the contract havn't enough found to perform the withdraw
 error NotEnoughTreasury();
 
+/// @author @KONFeature
+/// @title FrakTreasuryWallet
+/// @notice This contract is used to store some frk token for the treasury
+/// @custom:security-contact contact@frak.id
 contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */

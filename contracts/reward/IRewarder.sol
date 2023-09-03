@@ -2,6 +2,7 @@
 pragma solidity 0.8.21;
 
 import { IPausable } from "../utils/IPausable.sol";
+import { ContentId } from "../lib/ContentId.sol";
 
 /// @author @KONFeature
 /// @title IRewarder
@@ -40,14 +41,14 @@ interface IRewarder is IPausable {
 
     /// @dev Directly pay all the creators owner of `contentIds` for each given frk `amounts` (used for offchain reward
     /// created by the user, thatis sent to the creator)
-    function payCreatorDirectlyBatch(uint256[] calldata contentIds, uint256[] calldata amounts) external payable;
+    function payCreatorDirectlyBatch(ContentId[] calldata contentIds, uint256[] calldata amounts) external payable;
 
     /// @dev Compute the reward for a `listener`, given the `contentType`, `contentIds` and `listenCounts`, and pay him
     /// and the owner
     function payUser(
         address listener,
         uint256 contentType,
-        uint256[] calldata contentIds,
+        ContentId[] calldata contentIds,
         uint256[] calldata listenCounts
     )
         external

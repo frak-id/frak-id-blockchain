@@ -2,6 +2,8 @@
 pragma solidity 0.8.21;
 
 import { IPausable } from "../utils/IPausable.sol";
+import { ContentId } from "../lib/ContentId.sol";
+import { FraktionId } from "../lib/FraktionId.sol";
 
 /// @author @KONFeature
 /// @title IMinter
@@ -51,7 +53,7 @@ interface IMinter is IPausable {
     )
         external
         payable
-        returns (uint256 contentId);
+        returns (ContentId contentId);
 
     /**
      * @notice  Mint a new fraktion for the given amount and user
@@ -65,7 +67,7 @@ interface IMinter is IPausable {
      * @param   s  Signature spec secp256k1
      */
     function mintFraktionForUser(
-        uint256 id,
+        FraktionId id,
         address to,
         uint256 deadline,
         uint8 v,
@@ -85,7 +87,7 @@ interface IMinter is IPausable {
      * @param   r  Signature spec secp256k1
      * @param   s  Signature spec secp256k1
      */
-    function mintFraktion(uint256 id, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external payable;
+    function mintFraktion(FraktionId id, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external payable;
 
     /**
      * @notice  Mint a free fraktion for the given user
@@ -94,7 +96,7 @@ interface IMinter is IPausable {
      * @param   id  Id of the free fraktion
      * @param   to  Address of the user
      */
-    function mintFreeFraktionForUser(uint256 id, address to) external payable;
+    function mintFreeFraktionForUser(FraktionId id, address to) external payable;
 
     /**
      * @notice  Mint a free fraktion for the given user
@@ -102,7 +104,7 @@ interface IMinter is IPausable {
      * only performed when contract not paused and by the right person
      * @param   id  Id of the free fraktion
      */
-    function mintFreeFraktion(uint256 id) external payable;
+    function mintFreeFraktion(FraktionId id) external payable;
 
     /**
      * @notice  Increase the total supply for the given fraktion id
@@ -111,5 +113,5 @@ interface IMinter is IPausable {
      * @param   id  The id of the fraktion for which we want to increase the supply
      * @param   newSupply  The supply we wan't to append for this fraktion
      */
-    function increaseSupply(uint256 id, uint256 newSupply) external;
+    function increaseSupply(FraktionId id, uint256 newSupply) external;
 }

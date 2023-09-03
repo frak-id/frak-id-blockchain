@@ -21,6 +21,10 @@ error InexistantVesting();
 /// @dev error when we encounter a computation error
 error ComputationError();
 
+/// @author @KONFeature
+/// @title MultiVestingWallets
+/// @notice This contract is used to store vesting for the frk token
+/// @custom:security-contact contact@frak.id
 contract MultiVestingWallets is FrakAccessControlUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -69,10 +73,10 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     uint24 private _idCounter;
 
     /// Vesting id to vesting
-    mapping(uint256 => Vesting) public vestings;
+    mapping(uint256 id => Vesting vesting) public vestings;
 
     /// User to list of vesting id owned
-    mapping(address => EnumerableSet.UintSet) private owned;
+    mapping(address investor => EnumerableSet.UintSet vestingIds) private owned;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

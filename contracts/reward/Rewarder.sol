@@ -6,7 +6,9 @@ import { ContentBadges } from "./badges/ContentBadges.sol";
 import { ListenerBadges } from "./badges/ListenerBadges.sol";
 import { IContentPool } from "./contentPool/IContentPool.sol";
 import { IReferralPool } from "./referralPool/IReferralPool.sol";
-import { FrakMath } from "../utils/FrakMath.sol";
+import { FrakMath } from "../lib/FrakMath.sol";
+import { ContentId } from "../lib/ContentId.sol";
+import { FraktionId } from "../lib/FraktionId.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { FraktionTokens } from "../fraktions/FraktionTokens.sol";
 import { IFrakToken } from "../tokens/IFrakToken.sol";
@@ -184,7 +186,7 @@ contract Rewarder is
     /// @dev Directly pay all the creators owner of `contentIds` for each given frk `amounts` (used for offchain reward
     /// created by the user, thatis sent to the creator)
     function payCreatorDirectlyBatch(
-        uint256[] calldata contentIds,
+        ContentId[] calldata contentIds,
         uint256[] calldata amounts
     )
         external
@@ -244,7 +246,7 @@ contract Rewarder is
     function payUser(
         address listener,
         uint256 contentType,
-        uint256[] calldata contentIds,
+        ContentId[] calldata contentIds,
         uint256[] calldata listenCounts
     )
         external
@@ -337,7 +339,7 @@ contract Rewarder is
 
     /// @dev Update the 'contentId' 'badge'
     function updateContentBadge(
-        uint256 contentId,
+        ContentId contentId,
         uint256 badge
     )
         external
@@ -387,7 +389,7 @@ contract Rewarder is
     /// @param fraktionTypes The fraktion types
     /// @param totalRewards The current total rewards in memory accounting (that will be updated)
     function computeRewardForContent(
-        uint256 contentId,
+        ContentId contentId,
         uint256 listenCount,
         uint256 rewardForContentType,
         address listener,
@@ -488,7 +490,7 @@ contract Rewarder is
     function earningFactorForListener(
         uint256[] memory fraktionTypes,
         address listener,
-        uint256 contentId
+        ContentId contentId
     )
         private
         view
@@ -496,7 +498,7 @@ contract Rewarder is
     {
         // Build the ids for eachs fraktion that can generate reward, and get the user balance for each one if this
         // fraktions
-        uint256[] memory fraktionIds = contentId.buildSnftIds(fraktionTypes);
+        FraktionId[] memory fraktionIds = contentId.buildSnftIds(fraktionTypes);
         uint256[] memory tokenBalances = fraktionTokens.balanceOfIdsBatch(listener, fraktionIds);
 
         assembly {

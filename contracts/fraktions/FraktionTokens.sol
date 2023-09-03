@@ -3,7 +3,9 @@ pragma solidity 0.8.21;
 
 import { ERC1155Upgradeable } from "@oz-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import { FraktionTransferCallback } from "./FraktionTransferCallback.sol";
-import { FrakMath } from "../utils/FrakMath.sol";
+import { FrakMath } from "../lib/FrakMath.sol";
+import { ContentId } from "../lib/ContentId.sol";
+import { FraktionId } from "../lib/FraktionId.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { InvalidArray } from "../utils/FrakErrors.sol";
@@ -106,7 +108,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
         payable
         onlyRole(FrakRoles.MINTER)
         whenNotPaused
-        returns (uint256 id)
+        returns (ContentId id)
     {
         uint256 creatorTokenId;
         assembly {
@@ -361,7 +363,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
         }
 
         // Call our callback
-        transferCallback.onFraktionsTransferred(from, to, ids, amounts);
+        transferCallback.onFraktionsTransferred(from, to, FrakMath.asFraktionIds(ids), amounts);
     }
 
     /* -------------------------------------------------------------------------- */
@@ -373,7 +375,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
      */
     function balanceOfIdsBatch(
         address account,
-        uint256[] calldata ids
+        FraktionId[] calldata ids
     )
         public
         view
@@ -414,12 +416,12 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     }
 
     /// @dev Find the owner of the given 'contentId'
-    function ownerOf(uint256 contentId) external view returns (address) {
-        return owners[contentId];
+    function ownerOf(ContentId contentId) external view returns (address) {
+        return owners[ContentId.unwrap(contentId)];
     }
 
     /// @dev Find the current supply of the given 'tokenId'
-    function supplyOf(uint256 tokenId) external view returns (uint256) {
-        return _availableSupplies[tokenId];
+    function supplyOf(FraktionId tokenId) external view returns (uint256) {
+        return _availableSupplies[FraktionId.unwrap(tokenId)];
     }
 }

@@ -2,6 +2,7 @@
 pragma solidity 0.8.21;
 
 import { FraktionTransferCallback } from "../../fraktions/FraktionTransferCallback.sol";
+import { ContentId } from "../../lib/ContentId.sol";
 
 /// @author @KONFeature
 /// @title IContentPool
@@ -89,7 +90,7 @@ interface IContentPool is FraktionTransferCallback {
     /* -------------------------------------------------------------------------- */
 
     /// @dev Add a new `rewardAmount` to the pool for the content `contentId`
-    function addReward(uint256 contentId, uint256 rewardAmount) external payable;
+    function addReward(ContentId contentId, uint256 rewardAmount) external payable;
 
     /// @dev Compute all the pools balance of the user
     function computeAllPoolsBalance(address user) external payable;

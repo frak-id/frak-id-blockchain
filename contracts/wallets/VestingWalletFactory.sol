@@ -15,6 +15,10 @@ error InexistantGroup();
 /// @dev error when the supply of the group is not sufficiant
 error InsuficiantGroupSupply();
 
+/// @author @KONFeature
+/// @title VestingWalletFactory
+/// @notice This contract is used to create vesting wallet for the investor's
+/// @custom:security-contact contact@frak.id
 contract VestingWalletFactory is FrakAccessControlUpgradeable {
     // The cap of frk token propose to vester
     uint96 internal constant FRK_VESTING_CAP = 1_500_000_000 ether;
@@ -40,7 +44,7 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
     /**
      * @dev Map of id to vesting group
      */
-    mapping(uint8 => VestingGroup) private vestingGroup;
+    mapping(uint8 id => VestingGroup group) private vestingGroup;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {

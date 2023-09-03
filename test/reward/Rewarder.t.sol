@@ -2,7 +2,8 @@
 pragma solidity 0.8.21;
 
 import { RewarderTestHelper } from "./RewarderTestHelper.sol";
-import { FrakMath } from "@frak/utils/FrakMath.sol";
+import { FrakMath } from "@frak/lib/FrakMath.sol";
+import { ContentId } from "@frak/lib/ContentId.sol";
 import { NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge } from "@frak/utils/FrakErrors.sol";
 
 /// Testing the rewarder
@@ -49,13 +50,13 @@ contract RewarderTest is RewarderTestHelper {
     ) =====
      */
     function test_updateContentBadge() public prankExecAsDeployer {
-        uint256 contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
+        ContentId contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
         rewarder.updateContentBadge(contentId, 2 ether);
         assertEq(rewarder.getContentBadge(contentId), 2 ether);
     }
 
     function test_fail_updateContentBadge_ContractPaused() public prankExecAsDeployer {
-        uint256 contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
+        ContentId contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
         rewarder.pause();
 
         vm.expectRevert(ContractPaused.selector);
@@ -64,14 +65,14 @@ contract RewarderTest is RewarderTestHelper {
 
     function test_fail_updateContentBadge_NotAuthorized() public {
         prankDeployer();
-        uint256 contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
+        ContentId contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
 
         vm.expectRevert(NotAuthorized.selector);
         rewarder.updateContentBadge(contentId, 2 ether);
     }
 
     function test_fail_updateContentBadge_BadgeCapReached() public prankExecAsDeployer {
-        uint256 contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
+        ContentId contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
 
         vm.expectRevert(BadgeTooLarge.selector);
         rewarder.updateContentBadge(contentId, 1001 ether);
@@ -114,7 +115,7 @@ contract RewarderTest is RewarderTestHelper {
     }
 
     function test_multicall_singleData() public prankExecAsDeployer {
-        uint256 contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
+        ContentId contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
 
         // Build our calldata
         bytes[] memory callingData = new bytes[](1);
@@ -124,7 +125,7 @@ contract RewarderTest is RewarderTestHelper {
     }
 
     function test_multicall_multipleData() public prankExecAsDeployer {
-        uint256 contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
+        ContentId contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
 
         frakToken.mint(address(rewarder), 5 ether);
 
@@ -158,7 +159,7 @@ contract RewarderTest is RewarderTestHelper {
 
     function test_fail_multicall_NotAuthorized() public {
         prankDeployer();
-        uint256 contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
+        ContentId contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
 
         // Build our calldata
         bytes[] memory callingData = new bytes[](1);

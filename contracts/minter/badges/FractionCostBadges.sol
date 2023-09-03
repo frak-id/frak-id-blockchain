@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { FrakMath } from "../../utils/FrakMath.sol";
+import { FrakMath } from "../../lib/FrakMath.sol";
+import { FraktionId } from "../../lib/FraktionId.sol";
+import { ContentIdLib } from "../../lib/ContentId.sol";
 import { InvalidFraktionType } from "../../utils/FrakErrors.sol";
 
 /// @author @KONFeature
@@ -35,7 +37,7 @@ abstract contract FractionCostBadges {
      * @dev Map f nft id to cost badge.
      * @notice This variable is private and can only be accessed by the current contract.
      */
-    mapping(uint256 frakionId => uint96 cost) private fractionBadges;
+    mapping(FraktionId frakionId => uint96 cost) private fractionBadges;
 
     /* -------------------------------------------------------------------------- */
     /*                             Abstract function's                            */
@@ -47,7 +49,7 @@ abstract contract FractionCostBadges {
      * @param fractionId The id of the fraction to update the badge cost of.
      * @param badge The new badge cost of the fraction in wei.
      */
-    function updateCostBadge(uint256 fractionId, uint96 badge) external virtual;
+    function updateCostBadge(FraktionId fractionId, uint96 badge) external virtual;
 
     /* -------------------------------------------------------------------------- */
     /*                          Internal write function's                         */
@@ -58,9 +60,9 @@ abstract contract FractionCostBadges {
      * @param fractionId The id of the fraction to update the badge cost of.
      * @param badge The new badge cost of the fraction in wei.
      */
-    function _updateCostBadge(uint256 fractionId, uint96 badge) internal {
+    function _updateCostBadge(FraktionId fractionId, uint96 badge) internal {
         fractionBadges[fractionId] = badge;
-        emit FractionCostBadgeUpdated(fractionId, badge);
+        emit FractionCostBadgeUpdated(FraktionId.unwrap(fractionId), badge);
     }
 
     /* -------------------------------------------------------------------------- */
@@ -73,11 +75,11 @@ abstract contract FractionCostBadges {
      * @param fractionId The id of the fraction to get the badge cost of.
      * @return fractionBadge The badge cost of the specified fraction in wei.
      */
-    function getCostBadge(uint256 fractionId) public view returns (uint96 fractionBadge) {
+    function getCostBadge(FraktionId fractionId) public view returns (uint96 fractionBadge) {
         fractionBadge = fractionBadges[fractionId];
         if (fractionBadge == 0) {
             // If the badge of this fraction isn't set yet, set it to default
-            uint256 tokenType = FrakMath.extractTokenType(fractionId);
+            uint256 tokenType = fractionId.getFraktionType();
             fractionBadge = initialFractionCost(tokenType);
         }
     }
@@ -89,13 +91,13 @@ abstract contract FractionCostBadges {
      * @return initialCost The initial cost of the specified token type in wei.
      */
     function initialFractionCost(uint256 tokenType) internal pure returns (uint96 initialCost) {
-        if (tokenType == FrakMath.TOKEN_TYPE_COMMON_MASK) {
+        if (tokenType == ContentIdLib.FRAKTION_TYPE_COMMON) {
             initialCost = 90 ether; // 90 FRK
-        } else if (tokenType == FrakMath.TOKEN_TYPE_PREMIUM_MASK) {
+        } else if (tokenType == ContentIdLib.FRAKTION_TYPE_PREMIUM) {
             initialCost = 500 ether; // 500 FRK
-        } else if (tokenType == FrakMath.TOKEN_TYPE_GOLD_MASK) {
+        } else if (tokenType == ContentIdLib.FRAKTION_TYPE_GOLD) {
             initialCost = 1200 ether; // 1.2k FRK
-        } else if (tokenType == FrakMath.TOKEN_TYPE_DIAMOND_MASK) {
+        } else if (tokenType == ContentIdLib.FRAKTION_TYPE_DIAMOND) {
             initialCost = 3000 ether; // 3k FRK
         } else {
             assembly {

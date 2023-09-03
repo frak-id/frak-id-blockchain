@@ -3,7 +3,9 @@ pragma solidity 0.8.21;
 
 import { IMinter } from "./IMinter.sol";
 import { FractionCostBadges } from "./badges/FractionCostBadges.sol";
-import { FrakMath } from "../utils/FrakMath.sol";
+import { FrakMath } from "../lib/FrakMath.sol";
+import { ContentId } from "../lib/ContentId.sol";
+import { FraktionId } from "../lib/FraktionId.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { FraktionTokens } from "../fraktions/FraktionTokens.sol";
 import { IFrakToken } from "../tokens/IFrakToken.sol";
@@ -126,7 +128,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
         override
         onlyRole(FrakRoles.MINTER)
         whenNotPaused
-        returns (uint256 contentId)
+        returns (ContentId contentId)
     {
         assembly {
             // Check owner address
@@ -187,7 +189,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
      * @param   s  Signature spec secp256k1
      */
     function mintFraktionForUser(
-        uint256 id,
+        FraktionId id,
         address to,
         uint256 deadline,
         uint8 v,
@@ -212,7 +214,17 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
      * @param   r  Signature spec secp256k1
      * @param   s  Signature spec secp256k1
      */
-    function mintFraktion(uint256 id, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external payable whenNotPaused {
+    function mintFraktion(
+        FraktionId id,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
+        external
+        payable
+        whenNotPaused
+    {
         _mintFraktionForUser(id, msg.sender, deadline, v, r, s);
     }
 
@@ -224,7 +236,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
      * @param   to  Address of the user
      */
     function mintFreeFraktionForUser(
-        uint256 id,
+        FraktionId id,
         address to
     )
         external
@@ -242,7 +254,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
      * only performed when contract not paused and by the right person
      * @param   id  Id of the free fraktion
      */
-    function mintFreeFraktion(uint256 id) external payable override whenNotPaused {
+    function mintFreeFraktion(FraktionId id) external payable override whenNotPaused {
         _mintFreeFraktionForUser(id, msg.sender);
     }
 
@@ -253,9 +265,9 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
      * @param   id  The id of the fraktion for which we want to increase the supply
      * @param   newSupply  The supply we wan't to append for this fraktion
      */
-    function increaseSupply(uint256 id, uint256 newSupply) external onlyRole(FrakRoles.MINTER) whenNotPaused {
+    function increaseSupply(FraktionId id, uint256 newSupply) external onlyRole(FrakRoles.MINTER) whenNotPaused {
         // Update the supply
-        fraktionTokens.setSupply(id, newSupply);
+        fraktionTokens.setSupply(FraktionId.unwrap(id), newSupply);
     }
 
     /**
@@ -266,7 +278,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
      * @param   badge The new badge for the fraktion
      */
     function updateCostBadge(
-        uint256 fractionId,
+        FraktionId fractionId,
         uint96 badge
     )
         external
@@ -292,9 +304,9 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
      * @param   r  Signature spec secp256k1
      * @param   s  Signature spec secp256k1
      */
-    function _mintFraktionForUser(uint256 id, address to, uint256 deadline, uint8 v, bytes32 r, bytes32 s) private {
+    function _mintFraktionForUser(FraktionId id, address to, uint256 deadline, uint8 v, bytes32 r, bytes32 s) private {
         // Get the current user balance, and exit if he already got a fraktion of this type
-        uint256 balance = fraktionTokens.balanceOf(to, id);
+        uint256 balance = fraktionTokens.balanceOf(to, FraktionId.unwrap(id));
         if (balance != 0) {
             revert TooManyFraktion();
         }
@@ -311,7 +323,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
         // Transfer the tokens
         frakToken.transferFrom(to, foundationWallet, cost);
         // Mint his Fraction of NFT
-        fraktionTokens.mint(to, id, 1);
+        fraktionTokens.mint(to, FraktionId.unwrap(id), 1);
     }
 
     /**
@@ -320,7 +332,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
      * only performed when contract not paused and by the right person
      * @param   id  Id of the free fraktion
      */
-    function _mintFreeFraktionForUser(uint256 id, address to) private {
+    function _mintFreeFraktionForUser(FraktionId id, address to) private {
         assembly {
             // Check if it's a free fraktion
             if iszero(eq(and(id, 0xF), 0x2)) {
@@ -330,12 +342,12 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
         }
 
         // Get the current user balance, and exit if he already got a fraktion of this type
-        uint256 balance = fraktionTokens.balanceOf(to, id);
+        uint256 balance = fraktionTokens.balanceOf(to, FraktionId.unwrap(id));
         if (balance != 0) {
             revert TooManyFraktion();
         }
 
         // If we are all good, mint the free fraktion to the user
-        fraktionTokens.mint(to, id, 1);
+        fraktionTokens.mint(to, FraktionId.unwrap(id), 1);
     }
 }

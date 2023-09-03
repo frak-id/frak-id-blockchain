@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
+import { FraktionId } from "../lib/FraktionId.sol";
+
 /// @author @KONFeature
 /// @title FraktionTransferCallback
 /// @notice Interface for contract who want to listen of the fraktion transfer (ERC1155 tokens transfer)
@@ -12,7 +14,7 @@ interface FraktionTransferCallback {
     function onFraktionsTransferred(
         address from,
         address to,
-        uint256[] memory ids,
+        FraktionId[] memory ids,
         uint256[] memory amount
     )
         external
