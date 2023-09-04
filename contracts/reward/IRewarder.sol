@@ -13,17 +13,6 @@ interface IRewarder is IPausable {
     error InvalidReward();
 
     /* -------------------------------------------------------------------------- */
-    /*                                  Struct's                                  */
-    /* -------------------------------------------------------------------------- */
-
-    /// @dev Struct representing the total reward for a user, used as an in memory accounting
-    struct TotalRewards {
-        uint256 user;
-        uint256 owners;
-        uint256 content;
-    }
-
-    /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
     /* -------------------------------------------------------------------------- */
 

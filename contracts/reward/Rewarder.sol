@@ -10,6 +10,7 @@ import { ArrayLib } from "../libs/ArrayLib.sol";
 import { ContentId } from "../libs/ContentId.sol";
 import { FraktionId } from "../libs/FraktionId.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
+import { RewardAccounter } from "./RewardAccounter.sol";
 import { FraktionTokens } from "../fraktions/FraktionTokens.sol";
 import { IFrakToken } from "../tokens/IFrakToken.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
@@ -70,6 +71,11 @@ contract Rewarder is
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
     /* -------------------------------------------------------------------------- */
+
+    /// @dev Event emitted when a user is rewarded for his listen
+    event RewardOnContent(
+        address indexed user, ContentId indexed contentId, uint256 baseUserReward, uint256 earningFactor
+    );
 
     /// @dev 'keccak256(bytes("RewardOnContent(address,uint256,uint256,uint256"))'
     uint256 private constant _REWARD_ON_CONTENT_EVENT_SELECTOR =
@@ -265,7 +271,7 @@ contract Rewarder is
         }
 
         // Get the data we will need in this level
-        TotalRewards memory totalRewards = TotalRewards(0, 0, 0);
+        RewardAccounter memory rewardsAccounter = RewardAccounter(0, 0, 0);
 
         // Get all the payed fraktion types
         uint256 rewardForContentType = baseRewardForContentType(contentType);
@@ -273,47 +279,39 @@ contract Rewarder is
         // Iterate over each content the user listened
         uint256 length = contentIds.length;
         for (uint256 i; i < length;) {
-            computeRewardForContent(contentIds[i], listenCounts[i], rewardForContentType, listener, totalRewards);
+            computeRewardForContent(contentIds[i], listenCounts[i], rewardForContentType, listener, rewardsAccounter);
 
             // Finally, increase the counter
             unchecked {
                 ++i;
             }
         }
-
-        // Then outside of our loop find the user badge
-        uint256 listenerBadge = getListenerBadge(listener);
-
         // Compute the total amount to mint, and ensure we don't exceed our cap
-        assembly {
-            // Update the total mint for user with his listener badges
-            mstore(totalRewards, div(mul(listenerBadge, mload(totalRewards)), 1000000000000000000))
+        unchecked {
+            // Apply the user badge
+            rewardsAccounter.applyUserBadge(getListenerBadge(listener));
 
-            // Compute the total to be minted
-            let userAndOwner := add(mload(totalRewards), mload(add(totalRewards, 0x20)))
-            let referralAndContent := add(mload(add(totalRewards, 0x40)), mload(add(totalRewards, 0x60)))
-            let totalMint := add(userAndOwner, referralAndContent)
+            // Compute the new total frk minted for reward
+            uint256 newTotalMint = totalFrakMinted + rewardsAccounter.getTotal();
 
-            // Compute the new total amount
-            let newTotalAmount := add(totalMint, sload(totalFrakMinted.slot))
-            // Ensure it's good
-            if gt(newTotalAmount, REWARD_MINT_CAP) {
-                mstore(0x00, _REWARD_TOO_LARGE_SELECTOR)
-                revert(0x1c, 0x04)
+            // Ensure we don't go past the mint cap
+            if (newTotalMint > REWARD_MINT_CAP) {
+                revert RewardTooLarge();
             }
+
             // Increase our total frak minted
-            sstore(totalFrakMinted.slot, newTotalAmount)
+            totalFrakMinted = newTotalMint;
         }
 
         // Register the amount for listener
-        _addFoundsUnchecked(listener, totalRewards.user);
+        _addFoundsUnchecked(listener, rewardsAccounter.user);
 
         // If we got reward for the pool, transfer them
-        if (totalRewards.content > 0) {
-            token.transfer(address(contentPool), totalRewards.content);
+        if (rewardsAccounter.content > 0) {
+            token.transfer(address(contentPool), rewardsAccounter.content);
         }
-        /*if (totalRewards.referral > 0) {
-            token.transfer(address(referralPool), totalRewards.referral);
+        /*if (rewardsAccounter.referral > 0) {
+            token.transfer(address(referralPool), rewardsAccounter.referral);
         }*/
     }
 
@@ -381,13 +379,13 @@ contract Rewarder is
     /// @param listenCount The number of listen for the given content
     /// @param rewardForContentType The base reward for the given content type
     /// @param listener The listener address
-    /// @param totalRewards The current total rewards in memory accounting (that will be updated)
+    /// @param rewardsAccounter The current total rewards in memory accounting (that will be updated)
     function computeRewardForContent(
         ContentId contentId,
         uint256 listenCount,
         uint256 rewardForContentType,
         address listener,
-        TotalRewards memory totalRewards
+        RewardAccounter memory rewardsAccounter
     )
         private
     {
@@ -427,7 +425,7 @@ contract Rewarder is
 
             // User reward at 35%
             let userReward := div(mul(totalReward, 35), 100)
-            mstore(totalRewards, add(mload(totalRewards), userReward))
+            mstore(rewardsAccounter, add(mload(rewardsAccounter), userReward))
 
             // Check if the user has got paid fraktion
             switch hasOnePaidFraktion
@@ -441,11 +439,11 @@ contract Rewarder is
                 ownerReward := sub(sub(totalReward, userReward), contentPoolReward)
 
                 // Store the content pool reward
-                mstore(add(totalRewards, 0x40), add(mload(add(totalRewards, 0x40)), contentPoolReward))
+                mstore(add(rewardsAccounter, 0x40), add(mload(add(rewardsAccounter, 0x40)), contentPoolReward))
             }
 
             // Store the owner reward in memory
-            mstore(add(totalRewards, 0x20), add(mload(add(totalRewards, 0x20)), ownerReward))
+            mstore(add(rewardsAccounter, 0x20), add(mload(add(rewardsAccounter, 0x20)), ownerReward))
 
             // Emit the reward on content event's
             mstore(0, userReward)
