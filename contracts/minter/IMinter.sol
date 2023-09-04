@@ -2,8 +2,8 @@
 pragma solidity 0.8.21;
 
 import { IPausable } from "../utils/IPausable.sol";
-import { ContentId } from "../lib/ContentId.sol";
-import { FraktionId } from "../lib/FraktionId.sol";
+import { ContentId } from "../libs/ContentId.sol";
+import { FraktionId } from "../libs/FraktionId.sol";
 
 /// @author @KONFeature
 /// @title IMinter

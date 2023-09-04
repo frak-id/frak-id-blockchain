@@ -5,9 +5,8 @@ import { NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge } from "@f
 import { FraktionTokens } from "@frak/fraktions/FraktionTokens.sol";
 import { FrakToken } from "@frak/tokens/FrakToken.sol";
 import { IFrakToken } from "@frak/tokens/IFrakToken.sol";
-import { FrakMath } from "@frak/lib/FrakMath.sol";
-import { ContentId } from "@frak/lib/ContentId.sol";
-import { FraktionId } from "@frak/lib/FraktionId.sol";
+import { ContentId } from "@frak/libs/ContentId.sol";
+import { FraktionId } from "@frak/libs/FraktionId.sol";
 import { FrakRoles } from "@frak/roles/FrakRoles.sol";
 import { Minter } from "@frak/minter/Minter.sol";
 import { IMinter } from "@frak/minter/IMinter.sol";
@@ -22,9 +21,6 @@ import {
 
 /// Testing minter contract
 contract MinterTest is FrkTokenTestHelper {
-    using FrakMath for address;
-    using FrakMath for uint256;
-
     FraktionTokens fraktionTokens;
     address foundationAddr = address(13);
 

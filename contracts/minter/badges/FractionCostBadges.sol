@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { FrakMath } from "../../lib/FrakMath.sol";
-import { FraktionId } from "../../lib/FraktionId.sol";
-import { ContentIdLib } from "../../lib/ContentId.sol";
+import { FraktionId } from "../../libs/FraktionId.sol";
+import { ContentIdLib } from "../../libs/ContentId.sol";
 import { InvalidFraktionType } from "../../utils/FrakErrors.sol";
 
 /// @author @KONFeature

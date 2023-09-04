@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { FraktionId } from "../lib/FraktionId.sol";
+import { FraktionId } from "../libs/FraktionId.sol";
 
 /// @author @KONFeature
 /// @title FraktionTransferCallback

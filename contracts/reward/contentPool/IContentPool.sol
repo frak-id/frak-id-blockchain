@@ -2,7 +2,7 @@
 pragma solidity 0.8.21;
 
 import { FraktionTransferCallback } from "../../fraktions/FraktionTransferCallback.sol";
-import { ContentId } from "../../lib/ContentId.sol";
+import { ContentId } from "../../libs/ContentId.sol";
 
 /// @author @KONFeature
 /// @title IContentPool

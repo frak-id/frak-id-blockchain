@@ -3,9 +3,9 @@ pragma solidity 0.8.21;
 
 import { ERC1155Upgradeable } from "@oz-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import { FraktionTransferCallback } from "./FraktionTransferCallback.sol";
-import { FrakMath } from "../lib/FrakMath.sol";
-import { ContentId } from "../lib/ContentId.sol";
-import { FraktionId } from "../lib/FraktionId.sol";
+import { ContentId } from "../libs/ContentId.sol";
+import { FraktionId } from "../libs/FraktionId.sol";
+import { ArrayLib } from "../libs/ArrayLib.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { InvalidArray } from "../utils/FrakErrors.sol";
@@ -15,8 +15,6 @@ import { InvalidArray } from "../utils/FrakErrors.sol";
 /// @notice ERC1155 for the Frak Fraktions tokens, used as ownership proof for a content, or investisment proof
 /// @custom:security-contact contact@frak.id
 contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
-    using FrakMath for uint256;
-
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
@@ -363,7 +361,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
         }
 
         // Call our callback
-        transferCallback.onFraktionsTransferred(from, to, FrakMath.asFraktionIds(ids), amounts);
+        transferCallback.onFraktionsTransferred(from, to, ArrayLib.asFraktionIds(ids), amounts);
     }
 
     /* -------------------------------------------------------------------------- */

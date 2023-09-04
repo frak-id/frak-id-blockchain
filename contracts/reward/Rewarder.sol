@@ -6,9 +6,9 @@ import { ContentBadges } from "./badges/ContentBadges.sol";
 import { ListenerBadges } from "./badges/ListenerBadges.sol";
 import { IContentPool } from "./contentPool/IContentPool.sol";
 import { IReferralPool } from "./referralPool/IReferralPool.sol";
-import { FrakMath } from "../lib/FrakMath.sol";
-import { ContentId } from "../lib/ContentId.sol";
-import { FraktionId } from "../lib/FraktionId.sol";
+import { ArrayLib } from "../libs/ArrayLib.sol";
+import { ContentId } from "../libs/ContentId.sol";
+import { FraktionId } from "../libs/FraktionId.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { FraktionTokens } from "../fraktions/FraktionTokens.sol";
 import { IFrakToken } from "../tokens/IFrakToken.sol";
@@ -29,8 +29,6 @@ contract Rewarder is
     PushPullReward,
     Multicallable
 {
-    using FrakMath for uint256;
-
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
@@ -270,15 +268,12 @@ contract Rewarder is
         TotalRewards memory totalRewards = TotalRewards(0, 0, 0);
 
         // Get all the payed fraktion types
-        uint256[] memory fraktionTypes = FrakMath.payableTokenTypes();
         uint256 rewardForContentType = baseRewardForContentType(contentType);
 
         // Iterate over each content the user listened
         uint256 length = contentIds.length;
         for (uint256 i; i < length;) {
-            computeRewardForContent(
-                contentIds[i], listenCounts[i], rewardForContentType, listener, fraktionTypes, totalRewards
-            );
+            computeRewardForContent(contentIds[i], listenCounts[i], rewardForContentType, listener, totalRewards);
 
             // Finally, increase the counter
             unchecked {
@@ -386,14 +381,12 @@ contract Rewarder is
     /// @param listenCount The number of listen for the given content
     /// @param rewardForContentType The base reward for the given content type
     /// @param listener The listener address
-    /// @param fraktionTypes The fraktion types
     /// @param totalRewards The current total rewards in memory accounting (that will be updated)
     function computeRewardForContent(
         ContentId contentId,
         uint256 listenCount,
         uint256 rewardForContentType,
         address listener,
-        uint256[] memory fraktionTypes,
         TotalRewards memory totalRewards
     )
         private
@@ -407,7 +400,7 @@ contract Rewarder is
         }
 
         // Boolean used to know if the user have one paied fraktion
-        (uint256 earningFactor, bool hasOnePaidFraktion) = earningFactorForListener(fraktionTypes, listener, contentId);
+        (uint256 earningFactor, bool hasOnePaidFraktion) = earningFactorForListener(listener, contentId);
 
         // Get the content badge
         uint256 contentBadge = getContentBadge(contentId);
@@ -484,11 +477,9 @@ contract Rewarder is
     /* -------------------------------------------------------------------------- */
 
     /// @dev Compute the earning factor for the given listener
-    /// @param fraktionTypes The fraktion types
     /// @param listener The listener address
     /// @param contentId The content id
     function earningFactorForListener(
-        uint256[] memory fraktionTypes,
         address listener,
         ContentId contentId
     )
@@ -498,7 +489,7 @@ contract Rewarder is
     {
         // Build the ids for eachs fraktion that can generate reward, and get the user balance for each one if this
         // fraktions
-        FraktionId[] memory fraktionIds = contentId.buildSnftIds(fraktionTypes);
+        FraktionId[] memory fraktionIds = contentId.payableFraktionIds();
         uint256[] memory tokenBalances = fraktionTokens.balanceOfIdsBatch(listener, fraktionIds);
 
         assembly {
@@ -513,7 +504,7 @@ contract Rewarder is
             for { } 1 { } {
                 // Get balance and fraktion type
                 let tokenBalance := mload(add(tokenBalances, currOffset))
-                let fraktionType := mload(add(fraktionTypes, currOffset))
+                let fraktionType := and(mload(add(fraktionIds, currOffset)), 0xF)
 
                 // Update the one paid fraktion value
                 if not(hasOnePaidFraktion) {

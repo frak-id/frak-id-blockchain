@@ -4,7 +4,7 @@ pragma solidity 0.8.21;
 import "forge-std/Script.sol";
 import { UpgradeScript } from "../utils/UpgradeScript.s.sol";
 import { Rewarder } from "@frak/reward/Rewarder.sol";
-import { ContentId } from "@frak/lib/ContentId.sol";
+import { ContentId } from "@frak/libs/ContentId.sol";
 
 contract FakeRewardScript is UpgradeScript {
     function run() external {

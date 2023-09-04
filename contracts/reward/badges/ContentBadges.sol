@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { ContentId } from "../../lib/ContentId.sol";
+import { ContentId } from "../../libs/ContentId.sol";
 import { BadgeTooLarge } from "../../utils/FrakErrors.sol";
 
 /// @author @KONFeature

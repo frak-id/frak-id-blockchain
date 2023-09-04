@@ -3,16 +3,16 @@ pragma solidity 0.8.21;
 
 import "forge-std/console.sol";
 import { ContentPool } from "@frak/reward/contentPool/ContentPool.sol";
-import { FrakMath } from "@frak/lib/FrakMath.sol";
-import { ContentId } from "@frak/lib/ContentId.sol";
-import { FraktionId } from "@frak/lib/FraktionId.sol";
+import { ArrayLib } from "@frak/libs/ArrayLib.sol";
+import { ContentId } from "@frak/libs/ContentId.sol";
+import { FraktionId } from "@frak/libs/FraktionId.sol";
 import { FrakRoles } from "@frak/roles/FrakRoles.sol";
 import { NotAuthorized, InvalidAddress, ContractPaused, NoReward } from "@frak/utils/FrakErrors.sol";
 import { FrkTokenTestHelper } from "../../FrkTokenTestHelper.sol";
 
 /// Testing the content pool
 contract ContentPoolTest is FrkTokenTestHelper {
-    using FrakMath for uint256;
+    using ArrayLib for uint256;
 
     ContentPool contentPool;
 

@@ -2,13 +2,13 @@
 pragma solidity 0.8.21;
 
 import { RewarderTestHelper } from "./RewarderTestHelper.sol";
-import { FrakMath } from "@frak/lib/FrakMath.sol";
-import { ContentId } from "@frak/lib/ContentId.sol";
+import { ArrayLib } from "@frak/libs/ArrayLib.sol";
+import { ContentId } from "@frak/libs/ContentId.sol";
 import { NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge } from "@frak/utils/FrakErrors.sol";
 
 /// Testing the rewarder
 contract RewarderTest is RewarderTestHelper {
-    using FrakMath for uint256;
+    using ArrayLib for uint256;
 
     uint256[] fTypeArray = uint256(3).asSingletonArray();
 

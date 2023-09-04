@@ -7,8 +7,8 @@ import { ContentPool } from "@frak/reward/contentPool/ContentPool.sol";
 import { ReferralPool } from "@frak/reward/referralPool/ReferralPool.sol";
 import { Rewarder } from "@frak/reward/Rewarder.sol";
 import { FraktionTokens } from "@frak/fraktions/FraktionTokens.sol";
-import { FrakMath } from "@frak/lib/FrakMath.sol";
-import { ContentId } from "@frak/lib/ContentId.sol";
+import { ArrayLib } from "@frak/libs/ArrayLib.sol";
+import { ContentId } from "@frak/libs/ContentId.sol";
 import { FrakRoles } from "@frak/roles/FrakRoles.sol";
 import { MultiVestingWallets } from "@frak/wallets/MultiVestingWallets.sol";
 import { PRBTest } from "@prb/test/PRBTest.sol";
@@ -16,9 +16,6 @@ import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
 
 /// Helper for our rewarder test
 contract RewarderTestHelper is FrkTokenTestHelper {
-    using FrakMath for address;
-    using FrakMath for uint256;
-
     FraktionTokens fraktionTokens;
     ContentPool contentPool;
     ReferralPool referralPool;
@@ -85,7 +82,7 @@ contract RewarderTestHelper is FrkTokenTestHelper {
 
     function mintAContent() public returns (ContentId) {
         prankDeployer();
-        uint256[] memory fTypeArray = uint256(3).asSingletonArray();
+        uint256[] memory fTypeArray = ArrayLib.asSingletonArray(uint256(3));
         return fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
     }
 }

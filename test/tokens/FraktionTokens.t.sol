@@ -5,9 +5,9 @@ import { PRBTest } from "@prb/test/PRBTest.sol";
 import { StdUtils } from "@forge-std/StdUtils.sol";
 import { FraktionTokens } from "@frak/fraktions/FraktionTokens.sol";
 import { UUPSTestHelper } from "../UUPSTestHelper.sol";
-import { FrakMath } from "@frak/lib/FrakMath.sol";
-import { ContentId } from "@frak/lib/ContentId.sol";
-import { FraktionId } from "@frak/lib/FraktionId.sol";
+import { ArrayLib } from "@frak/libs/ArrayLib.sol";
+import { ContentId } from "@frak/libs/ContentId.sol";
+import { FraktionId } from "@frak/libs/FraktionId.sol";
 import {
     NotAuthorized,
     InvalidAddress,
@@ -18,7 +18,7 @@ import {
 
 /// Testing the frak l2 token
 contract FraktionTokensTest is UUPSTestHelper, StdUtils {
-    using FrakMath for uint256;
+    using ArrayLib for uint256;
 
     FraktionTokens fraktionTokens;
 

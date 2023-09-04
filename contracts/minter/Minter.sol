@@ -3,9 +3,8 @@ pragma solidity 0.8.21;
 
 import { IMinter } from "./IMinter.sol";
 import { FractionCostBadges } from "./badges/FractionCostBadges.sol";
-import { FrakMath } from "../lib/FrakMath.sol";
-import { ContentId } from "../lib/ContentId.sol";
-import { FraktionId } from "../lib/FraktionId.sol";
+import { ContentId } from "../libs/ContentId.sol";
+import { FraktionId } from "../libs/FraktionId.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { FraktionTokens } from "../fraktions/FraktionTokens.sol";
 import { IFrakToken } from "../tokens/IFrakToken.sol";
@@ -18,8 +17,6 @@ import { Multicallable } from "solady/utils/Multicallable.sol";
 /// @notice This contract will mint new content on the ecosytem, and mint fraktions for the user
 /// @custom:security-contact contact@frak.id
 contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Multicallable {
-    using FrakMath for uint256;
-
     /* -------------------------------------------------------------------------- */
     /*                                   Error's                                  */
     /* -------------------------------------------------------------------------- */

@@ -4,15 +4,15 @@ pragma solidity 0.8.21;
 import { StdUtils } from "@forge-std/StdUtils.sol";
 import { Rewarder } from "@frak/reward/Rewarder.sol";
 import { IRewarder } from "@frak/reward/IRewarder.sol";
-import { FrakMath } from "@frak/lib/FrakMath.sol";
-import { ContentId } from "@frak/lib/ContentId.sol";
-import { FraktionId } from "@frak/lib/FraktionId.sol";
+import { ArrayLib } from "@frak/libs/ArrayLib.sol";
+import { ContentId } from "@frak/libs/ContentId.sol";
+import { FraktionId } from "@frak/libs/FraktionId.sol";
 import { ContractPaused, NotAuthorized, InvalidArray, InvalidAddress, RewardTooLarge } from "@frak/utils/FrakErrors.sol";
 import { RewarderTestHelper } from "./RewarderTestHelper.sol";
 
 /// Testing the rewarder pay function
 contract RewarderPayTest is RewarderTestHelper, StdUtils {
-    using FrakMath for uint256;
+    using ArrayLib for uint256;
 
     ContentId contentId;
 
@@ -321,7 +321,7 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
 
     function mintFraktions(address target, uint256 amount) private {
         // Build the param for our new content mint, and mint it
-        uint256[] memory fTypeArray = FrakMath.payableTokenTypes();
+        uint256[] memory fTypeArray = payableFraktionTypes();
         uint256[] memory amounts = new uint256[](fTypeArray.length);
         for (uint256 i = 0; i < fTypeArray.length; i++) {
             amounts[i] = amount;
@@ -332,5 +332,14 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
         for (uint256 i = 0; i < fIds.length; i++) {
             fraktionTokens.mint(target, FraktionId.unwrap(fIds[i]), 1);
         }
+    }
+
+    /// @dev Build an array of all the payable token types
+    function payableFraktionTypes() internal pure returns (uint256[] memory types) {
+        types = new uint256[](4);
+        types[0] = 3;
+        types[1] = 4;
+        types[2] = 5;
+        types[3] = 6;
     }
 }
