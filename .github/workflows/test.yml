@@ -1,4 +1,4 @@
-name: 🧪 Smart contract tests
+name: 🧪 Foundry tests
 
 on:
   push:
@@ -6,12 +6,12 @@ on:
   workflow_dispatch:
   pull_request:
 
-# cancel previous runs on the same PR
+# Cancel previous runs on the same PR
 concurrency:
   group: ${{ github.ref }}-tests
   cancel-in-progress: true
 
-# ll the env required for hardhat
+# All the env required for foundry
 env:
   FOUNDRY_PROFILE: "ci"
   API_KEY_ALCHEMY_MAINNET: ${{ secrets.API_KEY_ALCHEMY_MAINNET }}

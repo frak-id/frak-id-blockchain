@@ -1,14 +1,20 @@
-name: 🧪🗃️Smart storage tests
+name: 🗃️ Storage tests
 
 on:
   push:
     branches: ["main"]
   pull_request:
+  workflow_dispatch:
 
 # cancel previous runs on the same PR
 concurrency:
   group: ${{ github.ref }}-storage
   cancel-in-progress: true
+
+# All the env required for foundry
+env: 
+  FOUNDRY_PROFILE: "ci"
+  POLYGON_RPC_URL: "https://polygon-mainnet.g.alchemy.com/v2/${{ secrets.API_KEY_ALCHEMY_POLYGON }}"
 
 jobs:
   storage-check:
@@ -55,7 +61,7 @@ jobs:
         uses: Rubilmax/foundry-storage-check@v3.5
         with:
             contract: contracts/tokens/FrakToken.sol:FrakToken
-            rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
+            rpcUrl: ${{ env.POLYGON_RPC_URL }}
             address: "0x6261E4a478C98419EaFa6289509C49058D21Df8c"
             failOnRemoval: true
           
@@ -63,7 +69,7 @@ jobs:
         uses: Rubilmax/foundry-storage-check@v3.5
         with:
             contract: contracts/fraktions/FraktionTokens.sol:FraktionTokens
-            rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
+            rpcUrl: ${{ env.POLYGON_RPC_URL }}
             address: "0x4B1611803687Ab821E1b670fE94CB93303D94F8a"
             failOnRemoval: true
 
@@ -71,7 +77,7 @@ jobs:
         uses: Rubilmax/foundry-storage-check@v3.5
         with:
             contract: contracts/reward/contentPool/ContentPool.sol:ContentPool
-            rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
+            rpcUrl: ${{ env.POLYGON_RPC_URL }}
             address: "0xDCB34659B83C4F8708fd7AcAA3755547BF8BBcA0"
             failOnRemoval: true
     
@@ -79,7 +85,7 @@ jobs:
         uses: Rubilmax/foundry-storage-check@v3.5
         with:
             contract: contracts/reward/referralPool/ReferralPool.sol:ReferralPool
-            rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
+            rpcUrl: ${{ env.POLYGON_RPC_URL }}
             address: "0x166d8CFEe1919bC2e8c7AdBB34F1613194e9C599"
             failOnRemoval: true
 
@@ -87,7 +93,7 @@ jobs:
         uses: Rubilmax/foundry-storage-check@v3.5
         with:
             contract: contracts/reward/Rewarder.sol:Rewarder
-            rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
+            rpcUrl: ${{ env.POLYGON_RPC_URL }}
             address: "0x8D9fa601DA1416b087E9db6B6EaD63D4920A4528"
             failOnRemoval: true
 
@@ -95,6 +101,6 @@ jobs:
         uses: Rubilmax/foundry-storage-check@v3.5
         with:
             contract: contracts/minter/Minter.sol:Minter
-            rpcUrl: ${{ secrets.POLYGON_PROVIDER }}
+            rpcUrl: ${{ env.POLYGON_RPC_URL }}
             address: "0x1adc8CAaA35551730eCd82e0eEA683Aa90dB6cf0"
             failOnRemoval: true

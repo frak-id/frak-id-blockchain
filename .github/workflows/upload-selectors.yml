@@ -1,4 +1,4 @@
-name: 🗃 Upload selectors
+name: 📦️ Upload selectors
 
 on:
   workflow_dispatch:
