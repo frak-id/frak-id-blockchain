@@ -12,9 +12,9 @@ using FraktionIdLib for FraktionId global;
 /// @notice This contract is used to help us with the manipulation of the FraktionId
 /// @custom:security-contact contact@frak.id
 library FraktionIdLib {
-    /// @dev The offset of the id we use to store the token type
+    /// @dev The offset of the id we use to store the fraktion type
     uint256 internal constant ID_OFFSET = 4;
-    /// @dev The mask we use to store the token type in the token id
+    /// @dev The mask we use to store the fraktion type in the fraktion id
     uint256 internal constant TYPE_MASK = 0xF;
 
     /// @dev Get the `contentId` from the `self` fraktion id

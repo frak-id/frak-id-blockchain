@@ -62,8 +62,8 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /*                                   Storage                                  */
     /* -------------------------------------------------------------------------- */
 
-    /// @dev The current content token id
-    uint256 private _currentContentTokenId;
+    /// @dev The current content id
+    uint256 private _currentContentId;
 
     /// @dev The current callback
     FraktionTransferCallback private transferCallback;
@@ -71,10 +71,10 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /// @dev Id of content to owner of this content
     mapping(uint256 => address) private owners;
 
-    /// @dev Available supply of each tokens (classic, rare, epic and legendary only) by they id
+    /// @dev Available supply of each fraktion (classic, rare, epic and legendary only) by they id
     mapping(uint256 => uint256) private _availableSupplies;
 
-    /// @dev Tell us if that token is supply aware or not
+    /// @dev Tell us if that fraktion is supply aware or not
     mapping(uint256 => bool) private _isSupplyAware;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -86,7 +86,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
         __ERC1155_init(metadatalUrl);
         __FrakAccessControlUpgradeable_Minter_init();
         // Set the initial content id
-        _currentContentTokenId = 1;
+        _currentContentId = 1;
     }
 
     /* -------------------------------------------------------------------------- */
@@ -116,9 +116,9 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
                 revert(0x1c, 0x04)
             }
 
-            // Get the next content id and increment the current content token id
-            id := add(sload(_currentContentTokenId.slot), 1)
-            sstore(_currentContentTokenId.slot, id)
+            // Get the next content id and increment the current content id
+            id := add(sload(_currentContentId.slot), 1)
+            sstore(_currentContentId.slot, id)
 
             // Get the shifted id, to ease the fraktion id creation
             let shiftedId := shl(0x04, id)
@@ -133,9 +133,9 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
                 // Get the current id
                 let fraktionType := calldataload(add(fraktionTypes.offset, currentOffset))
 
-                // Ensure the supply update of this token type is allowed
+                // Ensure the supply update of this fraktion type is allowed
                 if or(lt(fraktionType, 3), gt(fraktionType, 6)) {
-                    // If token type lower than 3 -> free or owner
+                    // If fraktion type lower than 3 -> free or owner
                     mstore(0x00, _SUPPLY_UPDATE_NOT_ALLOWED_SELECTOR)
                     revert(0x1c, 0x04)
                 }
@@ -186,7 +186,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     }
 
     /**
-     * @dev Set the supply for the given token id
+     * @dev Set the supply for the given fraktion id
      */
     function setSupply(uint256 id, uint256 supply) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
         assembly {
@@ -195,10 +195,10 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
                 mstore(0x00, _INVALID_ARRAY_SELECTOR)
                 revert(0x1c, 0x04)
             }
-            // Ensure the supply update of this token type is allowed
+            // Ensure the supply update of this fraktion type is allowed
             let fraktionType := and(id, 0xF)
             if or(lt(fraktionType, 3), gt(fraktionType, 6)) {
-                // If token type lower than 3 -> free or owner, if greater than 6 -> not a content
+                // If fraktion type lower than 3 -> free or owner, if greater than 6 -> not a content
                 mstore(0x00, _SUPPLY_UPDATE_NOT_ALLOWED_SELECTOR)
                 revert(0x1c, 0x04)
             }
@@ -231,12 +231,12 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
         transferCallback = FraktionTransferCallback(callbackAddr);
     }
 
-    /// @dev Mint a new fraction of a nft
+    /// @dev Mint a new fraktion of a nft
     function mint(address to, uint256 id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
         _mint(to, id, amount, "");
     }
 
-    /// @dev Burn a fraction of a nft
+    /// @dev Burn a fraktion of a nft
     function burn(uint256 id, uint256 amount) external payable whenNotPaused {
         _burn(msg.sender, id, amount);
     }

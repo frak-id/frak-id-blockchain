@@ -2,7 +2,7 @@
 pragma solidity 0.8.21;
 
 import { IMinter } from "./IMinter.sol";
-import { FractionCostBadges } from "./badges/FractionCostBadges.sol";
+import { FraktionCostBadges } from "./badges/FraktionCostBadges.sol";
 import { ContentId } from "../libs/ContentId.sol";
 import { FraktionId } from "../libs/FraktionId.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
@@ -16,7 +16,7 @@ import { Multicallable } from "solady/utils/Multicallable.sol";
 /// @title Minter
 /// @notice This contract will mint new content on the ecosytem, and mint fraktions for the user
 /// @custom:security-contact contact@frak.id
-contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Multicallable {
+contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Multicallable {
     /* -------------------------------------------------------------------------- */
     /*                                   Error's                                  */
     /* -------------------------------------------------------------------------- */
@@ -142,7 +142,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
                 revert(0x1c, 0x04)
             }
         }
-        // Then set the supply for each token types
+        // Then set the supply for each fraktion types
         uint256[] memory fraktionTypes;
         uint256[] memory supplies;
         assembly {
@@ -271,11 +271,11 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
      * @notice  Update the cost badge for the given fraktion
      * @dev     Call to the FraktionCostBadges subclass to update the cost badge, need the right role and contract
      * unpaused
-     * @param   fractionId The id of the fraktion we will update the badge
+     * @param   fraktionId The id of the fraktion we will update the badge
      * @param   badge The new badge for the fraktion
      */
     function updateCostBadge(
-        FraktionId fractionId,
+        FraktionId fraktionId,
         uint96 badge
     )
         external
@@ -283,7 +283,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
         onlyRole(FrakRoles.BADGE_UPDATER)
         whenNotPaused
     {
-        _updateCostBadge(fractionId, badge);
+        _updateCostBadge(fraktionId, badge);
     }
 
     /* -------------------------------------------------------------------------- */
@@ -307,7 +307,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
         if (balance != 0) {
             revert TooManyFraktion();
         }
-        // Get the cost of the fraction
+        // Get the cost of the fraktionId
         uint256 cost = getCostBadge(id);
         assembly {
             // Emit the event
@@ -319,7 +319,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FractionCostBadges, Mu
         frakToken.permit(to, address(this), cost, deadline, v, r, s);
         // Transfer the tokens
         frakToken.transferFrom(to, foundationWallet, cost);
-        // Mint his Fraction of NFT
+        // Mint his fraktion
         fraktionTokens.mint(to, FraktionId.unwrap(id), 1);
     }
 

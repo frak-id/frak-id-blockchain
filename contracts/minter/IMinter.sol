@@ -31,7 +31,7 @@ interface IMinter is IPausable {
     event ContentMinted(uint256 baseId, address indexed owner);
 
     /// @dev Event emitted when a new fraktion for a content is minted
-    event FractionMinted(uint256 indexed fractionId, address indexed user, uint256 amount, uint256 cost);
+    event FractionMinted(uint256 indexed fraktionId, address indexed user, uint256 amount, uint256 cost);
 
     /**
      * @notice  Mint a new content to the FrkEcosystem

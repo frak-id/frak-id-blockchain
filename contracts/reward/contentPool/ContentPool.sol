@@ -198,11 +198,11 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
         private
     {
         unchecked {
-            // Extract content id and token type from this tx
+            // Extract content id and fraktion type from this tx
             (uint256 contentId, uint256 tokenType) = fraktionId.extractAll();
 
             // Get the initial share value of this token
-            uint256 sharesValue = getSharesForTokenType(tokenType);
+            uint256 sharesValue = getSharesForFraktionType(tokenType);
             if (sharesValue == 0) return; // Jump this iteration if this fraktions doesn't count for any shares
 
             // Get the last state index
@@ -247,10 +247,10 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
         private
     {
         unchecked {
-            // Extract content id and token type from this tx
+            // Extract content id and fraktion type from this tx
             (uint256 contentId, uint256 tokenType) = fraktionId.extractAll();
             // Get the total shares moved
-            uint256 sharesMoved = getSharesForTokenType(tokenType) * amountMoved;
+            uint256 sharesMoved = getSharesForFraktionType(tokenType) * amountMoved;
             if (sharesMoved == 0) return; // Jump this iteration if this fraktions doesn't count for any shares
 
             // Get the mapping and array concerned by this content (warm up further access)
@@ -511,11 +511,11 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     }
 
     /**
-     * @dev Get the base reward to the given token type
+     * @dev Get the base reward to the given fraktion type
      * We use a pure function instead of a mapping to economise on storage read,
      * and since this reawrd shouldn't evolve really fast
      */
-    function getSharesForTokenType(uint256 tokenType) private pure returns (uint256 shares) {
+    function getSharesForFraktionType(uint256 tokenType) private pure returns (uint256 shares) {
         if (tokenType == ContentIdLib.FRAKTION_TYPE_COMMON) {
             shares = 10;
         } else if (tokenType == ContentIdLib.FRAKTION_TYPE_PREMIUM) {

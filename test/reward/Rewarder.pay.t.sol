@@ -328,13 +328,13 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
         }
         contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, amounts);
 
-        FraktionId[] memory fIds = contentId.buildSnftIds(fTypeArray);
+        FraktionId[] memory fIds = contentId.payableFraktionIds();
         for (uint256 i = 0; i < fIds.length; i++) {
             fraktionTokens.mint(target, FraktionId.unwrap(fIds[i]), 1);
         }
     }
 
-    /// @dev Build an array of all the payable token types
+    /// @dev Build an array of all the payable fraktion types
     function payableFraktionTypes() internal pure returns (uint256[] memory types) {
         types = new uint256[](4);
         types[0] = 3;

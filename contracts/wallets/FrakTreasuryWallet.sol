@@ -81,9 +81,7 @@ contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
         frakToken = IFrakToken(frkTokenAddr);
     }
 
-    /**
-     * @dev Transfer the given number of token to the user
-     */
+    /// @dev Transfer `amount` of token to `target`
     function transfer(address target, uint256 amount) external whenNotPaused onlyRole(FrakRoles.MINTER) {
         assembly {
             // Ensure the param are valid and not too much
@@ -115,9 +113,7 @@ contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
         frakToken.transfer(target, amount);
     }
 
-    /**
-     * @dev Transfer the given number of token to the user
-     */
+    /// @dev Transfer all `amounts` to each `targets`
     function transferBatch(
         address[] calldata targets,
         uint256[] calldata amounts
@@ -182,9 +178,7 @@ contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
         }
     }
 
-    /**
-     * @dev Mint some fresh token to this contract, and return the number of token minted
-     */
+    /// @dev Mint some fresh token to this contract, and return the number of token minted
     function _mintNewToken() private returns (uint256 amountToMint) {
         if (totalFrakMinted + FRK_MINTING_AMOUNT < FRK_MINTING_CAP) {
             // In the case we have enough room, mint 1m token directly
