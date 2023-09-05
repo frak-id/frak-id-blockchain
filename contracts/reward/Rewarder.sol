@@ -6,7 +6,6 @@ import { ContentBadges } from "./badges/ContentBadges.sol";
 import { ListenerBadges } from "./badges/ListenerBadges.sol";
 import { IContentPool } from "./contentPool/IContentPool.sol";
 import { IReferralPool } from "./referralPool/IReferralPool.sol";
-import { ArrayLib } from "../libs/ArrayLib.sol";
 import { ContentId } from "../libs/ContentId.sol";
 import { FraktionId } from "../libs/FraktionId.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
@@ -17,6 +16,7 @@ import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradea
 import { InvalidAddress, InvalidArray, RewardTooLarge } from "../utils/FrakErrors.sol";
 import { PushPullReward } from "../utils/PushPullReward.sol";
 import { Multicallable } from "solady/utils/Multicallable.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 
 /// @author @KONFeature
 /// @title Rewarder
@@ -30,6 +30,8 @@ contract Rewarder is
     PushPullReward,
     Multicallable
 {
+    using SafeTransferLib for address;
+
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
@@ -176,7 +178,7 @@ contract Rewarder is
         }
 
         // Mint the reward for the user
-        token.transfer(listener, amount);
+        token.safeTransfer(listener, amount);
     }
 
     /// @dev Directly pay all the creators owner of `contentIds` for each given frk `amounts` (used for offchain reward
@@ -298,10 +300,10 @@ contract Rewarder is
 
         // If we got reward for the pool, transfer them
         if (rewardsAccounter.content > 0) {
-            token.transfer(address(contentPool), rewardsAccounter.content);
+            token.safeTransfer(address(contentPool), rewardsAccounter.content);
         }
         /*if (rewardsAccounter.referral > 0) {
-            token.transfer(address(referralPool), rewardsAccounter.referral);
+            token.safeTransfer(address(referralPool), rewardsAccounter.referral);
         }*/
     }
 

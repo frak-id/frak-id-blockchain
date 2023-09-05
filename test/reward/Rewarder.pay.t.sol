@@ -50,7 +50,7 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
     }
 
     function test_fail_payUserDirectly_NotEnoughBalance() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        vm.expectRevert("ERC20: transfer amount exceeds balance");
+        vm.expectRevert();
         rewarder.payUserDirectly(address(1), 11);
     }
 

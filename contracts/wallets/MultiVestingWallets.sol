@@ -2,11 +2,10 @@
 pragma solidity 0.8.21;
 
 import { EnumerableSet } from "openzeppelin/utils/structs/EnumerableSet.sol";
-import { SafeERC20Upgradeable } from "@oz-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { NotAuthorized, InvalidArray, InvalidAddress, NoReward, RewardTooLarge } from "../utils/FrakErrors.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 
 /// @dev error emitted when the contract doesn't have enough founds
 error NotEnoughFounds();
@@ -26,7 +25,7 @@ error ComputationError();
 /// @notice This contract is used to store vesting for the frk token
 /// @custom:security-contact contact@frak.id
 contract MultiVestingWallets is FrakAccessControlUpgradeable {
-    using SafeERC20Upgradeable for IERC20Upgradeable;
+    using SafeTransferLib for address;
 
     // Add the library methods
     using EnumerableSet for EnumerableSet.UintSet;
@@ -67,7 +66,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     uint96 public totalSupply;
 
     /// Access to the frak token
-    IERC20Upgradeable private token;
+    address private token;
 
     /// Current id of vesting
     uint24 private _idCounter;
@@ -84,8 +83,8 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     }
 
     /// Init our contract, with the frak tokan and base role init
-    function initialize(address tokenAddr) external initializer {
-        if (tokenAddr == address(0)) revert InvalidAddress();
+    function initialize(address _token) external initializer {
+        if (_token == address(0)) revert InvalidAddress();
 
         __FrakAccessControlUpgradeable_init();
 
@@ -93,7 +92,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
         _grantRole(FrakRoles.VESTING_MANAGER, msg.sender);
 
         // Init our frak token
-        token = IERC20Upgradeable(tokenAddr);
+        token = _token;
     }
 
     /**

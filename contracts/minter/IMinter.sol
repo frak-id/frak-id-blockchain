@@ -95,7 +95,7 @@ interface IMinter {
      * @param   id  Id of the free fraktion
      * @param   to  Address of the user
      */
-    function mintFreeFraktionForUser(FraktionId id, address to) external payable;
+    function mintFreeFraktionForUser(FraktionId id, address to) external;
 
     /**
      * @notice  Mint a free fraktion for the given user
@@ -103,7 +103,7 @@ interface IMinter {
      * only performed when contract not paused and by the right person
      * @param   id  Id of the free fraktion
      */
-    function mintFreeFraktion(FraktionId id) external payable;
+    function mintFreeFraktion(FraktionId id) external;
 
     /**
      * @notice  Increase the total supply for the given fraktion id

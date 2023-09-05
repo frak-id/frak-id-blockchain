@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import { MultiVestingWallets } from "./MultiVestingWallets.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { InvalidArray, InvalidAddress, NoReward, RewardTooLarge } from "../utils/FrakErrors.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 
 /// @dev error throwned when the creation param are invalid
 error InvalidCreationParam();

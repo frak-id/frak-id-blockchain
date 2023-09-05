@@ -11,12 +11,15 @@ import { IFrakToken } from "../tokens/IFrakToken.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { InvalidAddress } from "../utils/FrakErrors.sol";
 import { Multicallable } from "solady/utils/Multicallable.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 
 /// @author @KONFeature
 /// @title Minter
 /// @notice This contract will mint new content on the ecosytem, and mint fraktions for the user
 /// @custom:security-contact contact@frak.id
 contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Multicallable {
+    using SafeTransferLib for address;
+
     /* -------------------------------------------------------------------------- */
     /*                                   Error's                                  */
     /* -------------------------------------------------------------------------- */
@@ -220,7 +223,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      * @param   id  Id of the free fraktion
      * @param   to  Address of the user
      */
-    function mintFreeFraktionForUser(FraktionId id, address to) external payable override onlyRole(FrakRoles.MINTER) {
+    function mintFreeFraktionForUser(FraktionId id, address to) external override {
         _mintFreeFraktionForUser(id, to);
     }
 
@@ -230,7 +233,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      * only performed when contract not paused and by the right person
      * @param   id  Id of the free fraktion
      */
-    function mintFreeFraktion(FraktionId id) external payable override {
+    function mintFreeFraktion(FraktionId id) external override {
         _mintFreeFraktionForUser(id, msg.sender);
     }
 
@@ -289,7 +292,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         // Call the permit functions
         frakToken.permit(to, address(this), cost, deadline, v, r, s);
         // Transfer the tokens
-        frakToken.transferFrom(to, foundationWallet, cost);
+        address(frakToken).safeTransferFrom(to, foundationWallet, cost);
         // Mint his fraktion
         fraktionTokens.mint(to, FraktionId.unwrap(id), 1);
     }

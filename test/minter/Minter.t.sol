@@ -318,11 +318,6 @@ contract MinterTest is FrkTokenTestHelper {
         minter.mintFreeFraktionForUser(contentId.freeFraktionId(), address(1));
     }
 
-    function test_fail_mintFreeFraktionForUser_NotAuthorized() public {
-        vm.expectRevert(NotAuthorized.selector);
-        minter.mintFreeFraktionForUser(FraktionId.wrap(1), address(1));
-    }
-
     function test_fail_mintFreeFraktionForUser_ExpectingOnlyFreeFraktion() public prankExecAsDeployer {
         // Add an initial content
         ContentId contentId = minter.addContent(address(1), 1, 1, 1, 1);
