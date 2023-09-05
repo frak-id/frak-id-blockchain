@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
-import {UUPSTestHelper} from "./UUPSTestHelper.sol";
+import { FrakToken } from "@frak/tokens/FrakToken.sol";
+import { UUPSTestHelper } from "./UUPSTestHelper.sol";
 
 /// Testing the frak l2 token
 contract FrkTokenTestHelper is UUPSTestHelper {
@@ -10,7 +10,7 @@ contract FrkTokenTestHelper is UUPSTestHelper {
 
     function _setupFrkToken() internal {
         // Deploy frak token
-        bytes memory initData = abi.encodeCall(FrakToken.initialize, (address(this)));
+        bytes memory initData = abi.encodeCall(FrakToken.initialize, ());
         address frkProxyAddr = deployContract(address(new FrakToken()), initData);
         frakToken = FrakToken(frkProxyAddr);
     }

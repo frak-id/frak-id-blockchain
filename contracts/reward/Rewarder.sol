@@ -1,23 +1,26 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {IRewarder} from "./IRewarder.sol";
-import {ContentBadges} from "./badges/ContentBadges.sol";
-import {ListenerBadges} from "./badges/ListenerBadges.sol";
-import {ContentPool} from "./pool/ContentPool.sol";
-import {ReferralPool} from "./pool/ReferralPool.sol";
-import {FrakMath} from "../utils/FrakMath.sol";
-import {FrakRoles} from "../utils/FrakRoles.sol";
-import {FraktionTokens} from "../tokens/FraktionTokens.sol";
-import {IFrakToken} from "../tokens/IFrakToken.sol";
-import {FrakAccessControlUpgradeable} from "../utils/FrakAccessControlUpgradeable.sol";
-import {InvalidAddress, InvalidArray, RewardTooLarge} from "../utils/FrakErrors.sol";
-import {PushPullReward} from "../utils/PushPullReward.sol";
-import {Multicallable} from "solady/utils/Multicallable.sol";
+import { IRewarder } from "./IRewarder.sol";
+import { ContentBadges } from "./badges/ContentBadges.sol";
+import { ListenerBadges } from "./badges/ListenerBadges.sol";
+import { IContentPool } from "./contentPool/IContentPool.sol";
+import { IReferralPool } from "./referralPool/IReferralPool.sol";
+import { ArrayLib } from "../libs/ArrayLib.sol";
+import { ContentId } from "../libs/ContentId.sol";
+import { FraktionId } from "../libs/FraktionId.sol";
+import { FrakRoles } from "../roles/FrakRoles.sol";
+import { RewardAccounter } from "./RewardAccounter.sol";
+import { FraktionTokens } from "../fraktions/FraktionTokens.sol";
+import { IFrakToken } from "../tokens/IFrakToken.sol";
+import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
+import { InvalidAddress, InvalidArray, RewardTooLarge } from "../utils/FrakErrors.sol";
+import { PushPullReward } from "../utils/PushPullReward.sol";
+import { Multicallable } from "solady/utils/Multicallable.sol";
 
-/**
- * @dev Represent our rewarder contract
- */
+/// @author @KONFeature
+/// @title Rewarder
+/// @notice Contract in charge of managing the reward for the user / creator
 /// @custom:security-contact contact@frak.id
 contract Rewarder is
     IRewarder,
@@ -27,8 +30,6 @@ contract Rewarder is
     PushPullReward,
     Multicallable
 {
-    using FrakMath for uint256;
-
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
@@ -55,9 +56,6 @@ contract Rewarder is
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
 
-    /// @dev Error throwned when the reward is invalid
-    error InvalidReward();
-
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
     uint256 private constant _INVALID_ADDRESS_SELECTOR = 0xe6c4247b;
 
@@ -76,22 +74,12 @@ contract Rewarder is
 
     /// @dev Event emitted when a user is rewarded for his listen
     event RewardOnContent(
-        address indexed user, uint256 indexed contentId, uint256 baseUserReward, uint256 earningFactor
+        address indexed user, ContentId indexed contentId, uint256 baseUserReward, uint256 earningFactor
     );
 
     /// @dev 'keccak256(bytes("RewardOnContent(address,uint256,uint256,uint256"))'
     uint256 private constant _REWARD_ON_CONTENT_EVENT_SELECTOR =
         0x6396a2d965d9d843b0159912a8413f069bcce1830e320cd0b6cd5dc03d11eddf;
-
-    /* -------------------------------------------------------------------------- */
-    /*                                  Struct's                                  */
-    /* -------------------------------------------------------------------------- */
-
-    struct TotalRewards {
-        uint256 user;
-        uint256 owners;
-        uint256 content;
-    }
 
     /* -------------------------------------------------------------------------- */
     /*                                   Storage                                  */
@@ -113,10 +101,10 @@ contract Rewarder is
     IFrakToken private frakToken;
 
     /// @dev Access our referral system
-    ReferralPool private referralPool;
+    IReferralPool private referralPool;
 
     /// @dev Access our content pool
-    ContentPool private contentPool;
+    IContentPool private contentPool;
 
     /// @dev Address of the foundation wallet
     address private foundationWallet;
@@ -132,7 +120,10 @@ contract Rewarder is
         address contentPoolAddr,
         address referralAddr,
         address foundationAddr
-    ) external initializer {
+    )
+        external
+        initializer
+    {
         if (
             frkTokenAddr == address(0) || fraktionTokensAddr == address(0) || contentPoolAddr == address(0)
                 || referralAddr == address(0) || foundationAddr == address(0)
@@ -144,8 +135,8 @@ contract Rewarder is
 
         fraktionTokens = FraktionTokens(fraktionTokensAddr);
         frakToken = IFrakToken(frkTokenAddr);
-        contentPool = ContentPool(contentPoolAddr);
-        referralPool = ReferralPool(referralAddr);
+        contentPool = IContentPool(contentPoolAddr);
+        referralPool = IReferralPool(referralAddr);
 
         foundationWallet = foundationAddr;
 
@@ -161,10 +152,11 @@ contract Rewarder is
     /*                          External write function's                         */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Directly pay a user for the given frk amount (used for offchain to onchain wallet migration)
-     */
-    function payUserDirectly(address listener, uint256 amount)
+    /// @dev Directly pay a `listener` for the given frk `amount` (used for offchain to onchain wallet migration)
+    function payUserDirectly(
+        address listener,
+        uint256 amount
+    )
         external
         payable
         onlyRole(FrakRoles.REWARDER)
@@ -195,10 +187,12 @@ contract Rewarder is
         token.transfer(listener, amount);
     }
 
-    /**
-     * @notice Directly pay all the creator for the given frk amount (used for offchain reward created by the user, that is sent to the creator)
-     */
-    function payCreatorDirectlyBatch(uint256[] calldata contentIds, uint256[] calldata amounts)
+    /// @dev Directly pay all the creators owner of `contentIds` for each given frk `amounts` (used for offchain reward
+    /// created by the user, thatis sent to the creator)
+    function payCreatorDirectlyBatch(
+        ContentId[] calldata contentIds,
+        uint256[] calldata amounts
+    )
         external
         payable
         onlyRole(FrakRoles.REWARDER)
@@ -251,15 +245,19 @@ contract Rewarder is
         }
     }
 
-    /**
-     * @dev Compute the reward for a user, given the content and listens, and pay him and the owner
-     */
+    /// @dev Compute the reward for a `listener`, given the `contentType`, `contentIds` and `listenCounts`, and pay him
+    /// and the owner
     function payUser(
         address listener,
         uint256 contentType,
-        uint256[] calldata contentIds,
+        ContentId[] calldata contentIds,
         uint256[] calldata listenCounts
-    ) external payable onlyRole(FrakRoles.REWARDER) whenNotPaused {
+    )
+        external
+        payable
+        onlyRole(FrakRoles.REWARDER)
+        whenNotPaused
+    {
         // Ensure we got valid data
         assembly {
             if iszero(listener) {
@@ -273,69 +271,56 @@ contract Rewarder is
         }
 
         // Get the data we will need in this level
-        TotalRewards memory totalRewards = TotalRewards(0, 0, 0);
+        RewardAccounter memory rewardsAccounter = RewardAccounter(0, 0, 0);
 
         // Get all the payed fraktion types
-        uint256[] memory fraktionTypes = FrakMath.payableTokenTypes();
         uint256 rewardForContentType = baseRewardForContentType(contentType);
 
         // Iterate over each content the user listened
         uint256 length = contentIds.length;
         for (uint256 i; i < length;) {
-            computeRewardForContent(
-                contentIds[i], listenCounts[i], rewardForContentType, listener, fraktionTypes, totalRewards
-            );
+            computeRewardForContent(contentIds[i], listenCounts[i], rewardForContentType, listener, rewardsAccounter);
 
             // Finally, increase the counter
             unchecked {
                 ++i;
             }
         }
-
-        // Then outside of our loop find the user badge
-        uint256 listenerBadge = getListenerBadge(listener);
-
         // Compute the total amount to mint, and ensure we don't exceed our cap
-        assembly {
-            // Update the total mint for user with his listener badges
-            mstore(totalRewards, div(mul(listenerBadge, mload(totalRewards)), 1000000000000000000))
+        unchecked {
+            // Apply the user badge
+            rewardsAccounter.applyUserBadge(getListenerBadge(listener));
 
-            // Compute the total to be minted
-            let userAndOwner := add(mload(totalRewards), mload(add(totalRewards, 0x20)))
-            let referralAndContent := add(mload(add(totalRewards, 0x40)), mload(add(totalRewards, 0x60)))
-            let totalMint := add(userAndOwner, referralAndContent)
+            // Compute the new total frk minted for reward
+            uint256 newTotalMint = totalFrakMinted + rewardsAccounter.getTotal();
 
-            // Compute the new total amount
-            let newTotalAmount := add(totalMint, sload(totalFrakMinted.slot))
-            // Ensure it's good
-            if gt(newTotalAmount, REWARD_MINT_CAP) {
-                mstore(0x00, _REWARD_TOO_LARGE_SELECTOR)
-                revert(0x1c, 0x04)
+            // Ensure we don't go past the mint cap
+            if (newTotalMint > REWARD_MINT_CAP) {
+                revert RewardTooLarge();
             }
+
             // Increase our total frak minted
-            sstore(totalFrakMinted.slot, newTotalAmount)
+            totalFrakMinted = newTotalMint;
         }
 
         // Register the amount for listener
-        _addFoundsUnchecked(listener, totalRewards.user);
+        _addFoundsUnchecked(listener, rewardsAccounter.user);
 
         // If we got reward for the pool, transfer them
-        if (totalRewards.content > 0) {
-            token.transfer(address(contentPool), totalRewards.content);
+        if (rewardsAccounter.content > 0) {
+            token.transfer(address(contentPool), rewardsAccounter.content);
         }
-        /*if (totalRewards.referral > 0) {
-            token.transfer(address(referralPool), totalRewards.referral);
+        /*if (rewardsAccounter.referral > 0) {
+            token.transfer(address(referralPool), rewardsAccounter.referral);
         }*/
     }
 
-    /**
-     * @dev Withdraw my pending founds
-     */
+    /// @dev Withdraw the pending founds of the caller
     function withdrawFounds() external override whenNotPaused {
         _withdrawWithFee(msg.sender, FEE_PERCENT, foundationWallet);
     }
 
-    /// @dev Withdraw the pending founds for 'user'
+    /// @dev Withdraw the pending founds of `user`
     function withdrawFounds(address user) external override onlyRole(FrakRoles.ADMIN) whenNotPaused {
         _withdrawWithFee(user, FEE_PERCENT, foundationWallet);
     }
@@ -346,7 +331,10 @@ contract Rewarder is
     }
 
     /// @dev Update the 'contentId' 'badge'
-    function updateContentBadge(uint256 contentId, uint256 badge)
+    function updateContentBadge(
+        ContentId contentId,
+        uint256 badge
+    )
         external
         override
         onlyRole(FrakRoles.BADGE_UPDATER)
@@ -356,7 +344,10 @@ contract Rewarder is
     }
 
     /// @dev Update the 'listener' 'badge'
-    function updateListenerBadge(address listener, uint256 badge)
+    function updateListenerBadge(
+        address listener,
+        uint256 badge
+    )
         external
         override
         onlyRole(FrakRoles.BADGE_UPDATER)
@@ -383,17 +374,21 @@ contract Rewarder is
     /*                          Internal write function's                         */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Compute the user and owner reward for the given content
-     */
+    /// @dev Compute the reward of the given content
+    /// @param contentId The id of the content
+    /// @param listenCount The number of listen for the given content
+    /// @param rewardForContentType The base reward for the given content type
+    /// @param listener The listener address
+    /// @param rewardsAccounter The current total rewards in memory accounting (that will be updated)
     function computeRewardForContent(
-        uint256 contentId,
+        ContentId contentId,
         uint256 listenCount,
         uint256 rewardForContentType,
         address listener,
-        uint256[] memory fraktionTypes,
-        TotalRewards memory totalRewards
-    ) private {
+        RewardAccounter memory rewardsAccounter
+    )
+        private
+    {
         // Ensure we don't exceed the max ccu / content
         assembly {
             if gt(listenCount, MAX_CCU_PER_CONTENT) {
@@ -403,7 +398,7 @@ contract Rewarder is
         }
 
         // Boolean used to know if the user have one paied fraktion
-        (uint256 earningFactor, bool hasOnePaidFraktion) = earningFactorForListener(fraktionTypes, listener, contentId);
+        (uint256 earningFactor, bool hasOnePaidFraktion) = earningFactorForListener(listener, contentId);
 
         // Get the content badge
         uint256 contentBadge = getContentBadge(contentId);
@@ -430,7 +425,7 @@ contract Rewarder is
 
             // User reward at 35%
             let userReward := div(mul(totalReward, 35), 100)
-            mstore(totalRewards, add(mload(totalRewards), userReward))
+            mstore(rewardsAccounter, add(mload(rewardsAccounter), userReward))
 
             // Check if the user has got paid fraktion
             switch hasOnePaidFraktion
@@ -444,11 +439,11 @@ contract Rewarder is
                 ownerReward := sub(sub(totalReward, userReward), contentPoolReward)
 
                 // Store the content pool reward
-                mstore(add(totalRewards, 0x40), add(mload(add(totalRewards, 0x40)), contentPoolReward))
+                mstore(add(rewardsAccounter, 0x40), add(mload(add(rewardsAccounter, 0x40)), contentPoolReward))
             }
 
             // Store the owner reward in memory
-            mstore(add(totalRewards, 0x20), add(mload(add(totalRewards, 0x20)), ownerReward))
+            mstore(add(rewardsAccounter, 0x20), add(mload(add(rewardsAccounter, 0x20)), ownerReward))
 
             // Emit the reward on content event's
             mstore(0, userReward)
@@ -479,16 +474,20 @@ contract Rewarder is
     /*                          Internal view function's                          */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Compute the earning factor for a listener on a given content
-     */
-    function earningFactorForListener(uint256[] memory fraktionTypes, address listener, uint256 contentId)
+    /// @dev Compute the earning factor for the given listener
+    /// @param listener The listener address
+    /// @param contentId The content id
+    function earningFactorForListener(
+        address listener,
+        ContentId contentId
+    )
         private
         view
         returns (uint256 earningFactor, bool hasOnePaidFraktion)
     {
-        // Build the ids for eachs fraktion that can generate reward, and get the user balance for each one if this fraktions
-        uint256[] memory fraktionIds = contentId.buildSnftIds(fraktionTypes);
+        // Build the ids for eachs fraktion that can generate reward, and get the user balance for each one if this
+        // fraktions
+        FraktionId[] memory fraktionIds = contentId.payableFraktionIds();
         uint256[] memory tokenBalances = fraktionTokens.balanceOfIdsBatch(listener, fraktionIds);
 
         assembly {
@@ -500,10 +499,10 @@ contract Rewarder is
             let offsetEnd := add(0x20, shl(0x05, mload(fraktionIds)))
 
             // Infinite loop
-            for {} 1 {} {
+            for { } 1 { } {
                 // Get balance and fraktion type
                 let tokenBalance := mload(add(tokenBalances, currOffset))
-                let fraktionType := mload(add(fraktionTypes, currOffset))
+                let fraktionType := and(mload(add(fraktionIds, currOffset)), 0xF)
 
                 // Update the one paid fraktion value
                 if not(hasOnePaidFraktion) {
@@ -535,35 +534,7 @@ contract Rewarder is
     /*                          Internal pure function's                          */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Get the base reward to the given token type
-     * We use a pure function instead of a mapping to economise on storage read,
-     * and since this reawrd shouldn't evolve really fast
-     */
-    function baseRewardForTokenType(uint256 tokenType) private pure returns (uint256 reward) {
-        if (tokenType == FrakMath.TOKEN_TYPE_FREE_MASK) {
-            // 0.01 FRK
-            reward = 0.01 ether;
-        } else if (tokenType == FrakMath.TOKEN_TYPE_COMMON_MASK) {
-            // 0.1 FRK
-            reward = 0.1 ether;
-        } else if (tokenType == FrakMath.TOKEN_TYPE_PREMIUM_MASK) {
-            // 0.5 FRK
-            reward = 0.5 ether;
-        } else if (tokenType == FrakMath.TOKEN_TYPE_GOLD_MASK) {
-            // 1 FRK
-            reward = 1 ether;
-        } else if (tokenType == FrakMath.TOKEN_TYPE_DIAMOND_MASK) {
-            // 2 FRK
-            reward = 2 ether;
-        } else {
-            reward = 0;
-        }
-    }
-
-    /**
-     * @dev Get the base reward to the given content type
-     */
+    /// @dev Compute the base reward for the given `contentType`
     function baseRewardForContentType(uint256 contentType) private pure returns (uint256 reward) {
         if (contentType == CONTENT_TYPE_VIDEO) {
             reward = 2 ether;

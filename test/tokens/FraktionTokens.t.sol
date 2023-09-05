@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {PRBTest} from "@prb/test/PRBTest.sol";
-import {StdUtils} from "@forge-std/StdUtils.sol";
-import {FraktionTokens} from "@frak/tokens/FraktionTokens.sol";
-import {UUPSTestHelper} from "../UUPSTestHelper.sol";
-import {FrakMath} from "@frak/utils/FrakMath.sol";
+import { PRBTest } from "@prb/test/PRBTest.sol";
+import { StdUtils } from "@forge-std/StdUtils.sol";
+import { FraktionTokens } from "@frak/fraktions/FraktionTokens.sol";
+import { UUPSTestHelper } from "../UUPSTestHelper.sol";
+import { ArrayLib } from "@frak/libs/ArrayLib.sol";
+import { ContentId } from "@frak/libs/ContentId.sol";
+import { FraktionId } from "@frak/libs/FraktionId.sol";
 import {
     NotAuthorized,
     InvalidAddress,
@@ -16,7 +18,7 @@ import {
 
 /// Testing the frak l2 token
 contract FraktionTokensTest is UUPSTestHelper, StdUtils {
-    using FrakMath for uint256;
+    using ArrayLib for uint256;
 
     FraktionTokens fraktionTokens;
 
@@ -41,9 +43,9 @@ contract FraktionTokensTest is UUPSTestHelper, StdUtils {
      * ===== TEST : mintNewContent(address ownerAddress) =====
      */
     function test_mintNewContent() public prankExecAsDeployer {
-        uint256 contentId = fraktionTokens.mintNewContent(address(1), sampleArray, sampleArray);
-        uint256 nftId = contentId.buildNftId();
-        assertEq(fraktionTokens.balanceOf(address(1), nftId), 1);
+        ContentId contentId = fraktionTokens.mintNewContent(address(1), sampleArray, sampleArray);
+        FraktionId nftId = contentId.creatorFraktionId();
+        assertEq(fraktionTokens.balanceOf(address(1), FraktionId.unwrap(nftId)), 1);
     }
 
     function test_fail_mintNewContent_ContractPaused() public prankExecAsDeployer {
@@ -87,7 +89,7 @@ contract FraktionTokensTest is UUPSTestHelper, StdUtils {
     }
 
     /*
-     * ===== TEST : safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes calldata data) =====
+    * ===== TEST : safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes calldata data) =====
      */
     function test_transfer() public {
         // Mint a few initial tokens to different address

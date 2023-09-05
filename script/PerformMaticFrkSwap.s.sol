@@ -3,11 +3,11 @@ pragma solidity 0.8.21;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
-import {UpgradeScript} from "./utils/UpgradeScript.s.sol";
-import {MonoPool} from "swap-pool/MonoPool.sol";
-import {EncoderLib} from "swap-pool/encoder/EncoderLib.sol";
-import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
-import {FrakToken} from "contracts/tokens/FrakTokenL2.sol";
+import { UpgradeScript } from "./utils/UpgradeScript.s.sol";
+import { MonoPool } from "swap-pool/MonoPool.sol";
+import { EncoderLib } from "swap-pool/encoder/EncoderLib.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
+import { FrakToken } from "contracts/tokens/FrakToken.sol";
 
 contract PerformMaticFrkSwap is UpgradeScript {
     using SafeTransferLib for address;
@@ -66,7 +66,10 @@ contract PerformMaticFrkSwap is UpgradeScript {
     }
 
     /// @dev Build the matic to frk swap command
-    function _buildSwapMaticToFrkCommand(uint256 maticAmount, address user)
+    function _buildSwapMaticToFrkCommand(
+        uint256 maticAmount,
+        address user
+    )
         private
         pure
         returns (bytes memory program)
@@ -82,7 +85,12 @@ contract PerformMaticFrkSwap is UpgradeScript {
     }
 
     /// @dev Build the frk to matic swap command
-    function _buildSwapFrkToMaticCommand(FrakToken frkToken, address pool, uint256 frkAmount, uint256 privateKey)
+    function _buildSwapFrkToMaticCommand(
+        FrakToken frkToken,
+        address pool,
+        uint256 frkAmount,
+        uint256 privateKey
+    )
         private
         view
         returns (bytes memory program)
@@ -111,7 +119,10 @@ contract PerformMaticFrkSwap is UpgradeScript {
         bytes32 s;
     }
 
-    function _appendPermitSignature(bytes memory program, AppendPermitSignature memory params)
+    function _appendPermitSignature(
+        bytes memory program,
+        AppendPermitSignature memory params
+    )
         internal
         pure
         returns (bytes memory)
@@ -165,7 +176,7 @@ contract PerformMaticFrkSwap is UpgradeScript {
     /// @dev Execute the add liquidity command
     function _executeMaticSwap(MonoPool pool, bytes memory program, uint256 maticAmount) private deployerBroadcast {
         // Execute the command
-        pool.execute{value: maticAmount}(program);
+        pool.execute{ value: maticAmount }(program);
     }
 
     /// @dev Execute the add liquidity command

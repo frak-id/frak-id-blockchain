@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {StdUtils} from "@forge-std/StdUtils.sol";
-import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
-import {FrakMath} from "@frak/utils/FrakMath.sol";
-import {FrakRoles} from "@frak/utils/FrakRoles.sol";
-import {FrakTreasuryWallet, NotEnoughTreasury} from "@frak/wallets/FrakTreasuryWallet.sol";
-import {FrkTokenTestHelper} from "../FrkTokenTestHelper.sol";
+import { StdUtils } from "@forge-std/StdUtils.sol";
+import { FrakToken } from "@frak/tokens/FrakToken.sol";
+import { ArrayLib } from "@frak/libs/ArrayLib.sol";
+import { FrakRoles } from "@frak/roles/FrakRoles.sol";
+import { FrakTreasuryWallet, NotEnoughTreasury } from "@frak/wallets/FrakTreasuryWallet.sol";
+import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
 import {
     NotAuthorized,
     InvalidAddress,
@@ -18,8 +18,8 @@ import {
 
 /// Testing the frak l2 token
 contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {
-    using FrakMath for address;
-    using FrakMath for uint256;
+    using ArrayLib for address;
+    using ArrayLib for uint256;
 
     address treasuryWalletAddr;
     FrakTreasuryWallet treasuryWallet;

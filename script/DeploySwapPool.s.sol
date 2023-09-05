@@ -3,9 +3,8 @@ pragma solidity 0.8.21;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
-import {UpgradeScript} from "./utils/UpgradeScript.s.sol";
-import {MonoPool} from "swap-pool/MonoPool.sol";
-
+import { UpgradeScript } from "./utils/UpgradeScript.s.sol";
+import { MonoPool } from "swap-pool/MonoPool.sol";
 
 contract DeploySwapPool is UpgradeScript {
     /// @dev The basis point for the pool to deploy
@@ -19,7 +18,7 @@ contract DeploySwapPool is UpgradeScript {
 
         // Get the frak-labs address
         address feeReceiver;
-        if (block.chainid == 80001) {
+        if (block.chainid == 80_001) {
             feeReceiver = address(0x8Cb488e0E16e49F064e210969EE1c771a55BcD04);
         } else if (block.chainid == 137) {
             feeReceiver = address(0x517ecFa01E2F9A6955d8DD04867613E41309213d);
@@ -36,7 +35,10 @@ contract DeploySwapPool is UpgradeScript {
     }
 
     /// @dev Fake some reward for a user
-    function _deployInitialPool(address frkToken, address feeReceiver)
+    function _deployInitialPool(
+        address frkToken,
+        address feeReceiver
+    )
         internal
         deployerBroadcast
         returns (MonoPool monotokenPool)

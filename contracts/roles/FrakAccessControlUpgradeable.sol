@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {Initializable} from "@oz-upgradeable/proxy/utils/Initializable.sol";
-import {UUPSUpgradeable} from "@oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {ContextUpgradeable} from "@oz-upgradeable/utils/ContextUpgradeable.sol";
-import {IPausable} from "./IPausable.sol";
-import {FrakRoles} from "./FrakRoles.sol";
-import {NotAuthorized, ContractPaused, ContractNotPaused, RenounceForCallerOnly} from "./FrakErrors.sol";
+import { Initializable } from "@oz-upgradeable/proxy/utils/Initializable.sol";
+import { UUPSUpgradeable } from "@oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { ContextUpgradeable } from "@oz-upgradeable/utils/ContextUpgradeable.sol";
+import { IPausable } from "../utils/IPausable.sol";
+import { FrakRoles } from "./FrakRoles.sol";
+import { NotAuthorized, ContractPaused, ContractNotPaused, RenounceForCallerOnly } from "../utils/FrakErrors.sol";
 
 /**
  * @author @KONFeature
@@ -56,22 +56,26 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     bool private _paused;
 
     /// @dev Mapping of roles -> user -> hasTheRight
-    mapping(bytes32 => mapping(address => bool)) private _roles;
+    mapping(bytes32 roles => mapping(address user => bool isAllowed)) private _roles;
 
-    /**
-     * @notice Initializes the contract, granting the ADMIN, PAUSER, and UPGRADER roles to the msg.sender.
-     * Also, set the contract as unpaused.
-     */
+    /// @dev Initialise the contract and also grant the role to the msg sender
     function __FrakAccessControlUpgradeable_init() internal onlyInitializing {
         __Context_init();
         __UUPSUpgradeable_init();
 
-        _grantRole(FrakRoles.ADMIN, _msgSender());
-        _grantRole(FrakRoles.PAUSER, _msgSender());
-        _grantRole(FrakRoles.UPGRADER, _msgSender());
+        _grantRole(FrakRoles.ADMIN, msg.sender);
+        _grantRole(FrakRoles.PAUSER, msg.sender);
+        _grantRole(FrakRoles.UPGRADER, msg.sender);
 
         // Tell we are not paused at start
         _paused = false;
+    }
+
+    /// @dev Initialise the contract and also grant the role to the msg sender
+    function __FrakAccessControlUpgradeable_Minter_init() internal onlyInitializing {
+        __FrakAccessControlUpgradeable_init();
+
+        _grantRole(FrakRoles.MINTER, msg.sender);
     }
 
     /* -------------------------------------------------------------------------- */
@@ -98,19 +102,19 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
         emit Unpaused();
     }
 
-    /// @dev Grant the 'role' to the 'account'
+    /// @dev Grant the `role` to the `account`
     function grantRole(bytes32 role, address account) external onlyRole(FrakRoles.ADMIN) {
         _grantRole(role, account);
     }
 
-    /// @dev Revoke the 'role' to the 'account'
+    /// @dev Revoke the `role` to the `account`
     function revokeRole(bytes32 role, address account) external onlyRole(FrakRoles.ADMIN) {
         _revokeRole(role, account);
     }
 
-    /// @dev 'Account' renounce to the 'role'
+    /// @dev `Account` renounce to the `role`
     function renounceRole(bytes32 role, address account) external {
-        if (account != _msgSender()) revert RenounceForCallerOnly();
+        if (account != msg.sender) revert RenounceForCallerOnly();
 
         _revokeRole(role, account);
     }
@@ -128,7 +132,7 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     /*                          Internal write function's                         */
     /* -------------------------------------------------------------------------- */
 
-    /// @dev Grant the 'role' to the 'account'
+    /// @dev Grant the `role` to the `account`
     function _grantRole(bytes32 role, address account) internal {
         if (!hasRole(role, account)) {
             _roles[role][account] = true;
@@ -136,7 +140,7 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
         }
     }
 
-    /// @dev Revoke the given 'role' to the 'account'
+    /// @dev Revoke the given `role` to the `account`
     function _revokeRole(bytes32 role, address account) private {
         if (hasRole(role, account)) {
             _roles[role][account] = false;
@@ -148,19 +152,14 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     /*                          Internal view function's                          */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Returns true if the contract is paused, and false otherwise.
-     * @return bool representing whether the contract is paused.
-     */
+    /// @dev Check if the contract is paused
     function paused() private view returns (bool) {
         return _paused;
     }
 
-    /**
-     * @notice Check that the calling user have the right role
-     */
+    /// @dev Check that the calling user have the right `role`
     function _checkRole(bytes32 role) private view {
-        address sender = _msgSender();
+        address sender = msg.sender;
         assembly {
             // Kecak (role, _roles.slot)
             mstore(0, role)
@@ -214,5 +213,5 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     /**
      * @notice Authorize the upgrade of this contract
      */
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(FrakRoles.UPGRADER) {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(FrakRoles.UPGRADER) { }
 }

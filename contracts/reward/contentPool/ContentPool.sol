@@ -1,33 +1,26 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {FrakMath} from "../../utils/FrakMath.sol";
-import {FrakRoles} from "../../utils/FrakRoles.sol";
-import {FraktionTransferCallback} from "../../tokens/FraktionTransferCallback.sol";
-import {PushPullReward} from "../../utils/PushPullReward.sol";
-import {FrakAccessControlUpgradeable} from "../../utils/FrakAccessControlUpgradeable.sol";
-import {InvalidAddress, NoReward} from "../../utils/FrakErrors.sol";
-import {EnumerableSet} from "openzeppelin/utils/structs/EnumerableSet.sol";
+import { FraktionId } from "../../libs/FraktionId.sol";
+import { ContentId, ContentIdLib } from "../../libs/ContentId.sol";
+import { FrakRoles } from "../../roles/FrakRoles.sol";
+import { PushPullReward } from "../../utils/PushPullReward.sol";
+import { FrakAccessControlUpgradeable } from "../../roles/FrakAccessControlUpgradeable.sol";
+import { InvalidAddress, NoReward } from "../../utils/FrakErrors.sol";
+import { EnumerableSet } from "openzeppelin/utils/structs/EnumerableSet.sol";
+import { IContentPool } from "./IContentPool.sol";
 
-/**
- * @author  @KONFeature
- * @title   ContentPool
- * @dev     Represent our content pool contract
- * @custom:security-contact contact@frak.id
- */
-contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTransferCallback {
+/// @author @KONFeature
+/// @title ContentPool
+/// @notice Contract in charge of managing the content pool
+/// @custom:security-contact contact@frak.id
+contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullReward {
     // Add the library methods
     using EnumerableSet for EnumerableSet.UintSet;
 
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
-
-    /// @dev The pool state is closed
-    error PoolStateClosed();
-
-    /// @dev When the user already claimed this pool state
-    error PoolStateAlreadyClaimed();
 
     /// @dev 'bytes4(keccak256(bytes("NoReward()")))'
     uint256 private constant _NO_REWARD_SELECTOR = 0x6e992686;
@@ -41,15 +34,6 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
     /* -------------------------------------------------------------------------- */
-
-    /// @dev Event emitted when a reward is added to the pool
-    event PoolRewardAdded(uint256 indexed contentId, uint256 reward);
-
-    /// @dev Event emitted when the pool shares are updated
-    event PoolSharesUpdated(uint256 indexed contentId, uint256 indexed poolId, uint256 totalShares);
-
-    /// @dev Event emitted when participant share are updated
-    event ParticipantShareUpdated(address indexed user, uint256 indexed contentId, uint256 shares);
 
     /// @dev 'keccak256(bytes("PoolRewardAdded(uint256,uint256)"))'
     uint256 private constant _POOL_REWARD_ADDED_EVENT_SELECTOR =
@@ -71,72 +55,22 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     uint256 private constant MAX_REWARD = 100_000 ether;
 
     /* -------------------------------------------------------------------------- */
-    /*                                  Struct's                                  */
-    /* -------------------------------------------------------------------------- */
-
-    /**
-     * @dev Represent a pool reward state
-     */
-    struct RewardState {
-        // First storage slot, remain 31 bytes (if bool encoded inside a single byte)
-        uint128 totalShares; // pos : 0x0 <-> 0x10
-        uint96 currentPoolReward; // pos : 0x10 + 0x0C -> 0x10 <-> 0x1C
-        bool open; // pos : 0x01 + 0x1C -> 0x1C <-> 0x1D ? Or less since multiple value can be packed inside a single slot ?
-    }
-
-    /**
-     * @dev Represent a pool participant
-     */
-    struct Participant {
-        // First storage slot, remain 40 bytes
-        uint120 shares; // Number of shares in the content pool, pos :  0x0 <-> 0x0F
-        uint96 lastStateClaim; // The last state amount claimed, pos : 0x0F + 0x0C -> 0x0F <-> 0x1B
-        // Second storage slot
-        uint256 lastStateIndex; // What was the last state index he claimed in the pool ? -> TODO : 0x20 or Ox1B -> (0x0F + 0x0C)
-    }
-
-    /**
-     * @dev Represent the participant state in a pool
-     * @dev Only used for view function! Heavy object that shouldn't be stored in storage
-     */
-    struct ParticipantInPoolState {
-        // Pool info's
-        uint256 poolId;
-        uint256 totalShares; // The total shares of the pool at the last state
-        uint256 poolState; // The index of the current pool state
-        // Participant info's
-        uint256 shares;
-        uint256 lastStateClaimed; // The last state amount claimed for the given pool
-        uint256 lastStateIndex; // The index of the last state a participant claimed in a pool
-        uint256 lastStateClaimable; // The claimable amount for the participant in the given pool
-    }
-
-    /**
-     * @dev In memory accounter for the balance claimable update post transfer
-     */
-    struct FraktionTransferAccounter {
-        address from;
-        uint256 deltaFrom;
-        address to;
-        uint256 deltaTo;
-    }
-
-    /* -------------------------------------------------------------------------- */
     /*                                   Storage                                  */
     /* -------------------------------------------------------------------------- */
 
     /// @dev The index of the current state index per content
-    /// TODO : This is unused now since we use the array length (more effecient since we perform a first sload on the mapping, and we need to do it anyway)
+    /// TODO : This is unused now since we use the array length (more effecient since we perform a first sload on the
+    /// mapping, and we need to do it anyway)
     mapping(uint256 => uint256) private currentStateIndex;
 
     /// @dev All the different reward states per content id
-    mapping(uint256 => RewardState[]) private rewardStates;
+    mapping(uint256 contentId => RewardState[] states) private rewardStates;
 
     /// @dev Mapping between content id, to address to participant
-    mapping(uint256 => mapping(address => Participant)) private participants;
+    mapping(uint256 contentId => mapping(address user => Participant participant)) private participants;
 
     /// @dev User address to list of content pool he is in
-    mapping(address => EnumerableSet.UintSet) private userContentPools;
+    mapping(address user => EnumerableSet.UintSet contentPoolIds) private userContentPools;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -158,7 +92,10 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /* -------------------------------------------------------------------------- */
 
     /// @dev Add a new `rewardAmount` to the pool for the content `contentId`
-    function addReward(uint256 contentId, uint256 rewardAmount)
+    function addReward(
+        ContentId contentId,
+        uint256 rewardAmount
+    )
         external
         payable
         onlyRole(FrakRoles.REWARDER)
@@ -172,7 +109,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
             }
         }
         // Get the current state
-        RewardState storage currentState = lastContentState(contentId);
+        RewardState storage currentState = lastContentState(ContentId.unwrap(contentId));
         if (!currentState.open) revert PoolStateClosed();
 
         // Increase the reward
@@ -181,11 +118,16 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         }
 
         // Send the event
-        emit PoolRewardAdded(contentId, rewardAmount);
+        emit PoolRewardAdded(ContentId.unwrap(contentId), rewardAmount);
     }
 
     /// @dev Callback from the erc1155 tokens when fraktion are transfered
-    function onFraktionsTransferred(address from, address to, uint256[] memory ids, uint256[] memory amount)
+    function onFraktionsTransferred(
+        address from,
+        address to,
+        FraktionId[] memory ids,
+        uint256[] memory amount
+    )
         external
         payable
         override
@@ -193,7 +135,7 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     {
         // Create our update accounter
         FraktionTransferAccounter memory accounter =
-            FraktionTransferAccounter({from: from, deltaFrom: 0, to: to, deltaTo: 0});
+            FraktionTransferAccounter({ from: from, deltaFrom: 0, to: to, deltaTo: 0 });
 
         if (from != address(0) && to != address(0)) {
             // Handle share transfer between participant, with no update on the total pool rewards
@@ -243,18 +185,24 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /*                          Internal write function's                         */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Update the participants of a pool after fraktion transfer
-     */
-    function updateParticipants(FraktionTransferAccounter memory accounter, uint256 fraktionId, uint256 amountMoved)
+    /// @dev Update the participants of a pool after fraktion transfer
+    /// @dev Will only update the participants of a pool after a fraktion transfer
+    /// @param accounter The accounter to use to update the participants
+    /// @param fraktionId The fraktion id that was transfered
+    /// @param amountMoved The amount of fraktion that was transfered
+    function updateParticipants(
+        FraktionTransferAccounter memory accounter,
+        FraktionId fraktionId,
+        uint256 amountMoved
+    )
         private
     {
         unchecked {
-            // Extract content id and token type from this tx
-            (uint256 contentId, uint256 tokenType) = FrakMath.extractContentIdAndTokenType(fraktionId);
+            // Extract content id and fraktion type from this tx
+            (uint256 contentId, uint256 tokenType) = fraktionId.extractAll();
 
             // Get the initial share value of this token
-            uint256 sharesValue = getSharesForTokenType(tokenType);
+            uint256 sharesValue = getSharesForFraktionType(tokenType);
             if (sharesValue == 0) return; // Jump this iteration if this fraktions doesn't count for any shares
 
             // Get the last state index
@@ -272,7 +220,8 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
             uint256 delta = _computeAllPendingParticipantStates(contentStates, sender, lastContentIndex);
             accounter.deltaFrom += delta;
 
-            // TODO: Find a way to compute the delta from the receiver, taking in account the edge case where the receiver has multiple content pool
+            // TODO: Find a way to compute the delta from the receiver, taking in account the edge case where the
+            // receiver has multiple content pool
             // TODO: In memory hashmap of the shares movement per content id?
             Participant storage receiver = contentParticipants[accounter.to];
 
@@ -285,19 +234,23 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         }
     }
 
-    /**
-     * @dev Update participant and pool after fraktion transfer
-     */
+    /// @dev Update participant and pool after fraktion transfer
+    /// @dev Will update the participants of a pool after a fraktion transfer, and update the pool state
+    /// @param accounter The accounter to use to update the participants
+    /// @param fraktionId The fraktion id that was transfered
+    /// @param amountMoved The amount of fraktion that was transfered
     function updateParticipantAndPool(
         FraktionTransferAccounter memory accounter,
-        uint256 fraktionId,
+        FraktionId fraktionId,
         uint256 amountMoved
-    ) private {
+    )
+        private
+    {
         unchecked {
-            // Extract content id and token type from this tx
-            (uint256 contentId, uint256 tokenType) = FrakMath.extractContentIdAndTokenType(fraktionId);
+            // Extract content id and fraktion type from this tx
+            (uint256 contentId, uint256 tokenType) = fraktionId.extractAll();
             // Get the total shares moved
-            uint256 sharesMoved = getSharesForTokenType(tokenType) * amountMoved;
+            uint256 sharesMoved = getSharesForFraktionType(tokenType) * amountMoved;
             if (sharesMoved == 0) return; // Jump this iteration if this fraktions doesn't count for any shares
 
             // Get the mapping and array concerned by this content (warm up further access)
@@ -371,7 +324,10 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         RewardState[] storage contentStates,
         Participant storage participant,
         uint256 toStateIndex
-    ) internal returns (uint256 claimable) {
+    )
+        internal
+        returns (uint256 claimable)
+    {
         // Replicate our participant to memory
         Participant memory memParticipant = participant;
 
@@ -406,7 +362,9 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
             if (i == memParticipant.lastStateIndex && memParticipant.lastStateClaim > 0) {
                 if (userReward > memParticipant.lastStateClaim) {
                     // If the reward is greater than the last claim, we can deduce it
-                    // @warning: Since we are using the memory participant, it doesn't has been updated with the value on top, so we decrease only the last claim if we are in the case of lastIndextoClaim == lastParticipantIndex
+                    // @warning: Since we are using the memory participant, it doesn't has been updated with the value
+                    // on top, so we decrease only the last claim if we are in the case of lastIndextoClaim ==
+                    // lastParticipantIndex
                     userReward -= memParticipant.lastStateClaim;
                 } else {
                     // Otherwise, the user has already claimed this state, so we can set the reward to 0
@@ -428,7 +386,12 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     }
 
     /// @dev Increase the share the `user` got in a pool of `contentId`by `amount`
-    function _increaseParticipantShare(uint256 contentId, Participant storage participant, address user, uint120 amount)
+    function _increaseParticipantShare(
+        uint256 contentId,
+        Participant storage participant,
+        address user,
+        uint120 amount
+    )
         private
     {
         // Add this pool to the user participating pool if he have 0 shares before
@@ -444,7 +407,12 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     }
 
     /// @dev Decrease the share the `user` got in a pool of `contentId`by `amount`
-    function _decreaseParticipantShare(uint256 contentId, Participant storage participant, address user, uint120 amount)
+    function _decreaseParticipantShare(
+        uint256 contentId,
+        Participant storage participant,
+        address user,
+        uint120 amount
+    )
         private
     {
         // Decrease his share
@@ -523,7 +491,10 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /**
      * @dev Compute the user reward at the given state
      */
-    function computeUserReward(RewardState memory state, Participant memory participant)
+    function computeUserReward(
+        RewardState memory state,
+        Participant memory participant
+    )
         internal
         pure
         returns (uint256 stateReward)
@@ -532,25 +503,26 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
         uint256 totalShares = state.totalShares;
         if (totalShares == 0) return 0;
 
-        // We can safely do an unchecked operation here since the pool reward, participant shares and total shares are all verified before being stored
+        // We can safely do an unchecked operation here since the pool reward, participant shares and total shares are
+        // all verified before being stored
         unchecked {
             stateReward = (state.currentPoolReward * participant.shares) / totalShares;
         }
     }
 
     /**
-     * @dev Get the base reward to the given token type
+     * @dev Get the base reward to the given fraktion type
      * We use a pure function instead of a mapping to economise on storage read,
      * and since this reawrd shouldn't evolve really fast
      */
-    function getSharesForTokenType(uint256 tokenType) private pure returns (uint256 shares) {
-        if (tokenType == FrakMath.TOKEN_TYPE_COMMON_MASK) {
+    function getSharesForFraktionType(uint256 tokenType) private pure returns (uint256 shares) {
+        if (tokenType == ContentIdLib.FRAKTION_TYPE_COMMON) {
             shares = 10;
-        } else if (tokenType == FrakMath.TOKEN_TYPE_PREMIUM_MASK) {
+        } else if (tokenType == ContentIdLib.FRAKTION_TYPE_PREMIUM) {
             shares = 50;
-        } else if (tokenType == FrakMath.TOKEN_TYPE_GOLD_MASK) {
+        } else if (tokenType == ContentIdLib.FRAKTION_TYPE_GOLD) {
             shares = 100;
-        } else if (tokenType == FrakMath.TOKEN_TYPE_DIAMOND_MASK) {
+        } else if (tokenType == ContentIdLib.FRAKTION_TYPE_DIAMOND) {
             shares = 200;
         }
     }
@@ -569,7 +541,10 @@ contract ContentPool is FrakAccessControlUpgradeable, PushPullReward, FraktionTr
     /**
      * @dev Get the current participant state for the given content
      */
-    function getParticipantForContent(uint256 contentId, address user)
+    function getParticipantForContent(
+        uint256 contentId,
+        address user
+    )
         external
         view
         returns (Participant memory participant)

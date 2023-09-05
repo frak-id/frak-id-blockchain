@@ -1,0 +1,56 @@
+name: 🔒️ Security analysis
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: ["main"]
+
+# Cancel previous runs on the same PR
+concurrency:
+  group: ${{ github.ref }}-analysis
+  cancel-in-progress: true
+
+env:
+  FOUNDRY_PROFILE: "ci"
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: "🔨 Install Foundry"
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: "💾 Foundry fork cache"
+        uses: actions/cache@v3
+        with:
+          path: "~/.foundry/cache"
+          key: foundry-${{ hashFiles('foundry.toml') }}
+
+      - name: "💾 Foundry compilation cache"
+        uses: actions/cache@v3
+        with:
+          path: |
+            cache
+            out
+          key: foundry-${{ github.repository_id }}-${{ hashFiles('foundry.toml') }}
+      
+      - name: "🔒️ Run Slither"
+        uses: crytic/slither-action@v0.3.0
+        id: slither
+        with:
+          solc-version: 0.8.21
+          sarif: results.sarif
+          fail-on: none
+          slither-config: 'tools/slither.config.json'
+
+      - name: "📈 Upload SARIF file report"
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ${{ steps.slither.outputs.sarif }}

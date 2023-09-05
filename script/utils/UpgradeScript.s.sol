@@ -3,8 +3,8 @@ pragma solidity 0.8.21;
 
 import "forge-std/console.sol";
 import "forge-std/Script.sol";
-import {UUPSUpgradeable} from "@oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {ERC1967Proxy} from "openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
+import { UUPSUpgradeable } from "@oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { ERC1967Proxy } from "openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
 
 /**
  * @author @KONFeature
@@ -49,9 +49,12 @@ abstract contract UpgradeScript is Script {
             frakTreasuryWallet: 0x7053f61CEA3B7C3b5f0e14de6eEdB01cA1850408,
             swapPool: 0x8a67c75F8C0bF37a06d92938e9C9e841506D37B0
         });
-        // forge verify-contract --chain polygon 0x8a67c75F8C0bF37a06d92938e9C9e841506D37B0 MonoPool  --constructor-args $(cast abi-encode "constructor(address,address,uint256,address,uint256)" 0x6261E4a478C98419EaFa6289509C49058D21Df8c 0x0000000000000000000000000000000000000000 100 0x517ecFa01E2F9A6955d8DD04867613E41309213d 100)
+        // forge verify-contract --chain polygon 0x8a67c75F8C0bF37a06d92938e9C9e841506D37B0 MonoPool  --constructor-args
+        // $(cast abi-encode "constructor(address,address,uint256,address,uint256)"
+        // 0x6261E4a478C98419EaFa6289509C49058D21Df8c 0x0000000000000000000000000000000000000000 100
+        // 0x517ecFa01E2F9A6955d8DD04867613E41309213d 100)
         // Mumbai proxy address
-        contractAddresses[80001] = ContractProxyAddresses({
+        contractAddresses[80_001] = ContractProxyAddresses({
             frakToken: 0xbCeE0E1C02E91EAFaEd69eD2B1DC5199789575df,
             fraktionTokens: 0x00ec5dd47eD5341A43d66F8aA7b6793277d1e29E,
             multiVestingWallet: 0x08F674c3577f759D315336ae5a7ff6ea5bE2c35E,
@@ -104,7 +107,11 @@ abstract contract UpgradeScript is Script {
      * @param name The name of the contract to deploy
      * @return proxyAddress The address of the deployed proxy
      */
-    function _deployProxy(address implementation, bytes memory data, string memory name)
+    function _deployProxy(
+        address implementation,
+        bytes memory data,
+        string memory name
+    )
         internal
         returns (address proxyAddress)
     {

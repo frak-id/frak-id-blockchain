@@ -1,22 +1,20 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {ERC1155Upgradeable} from "@oz-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
-import {FraktionTransferCallback} from "./FraktionTransferCallback.sol";
-import {FrakMath} from "../utils/FrakMath.sol";
-import {FrakRoles} from "../utils/FrakRoles.sol";
-import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
-import {InvalidArray} from "../utils/FrakErrors.sol";
+import { ERC1155Upgradeable } from "@oz-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import { FraktionTransferCallback } from "./FraktionTransferCallback.sol";
+import { ContentId } from "../libs/ContentId.sol";
+import { FraktionId } from "../libs/FraktionId.sol";
+import { ArrayLib } from "../libs/ArrayLib.sol";
+import { FrakRoles } from "../roles/FrakRoles.sol";
+import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
+import { InvalidArray } from "../utils/FrakErrors.sol";
 
-/**
- * @author  @KONFeature
- * @title   FraktionTokens
- * @dev  ERC1155 for the Frak Fraktions tokens, used as ownership proof for a content, or investisment proof
- * @custom:security-contact contact@frak.id
- */
-contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
-    using FrakMath for uint256;
-
+/// @author @KONFeature
+/// @title FraktionTokens
+/// @notice ERC1155 for the Frak Fraktions tokens, used as ownership proof for a content, or investisment proof
+/// @custom:security-contact contact@frak.id
+contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
@@ -64,8 +62,8 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     /*                                   Storage                                  */
     /* -------------------------------------------------------------------------- */
 
-    /// @dev The current content token id
-    uint256 private _currentContentTokenId;
+    /// @dev The current content id
+    uint256 private _currentContentId;
 
     /// @dev The current callback
     FraktionTransferCallback private transferCallback;
@@ -73,10 +71,10 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     /// @dev Id of content to owner of this content
     mapping(uint256 => address) private owners;
 
-    /// @dev Available supply of each tokens (classic, rare, epic and legendary only) by they id
+    /// @dev Available supply of each fraktion (classic, rare, epic and legendary only) by they id
     mapping(uint256 => uint256) private _availableSupplies;
 
-    /// @dev Tell us if that token is supply aware or not
+    /// @dev Tell us if that fraktion is supply aware or not
     mapping(uint256 => bool) private _isSupplyAware;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -86,9 +84,9 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
 
     function initialize(string calldata metadatalUrl) external initializer {
         __ERC1155_init(metadatalUrl);
-        __MintingAccessControlUpgradeable_init();
+        __FrakAccessControlUpgradeable_Minter_init();
         // Set the initial content id
-        _currentContentTokenId = 1;
+        _currentContentId = 1;
     }
 
     /* -------------------------------------------------------------------------- */
@@ -99,12 +97,16 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
      * @dev Mint a new content, return the id of the built content
      * We will store in memory -from 0x0 to 0x40 ->
      */
-    function mintNewContent(address ownerAddress, uint256[] calldata fraktionTypes, uint256[] calldata supplies)
+    function mintNewContent(
+        address ownerAddress,
+        uint256[] calldata fraktionTypes,
+        uint256[] calldata supplies
+    )
         external
         payable
         onlyRole(FrakRoles.MINTER)
         whenNotPaused
-        returns (uint256 id)
+        returns (ContentId id)
     {
         uint256 creatorTokenId;
         assembly {
@@ -114,9 +116,9 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 revert(0x1c, 0x04)
             }
 
-            // Get the next content id and increment the current content token id
-            id := add(sload(_currentContentTokenId.slot), 1)
-            sstore(_currentContentTokenId.slot, id)
+            // Get the next content id and increment the current content id
+            id := add(sload(_currentContentId.slot), 1)
+            sstore(_currentContentId.slot, id)
 
             // Get the shifted id, to ease the fraktion id creation
             let shiftedId := shl(0x04, id)
@@ -127,13 +129,13 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
             // Current iterator offset
             let currentOffset := 0
             // Infinite loop
-            for {} 1 {} {
+            for { } 1 { } {
                 // Get the current id
                 let fraktionType := calldataload(add(fraktionTypes.offset, currentOffset))
 
-                // Ensure the supply update of this token type is allowed
+                // Ensure the supply update of this fraktion type is allowed
                 if or(lt(fraktionType, 3), gt(fraktionType, 6)) {
-                    // If token type lower than 3 -> free or owner
+                    // If fraktion type lower than 3 -> free or owner
                     mstore(0x00, _SUPPLY_UPDATE_NOT_ALLOWED_SELECTOR)
                     revert(0x1c, 0x04)
                 }
@@ -184,7 +186,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     }
 
     /**
-     * @dev Set the supply for the given token id
+     * @dev Set the supply for the given fraktion id
      */
     function setSupply(uint256 id, uint256 supply) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
         assembly {
@@ -193,10 +195,10 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
                 mstore(0x00, _INVALID_ARRAY_SELECTOR)
                 revert(0x1c, 0x04)
             }
-            // Ensure the supply update of this token type is allowed
+            // Ensure the supply update of this fraktion type is allowed
             let fraktionType := and(id, 0xF)
             if or(lt(fraktionType, 3), gt(fraktionType, 6)) {
-                // If token type lower than 3 -> free or owner, if greater than 6 -> not a content
+                // If fraktion type lower than 3 -> free or owner, if greater than 6 -> not a content
                 mstore(0x00, _SUPPLY_UPDATE_NOT_ALLOWED_SELECTOR)
                 revert(0x1c, 0x04)
             }
@@ -229,12 +231,12 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         transferCallback = FraktionTransferCallback(callbackAddr);
     }
 
-    /// @dev Mint a new fraction of a nft
+    /// @dev Mint a new fraktion of a nft
     function mint(address to, uint256 id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
         _mint(to, id, amount, "");
     }
 
-    /// @dev Burn a fraction of a nft
+    /// @dev Burn a fraktion of a nft
     function burn(uint256 id, uint256 amount) external payable whenNotPaused {
         _burn(msg.sender, id, amount);
     }
@@ -253,14 +255,17 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory
-    ) internal override {
+    )
+        internal
+        override
+    {
         assembly {
             // Base offset to access array element's
             let currOffset := 0x20
             let offsetEnd := add(currOffset, shl(5, mload(ids)))
 
             // Infinite loop
-            for {} 1 {} {
+            for { } 1 { } {
                 // Get the id and amount
                 let id := mload(add(ids, currOffset))
                 let amount := mload(add(amounts, currOffset))
@@ -308,7 +313,11 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory
-    ) internal override whenNotPaused {
+    )
+        internal
+        override
+        whenNotPaused
+    {
         assembly {
             // Base offset to access array element's
             let currOffset := 0x20
@@ -318,7 +327,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
             let hasOneFraktionForCallback := false
 
             // Infinite loop
-            for {} 1 {} {
+            for { } 1 { } {
                 // Get the id and amount
                 let id := mload(add(ids, currOffset))
 
@@ -352,7 +361,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
         }
 
         // Call our callback
-        transferCallback.onFraktionsTransferred(from, to, ids, amounts);
+        transferCallback.onFraktionsTransferred(from, to, ArrayLib.asFraktionIds(ids), amounts);
     }
 
     /* -------------------------------------------------------------------------- */
@@ -362,7 +371,10 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     /**
      * @dev Batch balance of for single address
      */
-    function balanceOfIdsBatch(address account, uint256[] calldata ids)
+    function balanceOfIdsBatch(
+        address account,
+        FraktionId[] calldata ids
+    )
         public
         view
         virtual
@@ -380,7 +392,7 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
             // Current balance array offset
             let balanceOffset := add(batchBalances, 0x20)
             // Infinite loop
-            for {} 1 {} {
+            for { } 1 { } {
                 // Get the slot for the current id
                 mstore(0, calldataload(i))
                 mstore(0x20, 0xcb) // `_balances.slot` on the OZ contract
@@ -402,12 +414,12 @@ contract FraktionTokens is MintingAccessControlUpgradeable, ERC1155Upgradeable {
     }
 
     /// @dev Find the owner of the given 'contentId'
-    function ownerOf(uint256 contentId) external view returns (address) {
-        return owners[contentId];
+    function ownerOf(ContentId contentId) external view returns (address) {
+        return owners[ContentId.unwrap(contentId)];
     }
 
     /// @dev Find the current supply of the given 'tokenId'
-    function supplyOf(uint256 tokenId) external view returns (uint256) {
-        return _availableSupplies[tokenId];
+    function supplyOf(FraktionId tokenId) external view returns (uint256) {
+        return _availableSupplies[FraktionId.unwrap(tokenId)];
     }
 }

@@ -1,0 +1,4 @@
+{
+  "detectors_to_exclude": "naming-convention,reentrancy-events,solc-version,assembly,similar-names",
+  "filter_paths": "(lib/|test)"
+}

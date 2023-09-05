@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {IFrakToken} from "../tokens/IFrakToken.sol";
-import {MintingAccessControlUpgradeable} from "../utils/MintingAccessControlUpgradeable.sol";
-import {FrakRoles} from "../utils/FrakRoles.sol";
-import {InvalidAddress, RewardTooLarge, NoReward} from "../utils/FrakErrors.sol";
-import {Multicallable} from "solady/utils/Multicallable.sol";
+import { IFrakToken } from "../tokens/IFrakToken.sol";
+import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
+import { FrakRoles } from "../roles/FrakRoles.sol";
+import { InvalidAddress, RewardTooLarge, NoReward } from "../utils/FrakErrors.sol";
+import { Multicallable } from "solady/utils/Multicallable.sol";
 
 /// Error thrown when the contract havn't enough found to perform the withdraw
 error NotEnoughTreasury();
 
-contract FrakTreasuryWallet is MintingAccessControlUpgradeable, Multicallable {
+/// @author @KONFeature
+/// @title FrakTreasuryWallet
+/// @notice This contract is used to store some frk token for the treasury
+/// @custom:security-contact contact@frak.id
+contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
@@ -72,14 +76,12 @@ contract FrakTreasuryWallet is MintingAccessControlUpgradeable, Multicallable {
     function initialize(address frkTokenAddr) external initializer {
         if (frkTokenAddr == address(0)) revert InvalidAddress();
 
-        __MintingAccessControlUpgradeable_init();
+        __FrakAccessControlUpgradeable_Minter_init();
 
         frakToken = IFrakToken(frkTokenAddr);
     }
 
-    /**
-     * @dev Transfer the given number of token to the user
-     */
+    /// @dev Transfer `amount` of token to `target`
     function transfer(address target, uint256 amount) external whenNotPaused onlyRole(FrakRoles.MINTER) {
         assembly {
             // Ensure the param are valid and not too much
@@ -111,10 +113,11 @@ contract FrakTreasuryWallet is MintingAccessControlUpgradeable, Multicallable {
         frakToken.transfer(target, amount);
     }
 
-    /**
-     * @dev Transfer the given number of token to the user
-     */
-    function transferBatch(address[] calldata targets, uint256[] calldata amounts)
+    /// @dev Transfer all `amounts` to each `targets`
+    function transferBatch(
+        address[] calldata targets,
+        uint256[] calldata amounts
+    )
         external
         whenNotPaused
         onlyRole(FrakRoles.MINTER)
@@ -175,9 +178,7 @@ contract FrakTreasuryWallet is MintingAccessControlUpgradeable, Multicallable {
         }
     }
 
-    /**
-     * @dev Mint some fresh token to this contract, and return the number of token minted
-     */
+    /// @dev Mint some fresh token to this contract, and return the number of token minted
     function _mintNewToken() private returns (uint256 amountToMint) {
         if (totalFrakMinted + FRK_MINTING_AMOUNT < FRK_MINTING_CAP) {
             // In the case we have enough room, mint 1m token directly

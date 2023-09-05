@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {PRBTest} from "@prb/test/PRBTest.sol";
-import {StdUtils} from "@forge-std/StdUtils.sol";
-import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
-import {NotAuthorized} from "@frak/utils/FrakErrors.sol";
-import {UUPSTestHelper} from "../UUPSTestHelper.sol";
+import { PRBTest } from "@prb/test/PRBTest.sol";
+import { StdUtils } from "@forge-std/StdUtils.sol";
+import { FrakToken } from "@frak/tokens/FrakToken.sol";
+import { IFrakToken } from "@frak/tokens/FrakToken.sol";
+import { NotAuthorized } from "@frak/utils/FrakErrors.sol";
+import { UUPSTestHelper } from "../UUPSTestHelper.sol";
 
 /// Testing the frak l2 token
 contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
@@ -13,7 +14,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
 
     function setUp() public {
         // Deploy our contract via proxy and set the proxy address
-        bytes memory initData = abi.encodeCall(FrakToken.initialize, (address(this)));
+        bytes memory initData = abi.encodeCall(FrakToken.initialize, ());
         address proxyAddress = deployContract(address(new FrakToken()), initData);
         frakToken = FrakToken(proxyAddress);
     }
@@ -36,7 +37,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
      */
     function test_fail_initialize_CantInitTwice() public {
         vm.expectRevert("Initializable: contract is already initialized");
-        frakToken.initialize(address(0));
+        frakToken.initialize();
     }
 
     /*
@@ -209,7 +210,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
     }
 
     function test_fail_mint_TooLarge() public prankExecAsDeployer {
-        vm.expectRevert(FrakToken.CapExceed.selector);
+        vm.expectRevert(IFrakToken.CapExceed.selector);
         frakToken.mint(address(1), 3_000_000_001 ether);
     }
 
@@ -220,7 +221,8 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
     }
 
     /*
-     * ===== TEST : permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) =====
+    * ===== TEST : permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32
+    s) =====
      */
 
     bytes32 constant PERMIT_TYPEHASH =
@@ -261,7 +263,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
             )
         );
 
-        vm.expectRevert(FrakToken.InvalidSigner.selector);
+        vm.expectRevert(IFrakToken.InvalidSigner.selector);
         frakToken.permit(owner, address(2), 1 ether, block.timestamp, v, r, s);
     }
 
@@ -299,7 +301,7 @@ contract FrkTokenL2Test is UUPSTestHelper, StdUtils {
             )
         );
 
-        vm.expectRevert(FrakToken.PermitDelayExpired.selector);
+        vm.expectRevert(IFrakToken.PermitDelayExpired.selector);
         frakToken.permit(owner, address(1), 1 ether, block.timestamp - 1, v, r, s);
     }
 }

@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {Initializable} from "@oz-upgradeable/proxy/utils/Initializable.sol";
-import {IERC20Upgradeable} from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import {NoReward, InvalidAddress, RewardTooLarge} from "./FrakErrors.sol";
+import { Initializable } from "@oz-upgradeable/proxy/utils/Initializable.sol";
+import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import { NoReward, InvalidAddress, RewardTooLarge } from "./FrakErrors.sol";
+import { IPushPullReward } from "./IPushPullReward.sol";
 
-/**
- * @dev Abstraction for contract that give a push / pull reward, address based
- */
+/// @author @KONFeature
+/// @title PushPullReward
+/// @notice Abstract contract for managing the reward of a token
 /// @custom:security-contact contact@frak.id
-abstract contract PushPullReward is Initializable {
+abstract contract PushPullReward is IPushPullReward, Initializable {
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
@@ -26,12 +27,6 @@ abstract contract PushPullReward is Initializable {
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
     /* -------------------------------------------------------------------------- */
-
-    /// @dev Event emitted when a reward is added
-    event RewardAdded(address indexed user, uint256 amount);
-
-    /// @dev Event emitted when a user withdraw his pending reward
-    event RewardWithdrawed(address indexed user, uint256 amount, uint256 fees);
 
     /// @dev 'keccak256(bytes("RewardAdded(address,uint256)"))'
     uint256 private constant _REWARD_ADDED_EVENT_SELECTOR =
@@ -107,7 +102,8 @@ abstract contract PushPullReward is Initializable {
     }
 
     /**
-     * @dev Add founds for the given user, without checking the operation (gas gain, usefull when founds are checked before)
+     * @dev Add founds for the given user, without checking the operation (gas gain, usefull when founds are checked
+     * before)
      */
     function _addFoundsUnchecked(address user, uint256 founds) internal {
         assembly {
@@ -185,7 +181,8 @@ abstract contract PushPullReward is Initializable {
 
     /**
      * @dev Core logic of the withdraw method, but with fee this time
-     * @notice If that's the fee recipient performing the call, withdraw without fee's (otherwise, infinite loop required to get all the frk foundation fee's)
+     * @notice If that's the fee recipient performing the call, withdraw without fee's (otherwise, infinite loop
+     * required to get all the frk foundation fee's)
      */
     function _withdrawWithFee(address user, uint256 feePercent, address feeRecipient) internal {
         uint256 feesAmount;

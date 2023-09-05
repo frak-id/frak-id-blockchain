@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {FrakToken} from "@frak/tokens/FrakTokenL2.sol";
-import {FrakMath} from "@frak/utils/FrakMath.sol";
+import { FrakToken } from "@frak/tokens/FrakToken.sol";
+import { ArrayLib } from "@frak/libs/ArrayLib.sol";
 import {
     MultiVestingWallets, NotEnoughFounds, InvalidDuration, InvalidDate
 } from "@frak/wallets/MultiVestingWallets.sol";
-import {FrkTokenTestHelper} from "../FrkTokenTestHelper.sol";
+import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
 import {
     NotAuthorized,
     InvalidArray,
@@ -18,8 +18,8 @@ import {
 
 /// Testing the frak l2 token
 contract MultiVestingWalletsTest is FrkTokenTestHelper {
-    using FrakMath for address;
-    using FrakMath for uint256;
+    using ArrayLib for address;
+    using ArrayLib for uint256;
 
     address multiVestingAddr;
     MultiVestingWallets vestingWallets;

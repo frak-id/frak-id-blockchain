@@ -2,15 +2,17 @@
 pragma solidity 0.8.21;
 
 import "forge-std/console.sol";
-import {ContentPool} from "@frak/reward/pool/ContentPool.sol";
-import {FrakMath} from "@frak/utils/FrakMath.sol";
-import {FrakRoles} from "@frak/utils/FrakRoles.sol";
-import {NotAuthorized, InvalidAddress, ContractPaused, NoReward} from "@frak/utils/FrakErrors.sol";
-import {FrkTokenTestHelper} from "../../FrkTokenTestHelper.sol";
+import { ContentPool } from "@frak/reward/contentPool/ContentPool.sol";
+import { ArrayLib } from "@frak/libs/ArrayLib.sol";
+import { ContentId } from "@frak/libs/ContentId.sol";
+import { FraktionId } from "@frak/libs/FraktionId.sol";
+import { FrakRoles } from "@frak/roles/FrakRoles.sol";
+import { NotAuthorized, InvalidAddress, ContractPaused, NoReward } from "@frak/utils/FrakErrors.sol";
+import { FrkTokenTestHelper } from "../../FrkTokenTestHelper.sol";
 
 /// Testing the content pool
 contract ContentPoolTest is FrkTokenTestHelper {
-    using FrakMath for uint256;
+    using ArrayLib for uint256;
 
     ContentPool contentPool;
 
@@ -23,7 +25,7 @@ contract ContentPoolTest is FrkTokenTestHelper {
         contentPool = ContentPool(contentPoolProxyAddr);
 
         prankDeployer();
-        frakToken.mint(address(contentPool), 1_000 ether);
+        frakToken.mint(address(contentPool), 1000 ether);
 
         prankDeployer();
         contentPool.grantRole(FrakRoles.REWARDER, deployer);
@@ -43,36 +45,39 @@ contract ContentPoolTest is FrkTokenTestHelper {
      * ===== TEST : addReward(uint256 contentId, uint256 rewardAmount) =====
      */
     function test_addReward() public prankExecAsDeployer {
-        contentPool.addReward(1, 1 ether);
+        contentPool.addReward(ContentId.wrap(1), 1 ether);
     }
 
     function test_fail_addReward_NotAuthorized() public {
         vm.expectRevert(NotAuthorized.selector);
-        contentPool.addReward(1, 1 ether);
+        contentPool.addReward(ContentId.wrap(1), 1 ether);
     }
 
     function test_fail_addReward_ContractPaused() public prankExecAsDeployer {
         contentPool.pause();
 
         vm.expectRevert(ContractPaused.selector);
-        contentPool.addReward(1, 1 ether);
+        contentPool.addReward(ContentId.wrap(1), 1 ether);
     }
 
     function test_fail_addReward_NoReward() public prankExecAsDeployer {
         vm.expectRevert(NoReward.selector);
-        contentPool.addReward(1, 0);
+        contentPool.addReward(ContentId.wrap(1), 0);
 
         vm.expectRevert(NoReward.selector);
-        contentPool.addReward(1, 100_001 ether);
+        contentPool.addReward(ContentId.wrap(1), 100_001 ether);
     }
 
     function test_fullProcess() public prankExecAsDeployer {
         // Add some initial reward
-        contentPool.addReward(1, 1 ether);
+        contentPool.addReward(ContentId.wrap(1), 1 ether);
 
         // Update a user shares
         contentPool.onFraktionsTransferred(
-            address(0), address(1), uint256(1).buildPremiumNftId().asSingletonArray(), uint256(1).asSingletonArray()
+            address(0),
+            address(1),
+            ContentId.wrap(1).premiumFraktionId().asSingletonArray(),
+            uint256(1).asSingletonArray()
         );
 
         // Compute it's reward
@@ -84,11 +89,11 @@ contract ContentPoolTest is FrkTokenTestHelper {
         // Add some initial reward
         console.log("");
         console.log("- Add some initial reward");
-        contentPool.addReward(1, 2 ether);
+        contentPool.addReward(ContentId.wrap(1), 2 ether);
 
-        uint256[] memory fraktionIds = new uint256[](2);
-        fraktionIds[0] = uint256(1).buildPremiumNftId();
-        fraktionIds[1] = uint256(1).buildGoldNftId();
+        FraktionId[] memory fraktionIds = new FraktionId[](2);
+        fraktionIds[0] = ContentId.wrap(1).premiumFraktionId();
+        fraktionIds[1] = ContentId.wrap(1).goldFraktionId();
         uint256[] memory amounts = new uint256[](2);
         amounts[0] = 2;
         amounts[1] = 1;
@@ -101,7 +106,7 @@ contract ContentPoolTest is FrkTokenTestHelper {
         // Add a few other rewards
         console.log("");
         console.log("- Add new reward");
-        contentPool.addReward(1, 10 ether);
+        contentPool.addReward(ContentId.wrap(1), 10 ether);
 
         // Compute it's reward
         console.log("");
@@ -124,7 +129,7 @@ contract ContentPoolTest is FrkTokenTestHelper {
         assertEq(contentPool.getAvailableFounds(address(2)), 0);
 
         // Add a few other rewards
-        contentPool.addReward(1, 20 ether);
+        contentPool.addReward(ContentId.wrap(1), 20 ether);
 
         console.log("");
         console.log("- Compute user 2");
@@ -134,12 +139,12 @@ contract ContentPoolTest is FrkTokenTestHelper {
 
         // Mint a few more fraktion to user 3
         contentPool.onFraktionsTransferred(address(0), address(3), fraktionIds, amounts);
-        contentPool.addReward(1, 20 ether);
+        contentPool.addReward(ContentId.wrap(1), 20 ether);
 
         // Mint a few more fraktion to user 3
         contentPool.onFraktionsTransferred(address(0), address(4), fraktionIds, amounts);
         contentPool.onFraktionsTransferred(address(0), address(5), fraktionIds, amounts);
-        contentPool.addReward(1, 20 ether);
+        contentPool.addReward(ContentId.wrap(1), 20 ether);
 
         console.log("");
         console.log("- Compute user 2");
@@ -149,7 +154,7 @@ contract ContentPoolTest is FrkTokenTestHelper {
         // Mint a few more fraktion to user 3
         contentPool.onFraktionsTransferred(address(4), address(0), fraktionIds, amounts);
         contentPool.onFraktionsTransferred(address(5), address(0), fraktionIds, amounts);
-        contentPool.addReward(1, 20 ether);
+        contentPool.addReward(ContentId.wrap(1), 20 ether);
 
         contentPool.computeAllPoolsBalance(address(2));
         assertEq(contentPool.getAvailableFounds(address(2)), 45 ether);

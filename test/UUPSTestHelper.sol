@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import {ERC1967Proxy} from "openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
-import {PRBTest} from "@prb/test/PRBTest.sol";
+import { ERC1967Proxy } from "openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
+import { PRBTest } from "@prb/test/PRBTest.sol";
 
 /// Testing the frak l2 token
 contract UUPSTestHelper is PRBTest {

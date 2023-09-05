@@ -2,8 +2,9 @@
 pragma solidity 0.8.21;
 
 import "forge-std/Script.sol";
-import {UpgradeScript} from "../utils/UpgradeScript.s.sol";
-import {Rewarder} from "@frak/reward/Rewarder.sol";
+import { UpgradeScript } from "../utils/UpgradeScript.s.sol";
+import { Rewarder } from "@frak/reward/Rewarder.sol";
+import { ContentId } from "@frak/libs/ContentId.sol";
 
 contract FakeRewardScript is UpgradeScript {
     function run() external {
@@ -16,8 +17,8 @@ contract FakeRewardScript is UpgradeScript {
 
     /// @dev Fake some reward for a user
     function _fakeSomeReward(Rewarder rewarder, address user) internal deployerBroadcast {
-        uint256[] memory contentIds = new uint256[](1);
-        contentIds[0] = 3;
+        ContentId[] memory contentIds = new ContentId[](1);
+        contentIds[0] = ContentId.wrap(3);
 
         uint256[] memory listenCounts = new uint256[](1);
         listenCounts[0] = 300;
