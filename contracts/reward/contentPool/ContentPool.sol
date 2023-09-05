@@ -157,7 +157,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     }
 
     /// @dev Compute all the pools balance of the user
-    function computeAllPoolsBalance(address user) external payable onlyRole(FrakRoles.ADMIN) {
+    function computeAllPoolsBalance(address user) external {
         _computeAndSaveAllForUser(user);
     }
 
@@ -168,7 +168,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     }
 
     /// @dev Withdraw the pending founds for a `user`
-    function withdrawFounds(address user) external virtual override onlyRole(FrakRoles.ADMIN) {
+    function withdrawFounds(address user) external virtual override {
         _computeAndSaveAllForUser(user);
         _tryWithdraw(user);
     }

@@ -311,7 +311,7 @@ contract Rewarder is
     }
 
     /// @dev Withdraw the pending founds of `user`
-    function withdrawFounds(address user) external override onlyRole(FrakRoles.ADMIN) {
+    function withdrawFounds(address user) external override {
         _withdrawWithFee(user, FEE_PERCENT, foundationWallet);
     }
 

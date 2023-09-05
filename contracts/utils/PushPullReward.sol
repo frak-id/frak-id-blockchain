@@ -44,7 +44,7 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
     IERC20Upgradeable internal token;
 
     /// @dev The pending reward for the given address
-    mapping(address => uint256) internal _pendingRewards;
+    mapping(address user => uint256 rewards) internal _pendingRewards;
 
     /**
      * Init of this contract

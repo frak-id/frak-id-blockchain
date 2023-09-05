@@ -93,7 +93,7 @@ interface IContentPool is FraktionTransferCallback {
     function addReward(ContentId contentId, uint256 rewardAmount) external payable;
 
     /// @dev Compute all the pools balance of the user
-    function computeAllPoolsBalance(address user) external payable;
+    function computeAllPoolsBalance(address user) external;
 
     /* -------------------------------------------------------------------------- */
     /*                          External view function's                          */

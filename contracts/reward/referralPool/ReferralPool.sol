@@ -112,7 +112,7 @@ contract ReferralPool is IReferralPool, FrakAccessControlUpgradeable, PushPullRe
         _withdraw(msg.sender);
     }
 
-    function withdrawFounds(address user) external virtual override onlyRole(FrakRoles.ADMIN) {
+    function withdrawFounds(address user) external virtual override {
         _withdraw(user);
     }
 }
