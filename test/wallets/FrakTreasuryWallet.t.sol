@@ -78,13 +78,6 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {
         treasuryWallet.transfer(address(1), 1 ether);
     }
 
-    function test_fail_transfer_ContractPaused() public prankExecAsDeployer {
-        treasuryWallet.pause();
-
-        vm.expectRevert(ContractPaused.selector);
-        treasuryWallet.transfer(address(1), 1 ether);
-    }
-
     function test_fail_transfer_InvalidAddress() public prankExecAsDeployer {
         vm.expectRevert(InvalidAddress.selector);
         treasuryWallet.transfer(address(0), 1 ether);
@@ -147,14 +140,6 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {
     function test_fail_transferBatch_NotMinter() public {
         vm.expectRevert(NotAuthorized.selector);
         (address[] memory addrs, uint256[] memory amounts) = baseBatchParam(1 ether);
-        treasuryWallet.transferBatch(addrs, amounts);
-    }
-
-    function test_fail_transferBatch_ContractPaused() public prankExecAsDeployer {
-        treasuryWallet.pause();
-
-        (address[] memory addrs, uint256[] memory amounts) = baseBatchParam(1 ether);
-        vm.expectRevert(ContractPaused.selector);
         treasuryWallet.transferBatch(addrs, amounts);
     }
 

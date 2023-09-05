@@ -131,7 +131,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     /**
      * @notice Free the reserve up
      */
-    function transferAvailableReserve(address receiver) external whenNotPaused onlyRole(FrakRoles.ADMIN) {
+    function transferAvailableReserve(address receiver) external onlyRole(FrakRoles.ADMIN) {
         uint256 available = availableReserve();
         if (available == 0) revert NoReward();
         token.safeTransfer(receiver, available);
@@ -147,7 +147,6 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
         uint48 startDate
     )
         external
-        whenNotPaused
         onlyRole(FrakRoles.VESTING_MANAGER)
     {
         _requireVestInputs(duration, startDate);
@@ -165,7 +164,6 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
         uint48 startDate
     )
         external
-        whenNotPaused
         onlyRole(FrakRoles.VESTING_MANAGER)
     {
         if (beneficiaries.length == 0 || beneficiaries.length != amounts.length) {
@@ -274,7 +272,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     /**
      * @dev Release the given vesting
      */
-    function _release(Vesting storage vesting) internal whenNotPaused returns (uint256 released) {
+    function _release(Vesting storage vesting) internal returns (uint256 released) {
         released = _doRelease(vesting);
         _checkAmount(released);
     }
@@ -282,7 +280,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     /**
      * @dev Release all the vestings from the given beneficiary
      */
-    function _releaseAll(address beneficiary) internal whenNotPaused returns (uint256 released) {
+    function _releaseAll(address beneficiary) internal returns (uint256 released) {
         EnumerableSet.UintSet storage indexes = owned[beneficiary];
 
         for (uint256 index; index < indexes.length();) {

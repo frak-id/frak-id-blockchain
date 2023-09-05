@@ -48,12 +48,6 @@ contract FraktionTokensTest is UUPSTestHelper, StdUtils {
         assertEq(fraktionTokens.balanceOf(address(1), FraktionId.unwrap(nftId)), 1);
     }
 
-    function test_fail_mintNewContent_ContractPaused() public prankExecAsDeployer {
-        fraktionTokens.pause();
-        vm.expectRevert(ContractPaused.selector);
-        fraktionTokens.mintNewContent(address(1), sampleArray, sampleArray);
-    }
-
     function test_fail_mintNewContent_NotAuthorized() public {
         vm.expectRevert(NotAuthorized.selector);
         fraktionTokens.mintNewContent(address(1), sampleArray, sampleArray);
@@ -70,12 +64,6 @@ contract FraktionTokensTest is UUPSTestHelper, StdUtils {
     function test_mint() public prankExecAsDeployer {
         fraktionTokens.mint(address(1), 1312, 1);
         assertEq(fraktionTokens.balanceOf(address(1), 1312), 1);
-    }
-
-    function test_fail_mint_ContractPaused() public prankExecAsDeployer {
-        fraktionTokens.pause();
-        vm.expectRevert(ContractPaused.selector);
-        fraktionTokens.mint(address(1), 1312, 1);
     }
 
     function test_fail_mint_NotAuthorized() public {

@@ -70,12 +70,6 @@ contract MinterTest is FrkTokenTestHelper {
         minter.addContent(address(1), 1, 1, 1, 1);
     }
 
-    function test_fail_addContent_ContractPaused() public prankExecAsDeployer {
-        minter.pause();
-        vm.expectRevert(ContractPaused.selector);
-        minter.addContent(address(1), 1, 1, 1, 1);
-    }
-
     function test_fail_addContent_NotAuthorized() public {
         vm.expectRevert(NotAuthorized.selector);
         minter.addContent(address(1), 1, 1, 1, 1);
@@ -159,31 +153,6 @@ contract MinterTest is FrkTokenTestHelper {
         // Ensure the supply is good
         assertEq(fraktionTokens.supplyOf(fraktionCommonId), 9);
         assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(fraktionCommonId)), 1);
-    }
-
-    function test_fail_mintFraktionForUser_ContractPaused() public {
-        uint256 privateKey = 0xACAB;
-        address user = vm.addr(privateKey);
-        // Add an initial content
-        prankDeployer();
-        ContentId contentId = minter.addContent(address(1), 10, 1, 1, 1);
-        // Mint some token to our user
-        prankDeployer();
-        frakToken.mint(user, 500 ether);
-
-        // Get the cost of the buy process
-        FraktionId fraktionCommonId = contentId.commonFraktionId();
-        uint256 cost = minter.getCostBadge(fraktionCommonId);
-
-        // Sign the tx for the user
-        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
-
-        // Launch the buy prcess
-        prankDeployer();
-        minter.pause();
-        vm.expectRevert(ContractPaused.selector);
-        prankDeployer();
-        minter.mintFraktionForUser(fraktionCommonId, user, block.timestamp, v, r, s);
     }
 
     function test_fail_mintFraktionForUser_NotAuthorized() public {
@@ -314,31 +283,6 @@ contract MinterTest is FrkTokenTestHelper {
         assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(fraktionCommonId)), 1);
     }
 
-    function test_fail_mintFraktion_ContractPaused() public {
-        uint256 privateKey = 0xACAB;
-        address user = vm.addr(privateKey);
-        // Add an initial content
-        prankDeployer();
-        ContentId contentId = minter.addContent(address(1), 10, 1, 1, 1);
-        // Mint some token to our user
-        prankDeployer();
-        frakToken.mint(user, 500 ether);
-
-        // Get the cost of the buy process
-        FraktionId fraktionCommonId = contentId.commonFraktionId();
-        uint256 cost = minter.getCostBadge(fraktionCommonId);
-
-        // Sign the tx for the user
-        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
-
-        // Launch the buy prcess
-        prankDeployer();
-        minter.pause();
-        vm.expectRevert(ContractPaused.selector);
-        vm.prank(user);
-        minter.mintFraktion(fraktionCommonId, block.timestamp, v, r, s);
-    }
-
     function test_fail_mintFraktion_TooManyFraktion() public {
         uint256 privateKey = 0xACAB;
         address user = vm.addr(privateKey);
@@ -381,12 +325,6 @@ contract MinterTest is FrkTokenTestHelper {
         minter.mintFreeFraktionForUser(contentId.freeFraktionId(), address(1));
     }
 
-    function test_fail_mintFreeFraktionForUser_ContractPaused() public prankExecAsDeployer {
-        minter.pause();
-        vm.expectRevert(ContractPaused.selector);
-        minter.mintFreeFraktionForUser(FraktionId.wrap(1), address(1));
-    }
-
     function test_fail_mintFreeFraktionForUser_NotAuthorized() public {
         vm.expectRevert(NotAuthorized.selector);
         minter.mintFreeFraktionForUser(FraktionId.wrap(1), address(1));
@@ -415,12 +353,6 @@ contract MinterTest is FrkTokenTestHelper {
         ContentId contentId = minter.addContent(address(1), 1, 1, 1, 0);
         // Increase it's diamond supply
         minter.increaseSupply(contentId.diamondFraktionId(), 1);
-    }
-
-    function test_fail_increaseSupply_ContractPaused() public prankExecAsDeployer {
-        minter.pause();
-        vm.expectRevert(ContractPaused.selector);
-        minter.increaseSupply(FraktionId.wrap(1), 1);
     }
 
     function test_fail_increaseSupply_NotAuthorized() public {

@@ -90,15 +90,6 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
         vestingWallets.transferAvailableReserve(address(1));
     }
 
-    function test_fail_transferAvailableReserve_ContractPaused() public withFrkToken(multiVestingAddr) {
-        prankDeployer();
-        vestingWallets.pause();
-
-        // Ask to transfer the available reserve
-        vm.expectRevert(ContractPaused.selector);
-        vestingWallets.transferAvailableReserve(address(1));
-    }
-
     function test_fail_TransferAvailableReserve_NoReserve() public {
         // Ask to transfer the available reserve
         vm.expectRevert(NoReward.selector);
@@ -125,13 +116,7 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
         vm.expectRevert(NotAuthorized.selector);
         vestingWallets.createVest(address(1), 10, 10, uint48(block.timestamp + 1));
     }
-
-    function test_fail_createVest_ContractPaused() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
-        vestingWallets.pause();
-        vm.expectRevert(ContractPaused.selector);
-        vestingWallets.createVest(address(1), 10, 10, uint48(block.timestamp + 1));
-    }
-
+    
     function test_fail_createVest_InvalidDuration() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
         vm.expectRevert(InvalidDuration.selector);
         vestingWallets.createVest(address(1), 10, 0, uint48(block.timestamp + 1));
@@ -186,15 +171,6 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
 
     function test_fail_createVestBatch_NotManager() public withFrkToken(multiVestingAddr) {
         vm.expectRevert(NotAuthorized.selector);
-        vestingWallets.createVestBatch(
-            address(1).asSingletonArray(), uint256(10).asSingletonArray(), 10, uint48(block.timestamp + 1)
-        );
-    }
-
-    function test_fail_createVestBatch_ContractPaused() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
-        vestingWallets.pause();
-
-        vm.expectRevert(ContractPaused.selector);
         vestingWallets.createVestBatch(
             address(1).asSingletonArray(), uint256(10).asSingletonArray(), 10, uint48(block.timestamp + 1)
         );

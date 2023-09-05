@@ -99,7 +99,6 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
         external
         payable
         onlyRole(FrakRoles.REWARDER)
-        whenNotPaused
     {
         // Ensure reward is specified
         assembly ("memory-safe") {
@@ -165,18 +164,18 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     }
 
     /// @dev Compute all the pools balance of the user
-    function computeAllPoolsBalance(address user) external payable onlyRole(FrakRoles.ADMIN) whenNotPaused {
+    function computeAllPoolsBalance(address user) external payable onlyRole(FrakRoles.ADMIN) {
         _computeAndSaveAllForUser(user);
     }
 
     /// @dev Withdraw the pending founds for the current caller
-    function withdrawFounds() external virtual override whenNotPaused {
+    function withdrawFounds() external virtual override {
         _computeAndSaveAllForUser(msg.sender);
         _tryWithdraw(msg.sender);
     }
 
     /// @dev Withdraw the pending founds for a `user`
-    function withdrawFounds(address user) external virtual override onlyRole(FrakRoles.ADMIN) whenNotPaused {
+    function withdrawFounds(address user) external virtual override onlyRole(FrakRoles.ADMIN) {
         _computeAndSaveAllForUser(user);
         _tryWithdraw(user);
     }

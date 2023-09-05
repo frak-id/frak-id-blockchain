@@ -124,7 +124,6 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         payable
         override
         onlyRole(FrakRoles.MINTER)
-        whenNotPaused
         returns (ContentId contentId)
     {
         assembly {
@@ -196,7 +195,6 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         external
         payable
         onlyRole(FrakRoles.MINTER)
-        whenNotPaused
     {
         _mintFraktionForUser(id, to, deadline, v, r, s);
     }
@@ -220,7 +218,6 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
     )
         external
         payable
-        whenNotPaused
     {
         _mintFraktionForUser(id, msg.sender, deadline, v, r, s);
     }
@@ -240,7 +237,6 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         payable
         override
         onlyRole(FrakRoles.MINTER)
-        whenNotPaused
     {
         _mintFreeFraktionForUser(id, to);
     }
@@ -251,7 +247,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      * only performed when contract not paused and by the right person
      * @param   id  Id of the free fraktion
      */
-    function mintFreeFraktion(FraktionId id) external payable override whenNotPaused {
+    function mintFreeFraktion(FraktionId id) external payable override {
         _mintFreeFraktionForUser(id, msg.sender);
     }
 
@@ -262,7 +258,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      * @param   id  The id of the fraktion for which we want to increase the supply
      * @param   newSupply  The supply we wan't to append for this fraktion
      */
-    function increaseSupply(FraktionId id, uint256 newSupply) external onlyRole(FrakRoles.MINTER) whenNotPaused {
+    function increaseSupply(FraktionId id, uint256 newSupply) external onlyRole(FrakRoles.MINTER) {
         // Update the supply
         fraktionTokens.setSupply(FraktionId.unwrap(id), newSupply);
     }
@@ -281,7 +277,6 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         external
         override
         onlyRole(FrakRoles.BADGE_UPDATER)
-        whenNotPaused
     {
         _updateCostBadge(fraktionId, badge);
     }

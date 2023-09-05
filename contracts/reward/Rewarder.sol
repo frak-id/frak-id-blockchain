@@ -160,7 +160,6 @@ contract Rewarder is
         external
         payable
         onlyRole(FrakRoles.REWARDER)
-        whenNotPaused
     {
         assembly {
             // Ensure the param are valid and not too much
@@ -196,7 +195,6 @@ contract Rewarder is
         external
         payable
         onlyRole(FrakRoles.REWARDER)
-        whenNotPaused
     {
         assembly {
             // Ensure we got valid data
@@ -256,7 +254,6 @@ contract Rewarder is
         external
         payable
         onlyRole(FrakRoles.REWARDER)
-        whenNotPaused
     {
         // Ensure we got valid data
         assembly {
@@ -316,12 +313,12 @@ contract Rewarder is
     }
 
     /// @dev Withdraw the pending founds of the caller
-    function withdrawFounds() external override whenNotPaused {
+    function withdrawFounds() external override {
         _withdrawWithFee(msg.sender, FEE_PERCENT, foundationWallet);
     }
 
     /// @dev Withdraw the pending founds of `user`
-    function withdrawFounds(address user) external override onlyRole(FrakRoles.ADMIN) whenNotPaused {
+    function withdrawFounds(address user) external override onlyRole(FrakRoles.ADMIN) {
         _withdrawWithFee(user, FEE_PERCENT, foundationWallet);
     }
 
@@ -338,7 +335,6 @@ contract Rewarder is
         external
         override
         onlyRole(FrakRoles.BADGE_UPDATER)
-        whenNotPaused
     {
         _updateContentBadge(contentId, badge);
     }
@@ -351,7 +347,6 @@ contract Rewarder is
         external
         override
         onlyRole(FrakRoles.BADGE_UPDATER)
-        whenNotPaused
     {
         _updateListenerBadge(listener, badge);
     }

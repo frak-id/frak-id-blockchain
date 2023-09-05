@@ -82,7 +82,7 @@ contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
     }
 
     /// @dev Transfer `amount` of token to `target`
-    function transfer(address target, uint256 amount) external whenNotPaused onlyRole(FrakRoles.MINTER) {
+    function transfer(address target, uint256 amount) external onlyRole(FrakRoles.MINTER) {
         assembly {
             // Ensure the param are valid and not too much
             if iszero(target) {
@@ -119,7 +119,6 @@ contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
         uint256[] calldata amounts
     )
         external
-        whenNotPaused
         onlyRole(FrakRoles.MINTER)
     {
         assembly {

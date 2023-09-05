@@ -78,7 +78,7 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
     /**
      * @dev Add a new vesting group
      */
-    function _addVestingGroup(uint8 id, uint96 rewardCap, uint32 duration) private whenNotPaused {
+    function _addVestingGroup(uint8 id, uint96 rewardCap, uint32 duration) private {
         if (rewardCap == 0) revert NoReward();
         if (duration == 0 || rewardCap + totalGroupCap > FRK_VESTING_CAP) {
             revert InvalidCreationParam();
@@ -101,7 +101,6 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
         uint96 amount
     )
         external
-        whenNotPaused
         onlyRole(FrakRoles.ADMIN)
     {
         // Ensure the group as enough supply
@@ -144,7 +143,6 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
     )
         external
         onlyRole(FrakRoles.VESTING_CREATOR)
-        whenNotPaused
     {
         // Ensure all the param are correct
         if (reward == 0) revert NoReward();
@@ -174,7 +172,6 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
     )
         external
         onlyRole(FrakRoles.VESTING_CREATOR)
-        whenNotPaused
     {
         // Ensure all the param are correct
         if (beneficiaries.length == 0 || beneficiaries.length != rewards.length) {

@@ -53,13 +53,6 @@ contract ContentPoolTest is FrkTokenTestHelper {
         contentPool.addReward(ContentId.wrap(1), 1 ether);
     }
 
-    function test_fail_addReward_ContractPaused() public prankExecAsDeployer {
-        contentPool.pause();
-
-        vm.expectRevert(ContractPaused.selector);
-        contentPool.addReward(ContentId.wrap(1), 1 ether);
-    }
-
     function test_fail_addReward_NoReward() public prankExecAsDeployer {
         vm.expectRevert(NoReward.selector);
         contentPool.addReward(ContentId.wrap(1), 0);
