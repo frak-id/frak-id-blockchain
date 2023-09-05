@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { IPausable } from "../utils/IPausable.sol";
 import { ContentId } from "../libs/ContentId.sol";
 import { FraktionId } from "../libs/FraktionId.sol";
 
@@ -9,7 +8,7 @@ import { FraktionId } from "../libs/FraktionId.sol";
 /// @title IMinter
 /// @notice Interface for the Minter contract
 /// @custom:security-contact contact@frak.id
-interface IMinter is IPausable {
+interface IMinter {
     /* -------------------------------------------------------------------------- */
     /*                                   Error's                                  */
     /* -------------------------------------------------------------------------- */

@@ -7,14 +7,7 @@ import { ArrayLib } from "@frak/libs/ArrayLib.sol";
 import { FrakRoles } from "@frak/roles/FrakRoles.sol";
 import { FrakTreasuryWallet, NotEnoughTreasury } from "@frak/wallets/FrakTreasuryWallet.sol";
 import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
-import {
-    NotAuthorized,
-    InvalidAddress,
-    NoReward,
-    ContractPaused,
-    RewardTooLarge,
-    InvalidArray
-} from "@frak/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidAddress, NoReward, RewardTooLarge, InvalidArray } from "@frak/utils/FrakErrors.sol";
 
 /// Testing the frak l2 token
 contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {

@@ -4,7 +4,7 @@ pragma solidity 0.8.21;
 import { RewarderTestHelper } from "./RewarderTestHelper.sol";
 import { ArrayLib } from "@frak/libs/ArrayLib.sol";
 import { ContentId } from "@frak/libs/ContentId.sol";
-import { NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge } from "@frak/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidAddress, BadgeTooLarge } from "@frak/utils/FrakErrors.sol";
 
 /// Testing the rewarder
 contract RewarderTest is RewarderTestHelper {

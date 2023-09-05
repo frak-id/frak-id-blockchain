@@ -153,14 +153,7 @@ contract Rewarder is
     /* -------------------------------------------------------------------------- */
 
     /// @dev Directly pay a `listener` for the given frk `amount` (used for offchain to onchain wallet migration)
-    function payUserDirectly(
-        address listener,
-        uint256 amount
-    )
-        external
-        payable
-        onlyRole(FrakRoles.REWARDER)
-    {
+    function payUserDirectly(address listener, uint256 amount) external payable onlyRole(FrakRoles.REWARDER) {
         assembly {
             // Ensure the param are valid and not too much
             if iszero(listener) {
@@ -340,14 +333,7 @@ contract Rewarder is
     }
 
     /// @dev Update the 'listener' 'badge'
-    function updateListenerBadge(
-        address listener,
-        uint256 badge
-    )
-        external
-        override
-        onlyRole(FrakRoles.BADGE_UPDATER)
-    {
+    function updateListenerBadge(address listener, uint256 badge) external override onlyRole(FrakRoles.BADGE_UPDATER) {
         _updateListenerBadge(listener, badge);
     }
 

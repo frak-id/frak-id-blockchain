@@ -4,9 +4,8 @@ pragma solidity 0.8.21;
 import { Initializable } from "@oz-upgradeable/proxy/utils/Initializable.sol";
 import { UUPSUpgradeable } from "@oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { ContextUpgradeable } from "@oz-upgradeable/utils/ContextUpgradeable.sol";
-import { IPausable } from "../utils/IPausable.sol";
 import { FrakRoles } from "./FrakRoles.sol";
-import { NotAuthorized, ContractPaused, ContractNotPaused, RenounceForCallerOnly } from "../utils/FrakErrors.sol";
+import { NotAuthorized, RenounceForCallerOnly } from "../utils/FrakErrors.sol";
 
 /**
  * @author @KONFeature
@@ -20,16 +19,10 @@ import { NotAuthorized, ContractPaused, ContractNotPaused, RenounceForCallerOnly
  *
  * @custom:security-contact contact@frak.id
  */
-abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradeable, IPausable, UUPSUpgradeable {
+abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradeable, UUPSUpgradeable {
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
-
-    /// @dev 'bytes4(keccak256(bytes("ContractPaused()")))'
-    uint256 private constant _PAUSED_SELECTOR = 0xab35696f;
-
-    /// @dev 'bytes4(keccak256(bytes("ContractNotPaused()")))'
-    uint256 private constant _NOT_PAUSED_SELECTOR = 0xdcdde9dd;
 
     /// @dev 'bytes4(keccak256(bytes("NotAuthorized()")))'
     uint256 private constant _NOT_AUTHORIZED_SELECTOR = 0xea8e4eb5;
@@ -37,11 +30,6 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
     /* -------------------------------------------------------------------------- */
-
-    /// @dev Event emitted when the contract is paused
-    event Paused();
-    /// @dev Event emitted when the contract is un-paused
-    event Unpaused();
 
     /// @dev Event emitted when a role is granted
     event RoleGranted(address indexed account, bytes32 indexed role);
@@ -53,6 +41,7 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     /* -------------------------------------------------------------------------- */
 
     /// @dev Is this contract currently paused ?
+    /// @dev Unused now, since pausim mecanism isn't here anymore, can be reused
     bool private _paused;
 
     /// @dev Mapping of roles -> user -> hasTheRight
@@ -64,7 +53,6 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
         __UUPSUpgradeable_init();
 
         _grantRole(FrakRoles.ADMIN, msg.sender);
-        _grantRole(FrakRoles.PAUSER, msg.sender);
         _grantRole(FrakRoles.UPGRADER, msg.sender);
 
         // Tell we are not paused at start
@@ -81,26 +69,6 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     /* -------------------------------------------------------------------------- */
     /*                          External write function's                         */
     /* -------------------------------------------------------------------------- */
-
-    /// @dev Pause this contract
-    function pause() external override whenNotPaused onlyRole(FrakRoles.PAUSER) {
-        _paused = true;
-        emit Paused();
-    }
-
-    /// @dev Un pause this contract
-    function unpause() external override onlyRole(FrakRoles.PAUSER) {
-        // Ensure the contract is paused
-        assembly {
-            if eq(sload(_paused.slot), false) {
-                mstore(0x00, _NOT_PAUSED_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-        }
-        // Then unpause it
-        _paused = false;
-        emit Unpaused();
-    }
 
     /// @dev Grant the `role` to the `account`
     function grantRole(bytes32 role, address account) external onlyRole(FrakRoles.ADMIN) {
@@ -152,11 +120,6 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     /*                          Internal view function's                          */
     /* -------------------------------------------------------------------------- */
 
-    /// @dev Check if the contract is paused
-    function paused() private view returns (bool) {
-        return _paused;
-    }
-
     /// @dev Check that the calling user have the right `role`
     function _checkRole(bytes32 role) private view {
         address sender = msg.sender;
@@ -184,23 +147,6 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     /* -------------------------------------------------------------------------- */
     /*                                 Modifier's                                 */
     /* -------------------------------------------------------------------------- */
-
-    /**
-     * @dev Modifier to make a function callable only when the contract is not paused.
-     *
-     * Requirements:
-     *
-     * - The contract must not be paused.
-     */
-    modifier whenNotPaused() {
-        assembly {
-            if sload(_paused.slot) {
-                mstore(0x00, _PAUSED_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-        }
-        _;
-    }
 
     /**
      * @notice Ensure the calling user have the right role

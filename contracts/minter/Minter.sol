@@ -209,16 +209,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      * @param   r  Signature spec secp256k1
      * @param   s  Signature spec secp256k1
      */
-    function mintFraktion(
-        FraktionId id,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    )
-        external
-        payable
-    {
+    function mintFraktion(FraktionId id, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external payable {
         _mintFraktionForUser(id, msg.sender, deadline, v, r, s);
     }
 
@@ -229,15 +220,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      * @param   id  Id of the free fraktion
      * @param   to  Address of the user
      */
-    function mintFreeFraktionForUser(
-        FraktionId id,
-        address to
-    )
-        external
-        payable
-        override
-        onlyRole(FrakRoles.MINTER)
-    {
+    function mintFreeFraktionForUser(FraktionId id, address to) external payable override onlyRole(FrakRoles.MINTER) {
         _mintFreeFraktionForUser(id, to);
     }
 
@@ -270,14 +253,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      * @param   fraktionId The id of the fraktion we will update the badge
      * @param   badge The new badge for the fraktion
      */
-    function updateCostBadge(
-        FraktionId fraktionId,
-        uint96 badge
-    )
-        external
-        override
-        onlyRole(FrakRoles.BADGE_UPDATER)
-    {
+    function updateCostBadge(FraktionId fraktionId, uint96 badge) external override onlyRole(FrakRoles.BADGE_UPDATER) {
         _updateCostBadge(fraktionId, badge);
     }
 

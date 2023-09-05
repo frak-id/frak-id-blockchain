@@ -12,9 +12,6 @@ library FrakRoles {
     /// @dev Role required to update a smart contract
     bytes32 internal constant UPGRADER = keccak256("UPGRADER_ROLE");
 
-    /// @dev Role required to pause a smart contract
-    bytes32 internal constant PAUSER = keccak256("PAUSER_ROLE");
-
     /// @dev Role required to mint new token on in a contract
     bytes32 internal constant MINTER = keccak256("MINTER_ROLE");
 

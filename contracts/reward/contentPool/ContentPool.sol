@@ -92,14 +92,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     /* -------------------------------------------------------------------------- */
 
     /// @dev Add a new `rewardAmount` to the pool for the content `contentId`
-    function addReward(
-        ContentId contentId,
-        uint256 rewardAmount
-    )
-        external
-        payable
-        onlyRole(FrakRoles.REWARDER)
-    {
+    function addReward(ContentId contentId, uint256 rewardAmount) external payable onlyRole(FrakRoles.REWARDER) {
         // Ensure reward is specified
         assembly ("memory-safe") {
             if or(iszero(rewardAmount), gt(rewardAmount, MAX_REWARD)) {

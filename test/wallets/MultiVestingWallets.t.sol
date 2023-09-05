@@ -7,14 +7,7 @@ import {
     MultiVestingWallets, NotEnoughFounds, InvalidDuration, InvalidDate
 } from "@frak/wallets/MultiVestingWallets.sol";
 import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
-import {
-    NotAuthorized,
-    InvalidArray,
-    InvalidAddress,
-    NoReward,
-    ContractPaused,
-    RewardTooLarge
-} from "@frak/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidArray, InvalidAddress, NoReward, RewardTooLarge } from "@frak/utils/FrakErrors.sol";
 
 /// Testing the frak l2 token
 contract MultiVestingWalletsTest is FrkTokenTestHelper {
@@ -116,7 +109,7 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
         vm.expectRevert(NotAuthorized.selector);
         vestingWallets.createVest(address(1), 10, 10, uint48(block.timestamp + 1));
     }
-    
+
     function test_fail_createVest_InvalidDuration() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
         vm.expectRevert(InvalidDuration.selector);
         vestingWallets.createVest(address(1), 10, 0, uint48(block.timestamp + 1));

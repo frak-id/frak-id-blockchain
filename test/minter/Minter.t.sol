@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge } from "@frak/utils/FrakErrors.sol";
 import { FraktionTokens } from "@frak/fraktions/FraktionTokens.sol";
 import { FrakToken } from "@frak/tokens/FrakToken.sol";
 import { IFrakToken } from "@frak/tokens/IFrakToken.sol";
@@ -11,13 +10,7 @@ import { FrakRoles } from "@frak/roles/FrakRoles.sol";
 import { Minter } from "@frak/minter/Minter.sol";
 import { IMinter } from "@frak/minter/IMinter.sol";
 import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
-import {
-    NotAuthorized,
-    InvalidAddress,
-    ContractPaused,
-    BadgeTooLarge,
-    InvalidFraktionType
-} from "@frak/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidAddress, BadgeTooLarge, InvalidFraktionType } from "@frak/utils/FrakErrors.sol";
 
 /// Testing minter contract
 contract MinterTest is FrkTokenTestHelper {

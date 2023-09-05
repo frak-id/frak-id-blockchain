@@ -8,13 +8,7 @@ import { UUPSTestHelper } from "../UUPSTestHelper.sol";
 import { ArrayLib } from "@frak/libs/ArrayLib.sol";
 import { ContentId } from "@frak/libs/ContentId.sol";
 import { FraktionId } from "@frak/libs/FraktionId.sol";
-import {
-    NotAuthorized,
-    InvalidAddress,
-    ContractPaused,
-    BadgeTooLarge,
-    InvalidFraktionType
-} from "@frak/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidAddress, BadgeTooLarge, InvalidFraktionType } from "@frak/utils/FrakErrors.sol";
 
 /// Testing the frak l2 token
 contract FraktionTokensTest is UUPSTestHelper, StdUtils {

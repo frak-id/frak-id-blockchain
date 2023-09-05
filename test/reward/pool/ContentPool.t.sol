@@ -7,7 +7,7 @@ import { ArrayLib } from "@frak/libs/ArrayLib.sol";
 import { ContentId } from "@frak/libs/ContentId.sol";
 import { FraktionId } from "@frak/libs/FraktionId.sol";
 import { FrakRoles } from "@frak/roles/FrakRoles.sol";
-import { NotAuthorized, InvalidAddress, ContractPaused, NoReward } from "@frak/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidAddress, NoReward } from "@frak/utils/FrakErrors.sol";
 import { FrkTokenTestHelper } from "../../FrkTokenTestHelper.sol";
 
 /// Testing the content pool

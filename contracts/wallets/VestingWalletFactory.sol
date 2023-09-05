@@ -95,14 +95,7 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
     /**
      * @notice Transfer a group reserve to another one
      */
-    function transferGroupReserve(
-        uint8 initialId,
-        uint8 targetId,
-        uint96 amount
-    )
-        external
-        onlyRole(FrakRoles.ADMIN)
-    {
+    function transferGroupReserve(uint8 initialId, uint8 targetId, uint96 amount) external onlyRole(FrakRoles.ADMIN) {
         // Ensure the group as enough supply
         VestingGroup storage initialGroup = _getSafeVestingGroup(initialId);
         if (initialGroup.supply > initialGroup.rewardCap - amount) {

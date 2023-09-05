@@ -7,7 +7,7 @@ import { IRewarder } from "@frak/reward/IRewarder.sol";
 import { ArrayLib } from "@frak/libs/ArrayLib.sol";
 import { ContentId } from "@frak/libs/ContentId.sol";
 import { FraktionId } from "@frak/libs/FraktionId.sol";
-import { ContractPaused, NotAuthorized, InvalidArray, InvalidAddress, RewardTooLarge } from "@frak/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidArray, InvalidAddress, RewardTooLarge } from "@frak/utils/FrakErrors.sol";
 import { RewarderTestHelper } from "./RewarderTestHelper.sol";
 
 /// Testing the rewarder pay function
