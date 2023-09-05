@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
+import { ContentId } from "@frak/libs/ContentId.sol";
 import { FrakToken } from "@frak/tokens/FrakToken.sol";
 import { FraktionTokens } from "@frak/fraktions/FraktionTokens.sol";
 import { MultiVestingWallets } from "@frak/wallets/MultiVestingWallets.sol";
@@ -21,6 +22,10 @@ contract FrakTest is PRBTest {
     address deployer;
     address user;
     uint256 userPrivKey;
+    address contentOwner;
+
+    // A simple minted content id
+    ContentId contentId;
 
     // Contracts we will tests
     FrakToken frakToken;
@@ -37,6 +42,7 @@ contract FrakTest is PRBTest {
         // Create users
         deployer = _newUser("deployer");
         foundation = _newUser("foundation");
+        contentOwner = _newUser("contentOwner");
         (user, userPrivKey) = _newUserWithPrivKey("user");
 
         // Deploy every contract
@@ -74,6 +80,12 @@ contract FrakTest is PRBTest {
         referralPool = ReferralPool(_referralPool);
         contentPool = ContentPool(_contentPool);
         rewarder = Rewarder(_rewarder);
+    }
+
+    /// @dev Generate the initial state for the contract
+    function _generateStates() private asDeployer {
+        // Mint a simple content
+        contentId = minter.addContent(contentOwner, 20, 7, 3, 1);
     }
 
     /* -------------------------------------------------------------------------- */
@@ -237,6 +249,12 @@ contract FrakTest is PRBTest {
         vm.startPrank(deployer);
         _;
         vm.stopPrank();
+    }
+
+    modifier withFrk(address _user, uint256 _amount) {
+        vm.prank(deployer);
+        frakToken.mint(_user, _amount);
+        _;
     }
 
     function _newUser(string memory label) internal returns (address addr) {
