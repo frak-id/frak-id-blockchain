@@ -105,7 +105,6 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
         external
         payable
         onlyRole(FrakRoles.MINTER)
-        whenNotPaused
         returns (ContentId id)
     {
         uint256 creatorTokenId;
@@ -188,7 +187,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /**
      * @dev Set the supply for the given fraktion id
      */
-    function setSupply(uint256 id, uint256 supply) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
+    function setSupply(uint256 id, uint256 supply) external payable onlyRole(FrakRoles.MINTER) {
         assembly {
             // Ensure we got valid data
             if iszero(supply) {
@@ -227,17 +226,17 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     }
 
     /// @dev Register a new transaction callback
-    function registerNewCallback(address callbackAddr) external onlyRole(FrakRoles.ADMIN) whenNotPaused {
+    function registerNewCallback(address callbackAddr) external onlyRole(FrakRoles.ADMIN) {
         transferCallback = FraktionTransferCallback(callbackAddr);
     }
 
     /// @dev Mint a new fraktion of a nft
-    function mint(address to, uint256 id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) whenNotPaused {
+    function mint(address to, uint256 id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) {
         _mint(to, id, amount, "");
     }
 
     /// @dev Burn a fraktion of a nft
-    function burn(uint256 id, uint256 amount) external payable whenNotPaused {
+    function burn(uint256 id, uint256 amount) external payable {
         _burn(msg.sender, id, amount);
     }
 
@@ -316,7 +315,6 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     )
         internal
         override
-        whenNotPaused
     {
         assembly {
             // Base offset to access array element's

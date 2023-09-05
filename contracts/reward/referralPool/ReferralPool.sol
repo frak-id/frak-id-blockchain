@@ -44,7 +44,6 @@ contract ReferralPool is IReferralPool, FrakAccessControlUpgradeable, PushPullRe
         external
         payable
         onlyRole(FrakRoles.ADMIN)
-        whenNotPaused
     {
         if (user == address(0) || referer == address(0) || user == referer) {
             revert InvalidAddress();
@@ -79,7 +78,6 @@ contract ReferralPool is IReferralPool, FrakAccessControlUpgradeable, PushPullRe
         external
         payable
         onlyRole(FrakRoles.REWARDER)
-        whenNotPaused
         returns (uint256 totalAmount)
     {
         if (user == address(0)) revert InvalidAddress();
@@ -110,11 +108,11 @@ contract ReferralPool is IReferralPool, FrakAccessControlUpgradeable, PushPullRe
         return totalAmount;
     }
 
-    function withdrawFounds() external virtual override whenNotPaused {
+    function withdrawFounds() external virtual override {
         _withdraw(msg.sender);
     }
 
-    function withdrawFounds(address user) external virtual override onlyRole(FrakRoles.ADMIN) whenNotPaused {
+    function withdrawFounds(address user) external virtual override {
         _withdraw(user);
     }
 }

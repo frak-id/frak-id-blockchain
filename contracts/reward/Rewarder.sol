@@ -6,7 +6,6 @@ import { ContentBadges } from "./badges/ContentBadges.sol";
 import { ListenerBadges } from "./badges/ListenerBadges.sol";
 import { IContentPool } from "./contentPool/IContentPool.sol";
 import { IReferralPool } from "./referralPool/IReferralPool.sol";
-import { ArrayLib } from "../libs/ArrayLib.sol";
 import { ContentId } from "../libs/ContentId.sol";
 import { FraktionId } from "../libs/FraktionId.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
@@ -17,6 +16,7 @@ import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradea
 import { InvalidAddress, InvalidArray, RewardTooLarge } from "../utils/FrakErrors.sol";
 import { PushPullReward } from "../utils/PushPullReward.sol";
 import { Multicallable } from "solady/utils/Multicallable.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 
 /// @author @KONFeature
 /// @title Rewarder
@@ -30,6 +30,8 @@ contract Rewarder is
     PushPullReward,
     Multicallable
 {
+    using SafeTransferLib for address;
+
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
@@ -153,15 +155,7 @@ contract Rewarder is
     /* -------------------------------------------------------------------------- */
 
     /// @dev Directly pay a `listener` for the given frk `amount` (used for offchain to onchain wallet migration)
-    function payUserDirectly(
-        address listener,
-        uint256 amount
-    )
-        external
-        payable
-        onlyRole(FrakRoles.REWARDER)
-        whenNotPaused
-    {
+    function payUserDirectly(address listener, uint256 amount) external payable onlyRole(FrakRoles.REWARDER) {
         assembly {
             // Ensure the param are valid and not too much
             if iszero(listener) {
@@ -184,7 +178,7 @@ contract Rewarder is
         }
 
         // Mint the reward for the user
-        token.transfer(listener, amount);
+        token.safeTransfer(listener, amount);
     }
 
     /// @dev Directly pay all the creators owner of `contentIds` for each given frk `amounts` (used for offchain reward
@@ -196,7 +190,6 @@ contract Rewarder is
         external
         payable
         onlyRole(FrakRoles.REWARDER)
-        whenNotPaused
     {
         assembly {
             // Ensure we got valid data
@@ -256,7 +249,6 @@ contract Rewarder is
         external
         payable
         onlyRole(FrakRoles.REWARDER)
-        whenNotPaused
     {
         // Ensure we got valid data
         assembly {
@@ -308,20 +300,20 @@ contract Rewarder is
 
         // If we got reward for the pool, transfer them
         if (rewardsAccounter.content > 0) {
-            token.transfer(address(contentPool), rewardsAccounter.content);
+            token.safeTransfer(address(contentPool), rewardsAccounter.content);
         }
         /*if (rewardsAccounter.referral > 0) {
-            token.transfer(address(referralPool), rewardsAccounter.referral);
+            token.safeTransfer(address(referralPool), rewardsAccounter.referral);
         }*/
     }
 
     /// @dev Withdraw the pending founds of the caller
-    function withdrawFounds() external override whenNotPaused {
+    function withdrawFounds() external override {
         _withdrawWithFee(msg.sender, FEE_PERCENT, foundationWallet);
     }
 
     /// @dev Withdraw the pending founds of `user`
-    function withdrawFounds(address user) external override onlyRole(FrakRoles.ADMIN) whenNotPaused {
+    function withdrawFounds(address user) external override {
         _withdrawWithFee(user, FEE_PERCENT, foundationWallet);
     }
 
@@ -338,21 +330,12 @@ contract Rewarder is
         external
         override
         onlyRole(FrakRoles.BADGE_UPDATER)
-        whenNotPaused
     {
         _updateContentBadge(contentId, badge);
     }
 
     /// @dev Update the 'listener' 'badge'
-    function updateListenerBadge(
-        address listener,
-        uint256 badge
-    )
-        external
-        override
-        onlyRole(FrakRoles.BADGE_UPDATER)
-        whenNotPaused
-    {
+    function updateListenerBadge(address listener, uint256 badge) external override onlyRole(FrakRoles.BADGE_UPDATER) {
         _updateListenerBadge(listener, badge);
     }
 

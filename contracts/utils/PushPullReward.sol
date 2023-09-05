@@ -2,15 +2,17 @@
 pragma solidity 0.8.21;
 
 import { Initializable } from "@oz-upgradeable/proxy/utils/Initializable.sol";
-import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import { NoReward, InvalidAddress, RewardTooLarge } from "./FrakErrors.sol";
 import { IPushPullReward } from "./IPushPullReward.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 
 /// @author @KONFeature
 /// @title PushPullReward
 /// @notice Abstract contract for managing the reward of a token
 /// @custom:security-contact contact@frak.id
 abstract contract PushPullReward is IPushPullReward, Initializable {
+    using SafeTransferLib for address;
+
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
@@ -41,16 +43,16 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
     /* -------------------------------------------------------------------------- */
 
     /// @dev Access the token that will deliver the tokens
-    IERC20Upgradeable internal token;
+    address internal token;
 
     /// @dev The pending reward for the given address
-    mapping(address => uint256) internal _pendingRewards;
+    mapping(address user => uint256 rewards) internal _pendingRewards;
 
     /**
      * Init of this contract
      */
     function __PushPullReward_init(address tokenAddr) internal onlyInitializing {
-        token = IERC20Upgradeable(tokenAddr);
+        token = tokenAddr;
     }
 
     /* -------------------------------------------------------------------------- */
@@ -150,7 +152,7 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
             sstore(rewardSlot, 0)
         }
         // Perform the transfer of the founds
-        token.transfer(user, userAmount);
+        token.safeTransfer(user, userAmount);
     }
 
     /**
@@ -176,7 +178,7 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
         // Reset his reward
         _pendingRewards[user] = 0;
         // Perform the transfer of the founds
-        token.transfer(user, userAmount);
+        token.safeTransfer(user, userAmount);
     }
 
     /**
@@ -233,6 +235,6 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
             log2(0, 0x40, _REWARD_WITHDRAWAD_EVENT_SELECTOR, user)
         }
         // Perform the transfer of the founds
-        token.transfer(user, userAmount);
+        token.safeTransfer(user, userAmount);
     }
 }

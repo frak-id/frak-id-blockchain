@@ -2,11 +2,10 @@
 pragma solidity 0.8.21;
 
 import { EnumerableSet } from "openzeppelin/utils/structs/EnumerableSet.sol";
-import { SafeERC20Upgradeable } from "@oz-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { NotAuthorized, InvalidArray, InvalidAddress, NoReward, RewardTooLarge } from "../utils/FrakErrors.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 
 /// @dev error emitted when the contract doesn't have enough founds
 error NotEnoughFounds();
@@ -26,7 +25,7 @@ error ComputationError();
 /// @notice This contract is used to store vesting for the frk token
 /// @custom:security-contact contact@frak.id
 contract MultiVestingWallets is FrakAccessControlUpgradeable {
-    using SafeERC20Upgradeable for IERC20Upgradeable;
+    using SafeTransferLib for address;
 
     // Add the library methods
     using EnumerableSet for EnumerableSet.UintSet;
@@ -67,7 +66,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     uint96 public totalSupply;
 
     /// Access to the frak token
-    IERC20Upgradeable private token;
+    address private token;
 
     /// Current id of vesting
     uint24 private _idCounter;
@@ -84,8 +83,8 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     }
 
     /// Init our contract, with the frak tokan and base role init
-    function initialize(address tokenAddr) external initializer {
-        if (tokenAddr == address(0)) revert InvalidAddress();
+    function initialize(address _token) external initializer {
+        if (_token == address(0)) revert InvalidAddress();
 
         __FrakAccessControlUpgradeable_init();
 
@@ -93,7 +92,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
         _grantRole(FrakRoles.VESTING_MANAGER, msg.sender);
 
         // Init our frak token
-        token = IERC20Upgradeable(tokenAddr);
+        token = _token;
     }
 
     /**
@@ -131,7 +130,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     /**
      * @notice Free the reserve up
      */
-    function transferAvailableReserve(address receiver) external whenNotPaused onlyRole(FrakRoles.ADMIN) {
+    function transferAvailableReserve(address receiver) external onlyRole(FrakRoles.ADMIN) {
         uint256 available = availableReserve();
         if (available == 0) revert NoReward();
         token.safeTransfer(receiver, available);
@@ -147,7 +146,6 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
         uint48 startDate
     )
         external
-        whenNotPaused
         onlyRole(FrakRoles.VESTING_MANAGER)
     {
         _requireVestInputs(duration, startDate);
@@ -165,7 +163,6 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
         uint48 startDate
     )
         external
-        whenNotPaused
         onlyRole(FrakRoles.VESTING_MANAGER)
     {
         if (beneficiaries.length == 0 || beneficiaries.length != amounts.length) {
@@ -274,7 +271,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     /**
      * @dev Release the given vesting
      */
-    function _release(Vesting storage vesting) internal whenNotPaused returns (uint256 released) {
+    function _release(Vesting storage vesting) internal returns (uint256 released) {
         released = _doRelease(vesting);
         _checkAmount(released);
     }
@@ -282,7 +279,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     /**
      * @dev Release all the vestings from the given beneficiary
      */
-    function _releaseAll(address beneficiary) internal whenNotPaused returns (uint256 released) {
+    function _releaseAll(address beneficiary) internal returns (uint256 released) {
         EnumerableSet.UintSet storage indexes = owned[beneficiary];
 
         for (uint256 index; index < indexes.length();) {

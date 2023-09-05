@@ -7,14 +7,7 @@ import {
     MultiVestingWallets, NotEnoughFounds, InvalidDuration, InvalidDate
 } from "@frak/wallets/MultiVestingWallets.sol";
 import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
-import {
-    NotAuthorized,
-    InvalidArray,
-    InvalidAddress,
-    NoReward,
-    ContractPaused,
-    RewardTooLarge
-} from "@frak/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidArray, InvalidAddress, NoReward, RewardTooLarge } from "@frak/utils/FrakErrors.sol";
 
 /// Testing the frak l2 token
 contract MultiVestingWalletsTest is FrkTokenTestHelper {
@@ -90,15 +83,6 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
         vestingWallets.transferAvailableReserve(address(1));
     }
 
-    function test_fail_transferAvailableReserve_ContractPaused() public withFrkToken(multiVestingAddr) {
-        prankDeployer();
-        vestingWallets.pause();
-
-        // Ask to transfer the available reserve
-        vm.expectRevert(ContractPaused.selector);
-        vestingWallets.transferAvailableReserve(address(1));
-    }
-
     function test_fail_TransferAvailableReserve_NoReserve() public {
         // Ask to transfer the available reserve
         vm.expectRevert(NoReward.selector);
@@ -123,12 +107,6 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
 
     function test_fail_createVest_NotManager() public withFrkToken(multiVestingAddr) {
         vm.expectRevert(NotAuthorized.selector);
-        vestingWallets.createVest(address(1), 10, 10, uint48(block.timestamp + 1));
-    }
-
-    function test_fail_createVest_ContractPaused() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
-        vestingWallets.pause();
-        vm.expectRevert(ContractPaused.selector);
         vestingWallets.createVest(address(1), 10, 10, uint48(block.timestamp + 1));
     }
 
@@ -186,15 +164,6 @@ contract MultiVestingWalletsTest is FrkTokenTestHelper {
 
     function test_fail_createVestBatch_NotManager() public withFrkToken(multiVestingAddr) {
         vm.expectRevert(NotAuthorized.selector);
-        vestingWallets.createVestBatch(
-            address(1).asSingletonArray(), uint256(10).asSingletonArray(), 10, uint48(block.timestamp + 1)
-        );
-    }
-
-    function test_fail_createVestBatch_ContractPaused() public withFrkToken(multiVestingAddr) prankExecAsDeployer {
-        vestingWallets.pause();
-
-        vm.expectRevert(ContractPaused.selector);
         vestingWallets.createVestBatch(
             address(1).asSingletonArray(), uint256(10).asSingletonArray(), 10, uint48(block.timestamp + 1)
         );

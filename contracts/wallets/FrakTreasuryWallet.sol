@@ -6,6 +6,7 @@ import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradea
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { InvalidAddress, RewardTooLarge, NoReward } from "../utils/FrakErrors.sol";
 import { Multicallable } from "solady/utils/Multicallable.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 
 /// Error thrown when the contract havn't enough found to perform the withdraw
 error NotEnoughTreasury();
@@ -15,6 +16,8 @@ error NotEnoughTreasury();
 /// @notice This contract is used to store some frk token for the treasury
 /// @custom:security-contact contact@frak.id
 contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
+    using SafeTransferLib for address;
+
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
@@ -73,16 +76,16 @@ contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
         _disableInitializers();
     }
 
-    function initialize(address frkTokenAddr) external initializer {
-        if (frkTokenAddr == address(0)) revert InvalidAddress();
+    function initialize(address _token) external initializer {
+        if (_token == address(0)) revert InvalidAddress();
 
         __FrakAccessControlUpgradeable_Minter_init();
 
-        frakToken = IFrakToken(frkTokenAddr);
+        frakToken = IFrakToken(_token);
     }
 
     /// @dev Transfer `amount` of token to `target`
-    function transfer(address target, uint256 amount) external whenNotPaused onlyRole(FrakRoles.MINTER) {
+    function transfer(address target, uint256 amount) external onlyRole(FrakRoles.MINTER) {
         assembly {
             // Ensure the param are valid and not too much
             if iszero(target) {
@@ -100,7 +103,7 @@ contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
         }
 
         // Ensure we got enough founds, and if not, try to mint more and ensure we minted enough
-        uint256 currentBalance = frakToken.balanceOf(address(this));
+        uint256 currentBalance = address(frakToken).balanceOf(address(this));
         if (amount > currentBalance) {
             uint256 mintedAmount = _mintNewToken();
             if (amount > currentBalance + mintedAmount) {
@@ -110,7 +113,7 @@ contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
 
         // Once we are good, move the token to the given address
         emit TreasuryTransfer(target, amount);
-        frakToken.transfer(target, amount);
+        address(frakToken).safeTransfer(target, amount);
     }
 
     /// @dev Transfer all `amounts` to each `targets`
@@ -119,7 +122,6 @@ contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
         uint256[] calldata amounts
     )
         external
-        whenNotPaused
         onlyRole(FrakRoles.MINTER)
     {
         assembly {
@@ -134,7 +136,7 @@ contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
         uint256 length = targets.length;
 
         // Get the current balance
-        uint256 currentBalance = frakToken.balanceOf(address(this));
+        uint256 currentBalance = address(frakToken).balanceOf(address(this));
 
         for (uint256 i; i < length;) {
             // Extract params
@@ -170,7 +172,7 @@ contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
             // Once we are good, move the token to the given address, and decrease the total balance
             currentBalance -= amount;
             emit TreasuryTransfer(target, amount);
-            frakToken.transfer(target, amount);
+            address(frakToken).safeTransfer(target, amount);
 
             unchecked {
                 ++i;

@@ -92,15 +92,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     /* -------------------------------------------------------------------------- */
 
     /// @dev Add a new `rewardAmount` to the pool for the content `contentId`
-    function addReward(
-        ContentId contentId,
-        uint256 rewardAmount
-    )
-        external
-        payable
-        onlyRole(FrakRoles.REWARDER)
-        whenNotPaused
-    {
+    function addReward(ContentId contentId, uint256 rewardAmount) external payable onlyRole(FrakRoles.REWARDER) {
         // Ensure reward is specified
         assembly ("memory-safe") {
             if or(iszero(rewardAmount), gt(rewardAmount, MAX_REWARD)) {
@@ -165,18 +157,18 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     }
 
     /// @dev Compute all the pools balance of the user
-    function computeAllPoolsBalance(address user) external payable onlyRole(FrakRoles.ADMIN) whenNotPaused {
+    function computeAllPoolsBalance(address user) external {
         _computeAndSaveAllForUser(user);
     }
 
     /// @dev Withdraw the pending founds for the current caller
-    function withdrawFounds() external virtual override whenNotPaused {
+    function withdrawFounds() external virtual override {
         _computeAndSaveAllForUser(msg.sender);
         _tryWithdraw(msg.sender);
     }
 
     /// @dev Withdraw the pending founds for a `user`
-    function withdrawFounds(address user) external virtual override onlyRole(FrakRoles.ADMIN) whenNotPaused {
+    function withdrawFounds(address user) external virtual override {
         _computeAndSaveAllForUser(user);
         _tryWithdraw(user);
     }

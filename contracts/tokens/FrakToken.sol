@@ -50,13 +50,13 @@ contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Base
     }
 
     /// @dev Mint some FRK
-    function mint(address to, uint256 amount) external override onlyRole(FrakRoles.MINTER) whenNotPaused {
+    function mint(address to, uint256 amount) external override onlyRole(FrakRoles.MINTER) {
         if (totalSupply() + amount > _cap) revert CapExceed();
         _mint(to, amount);
     }
 
     /// @dev Burn some FRK
-    function burn(uint256 amount) external override whenNotPaused {
+    function burn(uint256 amount) external override {
         _burn(msg.sender, amount);
     }
 

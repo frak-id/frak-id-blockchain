@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import { MultiVestingWallets } from "./MultiVestingWallets.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { InvalidArray, InvalidAddress, NoReward, RewardTooLarge } from "../utils/FrakErrors.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 
 /// @dev error throwned when the creation param are invalid
 error InvalidCreationParam();
@@ -78,7 +78,7 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
     /**
      * @dev Add a new vesting group
      */
-    function _addVestingGroup(uint8 id, uint96 rewardCap, uint32 duration) private whenNotPaused {
+    function _addVestingGroup(uint8 id, uint96 rewardCap, uint32 duration) private {
         if (rewardCap == 0) revert NoReward();
         if (duration == 0 || rewardCap + totalGroupCap > FRK_VESTING_CAP) {
             revert InvalidCreationParam();
@@ -95,15 +95,7 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
     /**
      * @notice Transfer a group reserve to another one
      */
-    function transferGroupReserve(
-        uint8 initialId,
-        uint8 targetId,
-        uint96 amount
-    )
-        external
-        whenNotPaused
-        onlyRole(FrakRoles.ADMIN)
-    {
+    function transferGroupReserve(uint8 initialId, uint8 targetId, uint96 amount) external onlyRole(FrakRoles.ADMIN) {
         // Ensure the group as enough supply
         VestingGroup storage initialGroup = _getSafeVestingGroup(initialId);
         if (initialGroup.supply > initialGroup.rewardCap - amount) {
@@ -144,7 +136,6 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
     )
         external
         onlyRole(FrakRoles.VESTING_CREATOR)
-        whenNotPaused
     {
         // Ensure all the param are correct
         if (reward == 0) revert NoReward();
@@ -174,7 +165,6 @@ contract VestingWalletFactory is FrakAccessControlUpgradeable {
     )
         external
         onlyRole(FrakRoles.VESTING_CREATOR)
-        whenNotPaused
     {
         // Ensure all the param are correct
         if (beneficiaries.length == 0 || beneficiaries.length != rewards.length) {

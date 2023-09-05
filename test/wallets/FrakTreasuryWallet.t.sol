@@ -7,14 +7,7 @@ import { ArrayLib } from "@frak/libs/ArrayLib.sol";
 import { FrakRoles } from "@frak/roles/FrakRoles.sol";
 import { FrakTreasuryWallet, NotEnoughTreasury } from "@frak/wallets/FrakTreasuryWallet.sol";
 import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
-import {
-    NotAuthorized,
-    InvalidAddress,
-    NoReward,
-    ContractPaused,
-    RewardTooLarge,
-    InvalidArray
-} from "@frak/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidAddress, NoReward, RewardTooLarge, InvalidArray } from "@frak/utils/FrakErrors.sol";
 
 /// Testing the frak l2 token
 contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {
@@ -75,13 +68,6 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {
 
     function test_fail_transfer_NotMinter() public {
         vm.expectRevert(NotAuthorized.selector);
-        treasuryWallet.transfer(address(1), 1 ether);
-    }
-
-    function test_fail_transfer_ContractPaused() public prankExecAsDeployer {
-        treasuryWallet.pause();
-
-        vm.expectRevert(ContractPaused.selector);
         treasuryWallet.transfer(address(1), 1 ether);
     }
 
@@ -147,14 +133,6 @@ contract FrakTreasuryWalletTest is FrkTokenTestHelper, StdUtils {
     function test_fail_transferBatch_NotMinter() public {
         vm.expectRevert(NotAuthorized.selector);
         (address[] memory addrs, uint256[] memory amounts) = baseBatchParam(1 ether);
-        treasuryWallet.transferBatch(addrs, amounts);
-    }
-
-    function test_fail_transferBatch_ContractPaused() public prankExecAsDeployer {
-        treasuryWallet.pause();
-
-        (address[] memory addrs, uint256[] memory amounts) = baseBatchParam(1 ether);
-        vm.expectRevert(ContractPaused.selector);
         treasuryWallet.transferBatch(addrs, amounts);
     }
 

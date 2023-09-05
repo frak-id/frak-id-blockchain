@@ -4,7 +4,7 @@ pragma solidity 0.8.21;
 import { RewarderTestHelper } from "./RewarderTestHelper.sol";
 import { ArrayLib } from "@frak/libs/ArrayLib.sol";
 import { ContentId } from "@frak/libs/ContentId.sol";
-import { NotAuthorized, InvalidAddress, ContractPaused, BadgeTooLarge } from "@frak/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidAddress, BadgeTooLarge } from "@frak/utils/FrakErrors.sol";
 
 /// Testing the rewarder
 contract RewarderTest is RewarderTestHelper {
@@ -55,14 +55,6 @@ contract RewarderTest is RewarderTestHelper {
         assertEq(rewarder.getContentBadge(contentId), 2 ether);
     }
 
-    function test_fail_updateContentBadge_ContractPaused() public prankExecAsDeployer {
-        ContentId contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
-        rewarder.pause();
-
-        vm.expectRevert(ContractPaused.selector);
-        rewarder.updateContentBadge(contentId, 2 ether);
-    }
-
     function test_fail_updateContentBadge_NotAuthorized() public {
         prankDeployer();
         ContentId contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fTypeArray, fTypeArray);
@@ -87,12 +79,6 @@ contract RewarderTest is RewarderTestHelper {
     function test_updateListenerBadge() public prankExecAsDeployer {
         rewarder.updateListenerBadge(address(1), 2 ether);
         assertEq(rewarder.getListenerBadge(address(1)), 2 ether);
-    }
-
-    function test_fail_updateListenerBadge_ContractPaused() public prankExecAsDeployer {
-        rewarder.pause();
-        vm.expectRevert(ContractPaused.selector);
-        rewarder.updateListenerBadge(address(1), 2 ether);
     }
 
     function test_fail_updateListenerBadge_NotAuthorized() public {

@@ -11,12 +11,15 @@ import { IFrakToken } from "../tokens/IFrakToken.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { InvalidAddress } from "../utils/FrakErrors.sol";
 import { Multicallable } from "solady/utils/Multicallable.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 
 /// @author @KONFeature
 /// @title Minter
 /// @notice This contract will mint new content on the ecosytem, and mint fraktions for the user
 /// @custom:security-contact contact@frak.id
 contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Multicallable {
+    using SafeTransferLib for address;
+
     /* -------------------------------------------------------------------------- */
     /*                                   Error's                                  */
     /* -------------------------------------------------------------------------- */
@@ -124,7 +127,6 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         payable
         override
         onlyRole(FrakRoles.MINTER)
-        whenNotPaused
         returns (ContentId contentId)
     {
         assembly {
@@ -196,7 +198,6 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         external
         payable
         onlyRole(FrakRoles.MINTER)
-        whenNotPaused
     {
         _mintFraktionForUser(id, to, deadline, v, r, s);
     }
@@ -211,17 +212,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      * @param   r  Signature spec secp256k1
      * @param   s  Signature spec secp256k1
      */
-    function mintFraktion(
-        FraktionId id,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    )
-        external
-        payable
-        whenNotPaused
-    {
+    function mintFraktion(FraktionId id, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external payable {
         _mintFraktionForUser(id, msg.sender, deadline, v, r, s);
     }
 
@@ -232,16 +223,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      * @param   id  Id of the free fraktion
      * @param   to  Address of the user
      */
-    function mintFreeFraktionForUser(
-        FraktionId id,
-        address to
-    )
-        external
-        payable
-        override
-        onlyRole(FrakRoles.MINTER)
-        whenNotPaused
-    {
+    function mintFreeFraktionForUser(FraktionId id, address to) external override {
         _mintFreeFraktionForUser(id, to);
     }
 
@@ -251,7 +233,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      * only performed when contract not paused and by the right person
      * @param   id  Id of the free fraktion
      */
-    function mintFreeFraktion(FraktionId id) external payable override whenNotPaused {
+    function mintFreeFraktion(FraktionId id) external override {
         _mintFreeFraktionForUser(id, msg.sender);
     }
 
@@ -262,7 +244,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      * @param   id  The id of the fraktion for which we want to increase the supply
      * @param   newSupply  The supply we wan't to append for this fraktion
      */
-    function increaseSupply(FraktionId id, uint256 newSupply) external onlyRole(FrakRoles.MINTER) whenNotPaused {
+    function increaseSupply(FraktionId id, uint256 newSupply) external onlyRole(FrakRoles.MINTER) {
         // Update the supply
         fraktionTokens.setSupply(FraktionId.unwrap(id), newSupply);
     }
@@ -274,15 +256,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      * @param   fraktionId The id of the fraktion we will update the badge
      * @param   badge The new badge for the fraktion
      */
-    function updateCostBadge(
-        FraktionId fraktionId,
-        uint96 badge
-    )
-        external
-        override
-        onlyRole(FrakRoles.BADGE_UPDATER)
-        whenNotPaused
-    {
+    function updateCostBadge(FraktionId fraktionId, uint96 badge) external override onlyRole(FrakRoles.BADGE_UPDATER) {
         _updateCostBadge(fraktionId, badge);
     }
 
@@ -318,7 +292,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         // Call the permit functions
         frakToken.permit(to, address(this), cost, deadline, v, r, s);
         // Transfer the tokens
-        frakToken.transferFrom(to, foundationWallet, cost);
+        address(frakToken).safeTransferFrom(to, foundationWallet, cost);
         // Mint his fraktion
         fraktionTokens.mint(to, FraktionId.unwrap(id), 1);
     }

@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { IPausable } from "../utils/IPausable.sol";
 import { ContentId } from "../libs/ContentId.sol";
 
 /// @author @KONFeature
 /// @title IRewarder
 /// @notice Interface for the rewarder contract
 /// @custom:security-contact contact@frak.id
-interface IRewarder is IPausable {
+interface IRewarder {
     /// @dev Error throwned when the reward is invalid
     error InvalidReward();
 

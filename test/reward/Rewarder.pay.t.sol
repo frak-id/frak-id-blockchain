@@ -7,7 +7,7 @@ import { IRewarder } from "@frak/reward/IRewarder.sol";
 import { ArrayLib } from "@frak/libs/ArrayLib.sol";
 import { ContentId } from "@frak/libs/ContentId.sol";
 import { FraktionId } from "@frak/libs/FraktionId.sol";
-import { ContractPaused, NotAuthorized, InvalidArray, InvalidAddress, RewardTooLarge } from "@frak/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidArray, InvalidAddress, RewardTooLarge } from "@frak/utils/FrakErrors.sol";
 import { RewarderTestHelper } from "./RewarderTestHelper.sol";
 
 /// Testing the rewarder pay function
@@ -26,12 +26,6 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
      * ===== TEST : payUserDirectly(address listener, uint256 amount) =====
      */
     function test_payUserDirectly() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        rewarder.payUserDirectly(address(1), 10);
-    }
-
-    function test_fail_payUserDirectly_ContractPaused() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        rewarder.pause();
-        vm.expectRevert(ContractPaused.selector);
         rewarder.payUserDirectly(address(1), 10);
     }
 
@@ -56,7 +50,7 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
     }
 
     function test_fail_payUserDirectly_NotEnoughBalance() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        vm.expectRevert("ERC20: transfer amount exceeds balance");
+        vm.expectRevert();
         rewarder.payUserDirectly(address(1), 11);
     }
 
@@ -67,12 +61,6 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
     ) =====
      */
     function test_payCreatorDirectlyBatch() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        rewarder.payCreatorDirectlyBatch(contentId.asSingletonArray(), uint256(10).asSingletonArray());
-    }
-
-    function test_fail_payCreatorDirectlyBatch_ContractPaused() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        rewarder.pause();
-        vm.expectRevert(ContractPaused.selector);
         rewarder.payCreatorDirectlyBatch(contentId.asSingletonArray(), uint256(10).asSingletonArray());
     }
 
@@ -213,14 +201,6 @@ contract RewarderPayTest is RewarderTestHelper, StdUtils {
         rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
         mintFraktions(address(5));
         rewarder.payUser(address(1), 1, contentId.asSingletonArray(), listenCounts);
-    }
-
-    function test_fail_payUser_ContractPaused() public withFrkToken(rewarderAddr) prankExecAsDeployer {
-        rewarder.pause();
-
-        vm.expectRevert(ContractPaused.selector);
-        (uint256[] memory listenCounts, ContentId[] memory contentIds) = basePayParam();
-        rewarder.payUser(address(1), 1, contentIds, listenCounts);
     }
 
     function test_fail_payUser_NotRewarder() public withFrkToken(rewarderAddr) {

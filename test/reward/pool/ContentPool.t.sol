@@ -7,7 +7,7 @@ import { ArrayLib } from "@frak/libs/ArrayLib.sol";
 import { ContentId } from "@frak/libs/ContentId.sol";
 import { FraktionId } from "@frak/libs/FraktionId.sol";
 import { FrakRoles } from "@frak/roles/FrakRoles.sol";
-import { NotAuthorized, InvalidAddress, ContractPaused, NoReward } from "@frak/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidAddress, NoReward } from "@frak/utils/FrakErrors.sol";
 import { FrkTokenTestHelper } from "../../FrkTokenTestHelper.sol";
 
 /// Testing the content pool
@@ -50,13 +50,6 @@ contract ContentPoolTest is FrkTokenTestHelper {
 
     function test_fail_addReward_NotAuthorized() public {
         vm.expectRevert(NotAuthorized.selector);
-        contentPool.addReward(ContentId.wrap(1), 1 ether);
-    }
-
-    function test_fail_addReward_ContractPaused() public prankExecAsDeployer {
-        contentPool.pause();
-
-        vm.expectRevert(ContractPaused.selector);
         contentPool.addReward(ContentId.wrap(1), 1 ether);
     }
 

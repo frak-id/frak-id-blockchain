@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { IPausable } from "../utils/IPausable.sol";
 import { ContentId } from "../libs/ContentId.sol";
 import { FraktionId } from "../libs/FraktionId.sol";
 
@@ -9,7 +8,7 @@ import { FraktionId } from "../libs/FraktionId.sol";
 /// @title IMinter
 /// @notice Interface for the Minter contract
 /// @custom:security-contact contact@frak.id
-interface IMinter is IPausable {
+interface IMinter {
     /* -------------------------------------------------------------------------- */
     /*                                   Error's                                  */
     /* -------------------------------------------------------------------------- */
@@ -96,7 +95,7 @@ interface IMinter is IPausable {
      * @param   id  Id of the free fraktion
      * @param   to  Address of the user
      */
-    function mintFreeFraktionForUser(FraktionId id, address to) external payable;
+    function mintFreeFraktionForUser(FraktionId id, address to) external;
 
     /**
      * @notice  Mint a free fraktion for the given user
@@ -104,7 +103,7 @@ interface IMinter is IPausable {
      * only performed when contract not paused and by the right person
      * @param   id  Id of the free fraktion
      */
-    function mintFreeFraktion(FraktionId id) external payable;
+    function mintFreeFraktion(FraktionId id) external;
 
     /**
      * @notice  Increase the total supply for the given fraktion id

@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { Initializable } from "@oz-upgradeable/proxy/utils/Initializable.sol";
-import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import { NoReward, InvalidAddress, RewardTooLarge } from "./FrakErrors.sol";
-
 /// @author @KONFeature
 /// @title IPushPullReward
 /// @notice Interface for the push pull reward contracts
