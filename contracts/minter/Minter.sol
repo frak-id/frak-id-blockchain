@@ -246,7 +246,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      */
     function increaseSupply(FraktionId id, uint256 newSupply) external onlyRole(FrakRoles.MINTER) {
         // Update the supply
-        fraktionTokens.setSupply(FraktionId.unwrap(id), newSupply);
+        fraktionTokens.setSupply(id, newSupply);
     }
 
     /**
@@ -294,7 +294,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         // Transfer the tokens
         address(frakToken).safeTransferFrom(to, foundationWallet, cost);
         // Mint his fraktion
-        fraktionTokens.mint(to, FraktionId.unwrap(id), 1);
+        fraktionTokens.mint(to, id, 1);
     }
 
     /**
@@ -319,6 +319,6 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         }
 
         // If we are all good, mint the free fraktion to the user
-        fraktionTokens.mint(to, FraktionId.unwrap(id), 1);
+        fraktionTokens.mint(to, id, 1);
     }
 }

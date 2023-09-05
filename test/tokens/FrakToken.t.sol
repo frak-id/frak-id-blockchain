@@ -6,7 +6,7 @@ import { NotAuthorized } from "contracts/utils/FrakErrors.sol";
 import { FrakToken } from "contracts/tokens/FrakToken.sol";
 import { IFrakToken } from "contracts/tokens/IFrakToken.sol";
 
-/// @dev Testing custom methods on the FrkToken
+/// @dev Testing custom methods on the FrakToken
 contract FrakTokenTest is FrakTest {
     function setUp() public {
         _setupTests();
@@ -122,7 +122,7 @@ contract FrakTokenTest is FrakTest {
                 abi.encodePacked(
                     "\x19\x01",
                     frakToken.getDomainSeperator(),
-                    keccak256(abi.encode(PERMIT_TYPEHASH, user, contentOwner, 1 ether, 12345, block.timestamp))
+                    keccak256(abi.encode(PERMIT_TYPEHASH, user, contentOwner, 1 ether, 12_345, block.timestamp))
                 )
             )
         );

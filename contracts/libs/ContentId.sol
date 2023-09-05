@@ -40,6 +40,13 @@ library ContentIdLib {
     /*                               Helper method's                              */
     /* -------------------------------------------------------------------------- */
 
+    /// @dev Build a fraktion id from a content id
+    function toFraktionId(ContentId self, uint256 fraktionType) internal pure returns (FraktionId id) {
+        assembly {
+            id := or(shl(ID_OFFSET, self), fraktionType)
+        }
+    }
+
     /// @dev Build the id for a creator NFT id
     function creatorFraktionId(ContentId self) internal pure returns (FraktionId id) {
         assembly {

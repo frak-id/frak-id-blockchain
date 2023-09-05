@@ -13,6 +13,10 @@ import { InvalidArray } from "../utils/FrakErrors.sol";
 /// @author @KONFeature
 /// @title FraktionTokens
 /// @notice ERC1155 for the Frak Fraktions tokens, used as ownership proof for a content, or investisment proof
+/// TODO: Global overview :
+///     - remove storage dependency for owner (using balanceOf and building content owner fraktion)
+///     - remove storage dependency for is supply aware (every fraktion type between 3 to 6 is supply aware)
+///     - mint content, Single array as param with byte shifting :|supplies|fraktionType|
 /// @custom:security-contact contact@frak.id
 contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /* -------------------------------------------------------------------------- */
@@ -69,13 +73,13 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     FraktionTransferCallback private transferCallback;
 
     /// @dev Id of content to owner of this content
-    mapping(uint256 => address) private owners;
+    mapping(uint256 id => address owner) private owners;
 
     /// @dev Available supply of each fraktion (classic, rare, epic and legendary only) by they id
-    mapping(uint256 => uint256) private _availableSupplies;
+    mapping(uint256 id => uint256 availableSupply) private _availableSupplies;
 
     /// @dev Tell us if that fraktion is supply aware or not
-    mapping(uint256 => bool) private _isSupplyAware;
+    mapping(uint256 id => bool isSupplyAware) private _isSupplyAware;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -95,7 +99,6 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
 
     /**
      * @dev Mint a new content, return the id of the built content
-     * We will store in memory -from 0x0 to 0x40 ->
      */
     function mintNewContent(
         address ownerAddress,
@@ -187,13 +190,8 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /**
      * @dev Set the supply for the given fraktion id
      */
-    function setSupply(uint256 id, uint256 supply) external payable onlyRole(FrakRoles.MINTER) {
+    function setSupply(FraktionId id, uint256 supply) external payable onlyRole(FrakRoles.MINTER) {
         assembly {
-            // Ensure we got valid data
-            if iszero(supply) {
-                mstore(0x00, _INVALID_ARRAY_SELECTOR)
-                revert(0x1c, 0x04)
-            }
             // Ensure the supply update of this fraktion type is allowed
             let fraktionType := and(id, 0xF)
             if or(lt(fraktionType, 3), gt(fraktionType, 6)) {
@@ -231,13 +229,13 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     }
 
     /// @dev Mint a new fraktion of a nft
-    function mint(address to, uint256 id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) {
-        _mint(to, id, amount, "");
+    function mint(address to, FraktionId id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) {
+        _mint(to, FraktionId.unwrap(id), amount, "");
     }
 
     /// @dev Burn a fraktion of a nft
-    function burn(uint256 id, uint256 amount) external payable {
-        _burn(msg.sender, id, amount);
+    function burn(FraktionId id, uint256 amount) external payable {
+        _burn(msg.sender, FraktionId.unwrap(id), amount);
     }
 
     /* -------------------------------------------------------------------------- */
