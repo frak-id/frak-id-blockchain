@@ -17,6 +17,9 @@ import { ERC1967Proxy } from "openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
 
 /// Testing the frak l2 token
 contract FrakTest is PRBTest {
+
+    bytes32 constant PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+
     // User accounts
     address foundation;
     address deployer;
@@ -255,6 +258,19 @@ contract FrakTest is PRBTest {
         vm.prank(deployer);
         frakToken.mint(_user, _amount);
         _;
+    }
+
+    function _generateUserPermitSignature(address to, uint256 amount, uint256 deadline) internal view returns(uint8, bytes32, bytes32) {
+        return vm.sign(
+            userPrivKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    frakToken.getDomainSeperator(),
+                    keccak256(abi.encode(PERMIT_TYPEHASH, user, to, amount, frakToken.getNonce(user), deadline))
+                )
+            )
+        );
     }
 
     function _newUser(string memory label) internal returns (address addr) {
