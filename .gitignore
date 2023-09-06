@@ -4,6 +4,7 @@ mcore_*/
 # Coverage report
 coverage/
 coverage.json
+lcov.info
 
 # Generic contracts exclusions
 .openzeppelin/unknwon-*.json
