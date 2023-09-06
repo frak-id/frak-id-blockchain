@@ -148,9 +148,7 @@ contract FrakTest is PRBTest {
 
     /// @dev Grand the required roles to the multi vesting wallet
     function _grantTreasuryWalletWalletRoles(address _proxyAddress, address _frkToken) private asDeployer {
-        // Get the contract
-        FrakTreasuryWallet implementation = FrakTreasuryWallet(_proxyAddress);
-        implementation.grantRole(FrakRoles.MINTER, _frkToken);
+        FrakToken(_frkToken).grantRole(FrakRoles.MINTER, _proxyAddress);
     }
 
     /* -------------------------------------------------------------------------- */

@@ -117,9 +117,7 @@ contract DeployAllScript is UpgradeScript {
 
     /// @dev Grand the required roles to the multi vesting wallet
     function _grantTreasuryWalletWalletRoles(address proxyAddress, address frkToken) private deployerBroadcast {
-        // Get the contract
-        FrakTreasuryWallet implementation = FrakTreasuryWallet(proxyAddress);
-        implementation.grantRole(FrakRoles.MINTER, frkToken);
+        FrakToken(frkToken).grantRole(FrakRoles.MINTER, proxyAddress);
     }
 
     /* -------------------------------------------------------------------------- */
