@@ -229,15 +229,6 @@ contract FraktionTokensTest is FrakTest {
         supplies[2] = 25;
         supplies[3] = 10;
     }
-
-    modifier withEmptySupply(FraktionId fraktionId) {
-        uint256 fraktionSupply = fraktionTokens.supplyOf(fraktionId);
-        if (fraktionSupply > 0) {
-            vm.prank(deployer);
-            fraktionTokens.mint(address(1), fraktionId, fraktionSupply);
-        }
-        _;
-    }
 }
 
 contract TestFraktionTransferCallback is FraktionTransferCallback {

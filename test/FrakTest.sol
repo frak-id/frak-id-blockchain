@@ -2,6 +2,7 @@
 pragma solidity 0.8.21;
 
 import { ContentId } from "@frak/libs/ContentId.sol";
+import { FraktionId } from "@frak/libs/FraktionId.sol";
 import { FrakToken } from "@frak/tokens/FrakToken.sol";
 import { FraktionTokens } from "@frak/fraktions/FraktionTokens.sol";
 import { MultiVestingWallets } from "@frak/wallets/MultiVestingWallets.sol";
@@ -260,6 +261,15 @@ contract FrakTest is PRBTest {
     modifier withFrk(address _user, uint256 _amount) {
         vm.prank(deployer);
         frakToken.mint(_user, _amount);
+        _;
+    }
+
+    modifier withEmptySupply(FraktionId fraktionId) {
+        uint256 fraktionSupply = fraktionTokens.supplyOf(fraktionId);
+        if (fraktionSupply > 0) {
+            vm.prank(deployer);
+            fraktionTokens.mint(address(1), fraktionId, fraktionSupply);
+        }
         _;
     }
 
