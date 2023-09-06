@@ -127,14 +127,9 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
         return token.balanceOf(address(this)) - totalSupply;
     }
 
-    /**
-     * @notice Free the reserve up
-     */
-    function transferAvailableReserve(address receiver) external onlyRole(FrakRoles.ADMIN) {
-        uint256 available = availableReserve();
-        if (available == 0) revert NoReward();
-        token.safeTransfer(receiver, available);
-    }
+    /* -------------------------------------------------------------------------- */
+    /*                              Create vesting's                              */
+    /* -------------------------------------------------------------------------- */
 
     /**
      * @notice Create a new vesting.
@@ -224,6 +219,23 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
         emit VestingTransfered(vestingId, address(0), beneficiary);
     }
 
+    /* -------------------------------------------------------------------------- */
+    /*                              Global managment                              */
+    /* -------------------------------------------------------------------------- */
+
+    /**
+     * @notice Free the reserve up
+     */
+    function transferAvailableReserve(address receiver) external onlyRole(FrakRoles.ADMIN) {
+        uint256 available = availableReserve();
+        if (available == 0) revert NoReward();
+        token.safeTransfer(receiver, available);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                              Vesting managment                             */
+    /* -------------------------------------------------------------------------- */
+
     /**
      * @notice Transfer a vesting to another person.
      */
@@ -264,7 +276,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     /**
      * @notice Release the tokens of a all of beneficiary's vesting.
      */
-    function releaseAllFor(address beneficiary) external onlyRole(FrakRoles.VESTING_MANAGER) returns (uint256) {
+    function releaseAllFor(address beneficiary) external returns (uint256) {
         return _releaseAll(beneficiary);
     }
 
@@ -273,7 +285,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
      */
     function _release(Vesting storage vesting) internal returns (uint256 released) {
         released = _doRelease(vesting);
-        _checkAmount(released);
+        if (released == 0) revert NoReward();
     }
 
     /**
@@ -293,7 +305,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
             }
         }
 
-        _checkAmount(released);
+        if (released == 0) revert NoReward();
     }
 
     /**
@@ -315,12 +327,9 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
         }
     }
 
-    /**
-     * @dev Revert the transaction if the value is zero.
-     */
-    function _checkAmount(uint256 released) internal pure {
-        if (released == 0) revert NoReward();
-    }
+    /* -------------------------------------------------------------------------- */
+    /*                                View method's                               */
+    /* -------------------------------------------------------------------------- */
 
     /**
      * @notice Get the releasable amount of tokens.
@@ -456,25 +465,5 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
      */
     function _addOwnership(address account, uint24 vestingId) internal {
         owned[account].add(vestingId);
-    }
-
-    /**
-     * @dev Update a vesting start date
-     */
-    function fixVestingDate(uint24[] calldata vestingIds) external onlyRole(FrakRoles.VESTING_MANAGER) {
-        for (uint256 index = 0; index < vestingIds.length; index++) {
-            // Get the vesting
-            uint24 vestingId = vestingIds[index];
-            Vesting memory vesting = _getVesting(vestingId);
-
-            // Check is date on update it if needed
-            if (vesting.startDate > MAX_TIMESTAMP) {
-                uint48 newDate = vesting.startDate / 1000;
-                // If that's good, update the date
-                if (newDate > block.timestamp && newDate < MAX_TIMESTAMP) {
-                    vestings[vestingId].startDate = newDate;
-                }
-            }
-        }
     }
 }
