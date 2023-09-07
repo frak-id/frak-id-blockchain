@@ -36,8 +36,8 @@ contract FraktionTokensTest is FrakTest {
     /* -------------------------------------------------------------------------- */
 
     function test_addContent_ok() public asDeployer {
-        (uint256[] memory types, uint256[] memory supplies) = _getMintContentParams();
-        ContentId contentId = fraktionTokens.mintNewContent(contentOwner, types, supplies);
+        uint256[] memory suppliesToType = _getMintContentParams();
+        ContentId contentId = fraktionTokens.mintNewContent(contentOwner, suppliesToType);
 
         // Ensure the content is well created, with valid supply
         assertEq(fraktionTokens.ownerOf(contentId), contentOwner);
@@ -47,43 +47,35 @@ contract FraktionTokensTest is FrakTest {
         assertEq(fraktionTokens.supplyOf(contentId.diamondFraktionId()), 10);
 
         // Ensure that two content id are not the same
-        ContentId newContentId = fraktionTokens.mintNewContent(contentOwner, types, supplies);
+        ContentId newContentId = fraktionTokens.mintNewContent(contentOwner, suppliesToType);
         assertNotEq(ContentId.unwrap(contentId), ContentId.unwrap(newContentId));
     }
 
     function test_addContent_InvalidRole_ko() public {
-        (uint256[] memory types, uint256[] memory supplies) = _getMintContentParams();
+        uint256[] memory suppliesToType = _getMintContentParams();
 
         vm.expectRevert(NotAuthorized.selector);
-        fraktionTokens.mintNewContent(contentOwner, types, supplies);
-    }
-
-    function test_addContent_InvalidArray_ko() public asDeployer {
-        (uint256[] memory types,) = _getMintContentParams();
-        uint256[] memory supplies = new uint256[](2);
-
-        vm.expectRevert(InvalidArray.selector);
-        fraktionTokens.mintNewContent(contentOwner, types, supplies);
+        fraktionTokens.mintNewContent(contentOwner, suppliesToType);
     }
 
     function test_addContent_SupplyUpdateNotAllowed_ko() public asDeployer {
-        (uint256[] memory types, uint256[] memory supplies) = _getMintContentParams();
+        uint256[] memory suppliesToType = _getMintContentParams();
 
-        types[0] = 0;
+        suppliesToType[0] = 0;
         vm.expectRevert(FraktionTokens.SupplyUpdateNotAllowed.selector);
-        fraktionTokens.mintNewContent(contentOwner, types, supplies);
+        fraktionTokens.mintNewContent(contentOwner, suppliesToType);
 
-        types[0] = 1;
+        suppliesToType[0] = 1;
         vm.expectRevert(FraktionTokens.SupplyUpdateNotAllowed.selector);
-        fraktionTokens.mintNewContent(contentOwner, types, supplies);
+        fraktionTokens.mintNewContent(contentOwner, suppliesToType);
 
-        types[0] = 2;
+        suppliesToType[0] = 2;
         vm.expectRevert(FraktionTokens.SupplyUpdateNotAllowed.selector);
-        fraktionTokens.mintNewContent(contentOwner, types, supplies);
+        fraktionTokens.mintNewContent(contentOwner, suppliesToType);
 
-        types[0] = 7;
+        suppliesToType[0] = 7;
         vm.expectRevert(FraktionTokens.SupplyUpdateNotAllowed.selector);
-        fraktionTokens.mintNewContent(contentOwner, types, supplies);
+        fraktionTokens.mintNewContent(contentOwner, suppliesToType);
     }
 
     /* -------------------------------------------------------------------------- */
@@ -214,20 +206,13 @@ contract FraktionTokensTest is FrakTest {
     /*                                Some helper's                               */
     /* -------------------------------------------------------------------------- */
 
-    function _getMintContentParams() internal pure returns (uint256[] memory types, uint256[] memory supplies) {
+    function _getMintContentParams() internal pure returns (uint256[] memory suppliesToType) {
         // Build the array of types (payable fraktion type)
-        types = new uint256[](4);
-        types[0] = ContentIdLib.FRAKTION_TYPE_COMMON;
-        types[1] = ContentIdLib.FRAKTION_TYPE_PREMIUM;
-        types[2] = ContentIdLib.FRAKTION_TYPE_GOLD;
-        types[3] = ContentIdLib.FRAKTION_TYPE_DIAMOND;
-
-        // Build the array of supplies
-        supplies = new uint256[](4);
-        supplies[0] = 100;
-        supplies[1] = 50;
-        supplies[2] = 25;
-        supplies[3] = 10;
+        suppliesToType = new uint256[](4);
+        suppliesToType[0] = 100 << 4 | ContentIdLib.FRAKTION_TYPE_COMMON;
+        suppliesToType[1] = 50 << 4 | ContentIdLib.FRAKTION_TYPE_PREMIUM;
+        suppliesToType[2] = 25 << 4 | ContentIdLib.FRAKTION_TYPE_GOLD;
+        suppliesToType[3] = 10 << 4 | ContentIdLib.FRAKTION_TYPE_DIAMOND;
     }
 }
 

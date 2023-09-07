@@ -228,6 +228,39 @@ contract ContentPoolTest is FrakTest {
         assertEq(targetUserParticipant.shares, 10);
     }
 
+    function test_updateUser_MultiTokenTransfer_ok() public {
+        // Simulate fraktion mint by a user
+        _mintCommonForUser();
+        _mintGoldForUser();
+        _mintDiamondForUser();
+        _addPoolReward();
+
+        address targetUser = _newUser("contentPoolTargetUser");
+
+        // Compute user rewards & withdraw
+        contentPool.computeAllPoolsBalance(user);
+        contentPool.withdrawFounds(user);
+        // Assert the user received something
+        assertGt(frakToken.balanceOf(user), 0);
+
+        // Transfer the user fraktion to the target user
+        uint256[] memory idsToTransfer = new uint256[](2);
+        idsToTransfer[0] = FraktionId.unwrap(contentId.commonFraktionId());
+        idsToTransfer[1] = FraktionId.unwrap(contentId.diamondFraktionId());
+        uint256[] memory amountsToTransfer = new uint256[](2);
+        amountsToTransfer[0] = 1;
+        amountsToTransfer[1] = 1;
+
+        vm.prank(user);
+        fraktionTokens.safeBatchTransferFrom(user, targetUser, idsToTransfer, amountsToTransfer, "");
+
+        // Add a few more rewards and repeat the process
+        _addPoolReward();
+        contentPool.withdrawFounds(targetUser);
+        assertGt(frakToken.balanceOf(user), 0);
+        assertGt(frakToken.balanceOf(targetUser), 0);
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                             Test view function                             */
     /* -------------------------------------------------------------------------- */

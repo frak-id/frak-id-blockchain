@@ -13,8 +13,6 @@ import { InvalidArray } from "../utils/FrakErrors.sol";
 /// @author @KONFeature
 /// @title FraktionTokens
 /// @notice ERC1155 for the Frak Fraktions tokens, used as ownership proof for a content, or investisment proof
-/// TODO: Global overview :
-///     - mint content, Single array as param with byte shifting :|supplies|fraktionType|
 /// @custom:security-contact contact@frak.id
 contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /* -------------------------------------------------------------------------- */
@@ -97,13 +95,13 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /*                          External write function's                         */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Mint a new content, return the id of the built content
-     */
+    /// @dev Mint a new content, return the id of the built content
+    /// @param ownerAddress The address of the content owner
+    /// @param suppliesToType The supplies to type array, each element of the array is a tuple on a byte [supply, type],
+    /// type on 0xf, supply on all the remaining bytes
     function mintNewContent(
         address ownerAddress,
-        uint256[] calldata fraktionTypes,
-        uint256[] calldata supplies
+        uint256[] calldata suppliesToType
     )
         external
         payable
@@ -112,12 +110,6 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     {
         uint256 creatorTokenId;
         assembly {
-            // Ensure we got valid data
-            if or(iszero(fraktionTypes.length), iszero(eq(fraktionTypes.length, supplies.length))) {
-                mstore(0x00, _INVALID_ARRAY_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-
             // Get the next content id and increment the current content id
             id := add(sload(_currentContentId.slot), 1)
             sstore(_currentContentId.slot, id)
@@ -127,13 +119,14 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
 
             // Iterate over each fraktion type, build their id, and set their supply
             // Get where our offset end
-            let offsetEnd := shl(5, fraktionTypes.length)
+            let offsetEnd := shl(5, suppliesToType.length)
             // Current iterator offset
             let currentOffset := 0
             // Infinite loop
             for { } 1 { } {
                 // Get the current id
-                let fraktionType := calldataload(add(fraktionTypes.offset, currentOffset))
+                let currentItem := calldataload(add(suppliesToType.offset, currentOffset))
+                let fraktionType := and(currentItem, 0xF)
 
                 // Ensure the supply update of this fraktion type is allowed
                 if or(lt(fraktionType, 3), gt(fraktionType, 6)) {
@@ -146,7 +139,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
                 let fraktionId := or(shiftedId, fraktionType)
 
                 // Get the supply
-                let supply := calldataload(add(supplies.offset, currentOffset))
+                let supply := shr(4, currentItem)
 
                 // Get the supply slot and update it
                 // Kecak (id, _availableSupplies.slot)
@@ -178,9 +171,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
         return id;
     }
 
-    /**
-     * @dev Set the supply for the given fraktion id
-     */
+    /// @dev Set the supply for the given fraktion id
     function setSupply(FraktionId id, uint256 supply) external payable onlyRole(FrakRoles.MINTER) {
         assembly {
             // Ensure the supply update of this fraktion type is allowed
@@ -228,9 +219,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /*                        Internal callback function's                        */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Handle the transfer token (so update the content investor, change the owner of some content etc)
-     */
+    /// @dev Handle the transfer token (so update the content investor, change the owner of some content etc)
     function _beforeTokenTransfer(
         address,
         address from,
@@ -242,6 +231,10 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
         internal
         override
     {
+        // Directly exit if we are not concerned by a mint or burn
+        if (from != address(0) && to != address(0)) return;
+
+        // Assembly block to check supply and decrease it if needed
         assembly {
             // Base offset to access array element's
             let currOffset := 0x20
@@ -283,9 +276,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
         }
     }
 
-    /**
-     * @dev Handle the transfer token (so update the content investor, change the owner of some content etc)
-     */
+    /// @dev Handle the transfer token (so update the content investor, change the owner of some content etc)
     function _afterTokenTransfer(
         address,
         address from,
@@ -347,9 +338,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /*                           Public view function's                           */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Batch balance of for single address
-     */
+    /// @dev Batch balance of for single address
     function balanceOfIdsBatch(
         address account,
         FraktionId[] calldata ids
