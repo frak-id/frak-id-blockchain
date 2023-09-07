@@ -14,8 +14,6 @@ import { InvalidArray } from "../utils/FrakErrors.sol";
 /// @title FraktionTokens
 /// @notice ERC1155 for the Frak Fraktions tokens, used as ownership proof for a content, or investisment proof
 /// TODO: Global overview :
-///     - remove storage dependency for owner (using balanceOf and building content owner fraktion)
-///     - remove storage dependency for is supply aware (every fraktion type between 3 to 6 is supply aware)
 ///     - mint content, Single array as param with byte shifting :|supplies|fraktionType|
 /// @custom:security-contact contact@frak.id
 contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
@@ -73,13 +71,15 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     FraktionTransferCallback private transferCallback;
 
     /// @dev Id of content to owner of this content
+    /// @notice This is unused now, since we rely on the balanceOf m
     mapping(uint256 id => address owner) private owners;
 
     /// @dev Available supply of each fraktion (classic, rare, epic and legendary only) by they id
     mapping(uint256 id => uint256 availableSupply) private _availableSupplies;
 
     /// @dev Tell us if that fraktion is supply aware or not
-    mapping(uint256 id => bool isSupplyAware) private _isSupplyAware;
+    /// @notice unused now since we rely on the fraktion type to know if it's supply aware or not
+    mapping(uint256 => bool) private _unused1;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -148,15 +148,9 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
                 // Get the supply
                 let supply := calldataload(add(supplies.offset, currentOffset))
 
-                // Get the slot to know if it's supply aware, and store true there
-                // Kecak (id, _isSupplyAware.slot)
-                mstore(0, fraktionId)
-                mstore(0x20, _isSupplyAware.slot)
-                sstore(keccak256(0, 0x40), true)
-
                 // Get the supply slot and update it
                 // Kecak (id, _availableSupplies.slot)
-                // `mstore(0, fraktionId)` -> Not needed since alreaded store on the 0 slot before
+                mstore(0, fraktionId)
                 mstore(0x20, _availableSupplies.slot)
                 sstore(keccak256(0, 0x40), supply)
                 // Emit the supply updated event
@@ -171,11 +165,8 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
 
             // Update creator supply now
             creatorTokenId := or(shiftedId, 1)
-            // Get the slot to know if it's supply aware, and store true there
-            mstore(0, creatorTokenId)
-            mstore(0x20, _isSupplyAware.slot)
-            sstore(keccak256(0, 0x40), true)
             // Then store the available supply of 1 (since only one creator nft is possible)
+            mstore(0, creatorTokenId)
             mstore(0x20, _availableSupplies.slot)
             sstore(keccak256(0, 0x40), 1)
         }
@@ -210,11 +201,6 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
                 revert(0x1c, 0x04)
             }
 
-            // Get the slot to know if it's supply aware, and store true there
-            // Kecak (id, _isSupplyAware.slot)
-            mstore(0, id)
-            mstore(0x20, _isSupplyAware.slot)
-            sstore(keccak256(0, 0x40), true)
             // Get the supply slot and update it
             sstore(supplySlot, supply)
             // Emit the supply updated event
@@ -267,16 +253,13 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
                 let id := mload(add(ids, currOffset))
                 let amount := mload(add(amounts, currOffset))
 
-                // Get the slot to know if it's supply aware
-                // Kecak (id, _isSupplyAware.slot)
-                mstore(0, id)
-                mstore(0x20, _isSupplyAware.slot)
-
                 // Supply aware code block
-                if sload(keccak256(0, 0x40)) {
+                // If fraktion type == 1 (creator) or fraktion type > 2 & < 7 (payed fraktion)
+                let fraktionType := and(id, 0xF)
+                if or(eq(fraktionType, 1), and(gt(fraktionType, 2), lt(fraktionType, 7))) {
                     // Get the supply slot
                     // Kecak (id, _availableSupplies.slot)
-                    // mstore(0, id) -> Don't needed since we already stored the id before in this mem space
+                    mstore(0, id)
                     mstore(0x20, _availableSupplies.slot)
                     let availableSupplySlot := keccak256(0, 0x40)
                     let availableSupply := sload(availableSupplySlot)

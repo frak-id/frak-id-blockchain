@@ -59,7 +59,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     /* -------------------------------------------------------------------------- */
 
     /// @dev The index of the current state index per content
-    /// TODO : This is unused now since we use the array length (more effecient since we perform a first sload on the
+    /// This is unused now since we use the array length (more effecient since we perform a first sload on the
     /// mapping, and we need to do it anyway)
     mapping(uint256 => uint256) private currentStateIndex;
 

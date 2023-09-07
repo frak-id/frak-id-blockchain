@@ -55,8 +55,7 @@ interface IContentPool is FraktionTransferCallback {
         uint120 shares; // Number of shares in the content pool, pos :  0x0 <-> 0x0F
         uint96 lastStateClaim; // The last state amount claimed, pos : 0x0F + 0x0C -> 0x0F <-> 0x1B
         // Second storage slot
-        uint256 lastStateIndex; // What was the last state index he claimed in the pool ? -> TODO : 0x20 or Ox1B ->
-            // (0x0F + 0x0C)
+        uint256 lastStateIndex; // What was the last state index he claimed in the pool ?
     }
 
     /**
