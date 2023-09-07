@@ -168,6 +168,78 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         }
     }
 
+    /// @dev Add an autominted content holder
+    function addAutoMintedContent(address autoMintHolder)
+        external
+        payable
+        override
+        onlyRole(FrakRoles.MINTER)
+        returns (ContentId contentId)
+    {
+        // Each typplies to types array
+        uint256[] memory suppliesToType;
+        assembly {
+            // Check owner address
+            if iszero(autoMintHolder) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+            // Init our array's
+            suppliesToType := mload(0x40)
+            // Update our free mem pointer
+            mstore(0x40, add(suppliesToType, 0x40))
+            // Init our array's length
+            mstore(suppliesToType, 1)
+            // Store the fraktionTypes (only 1 supply of common fraktion)
+            mstore(add(suppliesToType, 0x20), or(shl(4, 1), 3))
+        }
+        // Try to mint the new content
+        contentId = fraktionTokens.mintNewContent(autoMintHolder, suppliesToType);
+        assembly {
+            // Emit the content minted event
+            mstore(0, contentId)
+            log2(0, 0x20, _CONTENT_MINTED_EVENT_SELECTOR, autoMintHolder)
+        }
+    }
+
+    /// @dev Add a content for a creator
+    function addContentForCreator(address contentOwnerAddress)
+        external
+        payable
+        override
+        onlyRole(FrakRoles.MINTER)
+        returns (ContentId contentId)
+    {
+        // Each typplies to types array
+        uint256[] memory suppliesToType;
+        assembly {
+            // Check owner address
+            if iszero(contentOwnerAddress) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+            // Init our array's
+            suppliesToType := mload(0x40)
+            // Update our free mem pointer
+            mstore(0x40, add(suppliesToType, 0x100))
+            // Init our array's length
+            mstore(suppliesToType, 4)
+            // Store the fraktionTypes
+            // We can keep shifting since it will be replaced by constant by the compiler
+            mstore(add(suppliesToType, 0x20), or(shl(4, 20), 3))
+            mstore(add(suppliesToType, 0x40), or(shl(4, 7), 4))
+            mstore(add(suppliesToType, 0x60), or(shl(4, 3), 5))
+            mstore(add(suppliesToType, 0x80), or(shl(4, 1), 6))
+        }
+        // Try to mint the new content
+        contentId = fraktionTokens.mintNewContent(contentOwnerAddress, suppliesToType);
+        assembly {
+            // Emit the content minted event
+            mstore(0, contentId)
+            log2(0, 0x20, _CONTENT_MINTED_EVENT_SELECTOR, contentOwnerAddress)
+        }
+    }
+
     /**
      * @notice  Mint a new fraktion for the given amount and user
      * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer

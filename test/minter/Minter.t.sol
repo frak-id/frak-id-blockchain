@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
+import "forge-std/console.sol";
 import { FrakTest } from "../FrakTest.sol";
 import { NotAuthorized, InvalidArray } from "contracts/utils/FrakErrors.sol";
 import { FraktionTokens } from "contracts/fraktions/FraktionTokens.sol";
@@ -69,6 +70,39 @@ contract MinterTest is FrakTest {
 
         vm.expectRevert(IMinter.InvalidSupply.selector);
         minter.addContent(contentOwner, 20, 7, 3, 21);
+    }
+
+    /// @dev Different mint method's benchmark
+    function test_benchmarkAddContent_ok() public asDeployer {
+        // Warm up storage
+        minter.addAutoMintedContent(contentOwner);
+        minter.addContent(contentOwner, 1, 0, 0, 0);
+
+        uint256 gasLeft = gasleft();
+        minter.addAutoMintedContent(contentOwner);
+        uint256 gasUsed = gasLeft - gasleft();
+
+        console.log("- Automint");
+        console.log("-- Automint method used: %d", gasUsed);
+
+        // Build supply for 1 common only
+        gasLeft = gasleft();
+        minter.addContent(contentOwner, 1, 0, 0, 0);
+        gasUsed = gasLeft - gasleft();
+        console.log("-- Classic mint method : %d", gasUsed);
+
+        // Creator mint test
+        console.log("- Creator");
+        gasLeft = gasleft();
+        minter.addContentForCreator(contentOwner);
+        gasUsed = gasLeft - gasleft();
+        console.log("-- Creator method used: %d", gasUsed);
+
+        // Build supply for 20, 7, 3, 1
+        gasLeft = gasleft();
+        minter.addContent(contentOwner, 20, 7, 3, 1);
+        gasUsed = gasLeft - gasleft();
+        console.log("-- Classic mint method : %d", gasUsed);
     }
 
     /* -------------------------------------------------------------------------- */
