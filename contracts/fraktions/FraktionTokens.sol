@@ -25,9 +25,6 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /// @dev Error throwned when we try to update the supply of a non supply aware token
     error SupplyUpdateNotAllowed();
 
-    /// @dev Error emitted when it remain some fraktion supply when wanting to increase it
-    error RemainingSupply();
-
     /// @dev 'bytes4(keccak256("InsuficiantSupply()"))'
     uint256 private constant _INSUFICIENT_SUPPLY_SELECTOR = 0xa24b545a;
 
@@ -36,9 +33,6 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
 
     /// @dev 'bytes4(keccak256("SupplyUpdateNotAllowed()"))'
     uint256 private constant _SUPPLY_UPDATE_NOT_ALLOWED_SELECTOR = 0x48385ebd;
-
-    /// @dev 'bytes4(keccak256("RemainingSupply()"))'
-    uint256 private constant _REMAINING_SUPPLY_SELECTOR = 0x0180e6b4;
 
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
@@ -69,13 +63,15 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     FraktionTransferCallback private transferCallback;
 
     /// @dev Id of content to owner of this content
-    mapping(uint256 => address) private owners;
+    /// @notice This is unused now, since we rely on the balanceOf m
+    mapping(uint256 id => address owner) private owners;
 
     /// @dev Available supply of each fraktion (classic, rare, epic and legendary only) by they id
-    mapping(uint256 => uint256) private _availableSupplies;
+    mapping(uint256 id => uint256 availableSupply) private _availableSupplies;
 
     /// @dev Tell us if that fraktion is supply aware or not
-    mapping(uint256 => bool) private _isSupplyAware;
+    /// @notice unused now since we rely on the fraktion type to know if it's supply aware or not
+    mapping(uint256 => bool) private _unused1;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -93,14 +89,13 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /*                          External write function's                         */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Mint a new content, return the id of the built content
-     * We will store in memory -from 0x0 to 0x40 ->
-     */
+    /// @dev Mint a new content, return the id of the built content
+    /// @param ownerAddress The address of the content owner
+    /// @param suppliesToType The supplies to type array, each element of the array is a tuple on a byte [supply, type],
+    /// type on 0xf, supply on all the remaining bytes
     function mintNewContent(
         address ownerAddress,
-        uint256[] calldata fraktionTypes,
-        uint256[] calldata supplies
+        uint256[] calldata suppliesToType
     )
         external
         payable
@@ -109,12 +104,6 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     {
         uint256 creatorTokenId;
         assembly {
-            // Ensure we got valid data
-            if or(iszero(fraktionTypes.length), iszero(eq(fraktionTypes.length, supplies.length))) {
-                mstore(0x00, _INVALID_ARRAY_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-
             // Get the next content id and increment the current content id
             id := add(sload(_currentContentId.slot), 1)
             sstore(_currentContentId.slot, id)
@@ -124,13 +113,14 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
 
             // Iterate over each fraktion type, build their id, and set their supply
             // Get where our offset end
-            let offsetEnd := shl(5, fraktionTypes.length)
+            let offsetEnd := shl(5, suppliesToType.length)
             // Current iterator offset
             let currentOffset := 0
             // Infinite loop
             for { } 1 { } {
                 // Get the current id
-                let fraktionType := calldataload(add(fraktionTypes.offset, currentOffset))
+                let currentItem := calldataload(add(suppliesToType.offset, currentOffset))
+                let fraktionType := and(currentItem, 0xF)
 
                 // Ensure the supply update of this fraktion type is allowed
                 if or(lt(fraktionType, 3), gt(fraktionType, 6)) {
@@ -143,17 +133,11 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
                 let fraktionId := or(shiftedId, fraktionType)
 
                 // Get the supply
-                let supply := calldataload(add(supplies.offset, currentOffset))
-
-                // Get the slot to know if it's supply aware, and store true there
-                // Kecak (id, _isSupplyAware.slot)
-                mstore(0, fraktionId)
-                mstore(0x20, _isSupplyAware.slot)
-                sstore(keccak256(0, 0x40), true)
+                let supply := shr(4, currentItem)
 
                 // Get the supply slot and update it
                 // Kecak (id, _availableSupplies.slot)
-                // `mstore(0, fraktionId)` -> Not needed since alreaded store on the 0 slot before
+                mstore(0, fraktionId)
                 mstore(0x20, _availableSupplies.slot)
                 sstore(keccak256(0, 0x40), supply)
                 // Emit the supply updated event
@@ -168,11 +152,8 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
 
             // Update creator supply now
             creatorTokenId := or(shiftedId, 1)
-            // Get the slot to know if it's supply aware, and store true there
-            mstore(0, creatorTokenId)
-            mstore(0x20, _isSupplyAware.slot)
-            sstore(keccak256(0, 0x40), true)
             // Then store the available supply of 1 (since only one creator nft is possible)
+            mstore(0, creatorTokenId)
             mstore(0x20, _availableSupplies.slot)
             sstore(keccak256(0, 0x40), 1)
         }
@@ -184,16 +165,9 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
         return id;
     }
 
-    /**
-     * @dev Set the supply for the given fraktion id
-     */
-    function setSupply(uint256 id, uint256 supply) external payable onlyRole(FrakRoles.MINTER) {
+    /// @dev Set the supply for the given fraktion id
+    function addSupply(FraktionId id, uint256 supply) external payable onlyRole(FrakRoles.MINTER) {
         assembly {
-            // Ensure we got valid data
-            if iszero(supply) {
-                mstore(0x00, _INVALID_ARRAY_SELECTOR)
-                revert(0x1c, 0x04)
-            }
             // Ensure the supply update of this fraktion type is allowed
             let fraktionType := and(id, 0xF)
             if or(lt(fraktionType, 3), gt(fraktionType, 6)) {
@@ -205,20 +179,8 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
             mstore(0, id)
             mstore(0x20, _availableSupplies.slot)
             let supplySlot := keccak256(0, 0x40)
-            // Ensure all the supply has been sold
-            let currentSupply := sload(supplySlot)
-            if currentSupply {
-                mstore(0x00, _REMAINING_SUPPLY_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-
-            // Get the slot to know if it's supply aware, and store true there
-            // Kecak (id, _isSupplyAware.slot)
-            mstore(0, id)
-            mstore(0x20, _isSupplyAware.slot)
-            sstore(keccak256(0, 0x40), true)
             // Get the supply slot and update it
-            sstore(supplySlot, supply)
+            sstore(supplySlot, add(sload(supplySlot), supply))
             // Emit the supply updated event
             mstore(0, supply)
             log2(0, 0x20, _SUPPLY_UPDATED_EVENT_SELECTOR, id)
@@ -231,22 +193,20 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     }
 
     /// @dev Mint a new fraktion of a nft
-    function mint(address to, uint256 id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) {
-        _mint(to, id, amount, "");
+    function mint(address to, FraktionId id, uint256 amount) external payable onlyRole(FrakRoles.MINTER) {
+        _mint(to, FraktionId.unwrap(id), amount, "");
     }
 
     /// @dev Burn a fraktion of a nft
-    function burn(uint256 id, uint256 amount) external payable {
-        _burn(msg.sender, id, amount);
+    function burn(FraktionId id, uint256 amount) external payable {
+        _burn(msg.sender, FraktionId.unwrap(id), amount);
     }
 
     /* -------------------------------------------------------------------------- */
     /*                        Internal callback function's                        */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Handle the transfer token (so update the content investor, change the owner of some content etc)
-     */
+    /// @dev Handle the transfer token (so update the content investor, change the owner of some content etc)
     function _beforeTokenTransfer(
         address,
         address from,
@@ -258,6 +218,10 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
         internal
         override
     {
+        // Directly exit if we are not concerned by a mint or burn
+        if (from != address(0) && to != address(0)) return;
+
+        // Assembly block to check supply and decrease it if needed
         assembly {
             // Base offset to access array element's
             let currOffset := 0x20
@@ -269,16 +233,13 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
                 let id := mload(add(ids, currOffset))
                 let amount := mload(add(amounts, currOffset))
 
-                // Get the slot to know if it's supply aware
-                // Kecak (id, _isSupplyAware.slot)
-                mstore(0, id)
-                mstore(0x20, _isSupplyAware.slot)
-
                 // Supply aware code block
-                if sload(keccak256(0, 0x40)) {
+                // If fraktion type == 1 (creator) or fraktion type > 2 & < 7 (payed fraktion)
+                let fraktionType := and(id, 0xF)
+                if or(eq(fraktionType, 1), and(gt(fraktionType, 2), lt(fraktionType, 7))) {
                     // Get the supply slot
                     // Kecak (id, _availableSupplies.slot)
-                    // mstore(0, id) -> Don't needed since we already stored the id before in this mem space
+                    mstore(0, id)
                     mstore(0x20, _availableSupplies.slot)
                     let availableSupplySlot := keccak256(0, 0x40)
                     let availableSupply := sload(availableSupplySlot)
@@ -302,9 +263,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
         }
     }
 
-    /**
-     * @dev Handle the transfer token (so update the content investor, change the owner of some content etc)
-     */
+    /// @dev Handle the transfer token (so update the content investor, change the owner of some content etc)
     function _afterTokenTransfer(
         address,
         address from,
@@ -366,9 +325,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /*                           Public view function's                           */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Batch balance of for single address
-     */
+    /// @dev Batch balance of for single address
     function balanceOfIdsBatch(
         address account,
         FraktionId[] calldata ids

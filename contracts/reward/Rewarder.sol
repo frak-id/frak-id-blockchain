@@ -201,8 +201,6 @@ contract Rewarder is
 
         // Then, for each content contentIds
         for (uint256 i; i < contentIds.length;) {
-            // TODO : Do that in assembly (all the for loops)
-            // TODO : copy calldata to memory for iteration ? calldatacopy(...)
             uint256 amount = amounts[i];
             assembly {
                 // Ensure the reward is valid

@@ -1,397 +1,238 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { FraktionTokens } from "@frak/fraktions/FraktionTokens.sol";
-import { FrakToken } from "@frak/tokens/FrakToken.sol";
-import { IFrakToken } from "@frak/tokens/IFrakToken.sol";
-import { ContentId } from "@frak/libs/ContentId.sol";
-import { FraktionId } from "@frak/libs/FraktionId.sol";
-import { FrakRoles } from "@frak/roles/FrakRoles.sol";
-import { Minter } from "@frak/minter/Minter.sol";
-import { IMinter } from "@frak/minter/IMinter.sol";
-import { FrkTokenTestHelper } from "../FrkTokenTestHelper.sol";
-import { NotAuthorized, InvalidAddress, BadgeTooLarge, InvalidFraktionType } from "@frak/utils/FrakErrors.sol";
+import "forge-std/console.sol";
+import { FrakTest } from "../FrakTest.sol";
+import { NotAuthorized, InvalidArray } from "contracts/utils/FrakErrors.sol";
+import { FraktionTokens } from "contracts/fraktions/FraktionTokens.sol";
+import { Minter } from "contracts/minter/Minter.sol";
+import { IMinter } from "contracts/minter/IMinter.sol";
+import { ContentId, ContentIdLib } from "contracts/libs/ContentId.sol";
+import { FraktionId } from "contracts/libs/FraktionId.sol";
 
-/// Testing minter contract
-contract MinterTest is FrkTokenTestHelper {
-    FraktionTokens fraktionTokens;
-    address foundationAddr = address(13);
-
-    address minterAddr;
-    Minter minter;
-
+/// @dev Testing methods on the Minter
+contract MinterTest is FrakTest {
     function setUp() public {
-        _setupFrkToken();
-
-        // Deploy fraktions token
-        bytes memory initData = abi.encodeCall(FraktionTokens.initialize, ("test_url"));
-        address fraktionProxyAddr = deployContract(address(new FraktionTokens()), initData);
-        fraktionTokens = FraktionTokens(fraktionProxyAddr);
-
-        // Deploy our minter contract
-        initData = abi.encodeCall(Minter.initialize, (address(frakToken), fraktionProxyAddr, foundationAddr));
-        minterAddr = deployContract(address(new Minter()), initData);
-        minter = Minter(minterAddr);
-
-        // Grant the minter role to our minter contract
-        prankDeployer();
-        fraktionTokens.grantRole(FrakRoles.MINTER, minterAddr);
+        _setupTests();
     }
 
-    /*
-     * ===== TEST : initialize(
-        address frkTokenAddr,
-        address fraktionTokensAddr,
-        address foundationAddr
-    ) =====
-     */
-    function test_fail_InitTwice() public {
+    /* -------------------------------------------------------------------------- */
+    /*                                 Init test's                                */
+    /* -------------------------------------------------------------------------- */
+
+    function test_canBeDeployedAndInit_ok() public {
+        // Deploy our contract via proxy and set the proxy address
+        bytes memory initData =
+            abi.encodeCall(Minter.initialize, (address(frakToken), address(fraktionTokens), foundation));
+        address proxyAddress = _deployProxy(address(new Minter()), initData, "MinterDeploy");
+        minter = Minter(proxyAddress);
+    }
+
+    /// @dev Can't re-init
+    function test_initialize_InitTwice_ko() public {
         vm.expectRevert("Initializable: contract is already initialized");
-        minter.initialize(address(0), address(0), address(0));
+        minter.initialize(address(frakToken), address(fraktionTokens), foundation);
     }
 
-    /*
-     * ===== TEST : addContent(
-        address contentOwnerAddress,
-        uint256 commonSupply,
-        uint256 premiumSupply,
-        uint256 goldSupply,
-        uint256 diamondSupply
-    ) =====
-     */
-    function test_addContent() public prankExecAsDeployer {
-        minter.addContent(address(1), 1, 1, 1, 1);
+    /* -------------------------------------------------------------------------- */
+    /*                             Add content test's                             */
+    /* -------------------------------------------------------------------------- */
+
+    function test_addContent_ok() public {
+        // Can add a new content
+        vm.prank(deployer);
+        ContentId newContentId = minter.addContent(contentOwner, 20, 7, 3, 1);
+
+        // Ensure, the content supply are ok
+        assertEq(fraktionTokens.supplyOf(newContentId.commonFraktionId()), 20);
+        assertEq(fraktionTokens.supplyOf(newContentId.premiumFraktionId()), 7);
+        assertEq(fraktionTokens.supplyOf(newContentId.goldFraktionId()), 3);
+        assertEq(fraktionTokens.supplyOf(newContentId.diamondFraktionId()), 1);
     }
 
-    function test_fail_addContent_NotAuthorized() public {
+    function test_addContent_InvalidRole_ko() public {
         vm.expectRevert(NotAuthorized.selector);
-        minter.addContent(address(1), 1, 1, 1, 1);
+        minter.addContent(contentOwner, 20, 7, 3, 1);
     }
 
-    function test_fail_addContent_InvalidAddress() public prankExecAsDeployer {
-        vm.expectRevert(InvalidAddress.selector);
-        minter.addContent(address(0), 1, 1, 1, 1);
-    }
-
-    function test_fail_addContent_InvalidSupply() public prankExecAsDeployer {
+    function test_addContent_InvalidSupply_ko() public asDeployer {
         vm.expectRevert(IMinter.InvalidSupply.selector);
-        minter.addContent(address(1), 0, 1, 1, 1);
+        minter.addContent(contentOwner, 0, 7, 3, 1);
 
         vm.expectRevert(IMinter.InvalidSupply.selector);
-        minter.addContent(address(1), 501, 1, 1, 1);
+        minter.addContent(contentOwner, 501, 7, 3, 1);
 
         vm.expectRevert(IMinter.InvalidSupply.selector);
-        minter.addContent(address(1), 1, 201, 1, 1);
+        minter.addContent(contentOwner, 20, 201, 3, 1);
 
         vm.expectRevert(IMinter.InvalidSupply.selector);
-        minter.addContent(address(1), 1, 1, 51, 1);
+        minter.addContent(contentOwner, 20, 7, 51, 1);
 
         vm.expectRevert(IMinter.InvalidSupply.selector);
-        minter.addContent(address(1), 1, 1, 1, 21);
+        minter.addContent(contentOwner, 20, 7, 3, 21);
     }
 
-    /*
-     * ===== TEST : mintFraktionForUser(
-        uint256 id,
-        address to,
-        uint256 amount,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) =====
-     */
-    bytes32 constant PERMIT_TYPEHASH =
-        keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+    /// @dev Different mint method's benchmark
+    function test_benchmarkAddContent_ok() public asDeployer {
+        // Warm up storage
+        minter.addAutoMintedContent(contentOwner);
+        minter.addContent(contentOwner, 1, 0, 0, 0);
 
-    /// @dev Get permit signature for the given private key and cost
-    function _getSignedPermit(uint256 privateKey, uint256 cost) private view returns (uint8 v, bytes32 r, bytes32 s) {
-        address user = vm.addr(privateKey);
-        (v, r, s) = vm.sign(
-            privateKey,
-            keccak256(
-                abi.encodePacked(
-                    "\x19\x01",
-                    frakToken.getDomainSeperator(),
-                    keccak256(
-                        abi.encode(
-                            PERMIT_TYPEHASH, user, address(minter), cost, frakToken.getNonce(user), block.timestamp
-                        )
-                    )
-                )
-            )
-        );
+        uint256 gasLeft = gasleft();
+        minter.addAutoMintedContent(contentOwner);
+        uint256 gasUsed = gasLeft - gasleft();
+
+        console.log("- Automint");
+        console.log("-- Automint method used: %d", gasUsed);
+
+        // Build supply for 1 common only
+        gasLeft = gasleft();
+        minter.addContent(contentOwner, 1, 0, 0, 0);
+        gasUsed = gasLeft - gasleft();
+        console.log("-- Classic mint method : %d", gasUsed);
+
+        // Creator mint test
+        console.log("- Creator");
+        gasLeft = gasleft();
+        minter.addContentForCreator(contentOwner);
+        gasUsed = gasLeft - gasleft();
+        console.log("-- Creator method used: %d", gasUsed);
+
+        // Build supply for 20, 7, 3, 1
+        gasLeft = gasleft();
+        minter.addContent(contentOwner, 20, 7, 3, 1);
+        gasUsed = gasLeft - gasleft();
+        console.log("-- Classic mint method : %d", gasUsed);
     }
 
-    function test_mintFraktionForUser() public {
-        uint256 privateKey = 0xACAB;
-        address user = vm.addr(privateKey);
-        // Add an initial content
-        prankDeployer();
-        ContentId contentId = minter.addContent(address(1), 10, 1, 1, 1);
-        // Mint some token to our user
-        prankDeployer();
-        frakToken.mint(user, 500 ether);
+    /* -------------------------------------------------------------------------- */
+    /*                             Free fraktion mint                             */
+    /* -------------------------------------------------------------------------- */
 
-        // Get the cost of the buy process
-        FraktionId fraktionCommonId = contentId.commonFraktionId();
-        uint256 cost = minter.getCostBadge(fraktionCommonId);
+    function test_mintFreeFraktion_ok() public {
+        FraktionId freeFraktionId = contentId.freeFraktionId();
 
-        // Sign the tx for the user
-        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
-
-        // Launch the buy prcess
-        prankDeployer();
-        minter.mintFraktionForUser(fraktionCommonId, user, block.timestamp, v, r, s);
-        // Ensure the supply is good
-        assertEq(fraktionTokens.supplyOf(fraktionCommonId), 9);
-        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(fraktionCommonId)), 1);
-    }
-
-    function test_fail_mintFraktionForUser_NotAuthorized() public {
-        uint256 privateKey = 0xACAB;
-        address user = vm.addr(privateKey);
-        // Add an initial content
-        prankDeployer();
-        ContentId contentId = minter.addContent(address(1), 10, 1, 1, 1);
-        // Mint some token to our user
-        prankDeployer();
-        frakToken.mint(user, 500 ether);
-
-        // Get the cost of the buy process
-        FraktionId fraktionCommonId = contentId.commonFraktionId();
-        uint256 cost = minter.getCostBadge(fraktionCommonId);
-
-        // Sign the tx for the user
-        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
-
-        // Launch the buy prcess
-        vm.expectRevert(NotAuthorized.selector);
-        minter.mintFraktionForUser(fraktionCommonId, user, block.timestamp, v, r, s);
-    }
-
-    function test_fail_mintFraktionForUser_InsuficiantSupply() public {
-        uint256 privateKey = 0xACAB;
-        address user = vm.addr(privateKey);
-        // Add an initial content
-        prankDeployer();
-        ContentId contentId = minter.addContent(address(1), 1, 0, 1, 1);
-        // Mint some token to our user
-        prankDeployer();
-        frakToken.mint(user, 500 ether);
-
-        // Get the cost of the buy process
-        FraktionId fraktionCommonId = contentId.premiumFraktionId();
-        uint256 cost = minter.getCostBadge(fraktionCommonId);
-
-        // Sign the tx for the user
-        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
-
-        // Launch the buy prcess
-        vm.expectRevert(FraktionTokens.InsuficiantSupply.selector);
-        prankDeployer();
-        minter.mintFraktionForUser(fraktionCommonId, user, block.timestamp, v, r, s);
-    }
-
-    function test_fail_mintFraktionForUser_InvalidFraktionType() public {
-        uint256 privateKey = 0xACAB;
-        address user = vm.addr(privateKey);
-        // Add an initial content
-        prankDeployer();
-        ContentId contentId = minter.addContent(address(1), 1, 1, 1, 1);
-        // Mint some token to our user
-        prankDeployer();
-        frakToken.mint(user, 500 ether);
-
-        // Get the cost of the buy process
-        FraktionId fraktionCommonId = contentId.commonFraktionId();
-        uint256 cost = minter.getCostBadge(fraktionCommonId);
-
-        // Sign the tx for the user
-        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
-
-        // Launch the buy prcess
-        vm.expectRevert(InvalidFraktionType.selector);
-        prankDeployer();
-        minter.mintFraktionForUser(contentId.freeFraktionId(), user, block.timestamp, v, r, s);
-    }
-
-    function test_fail_mintFractionForUser_InvalidSigner() public {
-        uint256 privateKey = 0xACAB;
-        address user = vm.addr(privateKey);
-        // Add an initial content
-        prankDeployer();
-        ContentId contentId = minter.addContent(address(1), 10, 1, 1, 1);
-        // Mint some token to our user
-        prankDeployer();
-        frakToken.mint(user, 500 ether);
-
-        // Get the cost of the buy process
-        FraktionId fraktionCommonId = contentId.commonFraktionId();
-        uint256 cost = minter.getCostBadge(fraktionCommonId);
-
-        // Sign the tx for the user
-        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost - 1);
-
-        // Launch the buy prcess
-        prankDeployer();
-        vm.expectRevert(IFrakToken.InvalidSigner.selector);
-        minter.mintFraktionForUser(fraktionCommonId, user, block.timestamp, v, r, s);
-        // Ensure the supply hasn't changed
-        assertEq(fraktionTokens.supplyOf(fraktionCommonId), 10);
-    }
-
-    /*
-     * ===== TEST : mintFraktion(
-        uint256 id,
-        uint256 amount,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) =====
-     */
-    function test_mintFraktion() public {
-        uint256 privateKey = 0xACAB;
-        address user = vm.addr(privateKey);
-        // Add an initial content
-        prankDeployer();
-        ContentId contentId = minter.addContent(address(1), 10, 1, 1, 1);
-        // Mint some token to our user
-        prankDeployer();
-        frakToken.mint(user, 500 ether);
-
-        // Get the cost of the buy process
-        FraktionId fraktionCommonId = contentId.commonFraktionId();
-        uint256 cost = minter.getCostBadge(fraktionCommonId);
-
-        // Sign the tx for the user
-        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
-
-        // Launch the buy prcess
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(freeFraktionId)), 0);
         vm.prank(user);
-        minter.mintFraktion(fraktionCommonId, block.timestamp, v, r, s);
-        // Ensure the supply is good
-        assertEq(fraktionTokens.supplyOf(fraktionCommonId), 9);
-        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(fraktionCommonId)), 1);
+        minter.mintFreeFraktion(freeFraktionId);
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(freeFraktionId)), 1);
     }
 
-    function test_fail_mintFraktion_TooManyFraktion() public {
-        uint256 privateKey = 0xACAB;
-        address user = vm.addr(privateKey);
-        // Add an initial content
-        prankDeployer();
-        ContentId contentId = minter.addContent(address(1), 10, 1, 1, 1);
-        // Mint some token to our user
-        prankDeployer();
-        frakToken.mint(user, 500 ether);
+    function test_mintFreeFraktionForUser_ok() public {
+        FraktionId freeFraktionId = contentId.freeFraktionId();
 
-        // Get the cost of the buy process
-        FraktionId fraktionCommonId = contentId.commonFraktionId();
-        uint256 cost = minter.getCostBadge(fraktionCommonId);
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(freeFraktionId)), 0);
+        minter.mintFreeFraktionForUser(freeFraktionId, user);
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(freeFraktionId)), 1);
+    }
 
-        // Sign the tx for the user
-        (uint8 v, bytes32 r, bytes32 s) = _getSignedPermit(privateKey, cost);
-
-        // Launch the first buy process
+    function test_mintFreeFraktion_TooManyFraktion_ko() public {
+        // Mint initial fraktion
+        FraktionId freeFraktionId = contentId.freeFraktionId();
         vm.prank(user);
-        minter.mintFraktion(fraktionCommonId, block.timestamp, v, r, s);
+        minter.mintFreeFraktion(freeFraktionId);
 
-        // Sign the tx for the user
-        (v, r, s) = _getSignedPermit(privateKey, cost);
-
-        // Launch the second buy process
         vm.expectRevert(IMinter.TooManyFraktion.selector);
         vm.prank(user);
-        minter.mintFraktion(fraktionCommonId, block.timestamp, v, r, s);
+        minter.mintFreeFraktion(freeFraktionId);
     }
 
-    /*
-     * ===== TEST : mintFreeFraktionForUser(
-        uint256 id,
-        address to
-    ) =====
-     */
-    function test_mintFreeFraktionForUser() public prankExecAsDeployer {
-        // Add an initial content
-        ContentId contentId = minter.addContent(address(1), 1, 1, 1, 1);
-        minter.mintFreeFraktionForUser(contentId.freeFraktionId(), address(1));
-    }
-
-    function test_fail_mintFreeFraktionForUser_ExpectingOnlyFreeFraktion() public prankExecAsDeployer {
-        // Add an initial content
-        ContentId contentId = minter.addContent(address(1), 1, 1, 1, 1);
+    function test_mintFreeFraktion_ExpectingOnlyFreeFraktion_ko() public {
         vm.expectRevert(IMinter.ExpectingOnlyFreeFraktion.selector);
-        minter.mintFreeFraktionForUser(contentId.commonFraktionId(), address(1));
+        minter.mintFreeFraktion(contentId.creatorFraktionId());
+
+        vm.expectRevert(IMinter.ExpectingOnlyFreeFraktion.selector);
+        minter.mintFreeFraktion(contentId.commonFraktionId());
+
+        vm.expectRevert(IMinter.ExpectingOnlyFreeFraktion.selector);
+        minter.mintFreeFraktion(contentId.goldFraktionId());
+
+        vm.expectRevert(IMinter.ExpectingOnlyFreeFraktion.selector);
+        minter.mintFreeFraktion(contentId.premiumFraktionId());
+
+        vm.expectRevert(IMinter.ExpectingOnlyFreeFraktion.selector);
+        minter.mintFreeFraktion(contentId.diamondFraktionId());
     }
 
-    function test_fail_mintFreeFraktionForUser_AlreadyHaveFreeFraktion() public prankExecAsDeployer {
-        // Add an initial content
-        ContentId contentId = minter.addContent(address(1), 1, 1, 1, 1);
-        minter.mintFreeFraktionForUser(contentId.freeFraktionId(), address(1));
+    /* -------------------------------------------------------------------------- */
+    /*                             Payed fraktion mint                            */
+    /* -------------------------------------------------------------------------- */
+
+    function test_mintFraktion_ok() public withFrk(user, 100 ether) {
+        FraktionId commonFraktionId = contentId.commonFraktionId();
+        // Assert the balance is 0
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(commonFraktionId)), 0);
+
+        // Get the price of the fraktion
+        uint256 price = minter.getCostBadge(commonFraktionId);
+
+        // Generate the signature
+        (uint8 v, bytes32 r, bytes32 s) = _generateUserPermitSignature(address(minter), price, block.timestamp);
+
+        // Perform the mint process
+        vm.prank(user);
+        minter.mintFraktion(commonFraktionId, block.timestamp, v, r, s);
+
+        // Assert the fraktion was minted to the user
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(commonFraktionId)), 1);
+    }
+
+    function test_mintFraktion_TooManyFraktion_ko() public withFrk(user, 100 ether) {
+        FraktionId commonFraktionId = contentId.commonFraktionId();
+
+        // Mint first fraktion
+        uint256 price = minter.getCostBadge(commonFraktionId);
+        (uint8 v, bytes32 r, bytes32 s) = _generateUserPermitSignature(address(minter), price, block.timestamp);
+        vm.prank(user);
+        minter.mintFraktion(commonFraktionId, block.timestamp, v, r, s);
+
+        // Assert the second mint will fail
+        (v, r, s) = _generateUserPermitSignature(address(minter), price, block.timestamp);
         vm.expectRevert(IMinter.TooManyFraktion.selector);
-        minter.mintFreeFraktionForUser(contentId.freeFraktionId(), address(1));
+        vm.prank(user);
+        minter.mintFraktion(commonFraktionId, block.timestamp, v, r, s);
+
+        // Assert the fraktion was minted to the user
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(commonFraktionId)), 1);
     }
 
-    /*
-     * ===== TEST : increaseSupply(uint256 id, uint256 newSupply) =====
-     */
-    function test_increaseSupply() public prankExecAsDeployer {
-        // Add an initial content
-        ContentId contentId = minter.addContent(address(1), 1, 1, 1, 0);
-        // Increase it's diamond supply
-        minter.increaseSupply(contentId.diamondFraktionId(), 1);
+    function test_mintFraktionForUser_ok() public withFrk(user, 100 ether) {
+        FraktionId commonFraktionId = contentId.commonFraktionId();
+        // Assert the balance is 0
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(commonFraktionId)), 0);
+
+        // Get the price of the fraktion
+        uint256 price = minter.getCostBadge(commonFraktionId);
+
+        // Generate the signature
+        (uint8 v, bytes32 r, bytes32 s) = _generateUserPermitSignature(address(minter), price, block.timestamp);
+
+        // Perform the mint process
+        vm.prank(deployer);
+        minter.mintFraktionForUser(commonFraktionId, user, block.timestamp, v, r, s);
+
+        // Assert the fraktion was minted to the user
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(commonFraktionId)), 1);
     }
 
-    function test_fail_increaseSupply_NotAuthorized() public {
+    /* -------------------------------------------------------------------------- */
+    /*                               Supply method's                              */
+    /* -------------------------------------------------------------------------- */
+
+    function test_increaseSupply_ok() public withEmptySupply(contentId.commonFraktionId()) {
+        // Increase the supply of the common fraktion
+        FraktionId commonFraktionId = contentId.commonFraktionId();
+        vm.prank(deployer);
+        minter.increaseSupply(commonFraktionId, 1);
+
+        // Assert the supply was increased
+        assertEq(fraktionTokens.supplyOf(commonFraktionId), 1);
+    }
+
+    function test_increaseSupply_InvalidRole_ko() public withEmptySupply(contentId.commonFraktionId()) {
+        // Increase the supply of the common fraktion
+        FraktionId commonFraktionId = contentId.commonFraktionId();
         vm.expectRevert(NotAuthorized.selector);
-        minter.increaseSupply(FraktionId.wrap(1), 1);
-    }
-
-    function test_fail_increaseSupply_SupplyUpdateNotAllowed() public prankExecAsDeployer {
-        // Add an initial content
-        ContentId contentId = minter.addContent(address(1), 1, 1, 1, 0);
-        // Revert cause of free fraktion
-        vm.expectRevert(FraktionTokens.SupplyUpdateNotAllowed.selector);
-        minter.increaseSupply(contentId.freeFraktionId(), 1);
-        // Revert cause of nft id
-        vm.expectRevert(FraktionTokens.SupplyUpdateNotAllowed.selector);
-        minter.increaseSupply(contentId.creatorFraktionId(), 1);
-    }
-
-    function test_fail_increaseSupply_RemainingSupply() public prankExecAsDeployer {
-        // Add an initial content
-        ContentId contentId = minter.addContent(address(1), 1, 1, 1, 0);
-        // Revert cause of free fraktion
-        vm.expectRevert(FraktionTokens.RemainingSupply.selector);
-        minter.increaseSupply(contentId.commonFraktionId(), 1);
-    }
-
-    /*
-     * ===== TEST : multicall(bytes[] calldata data) =====
-     */
-    function test_multicall() public prankExecAsDeployer {
-        // Build our calldata
-        bytes[] memory callingData = new bytes[](5);
-        callingData[0] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
-        callingData[1] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
-        callingData[2] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
-        callingData[3] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
-        callingData[4] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
-
-        minter.multicall(callingData);
-    }
-
-    function test_fail_multicall_NotAuthorized() public {
-        // Build our calldata
-        bytes[] memory callingData = new bytes[](5);
-        callingData[0] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
-        callingData[1] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
-        callingData[2] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
-        callingData[3] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
-        callingData[4] = abi.encodeWithSelector(minter.addContent.selector, address(1), 1, 1, 1, 0);
-
-        vm.expectRevert(NotAuthorized.selector);
-        minter.multicall(callingData);
+        minter.increaseSupply(commonFraktionId, 1);
     }
 }

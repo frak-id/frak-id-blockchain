@@ -145,30 +145,94 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
             }
         }
         // Then set the supply for each fraktion types
-        uint256[] memory fraktionTypes;
-        uint256[] memory supplies;
+        uint256[] memory suppliesToType;
         assembly {
             // Init our array's
-            fraktionTypes := mload(0x40)
-            supplies := add(fraktionTypes, 0x100) // 0x100 Since -> 0 length, then 4 * 32 bytes for each uint256
-            // Init our array's length
-            mstore(fraktionTypes, 4)
-            mstore(supplies, 4)
+            suppliesToType := mload(0x40)
             // Update our free mem pointer
-            mstore(0x40, add(supplies, 0x100))
+            mstore(0x40, add(suppliesToType, 0x100))
+            // Init our array's length
+            mstore(suppliesToType, 4)
             // Store the fraktionTypes
-            mstore(add(fraktionTypes, 0x20), 3)
-            mstore(add(fraktionTypes, 0x40), 4)
-            mstore(add(fraktionTypes, 0x60), 5)
-            mstore(add(fraktionTypes, 0x80), 6)
-            // Store the supplies
-            mstore(add(supplies, 0x20), commonSupply)
-            mstore(add(supplies, 0x40), premiumSupply)
-            mstore(add(supplies, 0x60), goldSupply)
-            mstore(add(supplies, 0x80), diamondSupply)
+            mstore(add(suppliesToType, 0x20), or(shl(4, commonSupply), 3))
+            mstore(add(suppliesToType, 0x40), or(shl(4, premiumSupply), 4))
+            mstore(add(suppliesToType, 0x60), or(shl(4, goldSupply), 5))
+            mstore(add(suppliesToType, 0x80), or(shl(4, diamondSupply), 6))
         }
         // Try to mint the new content
-        contentId = fraktionTokens.mintNewContent(contentOwnerAddress, fraktionTypes, supplies);
+        contentId = fraktionTokens.mintNewContent(contentOwnerAddress, suppliesToType);
+        assembly {
+            // Emit the content minted event
+            mstore(0, contentId)
+            log2(0, 0x20, _CONTENT_MINTED_EVENT_SELECTOR, contentOwnerAddress)
+        }
+    }
+
+    /// @dev Add an autominted content holder
+    function addAutoMintedContent(address autoMintHolder)
+        external
+        payable
+        override
+        onlyRole(FrakRoles.MINTER)
+        returns (ContentId contentId)
+    {
+        // Each typplies to types array
+        uint256[] memory suppliesToType;
+        assembly {
+            // Check owner address
+            if iszero(autoMintHolder) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+            // Init our array's
+            suppliesToType := mload(0x40)
+            // Update our free mem pointer
+            mstore(0x40, add(suppliesToType, 0x40))
+            // Init our array's length
+            mstore(suppliesToType, 1)
+            // Store the fraktionTypes (only 1 supply of common fraktion)
+            mstore(add(suppliesToType, 0x20), or(shl(4, 1), 3))
+        }
+        // Try to mint the new content
+        contentId = fraktionTokens.mintNewContent(autoMintHolder, suppliesToType);
+        assembly {
+            // Emit the content minted event
+            mstore(0, contentId)
+            log2(0, 0x20, _CONTENT_MINTED_EVENT_SELECTOR, autoMintHolder)
+        }
+    }
+
+    /// @dev Add a content for a creator
+    function addContentForCreator(address contentOwnerAddress)
+        external
+        payable
+        override
+        onlyRole(FrakRoles.MINTER)
+        returns (ContentId contentId)
+    {
+        // Each typplies to types array
+        uint256[] memory suppliesToType;
+        assembly {
+            // Check owner address
+            if iszero(contentOwnerAddress) {
+                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+            // Init our array's
+            suppliesToType := mload(0x40)
+            // Update our free mem pointer
+            mstore(0x40, add(suppliesToType, 0x100))
+            // Init our array's length
+            mstore(suppliesToType, 4)
+            // Store the fraktionTypes
+            // We can keep shifting since it will be replaced by constant by the compiler
+            mstore(add(suppliesToType, 0x20), or(shl(4, 20), 3))
+            mstore(add(suppliesToType, 0x40), or(shl(4, 7), 4))
+            mstore(add(suppliesToType, 0x60), or(shl(4, 3), 5))
+            mstore(add(suppliesToType, 0x80), or(shl(4, 1), 6))
+        }
+        // Try to mint the new content
+        contentId = fraktionTokens.mintNewContent(contentOwnerAddress, suppliesToType);
         assembly {
             // Emit the content minted event
             mstore(0, contentId)
@@ -246,7 +310,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      */
     function increaseSupply(FraktionId id, uint256 newSupply) external onlyRole(FrakRoles.MINTER) {
         // Update the supply
-        fraktionTokens.setSupply(FraktionId.unwrap(id), newSupply);
+        fraktionTokens.addSupply(id, newSupply);
     }
 
     /**
@@ -294,7 +358,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         // Transfer the tokens
         address(frakToken).safeTransferFrom(to, foundationWallet, cost);
         // Mint his fraktion
-        fraktionTokens.mint(to, FraktionId.unwrap(id), 1);
+        fraktionTokens.mint(to, id, 1);
     }
 
     /**
@@ -319,6 +383,6 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         }
 
         // If we are all good, mint the free fraktion to the user
-        fraktionTokens.mint(to, FraktionId.unwrap(id), 1);
+        fraktionTokens.mint(to, id, 1);
     }
 }

@@ -59,7 +59,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     /* -------------------------------------------------------------------------- */
 
     /// @dev The index of the current state index per content
-    /// TODO : This is unused now since we use the array length (more effecient since we perform a first sload on the
+    /// This is unused now since we use the array length (more effecient since we perform a first sload on the
     /// mapping, and we need to do it anyway)
     mapping(uint256 => uint256) private currentStateIndex;
 
@@ -101,7 +101,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
             }
         }
         // Get the current state
-        RewardState storage currentState = lastContentState(ContentId.unwrap(contentId));
+        RewardState storage currentState = _lastContentState(ContentId.unwrap(contentId));
         if (!currentState.open) revert PoolStateClosed();
 
         // Increase the reward
@@ -132,7 +132,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
         if (from != address(0) && to != address(0)) {
             // Handle share transfer between participant, with no update on the total pool rewards
             for (uint256 index; index < ids.length;) {
-                updateParticipants(accounter, ids[index], amount[index]);
+                _updateParticipants(accounter, ids[index], amount[index]);
                 unchecked {
                     ++index;
                 }
@@ -140,7 +140,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
         } else {
             // Otherwise (in case of mined or burned token), also update the pool
             for (uint256 index; index < ids.length;) {
-                updateParticipantAndPool(accounter, ids[index], amount[index]);
+                _updateParticipantAndPool(accounter, ids[index], amount[index]);
                 unchecked {
                     ++index;
                 }
@@ -182,7 +182,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     /// @param accounter The accounter to use to update the participants
     /// @param fraktionId The fraktion id that was transfered
     /// @param amountMoved The amount of fraktion that was transfered
-    function updateParticipants(
+    function _updateParticipants(
         FraktionTransferAccounter memory accounter,
         FraktionId fraktionId,
         uint256 amountMoved
@@ -231,7 +231,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     /// @param accounter The accounter to use to update the participants
     /// @param fraktionId The fraktion id that was transfered
     /// @param amountMoved The amount of fraktion that was transfered
-    function updateParticipantAndPool(
+    function _updateParticipantAndPool(
         FraktionTransferAccounter memory accounter,
         FraktionId fraktionId,
         uint256 amountMoved
@@ -447,19 +447,19 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     /// @dev Reset a participant state to the last reward state
     function _resetParticipantState(RewardState[] storage contentStates, Participant storage participant) private {
         // Get the last content state index
-        uint256 lastContentStateIndex = contentStates.length - 1;
+        uint256 _lastContentStateIndex = contentStates.length - 1;
         // Reset the participant state
-        participant.lastStateIndex = lastContentStateIndex;
-        participant.lastStateClaim = uint96(computeUserReward(contentStates[lastContentStateIndex], participant));
+        participant.lastStateIndex = _lastContentStateIndex;
+        participant.lastStateClaim = uint96(computeUserReward(contentStates[_lastContentStateIndex], participant));
     }
 
     /// @dev Get the latest content `state` for the given `contentId`
-    function lastContentState(uint256 contentId) private returns (RewardState storage state) {
-        (state,) = lastContentStateWithIndex(contentId);
+    function _lastContentState(uint256 contentId) private returns (RewardState storage state) {
+        (state,) = _lastContentStateWithIndex(contentId);
     }
 
     /// @dev Get the latest content `state` and `index` for the given `contentId`
-    function lastContentStateWithIndex(uint256 contentId)
+    function _lastContentStateWithIndex(uint256 contentId)
         private
         returns (RewardState storage state, uint256 rewardIndex)
     {

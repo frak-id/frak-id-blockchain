@@ -54,6 +54,12 @@ interface IMinter {
         payable
         returns (ContentId contentId);
 
+    /// @dev Add a new auto minted content in our system
+    function addAutoMintedContent(address autoMintHolder) external payable returns (ContentId contentId);
+
+    /// @dev Add a content when a creator asked for it
+    function addContentForCreator(address contentOwnerAddress) external payable returns (ContentId contentId);
+
     /**
      * @notice  Mint a new fraktion for the given amount and user
      * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer

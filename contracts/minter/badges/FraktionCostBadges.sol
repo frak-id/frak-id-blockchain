@@ -60,6 +60,11 @@ abstract contract FraktionCostBadges {
      * @param badge The new badge cost of the fraktionId in wei.
      */
     function _updateCostBadge(FraktionId fraktionId, uint96 badge) internal {
+        // Revert if the fraktion id is not a payable one
+        if (fraktionId.isNotPayable()) {
+            revert InvalidFraktionType();
+        }
+
         fraktionBadges[fraktionId] = badge;
         emit FraktionCostBadgeUpdated(FraktionId.unwrap(fraktionId), badge);
     }

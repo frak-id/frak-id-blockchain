@@ -18,6 +18,14 @@ library FraktionIdLib {
     uint256 internal constant TYPE_MASK = 0xF;
 
     /// @dev Get the `contentId` from the `self` fraktion id
+    function isNotPayable(FraktionId self) internal pure returns (bool notPayable) {
+        assembly {
+            let fType := and(self, TYPE_MASK)
+            notPayable := or(lt(fType, 3), gt(fType, 6))
+        }
+    }
+
+    /// @dev Get the `contentId` from the `self` fraktion id
     function getContentId(FraktionId self) internal pure returns (uint256 contentId) {
         assembly {
             contentId := shr(ID_OFFSET, self)
