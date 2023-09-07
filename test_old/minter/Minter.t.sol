@@ -439,14 +439,6 @@ contract MinterTest is FrkTokenTestHelper {
         minter.increaseSupply(contentId.creatorFraktionId(), 1);
     }
 
-    function test_fail_increaseSupply_RemainingSupply() public prankExecAsDeployer {
-        // Add an initial content
-        ContentId contentId = minter.addContent(address(1), 1, 1, 1, 0);
-        // Revert cause of free fraktion
-        vm.expectRevert(FraktionTokens.RemainingSupply.selector);
-        minter.increaseSupply(contentId.commonFraktionId(), 1);
-    }
-
     /*
      * ===== TEST : multicall(bytes[] calldata data) =====
      */

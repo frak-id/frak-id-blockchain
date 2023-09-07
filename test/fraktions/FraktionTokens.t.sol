@@ -88,7 +88,7 @@ contract FraktionTokensTest is FrakTest {
         assertEq(fraktionTokens.supplyOf(commonFraktion), 0);
 
         // Increase it to one
-        fraktionTokens.setSupply(commonFraktion, 1);
+        fraktionTokens.addSupply(commonFraktion, 1);
         assertEq(fraktionTokens.supplyOf(commonFraktion), 1);
 
         // Ensure the fraktion is mintable and the supplies goes back to 0
@@ -98,26 +98,21 @@ contract FraktionTokensTest is FrakTest {
 
     function test_supply_InvalidRole_ko() public withEmptySupply(contentId.commonFraktionId()) {
         vm.expectRevert(NotAuthorized.selector);
-        fraktionTokens.setSupply(contentId.commonFraktionId(), 1);
+        fraktionTokens.addSupply(contentId.commonFraktionId(), 1);
     }
 
     function test_supply_SupplyUpdateNotAllowed_ko() public asDeployer {
         vm.expectRevert(FraktionTokens.SupplyUpdateNotAllowed.selector);
-        fraktionTokens.setSupply(contentId.toFraktionId(0), 1);
+        fraktionTokens.addSupply(contentId.toFraktionId(0), 1);
 
         vm.expectRevert(FraktionTokens.SupplyUpdateNotAllowed.selector);
-        fraktionTokens.setSupply(contentId.toFraktionId(1), 1);
+        fraktionTokens.addSupply(contentId.toFraktionId(1), 1);
 
         vm.expectRevert(FraktionTokens.SupplyUpdateNotAllowed.selector);
-        fraktionTokens.setSupply(contentId.toFraktionId(2), 1);
+        fraktionTokens.addSupply(contentId.toFraktionId(2), 1);
 
         vm.expectRevert(FraktionTokens.SupplyUpdateNotAllowed.selector);
-        fraktionTokens.setSupply(contentId.toFraktionId(7), 1);
-    }
-
-    function test_supply_SupplyRemaining_ko() public asDeployer {
-        vm.expectRevert(FraktionTokens.RemainingSupply.selector);
-        fraktionTokens.setSupply(contentId.commonFraktionId(), 1);
+        fraktionTokens.addSupply(contentId.toFraktionId(7), 1);
     }
 
     /* -------------------------------------------------------------------------- */

@@ -310,7 +310,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      */
     function increaseSupply(FraktionId id, uint256 newSupply) external onlyRole(FrakRoles.MINTER) {
         // Update the supply
-        fraktionTokens.setSupply(id, newSupply);
+        fraktionTokens.addSupply(id, newSupply);
     }
 
     /**

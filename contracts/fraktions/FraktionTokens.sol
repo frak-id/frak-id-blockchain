@@ -25,9 +25,6 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /// @dev Error throwned when we try to update the supply of a non supply aware token
     error SupplyUpdateNotAllowed();
 
-    /// @dev Error emitted when it remain some fraktion supply when wanting to increase it
-    error RemainingSupply();
-
     /// @dev 'bytes4(keccak256("InsuficiantSupply()"))'
     uint256 private constant _INSUFICIENT_SUPPLY_SELECTOR = 0xa24b545a;
 
@@ -36,9 +33,6 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
 
     /// @dev 'bytes4(keccak256("SupplyUpdateNotAllowed()"))'
     uint256 private constant _SUPPLY_UPDATE_NOT_ALLOWED_SELECTOR = 0x48385ebd;
-
-    /// @dev 'bytes4(keccak256("RemainingSupply()"))'
-    uint256 private constant _REMAINING_SUPPLY_SELECTOR = 0x0180e6b4;
 
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
@@ -172,7 +166,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     }
 
     /// @dev Set the supply for the given fraktion id
-    function setSupply(FraktionId id, uint256 supply) external payable onlyRole(FrakRoles.MINTER) {
+    function addSupply(FraktionId id, uint256 supply) external payable onlyRole(FrakRoles.MINTER) {
         assembly {
             // Ensure the supply update of this fraktion type is allowed
             let fraktionType := and(id, 0xF)
@@ -185,15 +179,8 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
             mstore(0, id)
             mstore(0x20, _availableSupplies.slot)
             let supplySlot := keccak256(0, 0x40)
-            // Ensure all the supply has been sold
-            let currentSupply := sload(supplySlot)
-            if currentSupply {
-                mstore(0x00, _REMAINING_SUPPLY_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-
             // Get the supply slot and update it
-            sstore(supplySlot, supply)
+            sstore(supplySlot, add(sload(supplySlot), supply))
             // Emit the supply updated event
             mstore(0, supply)
             log2(0, 0x20, _SUPPLY_UPDATED_EVENT_SELECTOR, id)
