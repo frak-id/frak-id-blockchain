@@ -379,7 +379,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         // Get the current user balance, and exit if he already got a fraktion of this type
         uint256 balance = fraktionTokens.balanceOf(to, FraktionId.unwrap(id));
         if (balance != 0) {
-            revert TooManyFraktion();
+            return;
         }
 
         // If we are all good, mint the free fraktion to the user

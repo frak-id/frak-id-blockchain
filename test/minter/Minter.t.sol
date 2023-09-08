@@ -131,10 +131,11 @@ contract MinterTest is FrakTest {
         FraktionId freeFraktionId = contentId.freeFraktionId();
         vm.prank(user);
         minter.mintFreeFraktion(freeFraktionId);
+        uint256 freeFraktionBalance = fraktionTokens.balanceOf(user, FraktionId.unwrap(freeFraktionId));
 
-        vm.expectRevert(IMinter.TooManyFraktion.selector);
         vm.prank(user);
         minter.mintFreeFraktion(freeFraktionId);
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(freeFraktionId)), freeFraktionBalance);
     }
 
     function test_mintFreeFraktion_ExpectingOnlyFreeFraktion_ko() public {
