@@ -36,7 +36,7 @@ contract RemoveLiquidityPoolPosition is UpgradeScript {
         console.log("Pool token1 : %s", Token.unwrap(token1));
 
         // Build the command
-        bytes memory program = _builRemoveLiquidityAndClaimFeesCommand(poolOwner, position);
+        bytes memory program = _builRemoveLiquidityCommand(poolOwner, position);
 
         // Execute the command
         _executeRemoveLiquidity(pool, program);
