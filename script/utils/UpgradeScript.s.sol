@@ -47,7 +47,7 @@ abstract contract UpgradeScript is Script {
             rewarder: 0x8D9fa601DA1416b087E9db6B6EaD63D4920A4528,
             minter: 0x1adc8CAaA35551730eCd82e0eEA683Aa90dB6cf0,
             frakTreasuryWallet: 0x7053f61CEA3B7C3b5f0e14de6eEdB01cA1850408,
-            swapPool: 0xc01677ec5ef3607364125ab84f6fbb7d95b3d545
+            swapPool: 0xC01677Ec5eF3607364125Ab84F6FBb7d95B3D545
         });
         // forge verify-contract --chain polygon 0x8a67c75F8C0bF37a06d92938e9C9e841506D37B0 MonoPool  --constructor-args
         // $(cast abi-encode "constructor(address,address,uint256,address,uint256)"
