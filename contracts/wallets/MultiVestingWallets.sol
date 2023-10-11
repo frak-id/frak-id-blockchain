@@ -128,7 +128,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                              Create vesting's                              */
+    /*                              Create vestings                               */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -328,7 +328,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                View method's                               */
+    /*                                View methods                                */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -356,6 +356,15 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
      */
     function ownedCount(address beneficiary) public view returns (uint256) {
         return owned[beneficiary].length();
+    }
+
+    /**
+     * @notice Get all the vesting id owned by an address.
+     * @param beneficiary Address to check.
+     * @return All the vesting ids of the address.
+     */
+    function ownedVestingIds(address beneficiary) public view returns (uint256[] memory) {
+        return owned[beneficiary].values();
     }
 
     /**
