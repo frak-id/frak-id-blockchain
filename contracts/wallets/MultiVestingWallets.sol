@@ -237,29 +237,6 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
     /* -------------------------------------------------------------------------- */
 
     /**
-     * @notice Transfer a vesting to another person.
-     */
-    function transfer(address to, uint24 vestingId) external {
-        if (to == address(0)) revert InvalidAddress();
-
-        // Get the vesting
-        Vesting storage vesting = _getVestingForBeneficiary(vestingId, msg.sender);
-        address from = vesting.beneficiary;
-
-        if (to == from) revert InvalidAddress();
-
-        // Change the ownership of it
-        _removeOwnership(from, vesting.id);
-        _addOwnership(to, vesting.id);
-
-        // And update the beneficiary
-        vesting.beneficiary = to;
-
-        // Then emit the event
-        emit VestingTransfered(vestingId, from, to);
-    }
-
-    /**
      * @notice Release the tokens for the specified vesting.
      */
     function release(uint24 vestingId) external returns (uint256) {
@@ -325,6 +302,59 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
             // Then perform the transfer
             token.safeTransfer(vesting.beneficiary, releasable);
         }
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                              Vesting transfer                              */
+    /* -------------------------------------------------------------------------- */
+
+    /**
+     * @dev Transfer a given vesting `vestingId` `to` another wallet.
+     */
+    function transfer(address to, uint24 vestingId) external {
+        if (to == address(0)) revert InvalidAddress();
+
+        // Perform the transfer
+        _doTransfer(to, vestingId);
+    }
+
+    /**
+     * @dev Transfer all the vestings `to` another wallet.
+     */
+    function transferAll(address to) external {
+        if (to == address(0)) revert InvalidAddress();
+
+        // Get all the vesting id of the sender
+        uint256[] memory _vestingIds = owned[msg.sender].values();
+        uint256 length = _vestingIds.length;
+
+        // Transfer all of them
+        for (uint256 index; index < length;) {
+            _doTransfer(to, uint24(_vestingIds[index]));
+
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
+    /**
+     * Execute the transfer of the given `vestingId` to the given `to` address.
+     */
+    function _doTransfer(address to, uint24 vestingId) private {
+        // Get the vesting
+        Vesting storage vesting = _getVestingForBeneficiary(vestingId, msg.sender);
+        address from = vesting.beneficiary;
+
+        // Change the ownership of it
+        _removeOwnership(from, vesting.id);
+        _addOwnership(to, vesting.id);
+
+        // And update the beneficiary
+        vesting.beneficiary = to;
+
+        // Then emit the event
+        emit VestingTransfered(vestingId, from, to);
     }
 
     /* -------------------------------------------------------------------------- */

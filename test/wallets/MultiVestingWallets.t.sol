@@ -187,10 +187,6 @@ contract MultiVestingWalletsTest is FrakTest {
         vm.prank(user);
         vm.expectRevert(InvalidAddress.selector);
         multiVestingWallet.transfer(address(0), 0);
-
-        vm.prank(user);
-        vm.expectRevert(InvalidAddress.selector);
-        multiVestingWallet.transfer(user, 0);
     }
 
     function test_release_ok() public withUserVesting {
