@@ -18,7 +18,7 @@ import { ECDSA } from "solady/utils/ECDSA.sol";
 /// @custom:security-contact contact@frak.id
 contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP712Diamond {
     /* -------------------------------------------------------------------------- */
-    /*                               Custom error's                               */
+    /*                               Custom errors                                */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Error throwned when we don't have enough supply to mint a new fNFT
@@ -40,7 +40,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP
     uint256 private constant _PERMIT_DELAYED_EXPIRED_SELECTOR = 0x95fc6e60;
 
     /* -------------------------------------------------------------------------- */
-    /*                                   Event's                                  */
+    /*                                   Events                                   */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Event emitted when the supply of a fraktion is updated
@@ -75,7 +75,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP
     mapping(uint256 id => uint256 availableSupply) private _availableSupplies;
 
     /// @dev Tell us if that fraktion is supply aware or not
-    /// @notice unused now since we rely on the fraktion type to know if it's supply aware or not
+    /// @notice unused now since we rely on the fraktion type to know if it is supply aware or not
     mapping(uint256 => bool) private _unused1;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -92,7 +92,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          External write function's                         */
+    /*                          External write functions                          */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Mint a new content, return the id of the built content
@@ -223,7 +223,6 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP
     )
         external
         payable
-        override
     {
         // Ensure deadline is valid
         assembly {
@@ -243,7 +242,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP
                             keccak256("PermitAllTransfer(address owner,address spender,uint256 nonce,uint256 deadline)"),
                             owner,
                             spender,
-                            _useNonce(owner),
+                            useNonce(owner),
                             deadline
                         )
                     )
@@ -253,7 +252,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP
                 s
             );
 
-            // Don't need to check for 0 address, or send event's, since approve already do it for us
+            // Don't need to check for 0 address, or send event, since approve already do it for us
             if (recoveredAddress != owner) revert InvalidSigner();
 
             // Approve the token
@@ -262,7 +261,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                        Internal callback function's                        */
+    /*                        Internal callback functions                         */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Handle the transfer token (so update the content investor, change the owner of some content etc)
@@ -282,7 +281,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP
 
         // Assembly block to check supply and decrease it if needed
         assembly {
-            // Base offset to access array element's
+            // Base offset to access array elements
             let currOffset := 0x20
             let offsetEnd := add(currOffset, shl(5, mload(ids)))
 
@@ -335,7 +334,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP
         override
     {
         assembly {
-            // Base offset to access array element's
+            // Base offset to access array elements
             let currOffset := 0x20
             let offsetEnd := add(currOffset, shl(5, mload(ids)))
 
@@ -381,7 +380,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                           Public view function's                           */
+    /*                           Public view functions                            */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Batch balance of for single address
