@@ -8,13 +8,15 @@ import { FraktionId } from "../libs/FraktionId.sol";
 import { ArrayLib } from "../libs/ArrayLib.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
-import { InvalidArray } from "../utils/FrakErrors.sol";
+import { InvalidArray, InvalidSigner } from "../utils/FrakErrors.sol";
+import { EIP712Diamond } from "../utils/EIP712Diamond.sol";
+import { ECDSA } from "solady/utils/ECDSA.sol";
 
 /// @author @KONFeature
 /// @title FraktionTokens
 /// @notice ERC1155 for the Frak Fraktions tokens, used as ownership proof for a content, or investisment proof
 /// @custom:security-contact contact@frak.id
-contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
+contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP712Diamond {
     /* -------------------------------------------------------------------------- */
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
@@ -33,6 +35,9 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
 
     /// @dev 'bytes4(keccak256("SupplyUpdateNotAllowed()"))'
     uint256 private constant _SUPPLY_UPDATE_NOT_ALLOWED_SELECTOR = 0x48385ebd;
+
+    /// @dev 'bytes4(keccak256(bytes("PermitDelayExpired()")))'
+    uint256 private constant _PERMIT_DELAYED_EXPIRED_SELECTOR = 0x95fc6e60;
 
     /* -------------------------------------------------------------------------- */
     /*                                   Event's                                  */
@@ -81,6 +86,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     function initialize(string calldata metadatalUrl) external initializer {
         __ERC1155_init(metadatalUrl);
         __FrakAccessControlUpgradeable_Minter_init();
+        _initializeEIP712("Fraktions");
         // Set the initial content id
         _currentContentId = 1;
     }
@@ -200,6 +206,59 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable {
     /// @dev Burn a fraktion of a nft
     function burn(FraktionId id, uint256 amount) external payable {
         _burn(msg.sender, FraktionId.unwrap(id), amount);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                              Allowance methods                             */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev Signature check to allow a user to transfer ERC-1155 on the behalf of the owner
+    function permitAllTransfer(
+        address owner,
+        address spender,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
+        external
+        payable
+        override
+    {
+        // Ensure deadline is valid
+        assembly {
+            if gt(timestamp(), deadline) {
+                mstore(0x00, _PERMIT_DELAYED_EXPIRED_SELECTOR)
+                revert(0x1c, 0x04)
+            }
+        }
+
+        // Unchecked because the only math done is incrementing
+        // the owner's nonce which cannot realistically overflow.
+        unchecked {
+            address recoveredAddress = ECDSA.recover(
+                toTypedMessageHash(
+                    keccak256(
+                        abi.encode(
+                            keccak256("PermitAllTransfer(address owner,address spender,uint256 nonce,uint256 deadline)"),
+                            owner,
+                            spender,
+                            _useNonce(owner),
+                            deadline
+                        )
+                    )
+                ),
+                v,
+                r,
+                s
+            );
+
+            // Don't need to check for 0 address, or send event's, since approve already do it for us
+            if (recoveredAddress != owner) revert InvalidSigner();
+
+            // Approve the token
+            _setApprovalForAll(recoveredAddress, spender, true);
+        }
     }
 
     /* -------------------------------------------------------------------------- */

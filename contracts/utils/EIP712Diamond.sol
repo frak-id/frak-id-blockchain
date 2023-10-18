@@ -7,7 +7,8 @@ import { Initializable } from "@oz-upgradeable/proxy/utils/Initializable.sol";
 /// @title EIP712Diamond
 /// @notice EIP712Diamond base contract with diamond storage
 /// @custom:security-contact contact@frak.id
-contract EIP712Diamond is Initializable {
+/// TODO: Use OZ5 -> Import another submodule based on OZ 5.0
+contract EIP712Diamond {
     struct EIP712Domain {
         string name;
         string version;
@@ -45,7 +46,11 @@ contract EIP712Diamond is Initializable {
     }
 
     /// @dev init function
-    function _initializeEIP712(string memory name) internal onlyInitializing {
+    function _initializeEIP712(string memory name) internal {
+        // Ensure the domain separator is currently empty
+        bytes32 domainSeparator = _getEIP712Storage()._domainSeperator;
+        if (domainSeparator != 0x0) revert();
+
         // Build and set the domain separator
         _getEIP712Storage()._domainSeperator = keccak256(
             abi.encode(
