@@ -3,6 +3,7 @@ pragma solidity 0.8.21;
 
 import { ERC20Upgradeable } from "@oz-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
+import { InvalidSigner } from "../utils/FrakErrors.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { IFrakToken } from "./IFrakToken.sol";
 import { EIP712Base } from "./EIP712Base.sol";

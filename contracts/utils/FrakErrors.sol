@@ -12,3 +12,8 @@ error NoReward();
 error RewardTooLarge();
 error BadgeTooLarge();
 error InvalidFraktionType();
+
+/// @dev error throwned when the signer is invalid
+error InvalidSigner();
+/// @dev error throwned when the permit delay is expired
+error PermitDelayExpired();
