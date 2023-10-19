@@ -21,6 +21,7 @@ export default defineConfig({
                 'PushPullReward.json',
                 'ReferralPool.json',
                 'Rewarder.json',
+                'WalletMigrator.json',
                 'MonoPool.json'
             ]
         }),

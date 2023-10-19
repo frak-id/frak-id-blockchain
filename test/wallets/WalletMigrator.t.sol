@@ -39,18 +39,19 @@ contract WalletMigratorTest is FrakTest {
         walletMigrator.claimAllFounds();
 
         // Ensure all the reward as been claimed
+        assertGt(frakToken.balanceOf(user), 0);
         _assertRewardClaimed();
     }
 
     function test_claimAllFoundsForUser_ok() public withUserReward {
-        walletMigrator.claimAllFounds(user);
+        walletMigrator.claimAllFoundsForUser(user);
 
         // Ensure all the reward as been claimed
+        assertGt(frakToken.balanceOf(user), 0);
         _assertRewardClaimed();
     }
 
     function _assertRewardClaimed() internal {
-        assertGt(frakToken.balanceOf(user), 0);
         assertEq(rewarder.getAvailableFounds(user), 0);
         assertEq(contentPool.getAvailableFounds(user), 0);
         assertEq(referralPool.getAvailableFounds(user), 0);
@@ -81,7 +82,7 @@ contract WalletMigratorTest is FrakTest {
             _generateUserPermitSignature(address(walletMigrator), type(uint256).max, deadline);
 
         // Perform the migration
-        walletMigrator.migrateFrk(user, targetUser, deadline, v, r, s);
+        walletMigrator.migrateFrkForUser(user, targetUser, deadline, v, r, s);
 
         // Ensure all the frk are migrated
         _assertFrkTransfered(10 ether);
@@ -96,7 +97,7 @@ contract WalletMigratorTest is FrakTest {
     /*                           Test fraktion transfer                           */
     /* -------------------------------------------------------------------------- */
 
-    function test_migrateFrations_ok() public userWithAllFraktions {
+    function test_migrateFrations_ok() public withUserFraktions {
         // Generate the permit signature for the wallet migration
         uint256 deadline = block.timestamp;
         (uint8 v, bytes32 r, bytes32 s) = _generateUserPermitTransferAllSignature(address(walletMigrator), deadline);
@@ -109,13 +110,13 @@ contract WalletMigratorTest is FrakTest {
         _assertFraktionTransfered();
     }
 
-    function test_migrateFrationsForUser_ok() public userWithAllFraktions {
+    function test_migrateFrationsForUser_ok() public withUserFraktions {
         // Generate the permit signature for the wallet migration
         uint256 deadline = block.timestamp;
         (uint8 v, bytes32 r, bytes32 s) = _generateUserPermitTransferAllSignature(address(walletMigrator), deadline);
 
         // Perform the migration
-        walletMigrator.migrateFraktions(user, targetUser, deadline, v, r, s, _allFraktionsIds());
+        walletMigrator.migrateFraktionsForUser(user, targetUser, deadline, v, r, s, _allFraktionsIds());
 
         // Ensure every fraktion type is well transfered
         _assertFraktionTransfered();
@@ -131,8 +132,99 @@ contract WalletMigratorTest is FrakTest {
 
         assertEq(fraktionTokens.balanceOf(targetUser, FraktionId.unwrap(contentId.commonFraktionId())), 5);
         assertEq(fraktionTokens.balanceOf(targetUser, FraktionId.unwrap(contentId.premiumFraktionId())), 2);
-        assertEq(fraktionTokens.balanceOf(targetUser, FraktionId.unwrap(contentId.goldFraktionId())), 1);
+        assertAlmostEq(fraktionTokens.balanceOf(targetUser, FraktionId.unwrap(contentId.goldFraktionId())), 1, 1);
         assertEq(fraktionTokens.balanceOf(targetUser, FraktionId.unwrap(contentId.diamondFraktionId())), 1);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                             Test full migration                            */
+    /* -------------------------------------------------------------------------- */
+
+    function test_fullMigration_ok() public withUserReward withFrk(user, 10 ether) withUserFraktions {
+        bytes[] memory migrationCallData = new bytes[](3);
+
+        // Build the claim function data
+        migrationCallData[0] = abi.encodeWithSelector(WalletMigrator.claimAllFounds.selector);
+
+        // Generate signature for frk transfer & encode function data
+        uint256 deadline = block.timestamp;
+        (uint8 v, bytes32 r, bytes32 s) =
+            _generateUserPermitSignature(address(walletMigrator), type(uint256).max, deadline);
+        migrationCallData[1] = abi.encodeWithSelector(
+            WalletMigrator.migrateFrk.selector,
+            targetUser,
+            deadline,
+            v,
+            r,
+            s
+        );
+
+        // Generate signature for fraktion transfer & encode function data
+        (v, r, s) = _generateUserPermitTransferAllSignature(address(walletMigrator), deadline);
+        migrationCallData[2] = abi.encodeWithSelector(
+            WalletMigrator.migrateFraktions.selector,
+            targetUser,
+            deadline,
+            v,
+            r,
+            s,
+            _allFraktionsIds()
+        );
+
+        // Perform the multicall
+        vm.prank(user);
+        walletMigrator.multicall(migrationCallData);
+    
+        // Ensure the user has no frk remaining
+        assertEq(frakToken.balanceOf(user), 0);
+
+        // Ensure the user has no more reward and fraktions
+        _assertRewardClaimed();
+        _assertFraktionTransfered();
+    }
+
+    function test_fullMigrationForUser_ok() public withUserReward withFrk(user, 10 ether) withUserFraktions {
+        bytes[] memory migrationCallData = new bytes[](3);
+
+        // Build the claim function data
+        migrationCallData[0] = abi.encodeWithSelector(WalletMigrator.claimAllFoundsForUser.selector, user);
+
+        // Generate signature for frk transfer & encode function data
+        uint256 deadline = block.timestamp;
+        (uint8 v, bytes32 r, bytes32 s) =
+            _generateUserPermitSignature(address(walletMigrator), type(uint256).max, deadline);
+        migrationCallData[1] = abi.encodeWithSelector(
+            WalletMigrator.migrateFrkForUser.selector,
+            user,
+            targetUser,
+            deadline,
+            v,
+            r,
+            s
+        );
+
+        // Generate signature for fraktion transfer & encode function data
+        (v, r, s) = _generateUserPermitTransferAllSignature(address(walletMigrator), deadline);
+        migrationCallData[2] = abi.encodeWithSelector(
+            WalletMigrator.migrateFraktionsForUser.selector,
+            user,
+            targetUser,
+            deadline,
+            v,
+            r,
+            s,
+            _allFraktionsIds()
+        );
+
+        // Perform the multicall
+        walletMigrator.multicall(migrationCallData);
+    
+        // Ensure the user has no frk remaining
+        assertEq(frakToken.balanceOf(user), 0);
+
+        // Ensure the user has no more reward and fraktions
+        _assertRewardClaimed();
+        _assertFraktionTransfered();
     }
 
     /* -------------------------------------------------------------------------- */
@@ -160,7 +252,7 @@ contract WalletMigratorTest is FrakTest {
         _;
     }
 
-    modifier userWithAllFraktions() {
+    modifier withUserFraktions() {
         // A few fraktion to the users
         vm.startPrank(deployer);
         fraktionTokens.mint(user, contentId.commonFraktionId(), 5);

@@ -55,7 +55,7 @@ contract WalletMigrator is Multicallable {
     }
 
     /// @dev Claim all the founds for a user at once
-    function claimAllFounds(address user) public {
+    function claimAllFoundsForUser(address user) public {
         _claimAllFounds(user);
     }
 
@@ -76,7 +76,7 @@ contract WalletMigrator is Multicallable {
     }
 
     /// @dev Migrate all the FRK of the current user to the `newWallet`
-    function migrateFrk(address user, address newWallet, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+    function migrateFrkForUser(address user, address newWallet, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
         _migrateFrk(user, newWallet, deadline, v, r, s);
     }
 
@@ -108,7 +108,7 @@ contract WalletMigrator is Multicallable {
     }
 
     /// @dev Migrate all the fraktions to the `newWallet`at once
-    function migrateFraktions(
+    function migrateFraktionsForUser(
         address user,
         address newWallet,
         uint256 deadline,
@@ -139,10 +139,5 @@ contract WalletMigrator is Multicallable {
 
         // And finally, we transfer all the FRK of the user to the new wallet
         fraktionTokens.transferAllFrom(user, newWallet, ids);
-    }
-
-    /// @dev Send all the matic of the sender to the `newWallet`
-    function migrateMatic(address newWallet) external {
-        newWallet.safeTransferAllETH();
     }
 }
