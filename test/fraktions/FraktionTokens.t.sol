@@ -237,9 +237,7 @@ contract FraktionTokensTest is FrakTest {
                 abi.encodePacked(
                     "\x19\x01",
                     fraktionTokens.getDomainSeperator(),
-                    keccak256(
-                        abi.encode(PERMIT_TRANSFER_ALL_TYPEHASH, user, contentOwner, 1312, block.timestamp)
-                    )
+                    keccak256(abi.encode(PERMIT_TRANSFER_ALL_TYPEHASH, user, contentOwner, 1312, block.timestamp))
                 )
             )
         );
@@ -260,7 +258,7 @@ contract FraktionTokensTest is FrakTest {
         fraktionTokens.mint(user, contentId.premiumFraktionId(), 2);
         fraktionTokens.mint(user, contentId.goldFraktionId(), 1);
         vm.stopPrank();
-    
+
         // Assert the fraktion is minted
         assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(contentId.commonFraktionId())), 5);
         assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(contentId.premiumFraktionId())), 2);

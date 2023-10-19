@@ -46,7 +46,7 @@ contract WalletMigrator is Multicallable {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                         Public migration functions                         */
+    /*                               Claim functions                              */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Claim all the founds for a user at once
@@ -54,14 +54,44 @@ contract WalletMigrator is Multicallable {
         _claimAllFounds(msg.sender);
     }
 
+    /// @dev Claim all the founds for a user at once
+    function claimAllFounds(address user) public {
+        _claimAllFounds(user);
+    }
+
+    /// @dev Claim all the founds for a user at once
+    function _claimAllFounds(address user) internal {
+        rewarderPool.withdrawFounds(user);
+        contentPool.withdrawFounds(user);
+        referralPool.withdrawFounds(user);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                          Frak migration functions                          */
+    /* -------------------------------------------------------------------------- */
+
     /// @dev Migrate all the FRK of the current user to the `newWallet`
     function migrateFrk(address newWallet, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+        _migrateFrk(msg.sender, newWallet, deadline, v, r, s);
+    }
+
+    /// @dev Migrate all the FRK of the current user to the `newWallet`
+    function migrateFrk(address user, address newWallet, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+        _migrateFrk(user, newWallet, deadline, v, r, s);
+    }
+
+    /// @dev Migrate all the frk of the `user` to the `newWallet`, using EIP-2612 signature as approval
+    function _migrateFrk(address user, address newWallet, uint256 deadline, uint8 v, bytes32 r, bytes32 s) internal {
         // We use the signature to allow the transfer all the FRK of the user
-        frkToken.permit(msg.sender, address(this), type(uint256).max, deadline, v, r, s);
+        frkToken.permit(user, address(this), type(uint256).max, deadline, v, r, s);
 
         // And finally, we transfer all the FRK of the user to the new wallet
-        address(frkToken).safeTransferFrom(msg.sender, newWallet, frkToken.balanceOf(msg.sender));
+        address(frkToken).safeTransferFrom(user, newWallet, frkToken.balanceOf(user));
     }
+
+    /* -------------------------------------------------------------------------- */
+    /*                        Fraktions migration functions                       */
+    /* -------------------------------------------------------------------------- */
 
     /// @dev Migrate all the fraktions to the `newWallet`at once
     function migrateFraktions(
@@ -74,26 +104,45 @@ contract WalletMigrator is Multicallable {
     )
         external
     {
+        _migrateFraktions(msg.sender, newWallet, deadline, v, r, s, ids);
+    }
+
+    /// @dev Migrate all the fraktions to the `newWallet`at once
+    function migrateFraktions(
+        address user,
+        address newWallet,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s,
+        uint256[] calldata ids
+    )
+        external
+    {
+        _migrateFraktions(user, newWallet, deadline, v, r, s, ids);
+    }
+
+    /// @dev Migrate all the fraktions to the `newWallet`at once
+    function _migrateFraktions(
+        address user,
+        address newWallet,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s,
+        uint256[] calldata ids
+    )
+        internal
+    {
         // We use the signature to allow the transfer all the FRK of the user
-        fraktionTokens.permitAllTransfer(msg.sender, address(this), deadline, v, r, s);
+        fraktionTokens.permitAllTransfer(user, address(this), deadline, v, r, s);
 
         // And finally, we transfer all the FRK of the user to the new wallet
-        fraktionTokens.transferAllFrom(msg.sender, newWallet, ids);
+        fraktionTokens.transferAllFrom(user, newWallet, ids);
     }
 
     /// @dev Send all the matic of the sender to the `newWallet`
     function migrateMatic(address newWallet) external {
         newWallet.safeTransferAllETH();
-    }
-
-    /* -------------------------------------------------------------------------- */
-    /*                        Internal migration functions                        */
-    /* -------------------------------------------------------------------------- */
-
-    /// @dev Claim all the founds for a user at once
-    function _claimAllFounds(address user) internal {
-        rewarderPool.withdrawFounds(user);
-        contentPool.withdrawFounds(user);
-        referralPool.withdrawFounds(user);
     }
 }
