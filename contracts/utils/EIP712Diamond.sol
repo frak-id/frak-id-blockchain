@@ -20,7 +20,8 @@ contract EIP712Diamond {
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
 
-    string internal constant ERC712_VERSION = "1";
+    /// @dev The current version of the erc712, 2 since we switch between inline storage to diamond storage
+    string internal constant ERC712_VERSION = "2";
 
     bytes32 internal constant EIP712_DOMAIN_TYPEHASH =
         keccak256(bytes("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"));

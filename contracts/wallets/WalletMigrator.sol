@@ -76,7 +76,16 @@ contract WalletMigrator is Multicallable {
     }
 
     /// @dev Migrate all the FRK of the current user to the `newWallet`
-    function migrateFrkForUser(address user, address newWallet, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+    function migrateFrkForUser(
+        address user,
+        address newWallet,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
+        external
+    {
         _migrateFrk(user, newWallet, deadline, v, r, s);
     }
 

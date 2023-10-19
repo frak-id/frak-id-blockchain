@@ -6,7 +6,7 @@ import { FrakRoles } from "../roles/FrakRoles.sol";
 import { InvalidSigner } from "../utils/FrakErrors.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { IFrakToken } from "./IFrakToken.sol";
-import { EIP712Base } from "./EIP712Base.sol";
+import { EIP712Diamond } from "../utils/EIP712Diamond.sol";
 import { ECDSA } from "solady/utils/ECDSA.sol";
 
 /// @author @KONFeature
@@ -14,7 +14,7 @@ import { ECDSA } from "solady/utils/ECDSA.sol";
 /// @notice ERC20 Contract for the FRAK token
 /// @dev Compliant with ERC20 - EIP712 - EIP2612
 /// @custom:security-contact contact@frak.id
-contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Base, IFrakToken {
+contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Diamond, IFrakToken {
     /* -------------------------------------------------------------------------- */
     /*                                 Constant's                                 */
     /* -------------------------------------------------------------------------- */
@@ -104,7 +104,7 @@ contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Base
                             owner,
                             spender,
                             value,
-                            nonces[owner]++,
+                            useNonce(owner),
                             deadline
                         )
                     )

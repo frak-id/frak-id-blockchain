@@ -150,31 +150,18 @@ contract WalletMigratorTest is FrakTest {
         uint256 deadline = block.timestamp;
         (uint8 v, bytes32 r, bytes32 s) =
             _generateUserPermitSignature(address(walletMigrator), type(uint256).max, deadline);
-        migrationCallData[1] = abi.encodeWithSelector(
-            WalletMigrator.migrateFrk.selector,
-            targetUser,
-            deadline,
-            v,
-            r,
-            s
-        );
+        migrationCallData[1] = abi.encodeWithSelector(WalletMigrator.migrateFrk.selector, targetUser, deadline, v, r, s);
 
         // Generate signature for fraktion transfer & encode function data
         (v, r, s) = _generateUserPermitTransferAllSignature(address(walletMigrator), deadline);
         migrationCallData[2] = abi.encodeWithSelector(
-            WalletMigrator.migrateFraktions.selector,
-            targetUser,
-            deadline,
-            v,
-            r,
-            s,
-            _allFraktionsIds()
+            WalletMigrator.migrateFraktions.selector, targetUser, deadline, v, r, s, _allFraktionsIds()
         );
 
         // Perform the multicall
         vm.prank(user);
         walletMigrator.multicall(migrationCallData);
-    
+
         // Ensure the user has no frk remaining
         assertEq(frakToken.balanceOf(user), 0);
 
@@ -193,32 +180,18 @@ contract WalletMigratorTest is FrakTest {
         uint256 deadline = block.timestamp;
         (uint8 v, bytes32 r, bytes32 s) =
             _generateUserPermitSignature(address(walletMigrator), type(uint256).max, deadline);
-        migrationCallData[1] = abi.encodeWithSelector(
-            WalletMigrator.migrateFrkForUser.selector,
-            user,
-            targetUser,
-            deadline,
-            v,
-            r,
-            s
-        );
+        migrationCallData[1] =
+            abi.encodeWithSelector(WalletMigrator.migrateFrkForUser.selector, user, targetUser, deadline, v, r, s);
 
         // Generate signature for fraktion transfer & encode function data
         (v, r, s) = _generateUserPermitTransferAllSignature(address(walletMigrator), deadline);
         migrationCallData[2] = abi.encodeWithSelector(
-            WalletMigrator.migrateFraktionsForUser.selector,
-            user,
-            targetUser,
-            deadline,
-            v,
-            r,
-            s,
-            _allFraktionsIds()
+            WalletMigrator.migrateFraktionsForUser.selector, user, targetUser, deadline, v, r, s, _allFraktionsIds()
         );
 
         // Perform the multicall
         walletMigrator.multicall(migrationCallData);
-    
+
         // Ensure the user has no frk remaining
         assertEq(frakToken.balanceOf(user), 0);
 
