@@ -221,7 +221,7 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP
             }
         }
 
-        // Perform the batch transfer operations
+        // Perform the batch transfer
         safeBatchTransferFrom(from, to, ids, amounts, "");
     }
 

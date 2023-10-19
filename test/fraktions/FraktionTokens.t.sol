@@ -2,7 +2,7 @@
 pragma solidity 0.8.21;
 
 import { FrakTest } from "../FrakTest.sol";
-import { NotAuthorized, InvalidArray } from "contracts/utils/FrakErrors.sol";
+import { NotAuthorized, InvalidArray, InvalidSigner, PermitDelayExpired } from "contracts/utils/FrakErrors.sol";
 import { FraktionTokens } from "contracts/fraktions/FraktionTokens.sol";
 import { FraktionTransferCallback } from "contracts/fraktions/FraktionTransferCallback.sol";
 import { ContentId, ContentIdLib } from "contracts/libs/ContentId.sol";
@@ -195,6 +195,111 @@ contract FraktionTokensTest is FrakTest {
 
     function test_ownerOf_ok() public {
         assertEq(fraktionTokens.ownerOf(contentId), contentOwner);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                             Permit transfer all                            */
+    /* -------------------------------------------------------------------------- */
+
+    function test_permitTransferAll_ok() public {
+        // Generate signature
+        (uint8 v, bytes32 r, bytes32 s) = _generateUserPermitTransferAllSignature(contentOwner, block.timestamp);
+
+        // Perform the permit op & ensure it's valid
+        fraktionTokens.permitAllTransfer(user, contentOwner, block.timestamp, v, r, s);
+
+        assertEq(fraktionTokens.isApprovedForAll(user, contentOwner), true);
+    }
+
+    function test_permitTransferAll_DelayExpired_ko() public {
+        // Generate signature
+        (uint8 v, bytes32 r, bytes32 s) = _generateUserPermitTransferAllSignature(contentOwner, block.timestamp - 1);
+
+        // Perform the permit op & ensure it's valid
+        vm.expectRevert(PermitDelayExpired.selector);
+        fraktionTokens.permitAllTransfer(user, contentOwner, block.timestamp - 1, v, r, s);
+    }
+
+    function test_permitTransferAll_InvalidSigner_ko() public {
+        // Generate signature
+        (uint8 v, bytes32 r, bytes32 s) = _generateUserPermitTransferAllSignature(contentOwner, block.timestamp);
+
+        // Perform the permit op & ensure it's valid
+        vm.expectRevert(InvalidSigner.selector);
+        fraktionTokens.permitAllTransfer(address(1), contentOwner, block.timestamp, v, r, s);
+    }
+
+    function test_permitTransferAll_InvalidNonce_ko() public {
+        // Generate signature
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            userPrivKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    fraktionTokens.getDomainSeperator(),
+                    keccak256(
+                        abi.encode(PERMIT_TRANSFER_ALL_TYPEHASH, user, contentOwner, 1312, block.timestamp)
+                    )
+                )
+            )
+        );
+
+        // Perform the permit op & ensure it's valid
+        vm.expectRevert(InvalidSigner.selector);
+        fraktionTokens.permitAllTransfer(user, contentOwner, block.timestamp, v, r, s);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                              Test transfer all                             */
+    /* -------------------------------------------------------------------------- */
+
+    function test_transferAllFrom_ok() public {
+        // A few fraktion to the users
+        vm.startPrank(deployer);
+        fraktionTokens.mint(user, contentId.commonFraktionId(), 5);
+        fraktionTokens.mint(user, contentId.premiumFraktionId(), 2);
+        fraktionTokens.mint(user, contentId.goldFraktionId(), 1);
+        vm.stopPrank();
+    
+        // Assert the fraktion is minted
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(contentId.commonFraktionId())), 5);
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(contentId.premiumFraktionId())), 2);
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(contentId.goldFraktionId())), 1);
+
+        // Ask to transfer all of the premium fraktion
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = FraktionId.unwrap(contentId.premiumFraktionId());
+
+        // Transfer all of the premium fraktion
+        address targetUser = _newUser("targetUser");
+        vm.prank(user);
+        fraktionTokens.transferAllFrom(user, targetUser, ids);
+
+        // Ensure all the premium fraktion are transfered
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(contentId.premiumFraktionId())), 0);
+        assertEq(fraktionTokens.balanceOf(targetUser, FraktionId.unwrap(contentId.premiumFraktionId())), 2);
+
+        // Build the array with all the fraktion type
+        ids = new uint256[](4);
+        ids[0] = FraktionId.unwrap(contentId.commonFraktionId());
+        ids[1] = FraktionId.unwrap(contentId.premiumFraktionId());
+        ids[2] = FraktionId.unwrap(contentId.goldFraktionId());
+        ids[3] = FraktionId.unwrap(contentId.diamondFraktionId());
+
+        // Transfer all of them
+        vm.prank(user);
+        fraktionTokens.transferAllFrom(user, targetUser, ids);
+
+        // Ensure every fraktion type is well transfered
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(contentId.commonFraktionId())), 0);
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(contentId.premiumFraktionId())), 0);
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(contentId.goldFraktionId())), 0);
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(contentId.diamondFraktionId())), 0);
+
+        assertEq(fraktionTokens.balanceOf(targetUser, FraktionId.unwrap(contentId.commonFraktionId())), 5);
+        assertEq(fraktionTokens.balanceOf(targetUser, FraktionId.unwrap(contentId.premiumFraktionId())), 2);
+        assertEq(fraktionTokens.balanceOf(targetUser, FraktionId.unwrap(contentId.goldFraktionId())), 1);
+        assertEq(fraktionTokens.balanceOf(targetUser, FraktionId.unwrap(contentId.diamondFraktionId())), 0);
     }
 
     /* -------------------------------------------------------------------------- */
