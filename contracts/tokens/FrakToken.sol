@@ -16,14 +16,14 @@ import { ECDSA } from "solady/utils/ECDSA.sol";
 /// @custom:security-contact contact@frak.id
 contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Diamond, IFrakToken {
     /* -------------------------------------------------------------------------- */
-    /*                                 Constant's                                 */
+    /*                                 Constants                                  */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Maximum cap of token, at 3 billion FRK
     uint256 private constant _cap = 3_000_000_000 ether;
 
     /* -------------------------------------------------------------------------- */
-    /*                               Custom error's                               */
+    /*                               Custom errors                                */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Gap variable for the previous domain separator variable from the EIP712 Base contract
@@ -43,7 +43,7 @@ contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Diam
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          External write function's                         */
+    /*                          External write functions                          */
     /* -------------------------------------------------------------------------- */
 
     function initialize() external initializer {

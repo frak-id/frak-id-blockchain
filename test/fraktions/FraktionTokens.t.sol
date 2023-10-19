@@ -15,7 +15,7 @@ contract FraktionTokensTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                 Init test's                                */
+    /*                                 Init tests                                 */
     /* -------------------------------------------------------------------------- */
 
     function test_canBeDeployedAndInit_ok() public {
@@ -79,7 +79,7 @@ contract FraktionTokensTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                            Supply related test's                           */
+    /*                            Supply related tests                            */
     /* -------------------------------------------------------------------------- */
 
     function test_supply_ok() public withEmptySupply(contentId.commonFraktionId()) asDeployer {
@@ -137,7 +137,7 @@ contract FraktionTokensTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                             Transfer callback's                            */
+    /*                             Transfer callbacks                             */
     /* -------------------------------------------------------------------------- */
 
     function test_setUpTransferCallback_ok() public {
@@ -301,7 +301,7 @@ contract FraktionTokensTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                Some helper's                               */
+    /*                                Some helpers                                */
     /* -------------------------------------------------------------------------- */
 
     function _getMintContentParams() internal pure returns (uint256[] memory suppliesToType) {

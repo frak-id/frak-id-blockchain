@@ -12,7 +12,7 @@ contract FrakTeasuryWalletTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                 Init test's                                */
+    /*                                 Init tests                                 */
     /* -------------------------------------------------------------------------- */
 
     function test_canBeDeployedAndInit_ok() public {
@@ -130,7 +130,7 @@ contract FrakTeasuryWalletTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                  Helper's                                  */
+    /*                                  Helpers                                   */
     /* -------------------------------------------------------------------------- */
     function _baseBatchTransferParam(uint256 amount) private view returns (address[] memory, uint256[] memory) {
         return _baseBatchTransferParam(user, amount);

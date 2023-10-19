@@ -13,7 +13,7 @@ contract FrakTokenTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                 Init test's                                */
+    /*                                 Init tests                                 */
     /* -------------------------------------------------------------------------- */
 
     function test_canBeDeployedAndInit_ok() public {
@@ -83,7 +83,7 @@ contract FrakTokenTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                Permit test's                               */
+    /*                                Permit tests                                */
     /* -------------------------------------------------------------------------- */
 
     function test_permit_ok() public {

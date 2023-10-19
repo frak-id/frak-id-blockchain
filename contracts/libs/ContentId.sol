@@ -15,7 +15,7 @@ using ContentIdLib for ContentId global;
 /// @custom:security-contact contact@frak.id
 library ContentIdLib {
     /* -------------------------------------------------------------------------- */
-    /*                                 Constant's                                 */
+    /*                                 Constants                                  */
     /* -------------------------------------------------------------------------- */
 
     /// @dev The offset of the id we use to store the fraktion type
@@ -37,7 +37,7 @@ library ContentIdLib {
     uint256 internal constant FRAKTION_TYPE_DIAMOND = 6;
 
     /* -------------------------------------------------------------------------- */
-    /*                               Helper method's                              */
+    /*                               Helper functions                              */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Build a fraktion id from a content id

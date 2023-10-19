@@ -10,7 +10,7 @@ import { ContentId } from "../../libs/ContentId.sol";
 /// @custom:security-contact contact@frak.id
 interface IContentPool is FraktionTransferCallback {
     /* -------------------------------------------------------------------------- */
-    /*                               Custom error's                               */
+    /*                               Custom errors                                */
     /* -------------------------------------------------------------------------- */
 
     /// @dev The pool state is closed
@@ -20,7 +20,7 @@ interface IContentPool is FraktionTransferCallback {
     error PoolStateAlreadyClaimed();
 
     /* -------------------------------------------------------------------------- */
-    /*                                   Event's                                  */
+    /*                                   Events                                   */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Event emitted when a reward is added to the pool
@@ -33,7 +33,7 @@ interface IContentPool is FraktionTransferCallback {
     event ParticipantShareUpdated(address indexed user, uint256 indexed contentId, uint256 shares);
 
     /* -------------------------------------------------------------------------- */
-    /*                                  Struct's                                  */
+    /*                                  Structs                                   */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -85,7 +85,7 @@ interface IContentPool is FraktionTransferCallback {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          External write funtion's                          */
+    /*                          External write functions                          */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Add a new `rewardAmount` to the pool for the content `contentId`
@@ -95,7 +95,7 @@ interface IContentPool is FraktionTransferCallback {
     function computeAllPoolsBalance(address user) external;
 
     /* -------------------------------------------------------------------------- */
-    /*                          External view function's                          */
+    /*                          External view functions                           */
     /* -------------------------------------------------------------------------- */
 
     /**

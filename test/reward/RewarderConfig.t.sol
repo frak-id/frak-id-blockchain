@@ -21,7 +21,7 @@ contract RewarderConfigTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                 Init test's                                */
+    /*                                 Init tests                                 */
     /* -------------------------------------------------------------------------- */
 
     function test_canBeDeployedAndInit_ok() public {

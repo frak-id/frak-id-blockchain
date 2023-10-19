@@ -17,7 +17,7 @@ contract EIP712Diamond {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                 Constant's                                 */
+    /*                                 Constants                                  */
     /* -------------------------------------------------------------------------- */
 
     /// @dev The current version of the erc712, 2 since we switch between inline storage to diamond storage

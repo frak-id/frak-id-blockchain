@@ -113,7 +113,7 @@ contract MultiVestingWallets is FrakAccessControlUpgradeable {
 
     /**
      * @notice Fake an ERC20-like contract allowing it to be displayed from wallets.
-     * @return the frk's decimals value.
+     * @return the frk decimals value.
      */
     function decimals() external pure returns (uint8) {
         return 18;

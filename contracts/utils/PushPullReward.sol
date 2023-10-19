@@ -14,7 +14,7 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
     using SafeTransferLib for address;
 
     /* -------------------------------------------------------------------------- */
-    /*                               Custom error's                               */
+    /*                               Custom errors                                */
     /* -------------------------------------------------------------------------- */
 
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
@@ -24,7 +24,7 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
     uint256 private constant _REWARD_TOO_LARGE_SELECTOR = 0x71009bf7;
 
     /* -------------------------------------------------------------------------- */
-    /*                                   Event's                                  */
+    /*                                   Events                                   */
     /* -------------------------------------------------------------------------- */
 
     /// @dev 'keccak256(bytes("RewardAdded(address,uint256)"))'
@@ -53,7 +53,7 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                         External virtual function's                        */
+    /*                         External virtual functions                         */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -67,7 +67,7 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
     function withdrawFounds(address user) external virtual;
 
     /* -------------------------------------------------------------------------- */
-    /*                          External view function's                          */
+    /*                          External view functions                           */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -84,7 +84,7 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          Internal write function's                         */
+    /*                          Internal write functions                          */
     /* -------------------------------------------------------------------------- */
 
     /**

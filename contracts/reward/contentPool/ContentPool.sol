@@ -19,7 +19,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     using EnumerableSet for EnumerableSet.UintSet;
 
     /* -------------------------------------------------------------------------- */
-    /*                               Custom error's                               */
+    /*                               Custom errors                                */
     /* -------------------------------------------------------------------------- */
 
     /// @dev 'bytes4(keccak256(bytes("NoReward()")))'
@@ -32,7 +32,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     uint256 private constant _POOL_STATE_ALREADY_CLAIMED_SELECTOR = 0xa917cd37;
 
     /* -------------------------------------------------------------------------- */
-    /*                                   Event's                                  */
+    /*                                   Events                                   */
     /* -------------------------------------------------------------------------- */
 
     /// @dev 'keccak256(bytes("PoolRewardAdded(uint256,uint256)"))'
@@ -48,7 +48,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
         0x1ecb16c5f7a5b459071d87585a22f39d1e567f4c0406de6e4b654a4c74b0908b;
 
     /* -------------------------------------------------------------------------- */
-    /*                                 Constant's                                 */
+    /*                                 Constants                                  */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Maximum reward we can have in a pool
@@ -88,7 +88,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          External write funtion's                          */
+    /*                          External write functions                          */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Add a new `rewardAmount` to the pool for the content `contentId`
@@ -174,7 +174,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          Internal write function's                         */
+    /*                          Internal write functions                          */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Update the participants of a pool after fraktion transfer
@@ -477,7 +477,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          Internal pure function's                          */
+    /*                          Internal pure functions                           */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -520,7 +520,7 @@ contract ContentPool is IContentPool, FrakAccessControlUpgradeable, PushPullRewa
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          External view function's                          */
+    /*                          External view functions                           */
     /* -------------------------------------------------------------------------- */
 
     /**

@@ -17,7 +17,7 @@ contract MultiVestingWalletsTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                 Init test's                                */
+    /*                                 Init tests                                 */
     /* -------------------------------------------------------------------------- */
 
     function test_canBeDeployedAndInit_ok() public {
@@ -279,7 +279,7 @@ contract MultiVestingWalletsTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                Test helper's                               */
+    /*                                Test helpers                                */
     /* -------------------------------------------------------------------------- */
 
     modifier withUserVesting() {
