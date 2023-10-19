@@ -26,6 +26,11 @@ contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Diam
     /*                               Custom error's                               */
     /* -------------------------------------------------------------------------- */
 
+    /// @dev Gap variable for the previous domain separator variable from the EIP712 Base contract
+    bytes32 private _gapOldDomainSeparator;
+    /// @dev Gap variable for the previous nonce variable from the EIP712 Base contract
+    mapping(address => uint256) private _gapOldNonces;
+
     /// @dev 'bytes4(keccak256(bytes("PermitDelayExpired()")))'
     uint256 private constant _PERMIT_DELAYED_EXPIRED_SELECTOR = 0x95fc6e60;
 
