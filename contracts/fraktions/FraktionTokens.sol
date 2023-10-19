@@ -11,6 +11,7 @@ import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradea
 import { InvalidArray, InvalidSigner } from "../utils/FrakErrors.sol";
 import { EIP712Diamond } from "../utils/EIP712Diamond.sol";
 import { ECDSA } from "solady/utils/ECDSA.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 
 /// @author @KONFeature
 /// @title FraktionTokens
@@ -206,6 +207,22 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP
     /// @dev Burn a fraktion of a nft
     function burn(FraktionId id, uint256 amount) external payable {
         _burn(msg.sender, FraktionId.unwrap(id), amount);
+    }
+
+    /// @dev Transfer all the fraktions from the given user to a new one
+    function transferAllFrom(address from, address to, uint256[] calldata ids) external payable {
+        // Build the amounts matching the ids
+        uint256 length = ids.length;
+        uint256[] memory amounts = new uint256[](length);
+        for (uint256 i = 0; i < length;) {
+            unchecked {
+                amounts[i] = balanceOf(from, ids[i]);
+                ++i;
+            }
+        }
+
+        // Perform the batch transfer operations
+        safeBatchTransferFrom(from, to, ids, amounts, "");
     }
 
     /* -------------------------------------------------------------------------- */
