@@ -84,12 +84,21 @@ contract FraktionTokens is FrakAccessControlUpgradeable, ERC1155Upgradeable, EIP
         _disableInitializers();
     }
 
+    /* -------------------------------------------------------------------------- */
+    /*                                 Versioning                                 */
+    /* -------------------------------------------------------------------------- */
+
     function initialize(string calldata metadatalUrl) external initializer {
         __ERC1155_init(metadatalUrl);
         __FrakAccessControlUpgradeable_Minter_init();
         _initializeEIP712("Fraktions");
         // Set the initial content id
         _currentContentId = 1;
+    }
+
+    /// @dev Update to diamond Eip712
+    function updateToDiamondEip712() external reinitializer(3) {
+        _initializeEIP712("Fraktions");
     }
 
     /* -------------------------------------------------------------------------- */

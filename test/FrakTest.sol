@@ -15,6 +15,7 @@ import { Rewarder } from "@frak/reward/Rewarder.sol";
 import { FrakRoles } from "@frak/roles/FrakRoles.sol";
 import { PRBTest } from "@prb/test/PRBTest.sol";
 import { ERC1967Proxy } from "openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
+import { UUPSUpgradeable } from "openzeppelin/proxy/utils/UUPSUpgradeable.sol";
 
 /// Testing the frak l2 token
 contract FrakTest is PRBTest {
@@ -297,6 +298,12 @@ contract FrakTest is PRBTest {
         ERC1967Proxy proxyTemp = new ERC1967Proxy(logic, init);
         createdAddress = address(proxyTemp);
         vm.label(createdAddress, label);
+    }
+
+    /// @dev Deploy the given proxy
+    function _updateProxy(address _proxy, address _logic, bytes memory _update) internal {
+        UUPSUpgradeable proxy = UUPSUpgradeable(_proxy);
+        proxy.upgradeToAndCall(_logic, _update);
     }
 
     /* -------------------------------------------------------------------------- */

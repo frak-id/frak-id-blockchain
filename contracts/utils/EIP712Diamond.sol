@@ -48,10 +48,6 @@ contract EIP712Diamond {
 
     /// @dev init function
     function _initializeEIP712(string memory name) internal {
-        // Ensure the domain separator is currently empty
-        bytes32 domainSeparator = _getEIP712Storage()._domainSeperator;
-        if (domainSeparator != 0x0) revert();
-
         // Build and set the domain separator
         _getEIP712Storage()._domainSeperator = keccak256(
             abi.encode(

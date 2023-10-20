@@ -43,7 +43,7 @@ contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Diam
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          External write functions                          */
+    /*                                 Versioning                                 */
     /* -------------------------------------------------------------------------- */
 
     function initialize() external initializer {
@@ -54,6 +54,15 @@ contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Diam
 
         // Current version is 2, since we use a version to reset the domain separator post EIP712 updates
     }
+
+    /// @dev Update to diamond Eip712
+    function updateToDiamondEip712() external reinitializer(3) {
+        _initializeEIP712("FRK");
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                          External write functions                          */
+    /* -------------------------------------------------------------------------- */
 
     /// @dev Mint some FRK
     function mint(address to, uint256 amount) external override onlyRole(FrakRoles.MINTER) {

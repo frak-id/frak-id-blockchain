@@ -21,6 +21,10 @@ contract FrakTokenTest is FrakTest {
         bytes memory initData = abi.encodeWithSelector(FrakToken.initialize.selector);
         address proxyAddress = _deployProxy(address(new FrakToken()), initData, "FrakTokenDeploy");
         frakToken = FrakToken(proxyAddress);
+
+        // Can be updated
+        bytes memory updateData = bytes.concat(FrakToken.updateToDiamondEip712.selector);
+        _updateProxy(proxyAddress, address(new FrakToken()), updateData);
     }
 
     /// @dev Can't re-init

@@ -23,6 +23,10 @@ contract FraktionTokensTest is FrakTest {
         bytes memory initData = abi.encodeCall(FraktionTokens.initialize, ("https://metadata/url"));
         address proxyAddress = _deployProxy(address(new FraktionTokens()), initData, "FraktionTokensDeploy");
         fraktionTokens = FraktionTokens(proxyAddress);
+
+        // Can be updated
+        bytes memory updateData = bytes.concat(FraktionTokens.updateToDiamondEip712.selector);
+        _updateProxy(proxyAddress, address(new FraktionTokens()), updateData);
     }
 
     /// @dev Can't re-init
