@@ -26,7 +26,7 @@ contract FraktionTokensTest is FrakTest {
 
         // Can be updated
         bytes memory updateData = bytes.concat(FraktionTokens.updateToDiamondEip712.selector);
-        _updateProxy(proxyAddress, address(new FraktionTokens()), updateData);
+        fraktionTokens.upgradeToAndCall(address(new FraktionTokens()), updateData);
     }
 
     /// @dev Can't re-init

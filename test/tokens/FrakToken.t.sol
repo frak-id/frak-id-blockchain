@@ -24,7 +24,7 @@ contract FrakTokenTest is FrakTest {
 
         // Can be updated
         bytes memory updateData = bytes.concat(FrakToken.updateToDiamondEip712.selector);
-        _updateProxy(proxyAddress, address(new FrakToken()), updateData);
+        frakToken.upgradeToAndCall(address(new FrakToken()), updateData);
     }
 
     /// @dev Can't re-init
