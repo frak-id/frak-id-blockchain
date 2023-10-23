@@ -74,11 +74,6 @@ contract EIP712Diamond {
         return _getEIP712Storage()._nonces[user];
     }
 
-    /// @dev Use the current 'nonce' for the given 'user' (and increment it)
-    function useNonce(address user) public returns (uint256) {
-        return _getEIP712Storage()._nonces[user]++;
-    }
-
     /* -------------------------------------------------------------------------- */
     /*                             Internal functions                             */
     /* -------------------------------------------------------------------------- */
@@ -101,5 +96,10 @@ contract EIP712Diamond {
             // Restore the part of the free memory slot that was overwritten.
             mstore(0x3a, 0)
         }
+    }
+
+    /// @dev Use the current 'nonce' for the given 'user' (and increment it)
+    function useNonce(address user) internal returns (uint256) {
+        return _getEIP712Storage()._nonces[user]++;
     }
 }
