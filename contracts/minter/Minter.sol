@@ -21,7 +21,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
     using SafeTransferLib for address;
 
     /* -------------------------------------------------------------------------- */
-    /*                                   Error's                                  */
+    /*                                   Errors                                   */
     /* -------------------------------------------------------------------------- */
 
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
@@ -37,7 +37,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
     uint256 private constant _TOO_MANY_FRAKTION_SELECTOR = 0xaa37c4ae;
 
     /* -------------------------------------------------------------------------- */
-    /*                                   Event's                                  */
+    /*                                   Events                                   */
     /* -------------------------------------------------------------------------- */
 
     /// @dev 'keccak256("ContentMinted(uint256,address)")'
@@ -102,7 +102,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          External write function's                         */
+    /*                          External write functions                          */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -325,7 +325,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          Internal write function's                         */
+    /*                          Internal write functions                          */
     /* -------------------------------------------------------------------------- */
 
     /**

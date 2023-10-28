@@ -33,7 +33,7 @@ contract Rewarder is
     using SafeTransferLib for address;
 
     /* -------------------------------------------------------------------------- */
-    /*                                 Constant's                                 */
+    /*                                 Constants                                  */
     /* -------------------------------------------------------------------------- */
 
     // The cap of frak token we can mint for the reward
@@ -55,7 +55,7 @@ contract Rewarder is
     uint256 private constant FEE_PERCENT = 2;
 
     /* -------------------------------------------------------------------------- */
-    /*                               Custom error's                               */
+    /*                               Custom errors                                */
     /* -------------------------------------------------------------------------- */
 
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
@@ -71,7 +71,7 @@ contract Rewarder is
     uint256 private constant _REWARD_TOO_LARGE_SELECTOR = 0x71009bf7;
 
     /* -------------------------------------------------------------------------- */
-    /*                                   Event's                                  */
+    /*                                   Events                                   */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Event emitted when a user is rewarded for his listen
@@ -151,7 +151,7 @@ contract Rewarder is
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          External write function's                         */
+    /*                          External write functions                          */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Directly pay a `listener` for the given frk `amount` (used for offchain to onchain wallet migration)
@@ -338,7 +338,7 @@ contract Rewarder is
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          External view function's                          */
+    /*                          External view functions                           */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Get the current TPU
@@ -352,7 +352,7 @@ contract Rewarder is
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          Internal write function's                         */
+    /*                          Internal write functions                          */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Compute the reward of the given content
@@ -452,7 +452,7 @@ contract Rewarder is
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          Internal view function's                          */
+    /*                          Internal view functions                           */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Compute the earning factor for the given listener
@@ -512,7 +512,7 @@ contract Rewarder is
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          Internal pure function's                          */
+    /*                          Internal pure functions                           */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Compute the base reward for the given `contentType`

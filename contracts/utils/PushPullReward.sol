@@ -14,7 +14,7 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
     using SafeTransferLib for address;
 
     /* -------------------------------------------------------------------------- */
-    /*                               Custom error's                               */
+    /*                               Custom errors                                */
     /* -------------------------------------------------------------------------- */
 
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
@@ -23,11 +23,8 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
     /// @dev 'bytes4(keccak256(bytes("RewardTooLarge()")))'
     uint256 private constant _REWARD_TOO_LARGE_SELECTOR = 0x71009bf7;
 
-    /// @dev 'bytes4(keccak256(bytes("NoReward()")))'
-    uint256 private constant _NO_REWARD_SELECTOR = 0x6e992686;
-
     /* -------------------------------------------------------------------------- */
-    /*                                   Event's                                  */
+    /*                                   Events                                   */
     /* -------------------------------------------------------------------------- */
 
     /// @dev 'keccak256(bytes("RewardAdded(address,uint256)"))'
@@ -56,7 +53,7 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                         External virtual function's                        */
+    /*                         External virtual functions                         */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -70,7 +67,7 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
     function withdrawFounds(address user) external virtual;
 
     /* -------------------------------------------------------------------------- */
-    /*                          External view function's                          */
+    /*                          External view functions                           */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -87,7 +84,7 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          Internal write function's                         */
+    /*                          Internal write functions                          */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -139,17 +136,15 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
             mstore(0x20, _pendingRewards.slot)
             let rewardSlot := keccak256(0, 0x40)
             userAmount := sload(rewardSlot)
-            // Revert if no reward
-            if iszero(userAmount) {
-                mstore(0x00, _NO_REWARD_SELECTOR)
-                revert(0x1c, 0x04)
+            // Emit the witdraw event and reset balance if user amount is positive
+            if userAmount {
+                // Emit the witdraw event
+                mstore(0x00, userAmount)
+                mstore(0x20, 0)
+                log2(0, 0x40, _REWARD_WITHDRAWAD_EVENT_SELECTOR, user)
+                // Reset his reward
+                sstore(rewardSlot, 0)
             }
-            // Emit the witdraw event
-            mstore(0x00, userAmount)
-            mstore(0x20, 0)
-            log2(0, 0x40, _REWARD_WITHDRAWAD_EVENT_SELECTOR, user)
-            // Reset his reward
-            sstore(rewardSlot, 0)
         }
         // Perform the transfer of the founds
         token.safeTransfer(user, userAmount);
@@ -209,11 +204,6 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
             let feeRecipientSlot := keccak256(0, 0x40)
             // Get the current user pending reward
             let pendingReward := sload(rewardSlot)
-            // Revert if no reward
-            if iszero(pendingReward) {
-                mstore(0x00, _NO_REWARD_SELECTOR)
-                revert(0x1c, 0x04)
-            }
             // Compute the fee's amount
             switch eq(feeRecipient, user)
             case 1 {
@@ -225,14 +215,17 @@ abstract contract PushPullReward is IPushPullReward, Initializable {
                 feesAmount := div(mul(pendingReward, feePercent), 100)
                 userAmount := sub(pendingReward, feesAmount)
             }
-            // Reset the user reward
-            sstore(rewardSlot, 0)
-            // Store the fee recipient reward (if any only)
-            if feesAmount { sstore(feeRecipientSlot, add(sload(feeRecipientSlot), feesAmount)) }
-            // Emit the witdraw event
-            mstore(0x00, userAmount)
-            mstore(0x20, feesAmount)
-            log2(0, 0x40, _REWARD_WITHDRAWAD_EVENT_SELECTOR, user)
+            // Emit the witdraw event and reset balance if user amount is positive
+            if userAmount {
+                // Reset his reward
+                sstore(rewardSlot, 0)
+                // Store the fee recipient reward (if any only)
+                if feesAmount { sstore(feeRecipientSlot, add(sload(feeRecipientSlot), feesAmount)) }
+                // Emit the witdraw event
+                mstore(0x00, userAmount)
+                mstore(0x20, feesAmount)
+                log2(0, 0x40, _REWARD_WITHDRAWAD_EVENT_SELECTOR, user)
+            }
         }
         // Perform the transfer of the founds
         token.safeTransfer(user, userAmount);

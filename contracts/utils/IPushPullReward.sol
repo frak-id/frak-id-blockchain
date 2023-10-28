@@ -7,7 +7,7 @@ pragma solidity 0.8.21;
 /// @custom:security-contact contact@frak.id
 interface IPushPullReward {
     /* -------------------------------------------------------------------------- */
-    /*                                   Event's                                  */
+    /*                                   Events                                   */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Event emitted when a reward is added
@@ -17,7 +17,7 @@ interface IPushPullReward {
     event RewardWithdrawed(address indexed user, uint256 amount, uint256 fees);
 
     /* -------------------------------------------------------------------------- */
-    /*                         External virtual function's                        */
+    /*                         External virtual functions                         */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -31,7 +31,7 @@ interface IPushPullReward {
     function withdrawFounds(address user) external;
 
     /* -------------------------------------------------------------------------- */
-    /*                          External view function's                          */
+    /*                          External view functions                           */
     /* -------------------------------------------------------------------------- */
 
     /**

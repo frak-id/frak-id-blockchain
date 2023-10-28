@@ -2,7 +2,7 @@
 pragma solidity 0.8.21;
 
 import { FrakTest } from "../FrakTest.sol";
-import { NotAuthorized } from "contracts/utils/FrakErrors.sol";
+import { NotAuthorized, PermitDelayExpired, InvalidSigner } from "contracts/utils/FrakErrors.sol";
 import { FrakToken } from "contracts/tokens/FrakToken.sol";
 import { IFrakToken } from "contracts/tokens/IFrakToken.sol";
 
@@ -13,7 +13,7 @@ contract FrakTokenTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                 Init test's                                */
+    /*                                 Init tests                                 */
     /* -------------------------------------------------------------------------- */
 
     function test_canBeDeployedAndInit_ok() public {
@@ -21,6 +21,10 @@ contract FrakTokenTest is FrakTest {
         bytes memory initData = abi.encodeWithSelector(FrakToken.initialize.selector);
         address proxyAddress = _deployProxy(address(new FrakToken()), initData, "FrakTokenDeploy");
         frakToken = FrakToken(proxyAddress);
+
+        // Can be updated
+        bytes memory updateData = bytes.concat(FrakToken.updateToDiamondEip712.selector);
+        frakToken.upgradeToAndCall(address(new FrakToken()), updateData);
     }
 
     /// @dev Can't re-init
@@ -83,7 +87,7 @@ contract FrakTokenTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                Permit test's                               */
+    /*                                Permit tests                                */
     /* -------------------------------------------------------------------------- */
 
     function test_permit_ok() public {
@@ -101,7 +105,7 @@ contract FrakTokenTest is FrakTest {
         (uint8 v, bytes32 r, bytes32 s) = _generateUserPermitSignature(contentOwner, 1 ether, block.timestamp - 1);
 
         // Perform the permit op & ensure it's valid
-        vm.expectRevert(IFrakToken.PermitDelayExpired.selector);
+        vm.expectRevert(PermitDelayExpired.selector);
         frakToken.permit(user, contentOwner, 1 ether, block.timestamp - 1, v, r, s);
     }
 
@@ -110,7 +114,7 @@ contract FrakTokenTest is FrakTest {
         (uint8 v, bytes32 r, bytes32 s) = _generateUserPermitSignature(contentOwner, 1 ether, block.timestamp);
 
         // Perform the permit op & ensure it's valid
-        vm.expectRevert(IFrakToken.InvalidSigner.selector);
+        vm.expectRevert(InvalidSigner.selector);
         frakToken.permit(address(1), contentOwner, 1 ether, block.timestamp, v, r, s);
     }
 
@@ -128,7 +132,7 @@ contract FrakTokenTest is FrakTest {
         );
 
         // Perform the permit op & ensure it's valid
-        vm.expectRevert(IFrakToken.InvalidSigner.selector);
+        vm.expectRevert(InvalidSigner.selector);
         frakToken.permit(address(1), contentOwner, 1 ether, block.timestamp, v, r, s);
     }
 

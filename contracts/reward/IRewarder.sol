@@ -12,7 +12,7 @@ interface IRewarder {
     error InvalidReward();
 
     /* -------------------------------------------------------------------------- */
-    /*                                   Event's                                  */
+    /*                                   Events                                   */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Event emitted when a user is rewarded for his listen
@@ -21,7 +21,7 @@ interface IRewarder {
     );
 
     /* -------------------------------------------------------------------------- */
-    /*                          External write function's                         */
+    /*                          External write functions                          */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Directly pay a `listener` for the given frk `amount` (used for offchain to onchain wallet migration)
@@ -46,7 +46,7 @@ interface IRewarder {
     function updateTpu(uint256 newTpu) external;
 
     /* -------------------------------------------------------------------------- */
-    /*                          External view function's                          */
+    /*                          External view functions                           */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Get the current TPU

@@ -19,7 +19,7 @@ contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
     using SafeTransferLib for address;
 
     /* -------------------------------------------------------------------------- */
-    /*                                 Constant's                                 */
+    /*                                 Constants                                  */
     /* -------------------------------------------------------------------------- */
 
     // The cap of frk token for the treasury
@@ -32,7 +32,7 @@ contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
     uint256 internal constant FRK_MINTING_AMOUNT = 1_000_000 ether;
 
     /* -------------------------------------------------------------------------- */
-    /*                               Custom error's                               */
+    /*                               Custom errors                                */
     /* -------------------------------------------------------------------------- */
 
     /// @dev 'bytes4(keccak256(bytes("InvalidAddress()")))'
@@ -48,7 +48,7 @@ contract FrakTreasuryWallet is FrakAccessControlUpgradeable, Multicallable {
     uint256 private constant _REWARD_TOO_LARGE_SELECTOR = 0x71009bf7;
 
     /* -------------------------------------------------------------------------- */
-    /*                                   Event's                                  */
+    /*                                   Events                                   */
     /* -------------------------------------------------------------------------- */
 
     /**

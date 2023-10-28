@@ -10,7 +10,7 @@ import { FraktionId } from "../libs/FraktionId.sol";
 /// @custom:security-contact contact@frak.id
 interface IMinter {
     /* -------------------------------------------------------------------------- */
-    /*                                   Error's                                  */
+    /*                                   Errors                                   */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Error emitted when the input supply is invalid
@@ -23,7 +23,7 @@ interface IMinter {
     error TooManyFraktion();
 
     /* -------------------------------------------------------------------------- */
-    /*                                   Event's                                  */
+    /*                                   Events                                   */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Event emitted when a new content is minted

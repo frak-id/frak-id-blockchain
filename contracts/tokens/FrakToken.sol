@@ -3,9 +3,10 @@ pragma solidity 0.8.21;
 
 import { ERC20Upgradeable } from "@oz-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
+import { InvalidSigner } from "../utils/FrakErrors.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { IFrakToken } from "./IFrakToken.sol";
-import { EIP712Base } from "./EIP712Base.sol";
+import { EIP712Diamond } from "../utils/EIP712Diamond.sol";
 import { ECDSA } from "solady/utils/ECDSA.sol";
 
 /// @author @KONFeature
@@ -13,17 +14,22 @@ import { ECDSA } from "solady/utils/ECDSA.sol";
 /// @notice ERC20 Contract for the FRAK token
 /// @dev Compliant with ERC20 - EIP712 - EIP2612
 /// @custom:security-contact contact@frak.id
-contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Base, IFrakToken {
+contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Diamond, IFrakToken {
     /* -------------------------------------------------------------------------- */
-    /*                                 Constant's                                 */
+    /*                                 Constants                                  */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Maximum cap of token, at 3 billion FRK
     uint256 private constant _cap = 3_000_000_000 ether;
 
     /* -------------------------------------------------------------------------- */
-    /*                               Custom error's                               */
+    /*                               Custom errors                                */
     /* -------------------------------------------------------------------------- */
+
+    /// @dev Gap variable for the previous domain separator variable from the EIP712 Base contract
+    bytes32 private _gapOldDomainSeparator;
+    /// @dev Gap variable for the previous nonce variable from the EIP712 Base contract
+    mapping(address => uint256) private _gapOldNonces;
 
     /// @dev 'bytes4(keccak256(bytes("PermitDelayExpired()")))'
     uint256 private constant _PERMIT_DELAYED_EXPIRED_SELECTOR = 0x95fc6e60;
@@ -37,7 +43,7 @@ contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Base
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          External write function's                         */
+    /*                                 Versioning                                 */
     /* -------------------------------------------------------------------------- */
 
     function initialize() external initializer {
@@ -48,6 +54,15 @@ contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Base
 
         // Current version is 2, since we use a version to reset the domain separator post EIP712 updates
     }
+
+    /// @dev Update to diamond Eip712
+    function updateToDiamondEip712() external reinitializer(3) {
+        _initializeEIP712("FRK");
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                          External write functions                          */
+    /* -------------------------------------------------------------------------- */
 
     /// @dev Mint some FRK
     function mint(address to, uint256 amount) external override onlyRole(FrakRoles.MINTER) {
@@ -103,7 +118,7 @@ contract FrakToken is ERC20Upgradeable, FrakAccessControlUpgradeable, EIP712Base
                             owner,
                             spender,
                             value,
-                            nonces[owner]++,
+                            useNonce(owner),
                             deadline
                         )
                     )

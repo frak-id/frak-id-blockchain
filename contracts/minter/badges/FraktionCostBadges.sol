@@ -11,14 +11,14 @@ import { InvalidFraktionType } from "../../utils/FrakErrors.sol";
 /// @custom:security-contact contact@frak.id
 abstract contract FraktionCostBadges {
     /* -------------------------------------------------------------------------- */
-    /*                                   Error's                                  */
+    /*                                   Errors                                   */
     /* -------------------------------------------------------------------------- */
 
     /// @dev 'bytes4(keccak256("InvalidFraktionType()"))'
     uint256 private constant _INVALID_FRAKTION_TYPE_SELECTOR = 0x3f126a45;
 
     /* -------------------------------------------------------------------------- */
-    /*                                   Event's                                  */
+    /*                                   Events                                   */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -39,7 +39,7 @@ abstract contract FraktionCostBadges {
     mapping(FraktionId frakionId => uint96 cost) private fraktionBadges;
 
     /* -------------------------------------------------------------------------- */
-    /*                             Abstract function's                            */
+    /*                             Abstract functions                             */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -51,7 +51,7 @@ abstract contract FraktionCostBadges {
     function updateCostBadge(FraktionId fraktionId, uint96 badge) external virtual;
 
     /* -------------------------------------------------------------------------- */
-    /*                          Internal write function's                         */
+    /*                          Internal write functions                          */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -70,7 +70,7 @@ abstract contract FraktionCostBadges {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                           Public read function's                           */
+    /*                           Public read functions                            */
     /* -------------------------------------------------------------------------- */
 
     /**

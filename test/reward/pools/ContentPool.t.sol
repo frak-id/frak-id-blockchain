@@ -28,7 +28,7 @@ contract ContentPoolTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                 Init test's                                */
+    /*                                 Init tests                                 */
     /* -------------------------------------------------------------------------- */
 
     function test_canBeDeployedAndInit_ok() public {
@@ -291,7 +291,7 @@ contract ContentPoolTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                Test helper's                               */
+    /*                                Test helpers                                */
     /* -------------------------------------------------------------------------- */
 
     function _mintCommonForUser() private {

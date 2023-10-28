@@ -21,6 +21,9 @@ contract FrakTest is PRBTest {
     bytes32 constant PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
+    bytes32 constant PERMIT_TRANSFER_ALL_TYPEHASH =
+        keccak256("PermitAllTransfer(address owner,address spender,uint256 nonce,uint256 deadline)");
+
     // User accounts
     address foundation;
     address deployer;
@@ -247,7 +250,7 @@ contract FrakTest is PRBTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                       Utils, to ease the test process                      */
+    /*                       Modifier helpers                                     */
     /* -------------------------------------------------------------------------- */
 
     modifier asDeployer() {
@@ -269,27 +272,6 @@ contract FrakTest is PRBTest {
             fraktionTokens.mint(address(1), fraktionId, fraktionSupply);
         }
         _;
-    }
-
-    function _generateUserPermitSignature(
-        address to,
-        uint256 amount,
-        uint256 deadline
-    )
-        internal
-        view
-        returns (uint8, bytes32, bytes32)
-    {
-        return vm.sign(
-            userPrivKey,
-            keccak256(
-                abi.encodePacked(
-                    "\x19\x01",
-                    frakToken.getDomainSeperator(),
-                    keccak256(abi.encode(PERMIT_TYPEHASH, user, to, amount, frakToken.getNonce(user), deadline))
-                )
-            )
-        );
     }
 
     function _newUser(string memory label) internal returns (address addr) {
@@ -315,5 +297,54 @@ contract FrakTest is PRBTest {
         ERC1967Proxy proxyTemp = new ERC1967Proxy(logic, init);
         createdAddress = address(proxyTemp);
         vm.label(createdAddress, label);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                              Signature helpers                             */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev Generate the erc20 permit signature
+    function _generateUserPermitSignature(
+        address to,
+        uint256 amount,
+        uint256 deadline
+    )
+        internal
+        view
+        returns (uint8, bytes32, bytes32)
+    {
+        return vm.sign(
+            userPrivKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    frakToken.getDomainSeperator(),
+                    keccak256(abi.encode(PERMIT_TYPEHASH, user, to, amount, frakToken.getNonce(user), deadline))
+                )
+            )
+        );
+    }
+
+    /// @dev Generate a permit signature for the fraktion tokens
+    function _generateUserPermitTransferAllSignature(
+        address to,
+        uint256 deadline
+    )
+        internal
+        view
+        returns (uint8, bytes32, bytes32)
+    {
+        return vm.sign(
+            userPrivKey,
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    fraktionTokens.getDomainSeperator(),
+                    keccak256(
+                        abi.encode(PERMIT_TRANSFER_ALL_TYPEHASH, user, to, fraktionTokens.getNonce(user), deadline)
+                    )
+                )
+            )
+        );
     }
 }

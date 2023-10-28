@@ -58,7 +58,7 @@ jobs:
           key: foundry-${{ github.repository_id }}-${{ hashFiles('foundry.toml') }}
           
       - name: '🧪 Check FRK Token storage'
-        uses: Rubilmax/foundry-storage-check@v3.5
+        uses: Rubilmax/foundry-storage-check@v3.6
         with:
             contract: contracts/tokens/FrakToken.sol:FrakToken
             rpcUrl: ${{ env.POLYGON_RPC_URL }}
@@ -66,7 +66,7 @@ jobs:
             failOnRemoval: true
           
       - name: '🧪 Check Fraktion Token storage'
-        uses: Rubilmax/foundry-storage-check@v3.5
+        uses: Rubilmax/foundry-storage-check@v3.6
         with:
             contract: contracts/fraktions/FraktionTokens.sol:FraktionTokens
             rpcUrl: ${{ env.POLYGON_RPC_URL }}
@@ -74,7 +74,7 @@ jobs:
             failOnRemoval: true
 
       - name: '🧪 Check content pool storage'
-        uses: Rubilmax/foundry-storage-check@v3.5
+        uses: Rubilmax/foundry-storage-check@v3.6
         with:
             contract: contracts/reward/contentPool/ContentPool.sol:ContentPool
             rpcUrl: ${{ env.POLYGON_RPC_URL }}
@@ -82,7 +82,7 @@ jobs:
             failOnRemoval: true
     
       - name: '🧪 Check referral pool storage'
-        uses: Rubilmax/foundry-storage-check@v3.5
+        uses: Rubilmax/foundry-storage-check@v3.6
         with:
             contract: contracts/reward/referralPool/ReferralPool.sol:ReferralPool
             rpcUrl: ${{ env.POLYGON_RPC_URL }}
@@ -90,7 +90,7 @@ jobs:
             failOnRemoval: true
 
       - name: '🧪 Check rewarder storage'
-        uses: Rubilmax/foundry-storage-check@v3.5
+        uses: Rubilmax/foundry-storage-check@v3.6
         with:
             contract: contracts/reward/Rewarder.sol:Rewarder
             rpcUrl: ${{ env.POLYGON_RPC_URL }}
@@ -98,7 +98,7 @@ jobs:
             failOnRemoval: true
 
       - name: '🧪 Check minter storage'
-        uses: Rubilmax/foundry-storage-check@v3.5
+        uses: Rubilmax/foundry-storage-check@v3.6
         with:
             contract: contracts/minter/Minter.sol:Minter
             rpcUrl: ${{ env.POLYGON_RPC_URL }}

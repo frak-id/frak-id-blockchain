@@ -8,14 +8,8 @@ import { IERC20Upgradeable } from "@oz-upgradeable/token/ERC20/IERC20Upgradeable
 /// @notice Interface for the FrakToken
 /// @custom:security-contact contact@frak.id
 interface IFrakToken is IERC20Upgradeable {
-    /// @dev error throwned when the signer is invalid
-    error InvalidSigner();
-
     /// @dev error throwned when the contract cap is exceeded
     error CapExceed();
-
-    /// @dev error throwned when the permit delay is expired
-    error PermitDelayExpired();
 
     /// @dev Mint `amount` of FRK to `to`
     function mint(address to, uint256 amount) external;

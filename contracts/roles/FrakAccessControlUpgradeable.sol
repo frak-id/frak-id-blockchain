@@ -21,14 +21,14 @@ import { NotAuthorized, RenounceForCallerOnly } from "../utils/FrakErrors.sol";
  */
 abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradeable, UUPSUpgradeable {
     /* -------------------------------------------------------------------------- */
-    /*                               Custom error's                               */
+    /*                               Custom errors                                */
     /* -------------------------------------------------------------------------- */
 
     /// @dev 'bytes4(keccak256(bytes("NotAuthorized()")))'
     uint256 private constant _NOT_AUTHORIZED_SELECTOR = 0xea8e4eb5;
 
     /* -------------------------------------------------------------------------- */
-    /*                                   Event's                                  */
+    /*                                   Events                                   */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Event emitted when a role is granted
@@ -67,7 +67,7 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          External write function's                         */
+    /*                          External write functions                          */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Grant the `role` to the `account`
@@ -88,7 +88,7 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          External view function's                          */
+    /*                          External view functions                           */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Check if the user has the given role
@@ -97,7 +97,7 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          Internal write function's                         */
+    /*                          Internal write functions                          */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Grant the `role` to the `account`
@@ -117,7 +117,7 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                          Internal view function's                          */
+    /*                          Internal view functions                           */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Check that the calling user have the right `role`
@@ -145,7 +145,7 @@ abstract contract FrakAccessControlUpgradeable is Initializable, ContextUpgradea
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                 Modifier's                                 */
+    /*                                 Modifiers                                  */
     /* -------------------------------------------------------------------------- */
 
     /**

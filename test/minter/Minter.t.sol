@@ -17,7 +17,7 @@ contract MinterTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                                 Init test's                                */
+    /*                                 Init tests                                 */
     /* -------------------------------------------------------------------------- */
 
     function test_canBeDeployedAndInit_ok() public {
@@ -35,7 +35,7 @@ contract MinterTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                             Add content test's                             */
+    /*                             Add content tests                              */
     /* -------------------------------------------------------------------------- */
 
     function test_addContent_ok() public {
@@ -72,7 +72,7 @@ contract MinterTest is FrakTest {
         minter.addContent(contentOwner, 20, 7, 3, 21);
     }
 
-    /// @dev Different mint method's benchmark
+    /// @dev Different mint functions benchmark
     function test_benchmarkAddContent_ok() public asDeployer {
         // Warm up storage
         minter.addAutoMintedContent(contentOwner);
@@ -217,7 +217,7 @@ contract MinterTest is FrakTest {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                               Supply method's                              */
+    /*                               Supply functions                             */
     /* -------------------------------------------------------------------------- */
 
     function test_increaseSupply_ok() public withEmptySupply(contentId.commonFraktionId()) {

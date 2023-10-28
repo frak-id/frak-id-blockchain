@@ -26,6 +26,7 @@ abstract contract UpgradeScript is Script {
         address minter;
         address frakTreasuryWallet;
         address swapPool;
+        address walletMigrator;
     }
 
     /// @dev Mapping of chainId -> proxy addresses
@@ -47,12 +48,9 @@ abstract contract UpgradeScript is Script {
             rewarder: 0x8D9fa601DA1416b087E9db6B6EaD63D4920A4528,
             minter: 0x1adc8CAaA35551730eCd82e0eEA683Aa90dB6cf0,
             frakTreasuryWallet: 0x7053f61CEA3B7C3b5f0e14de6eEdB01cA1850408,
-            swapPool: 0xC01677Ec5eF3607364125Ab84F6FBb7d95B3D545
+            swapPool: 0xC01677Ec5eF3607364125Ab84F6FBb7d95B3D545,
+            walletMigrator: 0xC9f4a01219240aEDfe9502fff0bdEEa5ea83E795
         });
-        // forge verify-contract --chain polygon 0x8a67c75F8C0bF37a06d92938e9C9e841506D37B0 MonoPool  --constructor-args
-        // $(cast abi-encode "constructor(address,address,uint256,address,uint256)"
-        // 0x6261E4a478C98419EaFa6289509C49058D21Df8c 0x0000000000000000000000000000000000000000 100
-        // 0x517ecFa01E2F9A6955d8DD04867613E41309213d 100)
         // Mumbai proxy address
         contractAddresses[80_001] = ContractProxyAddresses({
             frakToken: 0xbCeE0E1C02E91EAFaEd69eD2B1DC5199789575df,
@@ -64,12 +62,13 @@ abstract contract UpgradeScript is Script {
             rewarder: 0x0bD2a225E2c6173b42b907Cc4424076327D90F6F,
             minter: 0x8964e2Ed5fF27358c62a761f23957bd2b5165779,
             frakTreasuryWallet: 0x7CC62E1ecd246153DF4997352ec9C5fF172EE08C,
-            swapPool: 0xa5C6ff96B2417d5477d0ab27881b3D60675E0d30
+            swapPool: 0xa5C6ff96B2417d5477d0ab27881b3D60675E0d30,
+            walletMigrator: 0xC2F4685B8d9fafc3172abA9a7FFd4B0Dd2bd2D5e
         });
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                           Internal write method's                          */
+    /*                           Internal write functions                         */
     /* -------------------------------------------------------------------------- */
 
     /**
@@ -134,7 +133,7 @@ abstract contract UpgradeScript is Script {
     }
 
     /* -------------------------------------------------------------------------- */
-    /*                           Internal read method's                           */
+    /*                           Internal read functions                          */
     /* -------------------------------------------------------------------------- */
 
     /**
