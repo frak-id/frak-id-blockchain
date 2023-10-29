@@ -4,6 +4,7 @@ pragma solidity 0.8.21;
 import "forge-std/Script.sol";
 import { UpgradeScript } from "../utils/UpgradeScript.s.sol";
 import { Rewarder } from "contracts/reward/Rewarder.sol";
+import { RewardListenParamLib, RewardListenParam } from "contracts/reward/RewardListenParam.sol";
 import { ContentId } from "contracts/libs/ContentId.sol";
 
 contract FakeRewardScript is UpgradeScript {
@@ -17,12 +18,9 @@ contract FakeRewardScript is UpgradeScript {
 
     /// @dev Fake some reward for a user
     function _fakeSomeReward(Rewarder rewarder, address user) internal deployerBroadcast {
-        ContentId[] memory contentIds = new ContentId[](1);
-        contentIds[0] = ContentId.wrap(3);
+        RewardListenParam[] memory listenParams = new RewardListenParam[](1);
+        listenParams[0] = RewardListenParamLib.build(ContentId.wrap(3), 300);
 
-        uint256[] memory listenCounts = new uint256[](1);
-        listenCounts[0] = 300;
-
-        rewarder.payUser(user, 1, contentIds, listenCounts);
+        rewarder.payUser(user, 1, listenParams);
     }
 }

@@ -10,6 +10,7 @@ import { ContentId } from "../libs/ContentId.sol";
 import { FraktionId } from "../libs/FraktionId.sol";
 import { FrakRoles } from "../roles/FrakRoles.sol";
 import { RewardAccounter } from "./RewardAccounter.sol";
+import { RewardListenParam } from "./RewardListenParam.sol";
 import { FraktionTokens } from "../fraktions/FraktionTokens.sol";
 import { IFrakToken } from "../tokens/IFrakToken.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
@@ -236,13 +237,12 @@ contract Rewarder is
         }
     }
 
-    /// @dev Compute the reward for a `listener`, given the `contentType`, `contentIds` and `listenCounts`, and pay him
+    /// @dev Compute the reward for a `listener`, given the `contentType`, and `listenParams` and pay him
     /// and the owner
     function payUser(
         address listener,
         uint256 contentType,
-        ContentId[] calldata contentIds,
-        uint256[] calldata listenCounts
+        RewardListenParam[] calldata listenParams
     )
         external
         payable
@@ -254,7 +254,7 @@ contract Rewarder is
                 mstore(0x00, _INVALID_ADDRESS_SELECTOR)
                 revert(0x1c, 0x04)
             }
-            if or(iszero(eq(contentIds.length, listenCounts.length)), gt(contentIds.length, MAX_BATCH_AMOUNT)) {
+            if or(iszero(listenParams.length), gt(listenParams.length, MAX_BATCH_AMOUNT)) {
                 mstore(0x00, _INVALID_ARRAY_SELECTOR)
                 revert(0x1c, 0x04)
             }
@@ -267,9 +267,9 @@ contract Rewarder is
         uint256 rewardForContentType = baseRewardForContentType(contentType);
 
         // Iterate over each content the user listened
-        uint256 length = contentIds.length;
+        uint256 length = listenParams.length;
         for (uint256 i; i < length;) {
-            computeRewardForContent(contentIds[i], listenCounts[i], rewardForContentType, listener, rewardsAccounter);
+            computeRewardForContent(listenParams[i], rewardForContentType, listener, rewardsAccounter);
 
             // Finally, increase the counter
             unchecked {
@@ -356,20 +356,20 @@ contract Rewarder is
     /* -------------------------------------------------------------------------- */
 
     /// @dev Compute the reward of the given content
-    /// @param contentId The id of the content
-    /// @param listenCount The number of listen for the given content
+    /// @param listenParam The param of the listening (containing listen count & content id)
     /// @param rewardForContentType The base reward for the given content type
     /// @param listener The listener address
     /// @param rewardsAccounter The current total rewards in memory accounting (that will be updated)
     function computeRewardForContent(
-        ContentId contentId,
-        uint256 listenCount,
+        RewardListenParam listenParam,
         uint256 rewardForContentType,
         address listener,
         RewardAccounter memory rewardsAccounter
     )
         private
     {
+        uint256 listenCount = listenParam.getListenCount();
+        ContentId contentId = listenParam.getContentId();
         // Ensure we don't exceed the max ccu / content
         assembly {
             if gt(listenCount, MAX_CCU_PER_CONTENT) {

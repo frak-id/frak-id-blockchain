@@ -8,6 +8,7 @@ import { FrakTreasuryWallet, NotEnoughTreasury } from "contracts/wallets/FrakTre
 import { WalletMigrator } from "contracts/wallets/WalletMigrator.sol";
 import { FraktionId } from "contracts/libs/FraktionId.sol";
 import { ContentId } from "contracts/libs/ContentId.sol";
+import { RewardListenParamLib, RewardListenParam } from "contracts/reward/RewardListenParam.sol";
 
 /// @dev Testing methods on the WalletMigrator
 contract WalletMigratorTest is FrakTest {
@@ -213,14 +214,13 @@ contract WalletMigratorTest is FrakTest {
         fraktionTokens.mint(user, contentId.goldFraktionId(), 1);
 
         // Then pay it multiple time on this content
-        ContentId[] memory contentIds = new ContentId[](1);
-        contentIds[0] = contentId;
-        uint256[] memory listenCounts = new uint256[](1);
-        listenCounts[0] = 300;
-        rewarder.payUser(user, 1, contentIds, listenCounts);
-        rewarder.payUser(user, 1, contentIds, listenCounts);
-        rewarder.payUser(user, 1, contentIds, listenCounts);
-        rewarder.payUser(user, 1, contentIds, listenCounts);
+        RewardListenParam[] memory listenParams = new RewardListenParam[](1);
+        listenParams[0] = RewardListenParamLib.build(contentId, uint16(300));
+
+        rewarder.payUser(user, 1, listenParams);
+        rewarder.payUser(user, 1, listenParams);
+        rewarder.payUser(user, 1, listenParams);
+        rewarder.payUser(user, 1, listenParams);
         vm.stopPrank();
         _;
     }

@@ -37,7 +37,7 @@ library ContentIdLib {
     uint256 internal constant FRAKTION_TYPE_DIAMOND = 6;
 
     /* -------------------------------------------------------------------------- */
-    /*                               Helper functions                              */
+    /*                               Helper functions                             */
     /* -------------------------------------------------------------------------- */
 
     /// @dev Build a fraktion id from a content id

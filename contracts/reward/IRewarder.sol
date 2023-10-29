@@ -2,6 +2,7 @@
 pragma solidity 0.8.21;
 
 import { ContentId } from "../libs/ContentId.sol";
+import { RewardListenParam } from "./RewardListenParam.sol";
 
 /// @author @KONFeature
 /// @title IRewarder
@@ -31,13 +32,12 @@ interface IRewarder {
     /// created by the user, thatis sent to the creator)
     function payCreatorDirectlyBatch(ContentId[] calldata contentIds, uint256[] calldata amounts) external payable;
 
-    /// @dev Compute the reward for a `listener`, given the `contentType`, `contentIds` and `listenCounts`, and pay him
+    /// @dev Compute the reward for a `listener`, given the `contentType`, and `listenParams`, and pay him
     /// and the owner
     function payUser(
         address listener,
         uint256 contentType,
-        ContentId[] calldata contentIds,
-        uint256[] calldata listenCounts
+        RewardListenParam[] calldata listenParams
     )
         external
         payable;
