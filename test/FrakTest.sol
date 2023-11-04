@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: GNU GPLv3
 pragma solidity 0.8.21;
 
-import { ContentId } from "@frak/libs/ContentId.sol";
-import { FraktionId } from "@frak/libs/FraktionId.sol";
-import { FrakToken } from "@frak/tokens/FrakToken.sol";
-import { FraktionTokens } from "@frak/fraktions/FraktionTokens.sol";
-import { MultiVestingWallets } from "@frak/wallets/MultiVestingWallets.sol";
-import { VestingWalletFactory } from "@frak/wallets/VestingWalletFactory.sol";
-import { FrakTreasuryWallet } from "@frak/wallets/FrakTreasuryWallet.sol";
-import { ReferralPool } from "@frak/reward/referralPool/ReferralPool.sol";
-import { Minter } from "@frak/minter/Minter.sol";
-import { ContentPool } from "@frak/reward/contentPool/ContentPool.sol";
-import { Rewarder } from "@frak/reward/Rewarder.sol";
-import { FrakRoles } from "@frak/roles/FrakRoles.sol";
+import { ContentId } from "contracts/libs/ContentId.sol";
+import { FraktionId } from "contracts/libs/FraktionId.sol";
+import { FrakToken } from "contracts/tokens/FrakToken.sol";
+import { FraktionTokens } from "contracts/fraktions/FraktionTokens.sol";
+import { MultiVestingWallets } from "contracts/wallets/MultiVestingWallets.sol";
+import { VestingWalletFactory } from "contracts/wallets/VestingWalletFactory.sol";
+import { FrakTreasuryWallet } from "contracts/wallets/FrakTreasuryWallet.sol";
+import { ReferralPool } from "contracts/reward/referralPool/ReferralPool.sol";
+import { Minter } from "contracts/minter/Minter.sol";
+import { ContentPool } from "contracts/reward/contentPool/ContentPool.sol";
+import { Rewarder } from "contracts/reward/Rewarder.sol";
+import { FrakRoles } from "contracts/roles/FrakRoles.sol";
 import { PRBTest } from "@prb/test/PRBTest.sol";
 import { ERC1967Proxy } from "openzeppelin/proxy/ERC1967/ERC1967Proxy.sol";
 

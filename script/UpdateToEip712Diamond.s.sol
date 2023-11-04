@@ -4,17 +4,17 @@ pragma solidity 0.8.21;
 import "forge-std/console.sol";
 import "forge-std/Script.sol";
 import { UpgradeScript } from "./utils/UpgradeScript.s.sol";
-import { FrakToken } from "@frak/tokens/FrakToken.sol";
-import { FraktionTokens } from "@frak/fraktions/FraktionTokens.sol";
-import { MultiVestingWallets } from "@frak/wallets/MultiVestingWallets.sol";
-import { VestingWalletFactory } from "@frak/wallets/VestingWalletFactory.sol";
-import { FrakTreasuryWallet } from "@frak/wallets/FrakTreasuryWallet.sol";
-import { ReferralPool } from "@frak/reward/referralPool/ReferralPool.sol";
-import { Minter } from "@frak/minter/Minter.sol";
-import { ContentPool } from "@frak/reward/contentPool/ContentPool.sol";
-import { Rewarder } from "@frak/reward/Rewarder.sol";
-import { FrakRoles } from "@frak/roles/FrakRoles.sol";
-import { WalletMigrator } from "@frak/wallets/WalletMigrator.sol";
+import { FrakToken } from "contracts/tokens/FrakToken.sol";
+import { FraktionTokens } from "contracts/fraktions/FraktionTokens.sol";
+import { MultiVestingWallets } from "contracts/wallets/MultiVestingWallets.sol";
+import { VestingWalletFactory } from "contracts/wallets/VestingWalletFactory.sol";
+import { FrakTreasuryWallet } from "contracts/wallets/FrakTreasuryWallet.sol";
+import { ReferralPool } from "contracts/reward/referralPool/ReferralPool.sol";
+import { Minter } from "contracts/minter/Minter.sol";
+import { ContentPool } from "contracts/reward/contentPool/ContentPool.sol";
+import { Rewarder } from "contracts/reward/Rewarder.sol";
+import { FrakRoles } from "contracts/roles/FrakRoles.sol";
+import { WalletMigrator } from "contracts/wallets/WalletMigrator.sol";
 
 contract UpdateToEip712Diamond is UpgradeScript {
     function run() external {
