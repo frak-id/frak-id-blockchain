@@ -263,7 +263,7 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         payable
         onlyRole(FrakRoles.MINTER)
     {
-        _mintFraktionForUser(id, to, deadline, v, r, s);
+        _mintFraktionForUserWithSig(id, to, deadline, v, r, s);
     }
 
     /**
@@ -277,7 +277,17 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      * @param   s  Signature spec secp256k1
      */
     function mintFraktion(FraktionId id, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external payable {
-        _mintFraktionForUser(id, msg.sender, deadline, v, r, s);
+        _mintFraktionForUserWithSig(id, msg.sender, deadline, v, r, s);
+    }
+
+    /**
+     * @notice  Mint a new fraktion for the given amount to the caller
+     * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer
+     * and mint the fraktion
+     * @param   id  The id of the fraktion to be minted for the user
+     */
+    function mintFraktion(FraktionId id) external payable {
+        _mintFraktionForUser(id, msg.sender);
     }
 
     /**
@@ -339,7 +349,16 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
      * @param   r  Signature spec secp256k1
      * @param   s  Signature spec secp256k1
      */
-    function _mintFraktionForUser(FraktionId id, address to, uint256 deadline, uint8 v, bytes32 r, bytes32 s) private {
+    function _mintFraktionForUserWithSig(
+        FraktionId id,
+        address to,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
+        private
+    {
         // Get the current user balance, and exit if he already got a fraktion of this type
         uint256 balance = fraktionTokens.balanceOf(to, FraktionId.unwrap(id));
         if (balance != 0) {
@@ -355,6 +374,33 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         }
         // Call the permit functions
         frakToken.permit(to, address(this), cost, deadline, v, r, s);
+        // Transfer the tokens
+        address(frakToken).safeTransferFrom(to, foundationWallet, cost);
+        // Mint his fraktion
+        fraktionTokens.mint(to, id, 1);
+    }
+
+    /**
+     * @notice  Mint a new fraktion for the given amount and user
+     * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer
+     * and mint the fraktion
+     * @param   id  The id of the fraktion to be minted for the user
+     * @param   to  The address on which we will mint the fraktion
+     */
+    function _mintFraktionForUser(FraktionId id, address to) private {
+        // Get the current user balance, and exit if he already got a fraktion of this type
+        uint256 balance = fraktionTokens.balanceOf(to, FraktionId.unwrap(id));
+        if (balance != 0) {
+            revert TooManyFraktion();
+        }
+        // Get the cost of the fraktionId
+        uint256 cost = getCostBadge(id);
+        assembly {
+            // Emit the event
+            mstore(0, 1)
+            mstore(0x20, cost)
+            log3(0, 0x40, _FRACTION_MINTED_EVENT_SELECTOR, id, to)
+        }
         // Transfer the tokens
         address(frakToken).safeTransferFrom(to, foundationWallet, cost);
         // Mint his fraktion

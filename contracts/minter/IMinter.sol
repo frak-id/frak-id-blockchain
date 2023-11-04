@@ -95,6 +95,14 @@ interface IMinter {
     function mintFraktion(FraktionId id, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external payable;
 
     /**
+     * @notice  Mint a new fraktion for the given amount to the caller
+     * @dev     Will compute the fraktion price, ensure the user have enough Frk to buy it, if try, perform the transfer
+     * and mint the fraktion
+     * @param   id  The id of the fraktion to be minted for the user
+     */
+    function mintFraktion(FraktionId id) external payable;
+
+    /**
      * @notice  Mint a free fraktion for the given user
      * @dev     Will mint a new free FraktionToken for the user, by first ensuring the user doesn't have any fraktion,
      * only performed when contract not paused and by the right person

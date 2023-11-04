@@ -9,6 +9,7 @@ import { Minter } from "contracts/minter/Minter.sol";
 import { IMinter } from "contracts/minter/IMinter.sol";
 import { ContentId, ContentIdLib } from "contracts/libs/ContentId.sol";
 import { FraktionId } from "contracts/libs/FraktionId.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 
 /// @dev Testing methods on the Minter
 contract MinterTest is FrakTest {
@@ -214,6 +215,59 @@ contract MinterTest is FrakTest {
 
         // Assert the fraktion was minted to the user
         assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(commonFraktionId)), 1);
+    }
+
+    function test_mintFraktion_noSig_ok() public withFrk(user, 100 ether) {
+        FraktionId commonFraktionId = contentId.commonFraktionId();
+        // Assert the balance is 0
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(commonFraktionId)), 0);
+
+        // Get the price of the fraktion
+        uint256 price = minter.getCostBadge(commonFraktionId);
+
+        // Approve the minter to spend the user's FRK
+        vm.prank(user);
+        frakToken.approve(address(minter), price);
+
+        // Perform the mint process
+        vm.prank(user);
+        minter.mintFraktion(commonFraktionId);
+
+        // Assert the fraktion was minted to the user
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(commonFraktionId)), 1);
+    }
+
+    function test_mintFraktion_noSig_TooManyFraktion_ko() public withFrk(user, 100 ether) {
+        FraktionId commonFraktionId = contentId.commonFraktionId();
+
+        // Mint first fraktion
+        uint256 price = minter.getCostBadge(commonFraktionId);
+        vm.prank(user);
+        frakToken.approve(address(minter), price);
+        vm.prank(user);
+        minter.mintFraktion(commonFraktionId);
+
+        // Assert the second mint will fail
+        vm.prank(user);
+        frakToken.approve(address(minter), price);
+        vm.expectRevert(IMinter.TooManyFraktion.selector);
+        vm.prank(user);
+        minter.mintFraktion(commonFraktionId);
+
+        // Assert the fraktion was minted to the user
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(commonFraktionId)), 1);
+    }
+
+    function test_mintFraktion_noSig_NoApproval_ko() public withFrk(user, 100 ether) {
+        FraktionId commonFraktionId = contentId.commonFraktionId();
+
+        // Try to mint the fraktion without any approval
+        vm.expectRevert(SafeTransferLib.TransferFromFailed.selector);
+        vm.prank(user);
+        minter.mintFraktion(commonFraktionId);
+
+        // Assert the fraktion wasn't minted to the user
+        assertEq(fraktionTokens.balanceOf(user, FraktionId.unwrap(commonFraktionId)), 0);
     }
 
     /* -------------------------------------------------------------------------- */
