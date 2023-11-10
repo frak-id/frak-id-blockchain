@@ -89,6 +89,11 @@ contract WalletMigrator is Multicallable {
         _migrateFrk(user, newWallet, deadline, v, r, s);
     }
 
+    /// @dev Migrate all the FRK of the current user to the `newWallet`
+    function migrateFrkForUserDirect(address user, address newWallet) external {
+        address(frkToken).safeTransferFrom(user, newWallet, frkToken.balanceOf(user));
+    }
+
     /// @dev Migrate all the frk of the `user` to the `newWallet`, using EIP-2612 signature as approval
     function _migrateFrk(address user, address newWallet, uint256 deadline, uint8 v, bytes32 r, bytes32 s) internal {
         // We use the signature to allow the transfer all the FRK of the user
@@ -129,6 +134,12 @@ contract WalletMigrator is Multicallable {
         external
     {
         _migrateFraktions(user, newWallet, deadline, v, r, s, ids);
+    }
+
+    /// @dev Migrate all the fraktions to the `newWallet`at once
+    function migrateFraktionsForUserDirect(address user, address newWallet, uint256[] calldata ids) external {
+        // And finally, we transfer all the FRK of the user to the new wallet
+        fraktionTokens.transferAllFrom(user, newWallet, ids);
     }
 
     /// @dev Migrate all the fraktions to the `newWallet`at once

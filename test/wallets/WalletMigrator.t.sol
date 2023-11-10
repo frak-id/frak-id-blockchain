@@ -200,6 +200,39 @@ contract WalletMigratorTest is FrakTest {
         _assertFraktionTransfered();
     }
 
+    function test_fullMigrationForUserDirect_ok() public withUserReward withFrk(user, 10 ether) withUserFraktions {
+        bytes[] memory migrationCallData = new bytes[](3);
+
+        // Allow the wallet migrator to move founds for the user
+        vm.prank(user);
+        frakToken.approve(address(walletMigrator), type(uint256).max);
+
+        // Allow the wallet migrator on the fraktions
+        vm.prank(user);
+        fraktionTokens.setApprovalForAll(address(walletMigrator), true);
+
+        // Build the claim function data
+        migrationCallData[0] = abi.encodeWithSelector(WalletMigrator.claimAllFoundsForUser.selector, user);
+
+        // Generate signature for frk transfer & encode function data
+        migrationCallData[1] = abi.encodeWithSelector(WalletMigrator.migrateFrkForUserDirect.selector, user, targetUser);
+
+        // Generate signature for fraktion transfer & encode function data
+        migrationCallData[2] = abi.encodeWithSelector(
+            WalletMigrator.migrateFraktionsForUserDirect.selector, user, targetUser, _allFraktionsIds()
+        );
+
+        // Perform the multicall
+        walletMigrator.multicall(migrationCallData);
+
+        // Ensure the user has no frk remaining
+        assertEq(frakToken.balanceOf(user), 0);
+
+        // Ensure the user has no more reward and fraktions
+        _assertRewardClaimed();
+        _assertFraktionTransfered();
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                          Internal helper functions                         */
     /* -------------------------------------------------------------------------- */
