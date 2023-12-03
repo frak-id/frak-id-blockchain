@@ -39,7 +39,6 @@ contract Rewarder is
     // The cap of frak token we can mint for the reward
     uint256 private constant REWARD_MINT_CAP = 1_500_000_000 ether;
     uint256 private constant SINGLE_REWARD_CAP = 50_000 ether;
-    uint256 private constant DIRECT_REWARD_CAP = 53 ether;
 
     // Maximum data we can treat in a batch manner
     uint256 private constant MAX_BATCH_AMOUNT = 20;
@@ -153,88 +152,6 @@ contract Rewarder is
     /* -------------------------------------------------------------------------- */
     /*                          External write functions                          */
     /* -------------------------------------------------------------------------- */
-
-    /// @dev Directly pay a `listener` for the given frk `amount` (used for offchain to onchain wallet migration)
-    function payUserDirectly(address listener, uint256 amount) external payable onlyRole(FrakRoles.REWARDER) {
-        assembly {
-            // Ensure the param are valid and not too much
-            if iszero(listener) {
-                mstore(0x00, _INVALID_ADDRESS_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-            if or(iszero(amount), gt(amount, DIRECT_REWARD_CAP)) {
-                mstore(0x00, _INVALID_REWARD_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-            // Compute the new total amount
-            let newTotalAmount := add(amount, sload(totalFrakMinted.slot))
-            // Ensure it's good
-            if gt(newTotalAmount, REWARD_MINT_CAP) {
-                mstore(0x00, _INVALID_REWARD_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-            // Increase our total frak minted
-            sstore(totalFrakMinted.slot, newTotalAmount)
-        }
-
-        // Mint the reward for the user
-        token.safeTransfer(listener, amount);
-    }
-
-    /// @dev Directly pay all the creators owner of `contentIds` for each given frk `amounts` (used for offchain reward
-    /// created by the user, thatis sent to the creator)
-    function payCreatorDirectlyBatch(
-        ContentId[] calldata contentIds,
-        uint256[] calldata amounts
-    )
-        external
-        payable
-        onlyRole(FrakRoles.REWARDER)
-    {
-        assembly {
-            // Ensure we got valid data
-            if or(iszero(eq(contentIds.length, amounts.length)), gt(contentIds.length, MAX_BATCH_AMOUNT)) {
-                mstore(0x00, _INVALID_ARRAY_SELECTOR)
-                revert(0x1c, 0x04)
-            }
-        }
-
-        // Then, for each content contentIds
-        for (uint256 i; i < contentIds.length;) {
-            uint256 amount = amounts[i];
-            assembly {
-                // Ensure the reward is valid
-                if or(iszero(amount), gt(amount, DIRECT_REWARD_CAP)) {
-                    mstore(0x00, _INVALID_REWARD_SELECTOR)
-                    revert(0x1c, 0x04)
-                }
-                // Compute the new total amount
-                let newTotalAmount := add(amount, sload(totalFrakMinted.slot))
-                // Ensure it's good
-                if gt(newTotalAmount, REWARD_MINT_CAP) {
-                    mstore(0x00, _INVALID_REWARD_SELECTOR)
-                    revert(0x1c, 0x04)
-                }
-                // Increase our total frak minted
-                sstore(totalFrakMinted.slot, newTotalAmount)
-            }
-            // Get the creator address
-            address owner = fraktionTokens.ownerOf(contentIds[i]);
-            // Ensure it's not zero
-            assembly {
-                if iszero(owner) {
-                    mstore(0x00, _INVALID_ADDRESS_SELECTOR)
-                    revert(0x1c, 0x04)
-                }
-            }
-            // Add this founds
-            _addFoundsUnchecked(owner, amounts[i]);
-
-            unchecked {
-                i++;
-            }
-        }
-    }
 
     /// @dev Compute the reward for a `listener`, given the `contentType`, `contentIds` and `listenCounts`, and pay him
     /// and the owner
