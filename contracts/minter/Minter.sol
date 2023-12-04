@@ -101,6 +101,11 @@ contract Minter is IMinter, FrakAccessControlUpgradeable, FraktionCostBadges, Mu
         _grantRole(FrakRoles.BADGE_UPDATER, msg.sender);
     }
 
+    /// @dev Reinitialize the contract with the new frak labs address
+    function updateFeeReceiver(address foundationAddr) external reinitializer(2) {
+        foundationWallet = foundationAddr;
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                          External write functions                          */
     /* -------------------------------------------------------------------------- */

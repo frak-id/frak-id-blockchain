@@ -50,7 +50,7 @@ contract Rewarder is
     uint256 private constant CONTENT_TYPE_MUSIC = 3;
     uint256 private constant CONTENT_TYPE_STREAMING = 4;
 
-    /// @dev The percentage of fee's going to the FRK foundation
+    /// @dev The percentage of fee's going to the frak labs company
     uint256 private constant FEE_PERCENT = 2;
 
     /* -------------------------------------------------------------------------- */
@@ -95,10 +95,8 @@ contract Rewarder is
     /// @dev Access our internal tokens
     FraktionTokens private fraktionTokens;
 
-    /**
-     * @dev Access our FRK token
-     * @notice WARN This var is now unused, and so, this slot can be reused for other things
-     */
+    /// @dev Access our FRK token
+    /// @notice WARN This var is now unused, and so, this slot can be reused for other things
     IFrakToken private frakToken;
 
     /// @dev Access our referral system
@@ -107,8 +105,8 @@ contract Rewarder is
     /// @dev Access our content pool
     IContentPool private contentPool;
 
-    /// @dev Address of the foundation wallet
-    address private foundationWallet;
+    /// @dev Address of the frak labs wallet
+    address private frakLabsWallet;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -139,7 +137,7 @@ contract Rewarder is
         contentPool = IContentPool(contentPoolAddr);
         referralPool = IReferralPool(referralAddr);
 
-        foundationWallet = foundationAddr;
+        frakLabsWallet = foundationAddr;
 
         // Default TPU
         tokenGenerationFactor = 1 ether;
@@ -147,6 +145,11 @@ contract Rewarder is
         // Grant the rewarder role to the contract deployer
         _grantRole(FrakRoles.REWARDER, msg.sender);
         _grantRole(FrakRoles.BADGE_UPDATER, msg.sender);
+    }
+
+    /// @dev Reinitialize the contract with the new frak labs address
+    function updateFeeReceiver(address newFrakLabsAddress) external reinitializer(2) {
+        frakLabsWallet = newFrakLabsAddress;
     }
 
     /* -------------------------------------------------------------------------- */
@@ -224,12 +227,12 @@ contract Rewarder is
 
     /// @dev Withdraw the pending founds of the caller
     function withdrawFounds() external override {
-        _withdrawWithFee(msg.sender, FEE_PERCENT, foundationWallet);
+        _withdrawWithFee(msg.sender, FEE_PERCENT, frakLabsWallet);
     }
 
     /// @dev Withdraw the pending founds of `user`
     function withdrawFounds(address user) external override {
-        _withdrawWithFee(user, FEE_PERCENT, foundationWallet);
+        _withdrawWithFee(user, FEE_PERCENT, frakLabsWallet);
     }
 
     /// @dev Update the token generation factor to 'newTpu'
