@@ -24,13 +24,6 @@ interface IRewarder {
     /*                          External write functions                          */
     /* -------------------------------------------------------------------------- */
 
-    /// @dev Directly pay a `listener` for the given frk `amount` (used for offchain to onchain wallet migration)
-    function payUserDirectly(address listener, uint256 amount) external payable;
-
-    /// @dev Directly pay all the creators owner of `contentIds` for each given frk `amounts` (used for offchain reward
-    /// created by the user, thatis sent to the creator)
-    function payCreatorDirectlyBatch(ContentId[] calldata contentIds, uint256[] calldata amounts) external payable;
-
     /// @dev Compute the reward for a `listener`, given the `contentType`, `contentIds` and `listenCounts`, and pay him
     /// and the owner
     function payUser(
