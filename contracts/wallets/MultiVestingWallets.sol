@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.21;
+pragma solidity 0.8.23;
 
 import { EnumerableSet } from "openzeppelin/utils/structs/EnumerableSet.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";

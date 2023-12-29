@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.21;
+pragma solidity ^0.8.0;
 
 import "forge-std/Script.sol";
 import { UpgradeScript } from "./utils/UpgradeScript.s.sol";
@@ -22,7 +22,7 @@ contract UpdateAllScript is UpgradeScript {
         // Get the frk labs & foundation address
         address labsWallet;
         address foundationWallet;
-        if(block.chainid == 137) {
+        if (block.chainid == 137) {
             labsWallet = 0x9d92de42aB5BbB59d6c39fdabB55B998c83Da97c;
             foundationWallet = 0x11D2fF1540F2c275EE199500320Af58a97E9Da33;
         } else {
@@ -41,7 +41,14 @@ contract UpdateAllScript is UpgradeScript {
     }
 
     /// @dev Update every contracts
-    function _updateRewarderAndMinter(UpgradeScript.ContractProxyAddresses memory addresses, bytes memory rewarderUpdateData, bytes memory minterUpdateData) internal deployerBroadcast {
+    function _updateRewarderAndMinter(
+        UpgradeScript.ContractProxyAddresses memory addresses,
+        bytes memory rewarderUpdateData,
+        bytes memory minterUpdateData
+    )
+        internal
+        deployerBroadcast
+    {
         // Deploy the new rewarder & minter
         Rewarder rewarder = new Rewarder();
         Minter minter = new Minter();

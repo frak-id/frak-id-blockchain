@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.21;
+pragma solidity ^0.8.0;
 
 import { UpgradeScript } from "./UpgradeScript.s.sol";
 import { FrakToken } from "contracts/tokens/FrakToken.sol";

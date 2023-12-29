@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.21;
+pragma solidity ^0.8.0;
 
 import "forge-std/console.sol";
 import { FrakTest } from "../FrakTest.sol";
@@ -22,11 +22,7 @@ contract WalletMigratorTest is FrakTest {
 
         // Build the wallet migrator we will test
         walletMigrator = new WalletMigrator(
-            address(frakToken), 
-            address(fraktionTokens), 
-            address(rewarder), 
-            address(contentPool), 
-            address(referralPool)
+            address(frakToken), address(fraktionTokens), address(rewarder), address(contentPool), address(referralPool)
         );
     }
 

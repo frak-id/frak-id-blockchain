@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.21;
+pragma solidity 0.8.23;
 
 import { Initializable } from "@oz-upgradeable/proxy/utils/Initializable.sol";
 import { NoReward, InvalidAddress, RewardTooLarge } from "./FrakErrors.sol";

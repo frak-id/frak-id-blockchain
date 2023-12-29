@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.21;
+pragma solidity ^0.8.0;
 
 import { FrakTest } from "../FrakTest.sol";
 import { NotAuthorized, PermitDelayExpired, InvalidSigner } from "contracts/utils/FrakErrors.sol";

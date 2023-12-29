@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.21;
+pragma solidity 0.8.23;
 
 import { IMinter } from "./IMinter.sol";
 import { FraktionCostBadges } from "./badges/FraktionCostBadges.sol";

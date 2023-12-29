@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.21;
+pragma solidity ^0.8.0;
 
 import "forge-std/console.sol";
 import "forge-std/Script.sol";
@@ -68,10 +68,10 @@ contract UpdateToEip712Diamond is UpgradeScript {
     {
         // Build the wallet migrator we will test
         return new WalletMigrator(
-            addresses.frakToken, 
-            addresses.fraktionTokens, 
-            addresses.rewarder, 
-            addresses.contentPool, 
+            addresses.frakToken,
+            addresses.fraktionTokens,
+            addresses.rewarder,
+            addresses.contentPool,
             addresses.referralPool
         );
     }

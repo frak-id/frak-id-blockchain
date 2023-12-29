@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GNU GPLv3
-pragma solidity 0.8.21;
+pragma solidity ^0.8.0;
 
 import { ContentId } from "contracts/libs/ContentId.sol";
 import { FraktionId } from "contracts/libs/FraktionId.sol";
