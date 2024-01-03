@@ -8,6 +8,7 @@ import { ContentId } from "../libs/ContentId.sol";
 import { PushPullReward } from "../utils/PushPullReward.sol";
 import { FrakAccessControlUpgradeable } from "../roles/FrakAccessControlUpgradeable.sol";
 import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
+import { NotAuthorized } from "../utils/FrakErrors.sol";
 
 /// @author @KONFeature
 /// @title Paywall
@@ -77,6 +78,9 @@ contract Paywall is FrakAccessControlUpgradeable, PushPullReward, IPaywall {
 
         // Otherwise, fetch the price
         UnlockPrice memory unlockPrice = paywall.prices[_priceIndex];
+        if (!unlockPrice.isPriceEnabled) {
+            revert ArticlePriceDisabled(_contentId, _articleId, _priceIndex);
+        }
 
         // Compute the new unlocked until
         uint256 newUnlockedUntil = block.timestamp + unlockPrice.allowanceTime;
@@ -126,6 +130,66 @@ contract Paywall is FrakAccessControlUpgradeable, PushPullReward, IPaywall {
 
         // Otherwise, compare it to the current timestamp
         return (unlockedUntil > block.timestamp, unlockedUntil);
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                          Global paywall management                         */
+    /* -------------------------------------------------------------------------- */
+
+    /// @dev Enable the paywall globally for the given content
+    function disablePaywall(ContentId _contentId) external override onlyContentOwner(_contentId) {
+        // Remove all the prices
+        delete contentPaywall[_contentId];
+    }
+
+    /// @dev Add a new price for the given `_contentId`
+    function addPrice(
+        ContentId _contentId,
+        UnlockPrice calldata price
+    )
+        external
+        override
+        onlyContentOwner(_contentId)
+    {
+        // Check the price
+        if (price.price == 0) {
+            revert PriceCannotBeZero();
+        }
+
+        // Add the price
+        ContentPaywall storage paywall = contentPaywall[_contentId];
+        paywall.prices.push(price);
+    }
+
+    /// @dev Update the price at the given `_priceIndex` for the given `_contentId`
+    function updatePrice(
+        ContentId _contentId,
+        uint256 _priceIndex,
+        UnlockPrice calldata _price
+    )
+        external
+        override
+        onlyContentOwner(_contentId)
+    {
+        // Check the price
+        if (_price.price == 0) {
+            revert PriceCannotBeZero();
+        }
+
+        // Check if the price is in the content
+        ContentPaywall storage paywall = contentPaywall[_contentId];
+        if (_priceIndex >= paywall.prices.length) {
+            revert PriceIndexOutOfBound(_priceIndex);
+        }
+
+        // Update the price
+        paywall.prices[_priceIndex] = _price;
+    }
+
+    /// @dev Modifier to only allow the content owner to call the function
+    modifier onlyContentOwner(ContentId _contentId) {
+        if (fraktionTokens.ownerOf(_contentId) != msg.sender) revert NotAuthorized();
+        _;
     }
 
     /* -------------------------------------------------------------------------- */
