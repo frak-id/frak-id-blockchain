@@ -17,15 +17,7 @@ contract DeploySwapPool is UpgradeScript {
         console.log("Deploying to chain: %s", block.chainid);
 
         // Get the frak-labs address
-        address feeReceiver;
-        if (block.chainid == 80_001) {
-            feeReceiver = address(0x8Cb488e0E16e49F064e210969EE1c771a55BcD04);
-        } else if (block.chainid == 137) {
-            feeReceiver = address(0x517ecFa01E2F9A6955d8DD04867613E41309213d);
-        } else {
-            console.log("Unsupported chain id: %s", block.chainid);
-            return;
-        }
+        address feeReceiver = _currentCompanyWallets().frakLabs;
 
         // Deploy the initial pool
         MonoPool pool = _deployInitialPool(addresses.frakToken, feeReceiver);

@@ -16,6 +16,10 @@ import { FrakRoles } from "contracts/roles/FrakRoles.sol";
 contract DeployAllScript is UpgradeScript {
     constructor() { }
 
+    function run() public {
+        _setUpTestEnv();
+    }
+
     function _setUpTestEnv() internal {
         // Deploy each tokens related contract
         address frkToken = _deployFrkToken();
@@ -28,7 +32,7 @@ contract DeployAllScript is UpgradeScript {
         _grantTreasuryWalletWalletRoles(treasuryWallet, frkToken);
 
         // Deploy each contract related to the ecosystem
-        address foundation = address(this);
+        address foundation = _currentCompanyWallets().frakFoundation;
         address fraktionTokens = _deployFraktionsToken();
         address minter = _deployMinter(frkToken, fraktionTokens, foundation);
         address referralPool = _deployReferralPool(frkToken);
@@ -50,7 +54,8 @@ contract DeployAllScript is UpgradeScript {
             minter: minter,
             frakTreasuryWallet: treasuryWallet,
             swapPool: address(1),
-            walletMigrator: address(1)
+            walletMigrator: address(1),
+            paywall: address(1)
         });
         _setProxyAddresses(addresses);
     }

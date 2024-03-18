@@ -27,10 +27,17 @@ abstract contract UpgradeScript is Script {
         address frakTreasuryWallet;
         address swapPool;
         address walletMigrator;
+        address paywall;
+    }
+
+    struct CompanyWalletAddresses {
+        address frakLabs;
+        address frakFoundation;
     }
 
     /// @dev Mapping of chainId -> proxy addresses
     mapping(uint256 chain => ContractProxyAddresses contractAddresses) public contractAddresses;
+    mapping(uint256 chain => CompanyWalletAddresses companyWallets) public companyWallets;
 
     /* -------------------------------------------------------------------------- */
     /*                 Constructor saving current proxy addresses                 */
@@ -49,7 +56,8 @@ abstract contract UpgradeScript is Script {
             minter: 0x1adc8CAaA35551730eCd82e0eEA683Aa90dB6cf0,
             frakTreasuryWallet: 0x7053f61CEA3B7C3b5f0e14de6eEdB01cA1850408,
             swapPool: 0xC01677Ec5eF3607364125Ab84F6FBb7d95B3D545,
-            walletMigrator: 0xC9f4a01219240aEDfe9502fff0bdEEa5ea83E795
+            walletMigrator: 0xC9f4a01219240aEDfe9502fff0bdEEa5ea83E795,
+            paywall: address(0)
         });
         // Mumbai proxy address
         contractAddresses[80_001] = ContractProxyAddresses({
@@ -63,7 +71,39 @@ abstract contract UpgradeScript is Script {
             minter: 0x8964e2Ed5fF27358c62a761f23957bd2b5165779,
             frakTreasuryWallet: 0x7CC62E1ecd246153DF4997352ec9C5fF172EE08C,
             swapPool: 0xa5C6ff96B2417d5477d0ab27881b3D60675E0d30,
-            walletMigrator: 0xC2F4685B8d9fafc3172abA9a7FFd4B0Dd2bd2D5e
+            walletMigrator: 0xC2F4685B8d9fafc3172abA9a7FFd4B0Dd2bd2D5e,
+            paywall: 0xD2a304D5E3427AeF3319De435b530d4B3f7eab5F
+        });
+        // Amoy proxy address
+        contractAddresses[80_002] = ContractProxyAddresses({
+            frakToken: 0x183a08d221163335fC20B07E53236403CE9dc03d,
+            fraktionTokens: 0xa6713941ABA860DA9fd6CCA53E5b5583E82Af475,
+            multiVestingWallet: 0x4Be1153c6dc18BbE75b8F8E1C9CA52cbbEE38215,
+            vestingWalletFactory: 0x96a0B8dA8D2c38352e2A910f6E8124dAA4a44a8d,
+            referralPool: 0x975dfE2EAa974933e772D25A61640DB1088AAD9e,
+            contentPool: 0x0DF67c0F092cC595104B4586Ffd2F30790E31f8f,
+            rewarder: 0x23BAC39b7849E029F77d981485B6259172E3558e,
+            minter: 0x726BA97e5e4a8Fb630cdBf12383Bd9905CEDA074,
+            frakTreasuryWallet: 0xC1B4bFFEC8ea8E0BE9D923358652A32911c4d2Ce,
+            swapPool: 0x78006cCa3dC37ED26139c916B97Ef997323D58e0,
+            walletMigrator: 0xef7336D5be2F9da8a149e61a926b0f2B85373e6e,
+            paywall: 0x438fb6eEDBa3C300F5a1f636F33cAf20715b46f5
+        });
+
+        // Polygon company wallets
+        companyWallets[137] = CompanyWalletAddresses({
+            frakLabs: 0x9d92de42aB5BbB59d6c39fdabB55B998c83Da97c,
+            frakFoundation: 0x11D2fF1540F2c275EE199500320Af58a97E9Da33
+        });
+        // Mumbai company wallets
+        companyWallets[80_001] = CompanyWalletAddresses({
+            frakLabs: 0x1f20a905A41EDD54b6803999Ac62D003953a810a,
+            frakFoundation: 0x1f20a905A41EDD54b6803999Ac62D003953a810a
+        });
+        // Amoy company wallets
+        companyWallets[80_002] = CompanyWalletAddresses({
+            frakLabs: 0x1f20a905A41EDD54b6803999Ac62D003953a810a,
+            frakFoundation: 0x1f20a905A41EDD54b6803999Ac62D003953a810a
         });
     }
 
@@ -120,6 +160,7 @@ abstract contract UpgradeScript is Script {
         ERC1967Proxy deployedProxy = new ERC1967Proxy(implementation, data);
         proxyAddress = address(deployedProxy);
         vm.label(proxyAddress, label);
+        console.log("Proxy for %s deployed at %s", name, proxyAddress);
     }
 
     /// @dev Get the deployer private key
@@ -136,10 +177,8 @@ abstract contract UpgradeScript is Script {
     /*                           Internal read functions                          */
     /* -------------------------------------------------------------------------- */
 
-    /**
-     * @dev Read the current proxy addresses
-     * @return addresses The current proxy addresses
-     */
+    /// @dev Read the current proxy addresses
+    /// @return addresses The current proxy addresses
     function _currentProxyAddresses() internal view returns (ContractProxyAddresses memory addresses) {
         addresses = contractAddresses[block.chainid];
         // If one of the addresses is 0, revert
@@ -152,6 +191,15 @@ abstract contract UpgradeScript is Script {
         require(addresses.rewarder != address(0), "UpgradeScript: rewarder address is 0");
         require(addresses.minter != address(0), "UpgradeScript: minter address is 0");
         require(addresses.frakTreasuryWallet != address(0), "UpgradeScript: frakTreasuryWallet address is 0");
+    }
+
+    /// @dev Read the current company wallets
+    /// @return addresses The current company wallets
+    function _currentCompanyWallets() internal view returns (CompanyWalletAddresses memory addresses) {
+        addresses = companyWallets[block.chainid];
+        // If one of the addresses is 0, revert
+        require(addresses.frakLabs != address(0), "UpgradeScript: frakLabs address is 0");
+        require(addresses.frakFoundation != address(0), "UpgradeScript: frakFoundation address is 0");
     }
 
     /* -------------------------------------------------------------------------- */
